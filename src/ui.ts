@@ -9,6 +9,7 @@ export function renderUI(): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reffo Beacon</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='40' height='71' viewBox='0 0 40 71' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23c)'%3E%3Cpath d='M38.27 3.79s.5-.98.1-1.75c-.4-.76-1.37-.66-1.37-.66H13.12s-.63-.03-1.03.34c-.4.37-.55 1.15-.55 1.15L2.18 33.97s-.49 1.18-.07 2.08c.42.9 1.4.83 1.4.83h8.49l-9.5 31.39s-.73 1.63.43 2.45c1.17.82 2.37-.41 2.37-.41L39.68 25.98s.57-.65.19-1.67c-.38-1.01-1.23-.91-1.23-.91H28.82l9.45-19.61z' fill='%23000'/%3E%3Cpath d='M36.33 2.41s.5-.98.1-1.75C36.03-.1 35.05.01 35.05.01H11.18s-.63-.03-1.03.34c-.4.37-.55 1.15-.55 1.15L.24 32.59s-.49 1.18-.07 2.08c.42.9 1.4.83 1.4.83h8.49L.56 66.88s-.73 1.64.44 2.45c1.16.82 2.37-.42 2.37-.42L37.74 24.6s.57-.65.19-1.67c-.38-1.01-1.23-.91-1.23-.91H26.88l9.45-19.61z' fill='%23EA526F'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='c'%3E%3Crect width='40' height='71' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -318,7 +319,7 @@ export function renderUI(): string {
     </div>
   </div>
 
-  <!-- Proposal Modal -->
+  <!-- Proposal Modal (buyer sending offer) -->
   <div id="proposalModal" class="modal-overlay hidden">
     <div class="modal">
       <h3 id="modalTitle">Make a Proposal</h3>
@@ -346,6 +347,32 @@ export function renderUI(): string {
       <div class="modal-actions">
         <button class="btn-secondary" onclick="closeProposalModal()">Cancel</button>
         <button class="btn-primary" id="modalSendBtn" onclick="sendProposal()">Send Proposal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Respond Modal (seller responding to incoming offer) -->
+  <div id="respondModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3 id="respondModalTitle">Respond to Offer</h3>
+      <input type="hidden" id="respondNegId">
+      <div id="respondOfferInfo" style="background:#F4F5F6;border-radius:12px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:600;color:#777E90;text-transform:uppercase;margin-bottom:4px;">Offered Price</div>
+        <div id="respondOfferPrice" style="font-size:24px;font-weight:700;color:#141416;"></div>
+        <div id="respondOfferMessage" style="font-size:14px;color:#777E90;margin-top:6px;"></div>
+      </div>
+      <div id="respondCounterFields" class="hidden">
+        <label for="respondCounterPrice">Your Counter Price</label>
+        <input id="respondCounterPrice" type="number" min="0.01" step="0.01" placeholder="0.00">
+        <label for="respondMessage">Message (optional)</label>
+        <textarea id="respondMessage" placeholder="Explain your counter offer..."></textarea>
+      </div>
+      <div id="respondMsg"></div>
+      <div class="modal-actions" style="flex-wrap:wrap;gap:10px;">
+        <button class="btn-secondary" onclick="closeRespondModal()">Cancel</button>
+        <button class="btn-danger btn-sm" id="respondRejectBtn" onclick="submitRespond('rejected')">Reject</button>
+        <button class="btn-secondary btn-sm" id="respondCounterBtn" onclick="toggleCounterFields()">Counter</button>
+        <button class="btn-primary btn-sm" id="respondAcceptBtn" onclick="submitRespond('accepted')">Accept</button>
       </div>
     </div>
   </div>
@@ -868,10 +895,9 @@ export function renderUI(): string {
       return negs.map(n => {
         let actions = '';
         if (isSeller && n.role === 'seller' && n.status === 'pending') {
+          // Single "Respond" button opens the respond modal
           actions = '<div class="neg-actions">' +
-            '<button class="btn-primary btn-sm" onclick="respondNeg(\\'' + n.id + '\\', \\'accepted\\')">Accept</button>' +
-            '<button class="btn-danger btn-sm" onclick="respondNeg(\\'' + n.id + '\\', \\'rejected\\')">Reject</button>' +
-            '<button class="btn-secondary btn-sm" onclick="counterNeg(\\'' + n.id + '\\')">Counter</button>' +
+            '<button class="btn-primary btn-sm" onclick="openRespondModal(\\'' + n.id + '\\', \\'' + escapeHtml(n.itemName || n.itemId.slice(0,8)) + '\\', ' + n.price + ', \\'' + escapeHtml(n.priceCurrency) + '\\', \\'' + escapeHtml(n.message || '') + '\\')">Respond</button>' +
             '</div>';
         } else if (!isSeller && n.role === 'buyer' && n.status === 'pending') {
           actions = '<div class="neg-actions"><button class="btn-secondary btn-sm" onclick="withdrawNeg(\\'' + n.id + '\\')">Withdraw</button></div>';
@@ -920,36 +946,87 @@ export function renderUI(): string {
       }
     }
 
-    window.respondNeg = async function(negId, status) {
-      try {
-        const res = await fetch('/negotiations/' + negId + '/respond', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status })
-        });
-        if (!res.ok) { const err = await res.json(); throw new Error(err.error); }
-        loadNegotiations();
-      } catch (err) {
-        alert(err.message);
+    // ===== Respond Modal (seller) =====
+    window.openRespondModal = function(negId, itemName, price, currency, message) {
+      document.getElementById('respondNegId').value = negId;
+      document.getElementById('respondModalTitle').textContent = 'Respond: ' + itemName;
+      document.getElementById('respondOfferPrice').textContent = currency + ' ' + parseFloat(price).toFixed(2);
+      document.getElementById('respondOfferMessage').textContent = message || '';
+      document.getElementById('respondOfferMessage').style.display = message ? 'block' : 'none';
+      document.getElementById('respondCounterPrice').value = '';
+      document.getElementById('respondMessage').value = '';
+      document.getElementById('respondCounterFields').classList.add('hidden');
+      document.getElementById('respondMsg').innerHTML = '';
+      // Show accept/reject/counter buttons, hide send counter
+      document.getElementById('respondAcceptBtn').classList.remove('hidden');
+      document.getElementById('respondRejectBtn').classList.remove('hidden');
+      document.getElementById('respondCounterBtn').classList.remove('hidden');
+      document.getElementById('respondCounterBtn').textContent = 'Counter';
+      document.getElementById('respondModal').classList.remove('hidden');
+    };
+
+    window.toggleCounterFields = function() {
+      const fields = document.getElementById('respondCounterFields');
+      const btn = document.getElementById('respondCounterBtn');
+      if (fields.classList.contains('hidden')) {
+        // Show counter fields, change button to "Send Counter"
+        fields.classList.remove('hidden');
+        btn.textContent = 'Send Counter';
+        btn.onclick = function() { submitRespond('countered'); };
+        document.getElementById('respondCounterPrice').focus();
+      } else {
+        // Hide counter fields, revert button
+        fields.classList.add('hidden');
+        btn.textContent = 'Counter';
+        btn.onclick = function() { toggleCounterFields(); };
       }
     };
 
-    window.counterNeg = async function(negId) {
-      const counterPrice = prompt('Enter your counter price:');
-      if (!counterPrice) return;
-      const price = parseFloat(counterPrice);
-      if (isNaN(price) || price <= 0) { alert('Invalid price'); return; }
-      const msg = prompt('Message (optional):') || '';
+    window.closeRespondModal = function() {
+      document.getElementById('respondModal').classList.add('hidden');
+    };
+
+    window.submitRespond = async function(status) {
+      const negId = document.getElementById('respondNegId').value;
+      const body = { status };
+
+      if (status === 'countered') {
+        const cp = parseFloat(document.getElementById('respondCounterPrice').value);
+        if (isNaN(cp) || cp <= 0) {
+          document.getElementById('respondMsg').innerHTML = '<div class="msg err">Please enter a valid counter price</div>';
+          return;
+        }
+        body.counterPrice = cp;
+        body.responseMessage = document.getElementById('respondMessage').value.trim();
+      }
+
+      // Disable all buttons during request
+      const btns = document.querySelectorAll('#respondModal button');
+      btns.forEach(b => b.disabled = true);
+
       try {
         const res = await fetch('/negotiations/' + negId + '/respond', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'countered', counterPrice: price, responseMessage: msg })
+          body: JSON.stringify(body)
         });
-        if (!res.ok) { const err = await res.json(); throw new Error(err.error); }
-        loadNegotiations();
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        if (data.delivered === false) {
+          document.getElementById('respondMsg').innerHTML = '<div class="msg err">Response saved but buyer appears offline. They will not see this until you are both online.</div>';
+          setTimeout(() => {
+            closeRespondModal();
+            loadNegotiations();
+          }, 3000);
+        } else {
+          closeRespondModal();
+          loadNegotiations();
+        }
       } catch (err) {
-        alert(err.message);
+        document.getElementById('respondMsg').innerHTML = '<div class="msg err">' + escapeHtml(err.message) + '</div>';
+      } finally {
+        btns.forEach(b => b.disabled = false);
       }
     };
 

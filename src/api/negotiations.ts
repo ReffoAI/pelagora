@@ -112,8 +112,9 @@ router.patch('/:id/respond', async (req: Request, res: Response) => {
   if (negotiation.status !== 'pending') return res.status(400).json({ error: 'Can only respond to pending negotiations' });
 
   // Send response via DHT
+  let delivered = false;
   if (dht) {
-    dht.sendToPeer(negotiation.buyerBeaconId, {
+    delivered = dht.sendToPeer(negotiation.buyerBeaconId, {
       type: 'proposal_response',
       beaconId,
       payload: {
@@ -126,7 +127,7 @@ router.patch('/:id/respond', async (req: Request, res: Response) => {
   }
 
   const updated = negotiations.updateStatus(negId, status, counterPrice, responseMessage);
-  res.json(updated);
+  res.json({ ...updated, delivered });
 });
 
 // PATCH /negotiations/:id/withdraw — buyer withdraws pending proposal
