@@ -1,5 +1,7 @@
 import { Router, Request, Response } from 'express';
-import { ItemQueries } from '../db';
+import fs from 'fs';
+import path from 'path';
+import { ItemQueries, MediaQueries } from '../db';
 import { isValidCategory, isValidSubcategory } from '../taxonomy';
 import type { ListingStatus } from '../types';
 
@@ -32,7 +34,7 @@ router.get('/:id', (req: Request, res: Response) => {
 // POST /items
 router.post('/', (req: Request, res: Response) => {
   const items = new ItemQueries();
-  const { name, description, category, subcategory, image, sku, listingStatus } = req.body;
+  const { name, description, category, subcategory, image, sku, listingStatus, quantity } = req.body;
 
   if (!name || typeof name !== 'string') {
     return res.status(400).json({ error: 'name is required' });
@@ -40,6 +42,10 @@ router.post('/', (req: Request, res: Response) => {
 
   if (listingStatus !== undefined && !VALID_LISTING_STATUSES.includes(listingStatus)) {
     return res.status(400).json({ error: `Invalid listingStatus: ${listingStatus}. Must be one of: ${VALID_LISTING_STATUSES.join(', ')}` });
+  }
+
+  if (quantity !== undefined && (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 1)) {
+    return res.status(400).json({ error: 'quantity must be a positive integer' });
   }
 
   if (category && !isValidCategory(category)) {
@@ -51,17 +57,21 @@ router.post('/', (req: Request, res: Response) => {
   }
 
   const beaconId = req.app.get('beaconId') as string;
-  const item = items.create({ name, description, category, subcategory, image, sku, listingStatus }, beaconId);
+  const item = items.create({ name, description, category, subcategory, image, sku, listingStatus, quantity }, beaconId);
   res.status(201).json(item);
 });
 
 // PATCH /items/:id
 router.patch('/:id', (req: Request, res: Response) => {
   const items = new ItemQueries();
-  const { name, description, category, subcategory, image, sku, listingStatus } = req.body;
+  const { name, description, category, subcategory, image, sku, listingStatus, quantity } = req.body;
 
   if (listingStatus !== undefined && !VALID_LISTING_STATUSES.includes(listingStatus)) {
     return res.status(400).json({ error: `Invalid listingStatus: ${listingStatus}. Must be one of: ${VALID_LISTING_STATUSES.join(', ')}` });
+  }
+
+  if (quantity !== undefined && (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 1)) {
+    return res.status(400).json({ error: 'quantity must be a positive integer' });
   }
 
   if (category !== undefined && category !== '' && !isValidCategory(category)) {
@@ -72,7 +82,7 @@ router.patch('/:id', (req: Request, res: Response) => {
     return res.status(400).json({ error: `Invalid subcategory: ${subcategory} for category: ${category}` });
   }
 
-  const updated = items.update(String(req.params.id), { name, description, category, subcategory, image, sku, listingStatus });
+  const updated = items.update(String(req.params.id), { name, description, category, subcategory, image, sku, listingStatus, quantity });
   if (!updated) return res.status(404).json({ error: 'Item not found' });
   res.json(updated);
 });
@@ -80,8 +90,33 @@ router.patch('/:id', (req: Request, res: Response) => {
 // DELETE /items/:id
 router.delete('/:id', (req: Request, res: Response) => {
   const items = new ItemQueries();
-  const deleted = items.delete(String(req.params.id));
+  const media = new MediaQueries();
+  const itemId = String(req.params.id);
+
+  // Get media file paths before deletion (CASCADE will remove DB records)
+  const filePaths = media.deleteAllForItem(itemId);
+
+  const deleted = items.delete(itemId);
   if (!deleted) return res.status(404).json({ error: 'Item not found' });
+
+  // Clean up files from disk
+  for (const fp of filePaths) {
+    const fullPath = path.join(process.cwd(), fp);
+    try {
+      if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+    } catch {
+      // File already gone
+    }
+  }
+
+  // Try to remove the item's upload directory
+  const itemDir = path.join(process.cwd(), 'uploads', itemId);
+  try {
+    if (fs.existsSync(itemDir)) fs.rmdirSync(itemDir);
+  } catch {
+    // Directory not empty or doesn't exist
+  }
+
   res.status(204).send();
 });
 

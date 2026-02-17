@@ -19,6 +19,8 @@ export interface Item {
   sku?: string;
   /** Reffo: listing visibility status */
   listingStatus: ListingStatus;
+  /** Reffo: quantity available */
+  quantity: number;
   /** Reffo: beacon public key that owns this item */
   beaconId: string;
   /** Schema.org: dateCreated */
@@ -27,8 +29,9 @@ export interface Item {
   updatedAt: string;
 }
 
-export type ItemCreate = Omit<Item, 'id' | 'beaconId' | 'createdAt' | 'updatedAt' | 'listingStatus'> & {
+export type ItemCreate = Omit<Item, 'id' | 'beaconId' | 'createdAt' | 'updatedAt' | 'listingStatus' | 'quantity'> & {
   listingStatus?: ListingStatus;
+  quantity?: number;
 };
 
 export type ItemUpdate = Partial<ItemCreate>;
@@ -71,8 +74,64 @@ export interface BeaconInfo {
   };
 }
 
+// Media types
+export type MediaType = 'photo' | 'video';
+
+export interface ItemMedia {
+  id: string;
+  itemId: string;
+  mediaType: MediaType;
+  filePath: string;
+  mimeType: string;
+  fileSize: number;
+  sortOrder: number;
+  createdAt: string;
+}
+
+// Negotiation types
+export type NegotiationStatus = 'pending' | 'accepted' | 'rejected' | 'countered' | 'withdrawn';
+export type NegotiationRole = 'buyer' | 'seller';
+
+export interface Negotiation {
+  id: string;
+  itemId: string;
+  itemName: string;
+  buyerBeaconId: string;
+  sellerBeaconId: string;
+  price: number;
+  priceCurrency: string;
+  message: string;
+  status: NegotiationStatus;
+  role: NegotiationRole;
+  counterPrice?: number;
+  responseMessage?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type NegotiationCreate = Omit<Negotiation, 'createdAt' | 'updatedAt' | 'status' | 'counterPrice' | 'responseMessage'> & {
+  status?: NegotiationStatus;
+};
+
+// DHT payloads for negotiations
+export interface ProposalPayload {
+  negotiationId: string;
+  itemId: string;
+  itemName: string;
+  price: number;
+  priceCurrency: string;
+  message: string;
+}
+
+export interface ProposalResponsePayload {
+  negotiationId: string;
+  status: NegotiationStatus;
+  counterPrice?: number;
+  responseMessage?: string;
+}
+
 export interface PeerMessage {
-  type: 'query' | 'response' | 'announce';
+  type: 'query' | 'response' | 'announce' | 'proposal' | 'proposal_response';
   beaconId: string;
   payload: unknown;
 }

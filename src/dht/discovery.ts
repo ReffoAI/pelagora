@@ -1,8 +1,8 @@
 import Hyperswarm from 'hyperswarm';
 import b4a from 'b4a';
 import crypto from 'crypto';
-import { ItemQueries, OfferQueries } from '../db';
-import type { PeerMessage, QueryPayload, AnnouncePayload } from '../types';
+import { ItemQueries, OfferQueries, NegotiationQueries } from '../db';
+import type { PeerMessage, QueryPayload, AnnouncePayload, ProposalPayload, ProposalResponsePayload } from '../types';
 
 // All Reffo beacons join this topic to find each other
 const REFFO_TOPIC = crypto.createHash('sha256').update('reffo-beacon-v1').digest();
@@ -11,6 +11,7 @@ export class DhtDiscovery {
   private swarm: Hyperswarm;
   private beaconId: string;
   private peers: Map<string, { stream: any; beaconId: string }> = new Map();
+  private beaconIdMap: Map<string, string> = new Map(); // reffoBeaconId -> hyperswarm peerId
   private onPeerConnect?: (count: number) => void;
 
   constructor(beaconId: string) {
@@ -89,9 +90,16 @@ export class DhtDiscovery {
         break;
       case 'announce':
         console.log(`[DHT] Received announcement from ${msg.beaconId.slice(0, 8)}...`);
+        this.updatePeerBeaconId(stream, msg.beaconId);
         break;
       case 'response':
         // Responses are handled by the caller
+        break;
+      case 'proposal':
+        this.handleProposal(msg.beaconId, msg.payload as ProposalPayload);
+        break;
+      case 'proposal_response':
+        this.handleProposalResponse(msg.beaconId, msg.payload as ProposalResponsePayload);
         break;
     }
   }
@@ -121,6 +129,76 @@ export class DhtDiscovery {
     };
 
     stream.write(b4a.from(JSON.stringify(response)));
+  }
+
+  /** Map a Hyperswarm peer stream to its Reffo beaconId */
+  private updatePeerBeaconId(stream: any, reffoBeaconId: string): void {
+    const peerId = b4a.toString(stream.remotePublicKey, 'hex');
+    const peer = this.peers.get(peerId);
+    if (peer) {
+      peer.beaconId = reffoBeaconId;
+      this.beaconIdMap.set(reffoBeaconId, peerId);
+    }
+  }
+
+  /** Send a message to a specific peer by their Reffo beaconId */
+  sendToPeer(targetBeaconId: string, msg: PeerMessage): boolean {
+    // Look up by beaconId map first
+    const peerId = this.beaconIdMap.get(targetBeaconId);
+    if (peerId) {
+      const peer = this.peers.get(peerId);
+      if (peer) {
+        peer.stream.write(b4a.from(JSON.stringify(msg)));
+        return true;
+      }
+    }
+
+    // Fallback: search all peers
+    for (const [, peer] of this.peers) {
+      if (peer.beaconId === targetBeaconId) {
+        peer.stream.write(b4a.from(JSON.stringify(msg)));
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /** Handle incoming proposal from a buyer */
+  private handleProposal(fromBeaconId: string, payload: ProposalPayload): void {
+    console.log(`[DHT] Received proposal from ${fromBeaconId.slice(0, 8)}... for item ${payload.itemId}`);
+    const negotiations = new NegotiationQueries();
+
+    negotiations.create({
+      id: payload.negotiationId,
+      itemId: payload.itemId,
+      itemName: payload.itemName || '',
+      buyerBeaconId: fromBeaconId,
+      sellerBeaconId: this.beaconId,
+      price: payload.price,
+      priceCurrency: payload.priceCurrency || 'USD',
+      message: payload.message || '',
+      role: 'seller',
+    });
+  }
+
+  /** Handle incoming proposal response from a seller */
+  private handleProposalResponse(fromBeaconId: string, payload: ProposalResponsePayload): void {
+    console.log(`[DHT] Received proposal response from ${fromBeaconId.slice(0, 8)}... for negotiation ${payload.negotiationId}`);
+    const negotiations = new NegotiationQueries();
+
+    const existing = negotiations.get(payload.negotiationId);
+    if (!existing || existing.role !== 'buyer') {
+      console.log(`[DHT] Unknown or invalid negotiation: ${payload.negotiationId}`);
+      return;
+    }
+
+    negotiations.updateStatus(
+      payload.negotiationId,
+      payload.status,
+      payload.counterPrice,
+      payload.responseMessage,
+    );
   }
 
   /** Query all connected peers and collect responses */

@@ -34,6 +34,7 @@ function initSchema(database: Database.Database): void {
       image TEXT,
       sku TEXT,
       listing_status TEXT NOT NULL DEFAULT 'private' CHECK(listing_status IN ('private', 'for_sale', 'willing_to_sell')),
+      quantity INTEGER NOT NULL DEFAULT 1,
       beacon_id TEXT NOT NULL,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -44,6 +45,11 @@ function initSchema(database: Database.Database): void {
   const columns = database.pragma('table_info(items)') as { name: string }[];
   if (!columns.some(c => c.name === 'listing_status')) {
     database.exec(`ALTER TABLE items ADD COLUMN listing_status TEXT NOT NULL DEFAULT 'private' CHECK(listing_status IN ('private', 'for_sale', 'willing_to_sell'))`);
+  }
+
+  // Migration: add quantity to existing databases
+  if (!columns.some(c => c.name === 'quantity')) {
+    database.exec(`ALTER TABLE items ADD COLUMN quantity INTEGER NOT NULL DEFAULT 1`);
   }
 
   database.exec(`
@@ -67,6 +73,42 @@ function initSchema(database: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_offers_item ON offers(item_id);
     CREATE INDEX IF NOT EXISTS idx_offers_status ON offers(status);
     CREATE INDEX IF NOT EXISTS idx_offers_seller ON offers(seller_id);
+
+    CREATE TABLE IF NOT EXISTS item_media (
+      id TEXT PRIMARY KEY,
+      item_id TEXT NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+      media_type TEXT NOT NULL CHECK(media_type IN ('photo', 'video')),
+      file_path TEXT NOT NULL,
+      mime_type TEXT NOT NULL,
+      file_size INTEGER NOT NULL DEFAULT 0,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_item_media_item ON item_media(item_id);
+    CREATE INDEX IF NOT EXISTS idx_item_media_type ON item_media(item_id, media_type);
+
+    CREATE TABLE IF NOT EXISTS negotiations (
+      id TEXT PRIMARY KEY,
+      item_id TEXT NOT NULL,
+      item_name TEXT NOT NULL DEFAULT '',
+      buyer_beacon_id TEXT NOT NULL,
+      seller_beacon_id TEXT NOT NULL,
+      price REAL NOT NULL,
+      price_currency TEXT NOT NULL DEFAULT 'USD',
+      message TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'pending'
+        CHECK(status IN ('pending', 'accepted', 'rejected', 'countered', 'withdrawn')),
+      role TEXT NOT NULL CHECK(role IN ('buyer', 'seller')),
+      counter_price REAL,
+      response_message TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_negotiations_role ON negotiations(role);
+    CREATE INDEX IF NOT EXISTS idx_negotiations_status ON negotiations(status);
+    CREATE INDEX IF NOT EXISTS idx_negotiations_item ON negotiations(item_id);
   `);
 }
 

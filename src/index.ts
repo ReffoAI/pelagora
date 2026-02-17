@@ -1,4 +1,6 @@
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import { createApp } from './api';
 import { setBeaconId, setDhtStatus } from './api/health';
 import { DhtDiscovery } from './dht';
@@ -8,6 +10,9 @@ const PORT = parseInt(process.env.PORT || '3000', 10);
 const BEACON_ID = process.env.BEACON_ID || crypto.randomBytes(32).toString('hex');
 
 async function main(): Promise<void> {
+  // Ensure uploads directory exists
+  fs.mkdirSync(path.join(process.cwd(), 'uploads'), { recursive: true });
+
   // Initialize database
   getDb();
   console.log('[DB] SQLite initialized');
@@ -19,6 +24,7 @@ async function main(): Promise<void> {
 
   // Start DHT discovery
   const dht = new DhtDiscovery(BEACON_ID);
+  app.set('dht', dht);
 
   // Expose DHT search endpoint
   app.get('/search', async (req, res) => {
@@ -55,8 +61,11 @@ async function main(): Promise<void> {
     console.log(`         GET  /taxonomy      - Category taxonomy`);
     console.log(`         GET  /items         - List items`);
     console.log(`         POST /items         - Create item`);
+    console.log(`         POST /items/:id/media - Upload media`);
     console.log(`         GET  /offers        - List offers`);
     console.log(`         POST /offers        - Create offer`);
+    console.log(`         GET  /negotiations  - List negotiations`);
+    console.log(`         POST /negotiations  - Create proposal`);
     console.log(`         GET  /search?q=...  - Search peer network`);
   });
 
