@@ -69,6 +69,14 @@ export const TAXONOMY: Record<string, string[]> = {
     'Trailers',
     'Electric Vehicles',
   ],
+  'Housing': [
+    'Apartment',
+    'Condo',
+    'Townhome',
+    'Manufactured',
+    'Single Family',
+    'Multi-Family',
+  ],
   'Collectibles': [
     'Antiques',
     'Art',
