@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { v4 as uuid } from 'uuid';
 import { getDb } from './schema';
-import type { Item, ItemCreate, ItemUpdate, Offer, OfferCreate, OfferUpdate } from '../types';
+import type { Item, ItemCreate, ItemUpdate, ListingStatus, Offer, OfferCreate, OfferUpdate } from '../types';
 
 function rowToItem(row: Record<string, unknown>): Item {
   return {
@@ -12,6 +12,7 @@ function rowToItem(row: Record<string, unknown>): Item {
     subcategory: row.subcategory as string,
     image: row.image as string | undefined,
     sku: row.sku as string | undefined,
+    listingStatus: row.listing_status as ListingStatus,
     beaconId: row.beacon_id as string,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
@@ -70,9 +71,9 @@ export class ItemQueries {
     const id = uuid();
     const now = new Date().toISOString();
     this.db.prepare(`
-      INSERT INTO items (id, name, description, category, subcategory, image, sku, beacon_id, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(id, data.name, data.description || '', data.category || '', data.subcategory || '', data.image || null, data.sku || null, beaconId, now, now);
+      INSERT INTO items (id, name, description, category, subcategory, image, sku, listing_status, beacon_id, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(id, data.name, data.description || '', data.category || '', data.subcategory || '', data.image || null, data.sku || null, data.listingStatus || 'private', beaconId, now, now);
     return this.get(id)!;
   }
 
@@ -89,6 +90,7 @@ export class ItemQueries {
     if (data.subcategory !== undefined) { fields.push('subcategory = ?'); values.push(data.subcategory); }
     if (data.image !== undefined) { fields.push('image = ?'); values.push(data.image); }
     if (data.sku !== undefined) { fields.push('sku = ?'); values.push(data.sku); }
+    if (data.listingStatus !== undefined) { fields.push('listing_status = ?'); values.push(data.listingStatus); }
 
     if (fields.length === 0) return existing;
 
@@ -107,6 +109,31 @@ export class ItemQueries {
   search(term: string): Item[] {
     const rows = this.db.prepare(
       "SELECT * FROM items WHERE name LIKE ? OR description LIKE ? ORDER BY created_at DESC"
+    ).all(`%${term}%`, `%${term}%`);
+    return rows.map(r => rowToItem(r as Record<string, unknown>));
+  }
+
+  listDiscoverable(category?: string, subcategory?: string): Item[] {
+    let sql = "SELECT * FROM items WHERE listing_status != 'private'";
+    const params: string[] = [];
+
+    if (category) {
+      sql += ' AND category = ?';
+      params.push(category);
+    }
+    if (subcategory) {
+      sql += ' AND subcategory = ?';
+      params.push(subcategory);
+    }
+    sql += ' ORDER BY created_at DESC';
+
+    const rows = this.db.prepare(sql).all(...params);
+    return rows.map(r => rowToItem(r as Record<string, unknown>));
+  }
+
+  searchDiscoverable(term: string): Item[] {
+    const rows = this.db.prepare(
+      "SELECT * FROM items WHERE listing_status != 'private' AND (name LIKE ? OR description LIKE ?) ORDER BY created_at DESC"
     ).all(`%${term}%`, `%${term}%`);
     return rows.map(r => rowToItem(r as Record<string, unknown>));
   }

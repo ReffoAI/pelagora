@@ -62,9 +62,12 @@ export class DhtDiscovery {
     const items = new ItemQueries();
     const offers = new OfferQueries();
 
+    const discoverableItems = items.listDiscoverable();
+    const discoverableItemIds = new Set(discoverableItems.map(i => i.id));
+
     const payload: AnnouncePayload = {
-      items: items.list().map(i => ({ id: i.id, name: i.name, category: i.category, subcategory: i.subcategory })),
-      offers: offers.list().map(o => ({
+      items: discoverableItems.map(i => ({ id: i.id, name: i.name, category: i.category, subcategory: i.subcategory, listingStatus: i.listingStatus })),
+      offers: offers.list().filter(o => discoverableItemIds.has(o.itemId)).map(o => ({
         id: o.id, itemId: o.itemId, price: o.price,
         priceCurrency: o.priceCurrency, status: o.status,
       })),
@@ -99,8 +102,8 @@ export class DhtDiscovery {
     const offers = new OfferQueries();
 
     let results = query.search
-      ? items.search(query.search)
-      : items.list(query.category, query.subcategory);
+      ? items.searchDiscoverable(query.search)
+      : items.listDiscoverable(query.category, query.subcategory);
 
     // Build response with matching offers
     const matchingOffers = results.flatMap(item => {

@@ -1,6 +1,8 @@
 // Schema.org-based types with Reffo extensions
 // See: https://schema.org/Product, https://schema.org/Offer
 
+export type ListingStatus = 'private' | 'for_sale' | 'willing_to_sell';
+
 export interface Item {
   id: string;
   /** Schema.org: name */
@@ -15,6 +17,8 @@ export interface Item {
   image?: string;
   /** Schema.org: sku */
   sku?: string;
+  /** Reffo: listing visibility status */
+  listingStatus: ListingStatus;
   /** Reffo: beacon public key that owns this item */
   beaconId: string;
   /** Schema.org: dateCreated */
@@ -23,7 +27,9 @@ export interface Item {
   updatedAt: string;
 }
 
-export type ItemCreate = Omit<Item, 'id' | 'beaconId' | 'createdAt' | 'updatedAt'>;
+export type ItemCreate = Omit<Item, 'id' | 'beaconId' | 'createdAt' | 'updatedAt' | 'listingStatus'> & {
+  listingStatus?: ListingStatus;
+};
 
 export type ItemUpdate = Partial<ItemCreate>;
 
@@ -80,6 +86,6 @@ export interface QueryPayload {
 }
 
 export interface AnnouncePayload {
-  items: Pick<Item, 'id' | 'name' | 'category' | 'subcategory'>[];
+  items: Pick<Item, 'id' | 'name' | 'category' | 'subcategory' | 'listingStatus'>[];
   offers: Pick<Offer, 'id' | 'itemId' | 'price' | 'priceCurrency' | 'status'>[];
 }

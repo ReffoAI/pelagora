@@ -33,14 +33,24 @@ function initSchema(database: Database.Database): void {
       subcategory TEXT NOT NULL DEFAULT '',
       image TEXT,
       sku TEXT,
+      listing_status TEXT NOT NULL DEFAULT 'private' CHECK(listing_status IN ('private', 'for_sale', 'willing_to_sell')),
       beacon_id TEXT NOT NULL,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+  `);
 
+  // Migration: add listing_status to existing databases
+  const columns = database.pragma('table_info(items)') as { name: string }[];
+  if (!columns.some(c => c.name === 'listing_status')) {
+    database.exec(`ALTER TABLE items ADD COLUMN listing_status TEXT NOT NULL DEFAULT 'private' CHECK(listing_status IN ('private', 'for_sale', 'willing_to_sell'))`);
+  }
+
+  database.exec(`
     CREATE INDEX IF NOT EXISTS idx_items_category ON items(category);
     CREATE INDEX IF NOT EXISTS idx_items_cat_subcat ON items(category, subcategory);
     CREATE INDEX IF NOT EXISTS idx_items_beacon ON items(beacon_id);
+    CREATE INDEX IF NOT EXISTS idx_items_listing_status ON items(listing_status);
 
     CREATE TABLE IF NOT EXISTS offers (
       id TEXT PRIMARY KEY,

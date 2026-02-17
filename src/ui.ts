@@ -41,6 +41,13 @@ export function renderUI(): string {
     .search-bar > div { flex: 1; min-width: 140px; }
     .search-bar button { margin-bottom: 12px; align-self: flex-end; }
     .beacon-id { font-size: 0.75rem; color: #999; word-break: break-all; }
+    .badge-private { background: #e0e0e0; color: #666; }
+    .badge-for-sale { background: #e6f4ea; color: #1e7e34; }
+    .badge-willing { background: #fff8e1; color: #f57f17; }
+    .status-select { width: auto; display: inline-block; font-size: 0.75rem; padding: 2px 6px; margin: 4px 0; }
+    .btn-delete { background: #dc3545; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; margin-top: 6px; }
+    .btn-delete:hover { background: #c82333; }
+    .card-actions { display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
   </style>
 </head>
 <body>
@@ -72,8 +79,19 @@ export function renderUI(): string {
 
         <div class="row">
           <div>
-            <label for="itemPrice">Price *</label>
-            <input id="itemPrice" name="price" type="number" min="0" step="0.01" required placeholder="0.00">
+            <label for="itemListingStatus">Listing Status</label>
+            <select id="itemListingStatus" name="listingStatus">
+              <option value="private">Private</option>
+              <option value="for_sale">For Sale</option>
+              <option value="willing_to_sell">Willing to Sell</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="itemPrice">Price</label>
+            <input id="itemPrice" name="price" type="number" min="0" step="0.01" placeholder="0.00">
           </div>
           <div>
             <label for="itemCurrency">Currency</label>
@@ -177,14 +195,16 @@ export function renderUI(): string {
         const description = document.getElementById('itemDesc').value.trim();
         const category = document.getElementById('itemCat').value;
         const subcategory = document.getElementById('itemSubcat').value;
-        const price = parseFloat(document.getElementById('itemPrice').value);
+        const listingStatus = document.getElementById('itemListingStatus').value;
+        const priceVal = document.getElementById('itemPrice').value;
+        const price = priceVal ? parseFloat(priceVal) : 0;
         const currency = document.getElementById('itemCurrency').value;
 
         // Create item
         const itemRes = await fetch('/items', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, description, category, subcategory })
+          body: JSON.stringify({ name, description, category, subcategory, listingStatus })
         });
         if (!itemRes.ok) {
           const err = await itemRes.json();
@@ -192,18 +212,20 @@ export function renderUI(): string {
         }
         const item = await itemRes.json();
 
-        // Create offer
-        const offerRes = await fetch('/offers', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ itemId: item.id, price, priceCurrency: currency })
-        });
-        if (!offerRes.ok) {
-          const err = await offerRes.json();
-          throw new Error(err.error || 'Failed to create offer');
+        // Create offer only if not private and price > 0
+        if (listingStatus !== 'private' && price > 0) {
+          const offerRes = await fetch('/offers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ itemId: item.id, price, priceCurrency: currency })
+          });
+          if (!offerRes.ok) {
+            const err = await offerRes.json();
+            throw new Error(err.error || 'Failed to create offer');
+          }
         }
 
-        showMsg('listMsg', 'Item listed successfully!', true);
+        showMsg('listMsg', 'Item added successfully!', true);
         e.target.reset();
         document.getElementById('itemSubcat').innerHTML = '<option value="">Select...</option>';
         loadMyItems();
@@ -236,18 +258,32 @@ export function renderUI(): string {
           offerMap[o.itemId].push(o);
         });
 
+        const statusLabels = { private: 'Private', for_sale: 'For Sale', willing_to_sell: 'Willing to Sell' };
+        const statusBadgeClass = { private: 'badge-private', for_sale: 'badge-for-sale', willing_to_sell: 'badge-willing' };
+
         container.innerHTML = '<div class="cards">' + items.map(item => {
           const itemOffers = offerMap[item.id] || [];
           const activeOffer = itemOffers.find(o => o.status === 'active');
-          const priceStr = activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : 'No offer';
-          const badges = [item.category, item.subcategory].filter(Boolean).map(b =>
+          const priceStr = activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
+          const catBadges = [item.category, item.subcategory].filter(Boolean).map(b =>
             '<span class="badge">' + escapeHtml(b) + '</span>'
           ).join('');
+          const statusClass = statusBadgeClass[item.listingStatus] || 'badge-private';
+          const statusLabel = statusLabels[item.listingStatus] || 'Private';
+          const statusBadge = '<span class="badge ' + statusClass + '">' + statusLabel + '</span>';
           return '<div class="card">' +
             '<h3>' + escapeHtml(item.name) + '</h3>' +
-            '<div class="meta">' + badges + '</div>' +
-            '<div class="price">' + escapeHtml(priceStr) + '</div>' +
+            '<div class="meta">' + statusBadge + catBadges + '</div>' +
+            (priceStr ? '<div class="price">' + escapeHtml(priceStr) + '</div>' : '') +
             (item.description ? '<div class="desc">' + escapeHtml(item.description) + '</div>' : '') +
+            '<div class="card-actions">' +
+              '<select class="status-select" data-item-id="' + item.id + '" onchange="updateStatus(this)">' +
+                '<option value="private"' + (item.listingStatus === 'private' ? ' selected' : '') + '>Private</option>' +
+                '<option value="for_sale"' + (item.listingStatus === 'for_sale' ? ' selected' : '') + '>For Sale</option>' +
+                '<option value="willing_to_sell"' + (item.listingStatus === 'willing_to_sell' ? ' selected' : '') + '>Willing to Sell</option>' +
+              '</select>' +
+              '<button class="btn-delete" onclick="deleteItem(\\'' + item.id + '\\')">Delete</button>' +
+            '</div>' +
             '</div>';
         }).join('') + '</div>';
       } catch {
@@ -323,6 +359,36 @@ export function renderUI(): string {
       d.textContent = s;
       return d.innerHTML;
     }
+
+    // Update listing status inline
+    window.updateStatus = async function(selectEl) {
+      const itemId = selectEl.dataset.itemId;
+      const listingStatus = selectEl.value;
+      try {
+        const res = await fetch('/items/' + itemId, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ listingStatus })
+        });
+        if (!res.ok) throw new Error('Failed to update');
+        loadMyItems();
+      } catch {
+        alert('Failed to update status');
+        loadMyItems();
+      }
+    };
+
+    // Delete item with confirmation
+    window.deleteItem = async function(itemId) {
+      if (!confirm('Delete this item? This cannot be undone.')) return;
+      try {
+        const res = await fetch('/items/' + itemId, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete');
+        loadMyItems();
+      } catch {
+        alert('Failed to delete item');
+      }
+    };
 
     // Load items on page load
     loadMyItems();

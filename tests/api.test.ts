@@ -114,6 +114,36 @@ describe('POST /items', () => {
       .send({ name: 'No Category' });
     expect(res.status).toBe(201);
   });
+
+  test('defaults listingStatus to private', async () => {
+    const res = await request(app)
+      .post('/items')
+      .send({ name: 'Private Item' });
+    expect(res.status).toBe(201);
+    expect(res.body.listingStatus).toBe('private');
+  });
+
+  test('accepts valid listingStatus values', async () => {
+    const res1 = await request(app)
+      .post('/items')
+      .send({ name: 'Sale Item', listingStatus: 'for_sale' });
+    expect(res1.status).toBe(201);
+    expect(res1.body.listingStatus).toBe('for_sale');
+
+    const res2 = await request(app)
+      .post('/items')
+      .send({ name: 'Willing Item', listingStatus: 'willing_to_sell' });
+    expect(res2.status).toBe(201);
+    expect(res2.body.listingStatus).toBe('willing_to_sell');
+  });
+
+  test('rejects invalid listingStatus', async () => {
+    const res = await request(app)
+      .post('/items')
+      .send({ name: 'Bad Status', listingStatus: 'invalid' });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toContain('Invalid listingStatus');
+  });
 });
 
 describe('GET /items', () => {
@@ -154,6 +184,18 @@ describe('GET /items', () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(1);
   });
+
+  test('returns items of all listing statuses', async () => {
+    await request(app).post('/items').send({ name: 'Private', listingStatus: 'private' });
+    await request(app).post('/items').send({ name: 'For Sale', listingStatus: 'for_sale' });
+    await request(app).post('/items').send({ name: 'Willing', listingStatus: 'willing_to_sell' });
+
+    const res = await request(app).get('/items');
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(3);
+    const statuses = res.body.map((i: any) => i.listingStatus).sort();
+    expect(statuses).toEqual(['for_sale', 'private', 'willing_to_sell']);
+  });
 });
 
 describe('PATCH /items/:id', () => {
@@ -163,6 +205,22 @@ describe('PATCH /items/:id', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.name).toBe('New');
+  });
+
+  test('updates listingStatus', async () => {
+    const created = await request(app).post('/items').send({ name: 'Test' });
+    expect(created.body.listingStatus).toBe('private');
+
+    const res = await request(app).patch(`/items/${created.body.id}`).send({ listingStatus: 'for_sale' });
+    expect(res.status).toBe(200);
+    expect(res.body.listingStatus).toBe('for_sale');
+  });
+
+  test('rejects invalid listingStatus on update', async () => {
+    const created = await request(app).post('/items').send({ name: 'Test' });
+    const res = await request(app).patch(`/items/${created.body.id}`).send({ listingStatus: 'bogus' });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toContain('Invalid listingStatus');
   });
 
   test('404 for missing item', async () => {

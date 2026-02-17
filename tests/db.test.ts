@@ -90,6 +90,61 @@ describe('ItemQueries', () => {
     items.create({ name: 'B', description: '', category: '', subcategory: '' }, BEACON);
     expect(items.count()).toBe(2);
   });
+
+  test('default listingStatus is private', () => {
+    const item = items.create({ name: 'Secret', description: '', category: '', subcategory: '' }, BEACON);
+    expect(item.listingStatus).toBe('private');
+  });
+
+  test('create with explicit listingStatus', () => {
+    const item = items.create({ name: 'Public', description: '', category: '', subcategory: '', listingStatus: 'for_sale' }, BEACON);
+    expect(item.listingStatus).toBe('for_sale');
+  });
+
+  test('update listingStatus', () => {
+    const item = items.create({ name: 'Item', description: '', category: '', subcategory: '' }, BEACON);
+    expect(item.listingStatus).toBe('private');
+
+    const updated = items.update(item.id, { listingStatus: 'willing_to_sell' });
+    expect(updated!.listingStatus).toBe('willing_to_sell');
+  });
+
+  test('listDiscoverable excludes private items', () => {
+    items.create({ name: 'Private', description: '', category: 'Music', subcategory: 'Guitars' }, BEACON);
+    items.create({ name: 'For Sale', description: '', category: 'Music', subcategory: 'Guitars', listingStatus: 'for_sale' }, BEACON);
+    items.create({ name: 'Willing', description: '', category: 'Music', subcategory: 'Guitars', listingStatus: 'willing_to_sell' }, BEACON);
+
+    expect(items.list()).toHaveLength(3);
+    expect(items.listDiscoverable()).toHaveLength(2);
+    expect(items.listDiscoverable('Music')).toHaveLength(2);
+    expect(items.listDiscoverable('Electronics')).toHaveLength(0);
+  });
+
+  test('listDiscoverable filters by category and subcategory', () => {
+    items.create({ name: 'Guitar', description: '', category: 'Music', subcategory: 'Guitars', listingStatus: 'for_sale' }, BEACON);
+    items.create({ name: 'Bass', description: '', category: 'Music', subcategory: 'Bass', listingStatus: 'for_sale' }, BEACON);
+    items.create({ name: 'Laptop', description: '', category: 'Electronics', subcategory: 'Computers & Laptops', listingStatus: 'for_sale' }, BEACON);
+
+    expect(items.listDiscoverable('Music', 'Guitars')).toHaveLength(1);
+    expect(items.listDiscoverable('Music')).toHaveLength(2);
+  });
+
+  test('searchDiscoverable excludes private items', () => {
+    items.create({ name: 'Private Bike', description: '', category: '', subcategory: '' }, BEACON);
+    items.create({ name: 'Public Bike', description: '', category: '', subcategory: '', listingStatus: 'for_sale' }, BEACON);
+
+    expect(items.search('Bike')).toHaveLength(2);
+    expect(items.searchDiscoverable('Bike')).toHaveLength(1);
+    expect(items.searchDiscoverable('Bike')[0].name).toBe('Public Bike');
+  });
+
+  test('list still returns all items regardless of status', () => {
+    items.create({ name: 'A', description: '', category: '', subcategory: '' }, BEACON);
+    items.create({ name: 'B', description: '', category: '', subcategory: '', listingStatus: 'for_sale' }, BEACON);
+    items.create({ name: 'C', description: '', category: '', subcategory: '', listingStatus: 'willing_to_sell' }, BEACON);
+
+    expect(items.list()).toHaveLength(3);
+  });
 });
 
 describe('OfferQueries', () => {
