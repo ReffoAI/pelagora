@@ -24,6 +24,7 @@ async function main(): Promise<void> {
 
   // Start DHT discovery
   const dht = new DhtDiscovery(BEACON_ID);
+  dht.httpPort = PORT;
   app.set('dht', dht);
 
   // Expose DHT search endpoint

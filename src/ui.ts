@@ -174,6 +174,14 @@ export function renderUI(): string {
     .beacon-id { font-size: 12px; color: #B1B5C3; word-break: break-all; margin-top: 4px; font-weight: 500; }
 
     .hidden { display: none !important; }
+
+    /* Toast notifications */
+    #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .toast { background: #141416; color: #fff; border-radius: 12px; padding: 14px 20px; font-size: 14px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.2); opacity: 0; transform: translateY(-8px); transition: opacity 0.2s, transform 0.2s; min-width: 260px; max-width: 360px; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast-accepted { border-left: 4px solid #2ecc71; }
+    .toast-rejected  { border-left: 4px solid #e74c3c; }
+    .toast-countered { border-left: 4px solid #EC526F; }
   </style>
 </head>
 <body>
@@ -393,6 +401,9 @@ export function renderUI(): string {
     </div>
   </div>
 
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
   <script>
     const TAXONOMY = ${taxonomyJSON};
 
@@ -457,8 +468,23 @@ export function renderUI(): string {
       setTimeout(() => el.innerHTML = '', 4000);
     }
 
+    function showToast(message, type) {
+      type = type || '';
+      const t = document.createElement('div');
+      t.className = 'toast' + (type ? ' toast-' + type : '');
+      t.textContent = message;
+      document.getElementById('toast-container').appendChild(t);
+      requestAnimationFrame(() => t.classList.add('show'));
+      setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => t.remove(), 300);
+      }, 5000);
+    }
+
     const statusLabels = { private: 'Private', for_sale: 'For Sale', willing_to_sell: 'Willing to Sell' };
     const statusBadgeClass = { private: 'badge-private', for_sale: 'badge-for-sale', willing_to_sell: 'badge-willing' };
+
+    let lastSearchResults = [];
 
     // ===== List Form =====
     document.getElementById('listForm').addEventListener('submit', async (e) => {
@@ -799,9 +825,12 @@ export function renderUI(): string {
         }
 
         let cards = '';
+        lastSearchResults = [];
         data.results.forEach(peer => {
           const peerItems = peer.items || [];
           const peerOffers = peer.offers || [];
+          const peerMedia = peer.media || {};
+          const peerHttpPort = peer.httpPort || 0;
           const offerMap = {};
           peerOffers.forEach(o => { if (!offerMap[o.itemId]) offerMap[o.itemId] = []; offerMap[o.itemId].push(o); });
 
@@ -814,6 +843,8 @@ export function renderUI(): string {
             ).join('');
             const statusClass = statusBadgeClass[item.listingStatus] || 'badge-for-sale';
             const statusLabel = statusLabels[item.listingStatus] || '';
+            const itemMedia = peerMedia[item.id] || [];
+            const firstPhoto = itemMedia.find(m => m.mediaType === 'photo');
 
             let actionBtn = '';
             if (item.listingStatus === 'for_sale' && activeOffer) {
@@ -822,8 +853,15 @@ export function renderUI(): string {
               actionBtn = '<button class="btn-secondary btn-sm" onclick="event.stopPropagation(); openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')">Make Offer</button>';
             }
 
-            cards += '<div class="card">' +
-              '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#E6E8EC"/></svg></span></div>' +
+            const idx = lastSearchResults.length;
+            lastSearchResults.push({ item: item, peer: peer, offer: activeOffer || null, media: itemMedia, httpPort: peerHttpPort });
+
+            const imgHtml = (firstPhoto && peerHttpPort)
+              ? '<div class="card-img"><img src="http://' + location.hostname + ':' + peerHttpPort + '/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
+              : '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#E6E8EC"/></svg></span></div>';
+
+            cards += '<div class="card result-card" onclick="openRemoteDetail(' + idx + ')">' +
+              imgHtml +
               '<div class="card-body">' +
                 '<h3>' + escapeHtml(item.name) + '</h3>' +
                 '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + badges + '</div>' +
@@ -843,6 +881,93 @@ export function renderUI(): string {
         btn.disabled = false;
       }
     });
+
+    // ===== Remote Item Detail (read-only) =====
+    window.openRemoteDetail = function(idx) {
+      const entry = lastSearchResults[idx];
+      if (!entry) return;
+      const item = entry.item;
+      const peer = entry.peer;
+      const offer = entry.offer;
+      const mediaList = entry.media || [];
+      const httpPort = entry.httpPort || 0;
+      const baseUrl = httpPort ? 'http://' + location.hostname + ':' + httpPort : '';
+
+      const container = document.getElementById('detailContent');
+      switchTab('detail');
+
+      const photos = mediaList.filter(m => m.mediaType === 'photo');
+      const mainPhoto = photos[0];
+      const sidePhotos = photos.slice(1);
+
+      let mainImgHtml = (mainPhoto && baseUrl)
+        ? '<img src="' + baseUrl + '/' + escapeHtml(mainPhoto.filePath) + '" alt="">'
+        : '<span class="placeholder">No media</span>';
+
+      let sideImgsHtml = '';
+      for (let i = 0; i < 3; i++) {
+        const sm = sidePhotos[i];
+        if (sm && baseUrl) {
+          const src = baseUrl + '/' + escapeHtml(sm.filePath);
+          sideImgsHtml += '<div class="detail-side-img"><img src="' + src + '" alt="" onclick="setMainImage(this.src)"></div>';
+        } else {
+          sideImgsHtml += '<div class="detail-side-img"><span class="placeholder">+</span></div>';
+        }
+      }
+
+      const catBadges = [item.category, item.subcategory].filter(Boolean).map(b =>
+        '<span class="badge badge-cat">' + escapeHtml(b) + '</span>'
+      ).join('');
+      const statusClass = statusBadgeClass[item.listingStatus] || 'badge-for-sale';
+      const statusLabel = statusLabels[item.listingStatus] || '';
+
+      let actionBtn = '';
+      if (item.listingStatus === 'for_sale' && offer) {
+        actionBtn = '<button class="btn-primary" style="width:100%;" onclick="openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + offer.price + ', \\'' + escapeHtml(offer.priceCurrency) + '\\')"><svg width="12" height="12" viewBox="0 0 13 14" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.3231 4.33301H2.66709C2.48518 4.33295 2.30518 4.37002 2.1381 4.44199C1.97098 4.51473 1.8203 4.62052 1.69511 4.75299C1.57019 4.88603 1.47385 5.04327 1.41209 5.215C1.35099 5.38639 1.32515 5.56837 1.3361 5.75L1.66911 11.083C1.69023 11.4216 1.83968 11.7394 2.08699 11.9717C2.33429 12.2039 2.66084 12.3332 3.0001 12.333H9.99009C10.3294 12.3332 10.6559 12.2039 10.9032 11.9717C11.1505 11.7394 11.3 11.4216 11.3211 11.083L11.6541 5.75C11.6661 5.56833 11.6402 5.38615 11.5781 5.215C11.5163 5.04327 11.42 4.88603 11.2951 4.75299C11.1706 4.62002 11.02 4.51412 10.8528 4.44186C10.6856 4.36961 10.5053 4.33255 10.3231 4.33301Z" fill="white"/><path d="M3.16212 3.66602C3.15445 3.2234 3.23504 2.78368 3.39912 2.37253C3.5632 1.96137 3.80751 1.58703 4.11781 1.2713C4.42811 0.955576 4.79818 0.704808 5.20643 0.53363C5.61468 0.362453 6.05296 0.274292 6.49565 0.274292C6.93833 0.274292 7.37658 0.362453 7.78483 0.53363C8.19308 0.704808 8.56315 0.955576 8.87346 1.2713C9.18376 1.58703 9.42809 1.96137 9.59217 2.37253C9.75626 2.78368 9.83681 3.2234 9.82914 3.66602V5.00003C9.82247 5.17233 9.74931 5.33535 9.62504 5.4549C9.50078 5.57444 9.33507 5.6412 9.16264 5.6412C8.99021 5.6412 8.82447 5.57444 8.70021 5.4549C8.57594 5.33535 8.50281 5.17233 8.49614 5.00003V3.66602C8.49614 3.13558 8.28542 2.6269 7.91035 2.25183C7.53528 1.87676 7.02657 1.66602 6.49614 1.66602C5.9657 1.66602 5.45699 1.87676 5.08192 2.25183C4.70685 2.6269 4.49614 3.13558 4.49614 3.66602V5.00003C4.49614 5.17693 4.42585 5.34659 4.30076 5.47168C4.17568 5.59677 4.00604 5.66702 3.82914 5.66702C3.65224 5.66702 3.48258 5.59677 3.35749 5.47168C3.23241 5.34659 3.16212 5.17693 3.16212 5.00003V3.66602Z" fill="white"/></svg> Buy at ' + escapeHtml(offer.priceCurrency + ' ' + offer.price.toFixed(2)) + '</button>';
+      } else if (item.listingStatus === 'willing_to_sell') {
+        actionBtn = '<button class="btn-secondary" style="width:100%;" onclick="openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')">Make Offer</button>';
+      }
+
+      let html = '';
+      html += '<span class="detail-back" onclick="switchTab(\\'search\\')">';
+      html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#EC526F"/></svg>';
+      html += ' Back to Search</span>';
+
+      html += '<div class="detail-gallery">';
+      html += '<div class="detail-main-img" id="detailMainImg">' + mainImgHtml + '</div>';
+      html += '<div class="detail-side-imgs">' + sideImgsHtml + '</div>';
+      html += '</div>';
+
+      html += '<div class="detail-columns">';
+
+      // Left: item info
+      html += '<div class="detail-left">';
+      html += '<h1 style="font-size:24px;font-weight:700;color:#141416;margin-bottom:12px;">' + escapeHtml(item.name) + '</h1>';
+      html += '<div class="card-meta" style="margin-bottom:12px;"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + catBadges + '</div>';
+      if (item.description) {
+        html += '<p style="font-size:15px;color:#353945;line-height:1.71;margin-bottom:16px;">' + escapeHtml(item.description) + '</p>';
+      }
+      html += '<div class="beacon-id" style="margin-top:8px;">Seller beacon: ' + escapeHtml(peer.beaconId) + '</div>';
+      html += '</div>'; // end detail-left
+
+      // Right: action card
+      html += '<div class="detail-right">';
+      html += '<div class="action-card">';
+      if (offer) {
+        html += '<div class="action-price">' + escapeHtml(offer.priceCurrency) + ' ' + offer.price.toFixed(2) + '</div>';
+      }
+      html += '<div class="action-row"><span class="action-label">Status</span><span class="action-value">' + statusLabel + '</span></div>';
+      if (item.quantity > 1) html += '<div class="action-row"><span class="action-label">Qty available</span><span class="action-value">' + item.quantity + '</span></div>';
+      if (item.category) html += '<div class="action-row"><span class="action-label">Category</span><span class="action-value">' + escapeHtml(item.category) + '</span></div>';
+      if (item.subcategory) html += '<div class="action-row"><span class="action-label">Subcategory</span><span class="action-value">' + escapeHtml(item.subcategory) + '</span></div>';
+      if (actionBtn) html += '<div style="margin-top:20px;">' + actionBtn + '</div>';
+      html += '</div>'; // end action-card
+      html += '</div>'; // end detail-right
+
+      html += '</div>'; // end detail-columns
+
+      container.innerHTML = html;
+    };
 
     // ===== Proposal Modal =====
     window.openBuyModal = function(itemId, itemName, sellerBeaconId, price, currency) {
@@ -897,6 +1022,7 @@ export function renderUI(): string {
         }
         closeProposalModal();
         switchTab('negotiations');
+        switchNegTab('outgoing');
         loadNegotiations();
       } catch (err) {
         document.getElementById('modalMsg').innerHTML = '<div class="msg err">' + escapeHtml(err.message) + '</div>';
@@ -978,6 +1104,7 @@ export function renderUI(): string {
       document.getElementById('respondRejectBtn').classList.remove('hidden');
       document.getElementById('respondCounterBtn').classList.remove('hidden');
       document.getElementById('respondCounterBtn').textContent = 'Counter';
+      document.getElementById('respondCounterBtn').onclick = function() { toggleCounterFields(); };
       document.getElementById('respondModal').classList.remove('hidden');
     };
 
@@ -1061,9 +1188,22 @@ export function renderUI(): string {
     };
 
     // ===== Init =====
+    let prevOutgoingStatuses = {};
+
+    async function initOutgoingSnapshot() {
+      try {
+        const res = await fetch('/negotiations?role=buyer');
+        const outgoing = await res.json();
+        for (const neg of outgoing) prevOutgoingStatuses[neg.id] = neg.status;
+      } catch {}
+    }
+
     loadMyItems();
+    initOutgoingSnapshot();
+
     // Check for pending negotiations periodically
     setInterval(async () => {
+      // Seller: update incoming badge
       try {
         const res = await fetch('/negotiations?role=seller');
         const incoming = await res.json();
@@ -1074,6 +1214,27 @@ export function renderUI(): string {
           badge.classList.remove('hidden');
         } else {
           badge.classList.add('hidden');
+        }
+      } catch {}
+
+      // Buyer: detect status changes and show toasts
+      try {
+        const res = await fetch('/negotiations?role=buyer');
+        const outgoing = await res.json();
+        for (const neg of outgoing) {
+          const prev = prevOutgoingStatuses[neg.id];
+          if (prev && prev !== neg.status && neg.status !== 'pending' && neg.status !== 'withdrawn') {
+            const itemLabel = neg.itemName || neg.itemId;
+            if (neg.status === 'accepted') {
+              showToast('\u2713 Your offer on "' + itemLabel + '" was accepted!', 'accepted');
+            } else if (neg.status === 'rejected') {
+              showToast('\u2717 Your offer on "' + itemLabel + '" was declined.', 'rejected');
+            } else if (neg.status === 'countered') {
+              const cp = neg.counterPrice ? ' at $' + neg.counterPrice : '';
+              showToast('\u21a9 Counter offer received for "' + itemLabel + '"' + cp, 'countered');
+            }
+          }
+          prevOutgoingStatuses[neg.id] = neg.status;
         }
       } catch {}
     }, 10000);

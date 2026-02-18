@@ -1,7 +1,7 @@
 import Hyperswarm from 'hyperswarm';
 import b4a from 'b4a';
 import crypto from 'crypto';
-import { ItemQueries, OfferQueries, NegotiationQueries } from '../db';
+import { ItemQueries, OfferQueries, MediaQueries, NegotiationQueries } from '../db';
 import type { PeerMessage, QueryPayload, AnnouncePayload, ProposalPayload, ProposalResponsePayload } from '../types';
 
 // All Reffo beacons join this topic to find each other
@@ -13,6 +13,7 @@ export class DhtDiscovery {
   private peers: Map<string, { stream: any; beaconId: string }> = new Map();
   private beaconIdMap: Map<string, string> = new Map(); // reffoBeaconId -> hyperswarm peerId
   private onPeerConnect?: (count: number) => void;
+  httpPort = 0;
 
   constructor(beaconId: string) {
     this.swarm = new Hyperswarm();
@@ -108,6 +109,7 @@ export class DhtDiscovery {
     console.log(`[DHT] Query from ${fromBeacon.slice(0, 8)}...:`, query);
     const items = new ItemQueries();
     const offers = new OfferQueries();
+    const mediaQ = new MediaQueries();
 
     let results = query.search
       ? items.searchDiscoverable(query.search)
@@ -122,10 +124,19 @@ export class DhtDiscovery {
       return itemOffers;
     });
 
+    // Include media metadata per item
+    const mediaMap: Record<string, { id: string; filePath: string; mediaType: string }[]> = {};
+    for (const item of results) {
+      const media = mediaQ.listForItem(item.id);
+      if (media.length > 0) {
+        mediaMap[item.id] = media.map(m => ({ id: m.id, filePath: m.filePath, mediaType: m.mediaType }));
+      }
+    }
+
     const response: PeerMessage = {
       type: 'response',
       beaconId: this.beaconId,
-      payload: { items: results, offers: matchingOffers },
+      payload: { items: results, offers: matchingOffers, media: mediaMap, httpPort: this.httpPort },
     };
 
     stream.write(b4a.from(JSON.stringify(response)));

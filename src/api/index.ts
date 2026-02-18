@@ -13,6 +13,9 @@ export function createApp(): express.Express {
 
   app.use(express.json());
 
+  // Allow cross-origin requests (so browsers can fetch media from peer beacons)
+  app.use((_req, res, next) => { res.header('Access-Control-Allow-Origin', '*'); next(); });
+
   // Serve uploaded media files
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
