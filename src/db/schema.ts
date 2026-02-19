@@ -33,7 +33,7 @@ function initSchema(database: Database.Database): void {
       subcategory TEXT NOT NULL DEFAULT '',
       image TEXT,
       sku TEXT,
-      listing_status TEXT NOT NULL DEFAULT 'private' CHECK(listing_status IN ('private', 'for_sale', 'willing_to_sell')),
+      listing_status TEXT NOT NULL DEFAULT 'private' CHECK(listing_status IN ('private', 'for_sale', 'willing_to_sell', 'archived_sold', 'archived_deleted')),
       quantity INTEGER NOT NULL DEFAULT 1,
       beacon_id TEXT NOT NULL,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -58,6 +58,75 @@ function initSchema(database: Database.Database): void {
   }
   if (!columns.some(c => c.name === 'reffo_ref_id')) {
     database.exec(`ALTER TABLE items ADD COLUMN reffo_ref_id TEXT`);
+  }
+
+  // Migration: expand CHECK constraints for archived statuses on items table
+  // Check if the items table already supports the new statuses by attempting a test
+  const itemsCheckInfo = database.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='items'").get() as { sql: string } | undefined;
+  if (itemsCheckInfo && !itemsCheckInfo.sql.includes('archived_sold')) {
+    database.exec(`
+      PRAGMA foreign_keys = OFF;
+      BEGIN TRANSACTION;
+      CREATE TABLE items_new (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL DEFAULT '',
+        category TEXT NOT NULL DEFAULT '',
+        subcategory TEXT NOT NULL DEFAULT '',
+        image TEXT,
+        sku TEXT,
+        listing_status TEXT NOT NULL DEFAULT 'private' CHECK(listing_status IN ('private', 'for_sale', 'willing_to_sell', 'archived_sold', 'archived_deleted')),
+        quantity INTEGER NOT NULL DEFAULT 1,
+        reffo_synced INTEGER NOT NULL DEFAULT 0,
+        reffo_ref_id TEXT,
+        beacon_id TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      INSERT INTO items_new SELECT id, name, description, category, subcategory, image, sku, listing_status, quantity, reffo_synced, reffo_ref_id, beacon_id, created_at, updated_at FROM items;
+      DROP TABLE items;
+      ALTER TABLE items_new RENAME TO items;
+      CREATE INDEX IF NOT EXISTS idx_items_category ON items(category);
+      CREATE INDEX IF NOT EXISTS idx_items_cat_subcat ON items(category, subcategory);
+      CREATE INDEX IF NOT EXISTS idx_items_beacon ON items(beacon_id);
+      CREATE INDEX IF NOT EXISTS idx_items_listing_status ON items(listing_status);
+      COMMIT;
+      PRAGMA foreign_keys = ON;
+    `);
+  }
+
+  // Migration: expand CHECK constraints for 'sold' status on negotiations table
+  const negCheckInfo = database.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='negotiations'").get() as { sql: string } | undefined;
+  if (negCheckInfo && !negCheckInfo.sql.includes("'sold'")) {
+    database.exec(`
+      PRAGMA foreign_keys = OFF;
+      BEGIN TRANSACTION;
+      CREATE TABLE negotiations_new (
+        id TEXT PRIMARY KEY,
+        item_id TEXT NOT NULL,
+        item_name TEXT NOT NULL DEFAULT '',
+        buyer_beacon_id TEXT NOT NULL,
+        seller_beacon_id TEXT NOT NULL,
+        price REAL NOT NULL,
+        price_currency TEXT NOT NULL DEFAULT 'USD',
+        message TEXT NOT NULL DEFAULT '',
+        status TEXT NOT NULL DEFAULT 'pending'
+          CHECK(status IN ('pending', 'accepted', 'rejected', 'countered', 'withdrawn', 'sold')),
+        role TEXT NOT NULL CHECK(role IN ('buyer', 'seller')),
+        counter_price REAL,
+        response_message TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      INSERT INTO negotiations_new SELECT * FROM negotiations;
+      DROP TABLE negotiations;
+      ALTER TABLE negotiations_new RENAME TO negotiations;
+      CREATE INDEX IF NOT EXISTS idx_negotiations_role ON negotiations(role);
+      CREATE INDEX IF NOT EXISTS idx_negotiations_status ON negotiations(status);
+      CREATE INDEX IF NOT EXISTS idx_negotiations_item ON negotiations(item_id);
+      COMMIT;
+      PRAGMA foreign_keys = ON;
+    `);
   }
 
   database.exec(`
@@ -106,7 +175,7 @@ function initSchema(database: Database.Database): void {
       price_currency TEXT NOT NULL DEFAULT 'USD',
       message TEXT NOT NULL DEFAULT '',
       status TEXT NOT NULL DEFAULT 'pending'
-        CHECK(status IN ('pending', 'accepted', 'rejected', 'countered', 'withdrawn')),
+        CHECK(status IN ('pending', 'accepted', 'rejected', 'countered', 'withdrawn', 'sold')),
       role TEXT NOT NULL CHECK(role IN ('buyer', 'seller')),
       counter_price REAL,
       response_message TEXT,

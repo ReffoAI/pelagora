@@ -1,7 +1,7 @@
 // Schema.org-based types with Reffo extensions
 // See: https://schema.org/Product, https://schema.org/Offer
 
-export type ListingStatus = 'private' | 'for_sale' | 'willing_to_sell';
+export type ListingStatus = 'private' | 'for_sale' | 'willing_to_sell' | 'archived_sold' | 'archived_deleted';
 
 export interface Item {
   id: string;
@@ -93,7 +93,7 @@ export interface ItemMedia {
 }
 
 // Negotiation types
-export type NegotiationStatus = 'pending' | 'accepted' | 'rejected' | 'countered' | 'withdrawn';
+export type NegotiationStatus = 'pending' | 'accepted' | 'rejected' | 'countered' | 'withdrawn' | 'sold';
 export type NegotiationRole = 'buyer' | 'seller';
 
 export interface Negotiation {

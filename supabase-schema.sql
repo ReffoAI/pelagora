@@ -64,7 +64,7 @@ CREATE TABLE refs (
   -- for_sale: listed with price
   -- willing_to_sell: no fixed price, open to offers
   listing_status TEXT DEFAULT 'private'
-    CHECK (listing_status IN ('private', 'for_sale', 'willing_to_sell')),
+    CHECK (listing_status IN ('private', 'for_sale', 'willing_to_sell', 'archived_sold', 'archived_deleted')),
 
   -- Location (PostGIS)
   location_point GEOMETRY(Point, 4326),
@@ -112,7 +112,7 @@ CREATE TABLE offers (
   role TEXT CHECK (role IN ('buyer', 'seller')),
 
   status TEXT DEFAULT 'pending'
-    CHECK (status IN ('pending', 'accepted', 'rejected', 'countered', 'withdrawn', 'expired')),
+    CHECK (status IN ('pending', 'accepted', 'rejected', 'countered', 'withdrawn', 'expired', 'sold')),
 
   expires_at TIMESTAMP,
 

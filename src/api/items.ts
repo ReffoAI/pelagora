@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { ItemQueries, MediaQueries } from '../db';
+import { ItemQueries, MediaQueries, NegotiationQueries } from '../db';
 import { isValidCategory, isValidSubcategory } from '../taxonomy';
 import type { ListingStatus } from '../types';
 
@@ -9,9 +9,15 @@ const VALID_LISTING_STATUSES: ListingStatus[] = ['private', 'for_sale', 'willing
 
 const router = Router();
 
-// GET /items?category=...&subcategory=...&search=...
+// GET /items?category=...&subcategory=...&search=...&archived=true
 router.get('/', (req: Request, res: Response) => {
   const items = new ItemQueries();
+  const archived = req.query.archived === 'true';
+
+  if (archived) {
+    return res.json(items.listArchived());
+  }
+
   const search = String(req.query.search || '');
   const category = String(req.query.category || '');
   const subcategory = String(req.query.subcategory || '');
@@ -98,17 +104,62 @@ router.patch('/:id', (req: Request, res: Response) => {
   res.json(updated);
 });
 
-// DELETE /items/:id
+// DELETE /items/:id — soft archive (not hard delete)
 router.delete('/:id', (req: Request, res: Response) => {
+  const items = new ItemQueries();
+  const negotiations = new NegotiationQueries();
+  const itemId = String(req.params.id);
+
+  const item = items.get(itemId);
+  if (!item) return res.status(404).json({ error: 'Item not found' });
+
+  // If item was synced, unsync it
+  if (item.reffoSynced) {
+    const syncManager = req.app.get('syncManager');
+    if (syncManager) {
+      syncManager.unsyncItem(itemId).catch(() => {});
+    }
+  }
+
+  // Auto-reject any pending/countered negotiations for this item
+  const pendingNegs = negotiations.listForItem(itemId).filter(
+    n => n.status === 'pending' || n.status === 'countered'
+  );
+  for (const neg of pendingNegs) {
+    negotiations.updateStatus(neg.id, 'rejected', undefined, 'Item is no longer available');
+  }
+
+  items.archive(itemId, 'deleted');
+  res.status(204).send();
+});
+
+// POST /items/:id/restore — restore an archived item
+router.post('/:id/restore', (req: Request, res: Response) => {
+  const items = new ItemQueries();
+  const itemId = String(req.params.id);
+
+  const restored = items.restore(itemId);
+  if (!restored) return res.status(404).json({ error: 'Archived item not found' });
+
+  res.json(restored);
+});
+
+// DELETE /items/:id/permanent — hard delete (only for archived items)
+router.delete('/:id/permanent', (req: Request, res: Response) => {
   const items = new ItemQueries();
   const media = new MediaQueries();
   const itemId = String(req.params.id);
 
+  const item = items.get(itemId);
+  if (!item) return res.status(404).json({ error: 'Item not found' });
+  if (item.listingStatus !== 'archived_sold' && item.listingStatus !== 'archived_deleted') {
+    return res.status(400).json({ error: 'Only archived items can be permanently deleted' });
+  }
+
   // Get media file paths before deletion (CASCADE will remove DB records)
   const filePaths = media.deleteAllForItem(itemId);
 
-  const deleted = items.delete(itemId);
-  if (!deleted) return res.status(404).json({ error: 'Item not found' });
+  items.delete(itemId);
 
   // Clean up files from disk
   for (const fp of filePaths) {

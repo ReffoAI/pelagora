@@ -45,7 +45,7 @@ export class ItemQueries {
 
   list(category?: string, subcategory?: string): Item[] {
     let sql = 'SELECT * FROM items';
-    const conditions: string[] = [];
+    const conditions: string[] = ["listing_status NOT IN ('archived_sold', 'archived_deleted')"];
     const params: string[] = [];
 
     if (category) {
@@ -56,9 +56,7 @@ export class ItemQueries {
       conditions.push('subcategory = ?');
       params.push(subcategory);
     }
-    if (conditions.length > 0) {
-      sql += ' WHERE ' + conditions.join(' AND ');
-    }
+    sql += ' WHERE ' + conditions.join(' AND ');
     sql += ' ORDER BY created_at DESC';
 
     const rows = this.db.prepare(sql).all(...params);
@@ -112,13 +110,13 @@ export class ItemQueries {
 
   search(term: string): Item[] {
     const rows = this.db.prepare(
-      "SELECT * FROM items WHERE name LIKE ? OR description LIKE ? ORDER BY created_at DESC"
+      "SELECT * FROM items WHERE listing_status NOT IN ('archived_sold', 'archived_deleted') AND (name LIKE ? OR description LIKE ?) ORDER BY created_at DESC"
     ).all(`%${term}%`, `%${term}%`);
     return rows.map(r => rowToItem(r as Record<string, unknown>));
   }
 
   listDiscoverable(category?: string, subcategory?: string): Item[] {
-    let sql = "SELECT * FROM items WHERE listing_status != 'private'";
+    let sql = "SELECT * FROM items WHERE listing_status IN ('for_sale', 'willing_to_sell')";
     const params: string[] = [];
 
     if (category) {
@@ -137,13 +135,13 @@ export class ItemQueries {
 
   searchDiscoverable(term: string): Item[] {
     const rows = this.db.prepare(
-      "SELECT * FROM items WHERE listing_status != 'private' AND (name LIKE ? OR description LIKE ?) ORDER BY created_at DESC"
+      "SELECT * FROM items WHERE listing_status IN ('for_sale', 'willing_to_sell') AND (name LIKE ? OR description LIKE ?) ORDER BY created_at DESC"
     ).all(`%${term}%`, `%${term}%`);
     return rows.map(r => rowToItem(r as Record<string, unknown>));
   }
 
   count(): number {
-    const row = this.db.prepare('SELECT COUNT(*) as cnt FROM items').get() as { cnt: number };
+    const row = this.db.prepare("SELECT COUNT(*) as cnt FROM items WHERE listing_status NOT IN ('archived_sold', 'archived_deleted')").get() as { cnt: number };
     return row.cnt;
   }
 
@@ -160,6 +158,39 @@ export class ItemQueries {
   listSynced(): Item[] {
     const rows = this.db.prepare('SELECT * FROM items WHERE reffo_synced = 1 ORDER BY created_at DESC').all();
     return rows.map(r => rowToItem(r as Record<string, unknown>));
+  }
+
+  listArchived(): Item[] {
+    const rows = this.db.prepare("SELECT * FROM items WHERE listing_status IN ('archived_sold', 'archived_deleted') ORDER BY updated_at DESC").all();
+    return rows.map(r => rowToItem(r as Record<string, unknown>));
+  }
+
+  archive(id: string, reason: 'sold' | 'deleted'): boolean {
+    const status = reason === 'sold' ? 'archived_sold' : 'archived_deleted';
+    const result = this.db.prepare(
+      "UPDATE items SET listing_status = ?, reffo_synced = 0, reffo_ref_id = NULL, updated_at = datetime('now') WHERE id = ?"
+    ).run(status, id);
+    return result.changes > 0;
+  }
+
+  restore(id: string): Item | undefined {
+    const item = this.get(id);
+    if (!item) return undefined;
+    if (item.listingStatus !== 'archived_sold' && item.listingStatus !== 'archived_deleted') return undefined;
+
+    const newQuantity = item.listingStatus === 'archived_sold' ? 1 : item.quantity;
+    this.db.prepare(
+      "UPDATE items SET listing_status = 'private', quantity = ?, updated_at = datetime('now') WHERE id = ?"
+    ).run(newQuantity, id);
+    return this.get(id);
+  }
+
+  decrementQuantity(id: string): number {
+    this.db.prepare(
+      "UPDATE items SET quantity = MAX(0, quantity - 1), updated_at = datetime('now') WHERE id = ?"
+    ).run(id);
+    const item = this.get(id);
+    return item ? item.quantity : 0;
   }
 }
 
@@ -353,6 +384,13 @@ export class NegotiationQueries {
         .run(status, responseMessage || null, id);
     }
     return this.get(id);
+  }
+
+  listPendingForItem(itemId: string, excludeId: string): Negotiation[] {
+    const rows = this.db.prepare(
+      "SELECT * FROM negotiations WHERE item_id = ? AND id != ? AND status IN ('pending', 'countered')"
+    ).all(itemId, excludeId);
+    return rows.map(r => rowToNegotiation(r as Record<string, unknown>));
   }
 
   countPending(): number {

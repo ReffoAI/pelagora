@@ -192,6 +192,37 @@ export function renderUI(): string {
     .toast-accepted { border-left: 4px solid #2ecc71; }
     .toast-rejected  { border-left: 4px solid #e74c3c; }
     .toast-countered { border-left: 4px solid #EC526F; }
+    .toast-sold { border-left: 4px solid #1a8a42; }
+
+    /* Archive badges */
+    .badge-archived-sold { background: #e8eaed; color: #1a8a42; }
+    .badge-archived-deleted { background: #fce8e6; color: #E92222; }
+
+    /* Sold negotiation status */
+    .neg-card.sold { border-left-color: #1a8a42; }
+    .neg-status.sold { background: #e6f9ed; color: #1a8a42; }
+
+    /* Item sub-tabs */
+    .item-subtabs { display: flex; gap: 0; margin-bottom: 16px; }
+    .item-subtab { padding: 8px 20px; cursor: pointer; font-size: 13px; font-weight: 700; color: #777E90; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.02em; }
+    .item-subtab.active { color: #EC526F; border-bottom-color: #EC526F; }
+    .item-subtab:hover { color: #EC526F; }
+
+    /* Archive card actions */
+    .archive-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .archive-reason { font-size: 12px; color: #777E90; font-weight: 500; margin-top: 4px; }
+
+    /* Item group rows */
+    .neg-group-row { background: #FCFCFD; border-radius: 16px; padding: 16px 24px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .neg-group-row:hover { transform: translateY(-1px); box-shadow: 0 16px 40px -8px rgba(15,15,15,0.18); }
+    .neg-group-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+    .neg-group-name { font-weight: 700; font-size: 16px; color: #141416; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .neg-group-count { display: inline-block; background: #E6E8EC; color: #353945; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 10px; flex-shrink: 0; }
+    .neg-group-count.has-pending { background: #fff8e1; color: #e6a200; }
+    .neg-group-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .neg-group-date { font-size: 12px; color: #777E90; font-weight: 500; }
+    .neg-group-back { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: #EC526F; cursor: pointer; margin-bottom: 16px; font-weight: 600; transition: color 0.2s; }
+    .neg-group-back:hover { color: #DD436C; }
   </style>
 </head>
 <body>
@@ -231,6 +262,12 @@ export function renderUI(): string {
 
     <!-- Items Tab -->
     <div id="tab-items">
+      <div class="item-subtabs">
+        <div class="item-subtab active" data-itemtab="active" onclick="switchItemSubTab('active')">Active</div>
+        <div class="item-subtab" data-itemtab="archive" onclick="switchItemSubTab('archive')">Archive</div>
+      </div>
+
+      <div id="itemSubtabActive">
       <!-- List an Item -->
       <section>
         <h2>List an Item</h2>
@@ -314,6 +351,14 @@ export function renderUI(): string {
         <h2>My Items</h2>
         <div id="myItems"><p class="empty">Loading...</p></div>
       </section>
+      </div>
+
+      <div id="itemSubtabArchive" class="hidden">
+      <section>
+        <h2>Archived Items</h2>
+        <div id="archivedItems"><p class="empty">No archived items</p></div>
+      </section>
+      </div>
     </div>
 
     <!-- Item Detail View (hidden by default) -->
@@ -485,6 +530,83 @@ export function renderUI(): string {
       document.getElementById('negOutgoing').classList.toggle('hidden', tab !== 'outgoing');
     }
 
+    function switchItemSubTab(tab) {
+      document.querySelectorAll('.item-subtab').forEach(t => t.classList.toggle('active', t.dataset.itemtab === tab));
+      document.getElementById('itemSubtabActive').classList.toggle('hidden', tab !== 'active');
+      document.getElementById('itemSubtabArchive').classList.toggle('hidden', tab !== 'archive');
+      if (tab === 'archive') loadArchivedItems();
+      if (tab === 'active') loadMyItems();
+    }
+
+    async function loadArchivedItems() {
+      const container = document.getElementById('archivedItems');
+      try {
+        const res = await fetch('/items?archived=true');
+        const items = await res.json();
+        if (items.length === 0) {
+          container.innerHTML = '<p class="empty">No archived items</p>';
+          return;
+        }
+
+        // Load media for all archived items
+        const mediaMap = {};
+        await Promise.all(items.map(async item => {
+          const mRes = await fetch('/items/' + item.id + '/media');
+          mediaMap[item.id] = await mRes.json();
+        }));
+
+        container.innerHTML = '<div class="cards">' + items.map(item => {
+          const photos = (mediaMap[item.id] || []).filter(m => m.mediaType === 'photo');
+          const firstPhoto = photos[0];
+          const statusClass = statusBadgeClass[item.listingStatus] || 'badge-private';
+          const statusLabel = item.listingStatus === 'archived_sold' ? 'Sold' : 'Deleted';
+          const archiveDate = new Date(item.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+          const imgHtml = firstPhoto
+            ? '<div class="card-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
+            : '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#E6E8EC"/></svg></span></div>';
+
+          return '<div class="card" style="cursor:default;">' +
+            imgHtml +
+            '<div class="card-body">' +
+              '<h3>' + escapeHtml(item.name) + '</h3>' +
+              '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span></div>' +
+              '<div class="archive-reason">Archived ' + archiveDate + '</div>' +
+              '<div class="archive-actions">' +
+                '<button class="btn-secondary btn-sm" onclick="event.stopPropagation(); restoreItem(\\'' + item.id + '\\')">Restore</button>' +
+                '<button class="btn-danger btn-sm" onclick="event.stopPropagation(); permanentDeleteItem(\\'' + item.id + '\\')">Delete Forever</button>' +
+              '</div>' +
+            '</div></div>';
+        }).join('') + '</div>';
+      } catch {
+        container.innerHTML = '<p class="empty">Failed to load archived items</p>';
+      }
+    }
+
+    window.restoreItem = async function(itemId) {
+      try {
+        const res = await fetch('/items/' + itemId + '/restore', { method: 'POST' });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.error); }
+        showToast('Item restored', 'accepted');
+        loadArchivedItems();
+        loadMyItems();
+      } catch (err) {
+        showToast('Restore failed: ' + err.message, 'rejected');
+      }
+    };
+
+    window.permanentDeleteItem = async function(itemId) {
+      if (!confirm('Permanently delete this item? This cannot be undone. All media and data will be destroyed.')) return;
+      try {
+        const res = await fetch('/items/' + itemId + '/permanent', { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete');
+        showToast('Item permanently deleted', '');
+        loadArchivedItems();
+      } catch {
+        showToast('Failed to permanently delete item', 'rejected');
+      }
+    };
+
     // ===== Category dropdowns =====
     function populateCategories(selectEl, onChange) {
       Object.keys(TAXONOMY).forEach(cat => {
@@ -542,8 +664,9 @@ export function renderUI(): string {
       }, 5000);
     }
 
-    const statusLabels = { private: 'Private', for_sale: 'For Sale', willing_to_sell: 'Willing to Sell' };
-    const statusBadgeClass = { private: 'badge-private', for_sale: 'badge-for-sale', willing_to_sell: 'badge-willing' };
+    const statusLabels = { private: 'Private', for_sale: 'For Sale', willing_to_sell: 'Willing to Sell', archived_sold: 'Sold (Archived)', archived_deleted: 'Deleted (Archived)' };
+    const statusBadgeClass = { private: 'badge-private', for_sale: 'badge-for-sale', willing_to_sell: 'badge-willing', archived_sold: 'badge-archived-sold', archived_deleted: 'badge-archived-deleted' };
+    const negStatusLabels = { pending: 'Pending', accepted: 'Under Contract', rejected: 'Rejected', countered: 'Countered', withdrawn: 'Withdrawn', sold: 'Sold' };
 
     let lastSearchResults = [];
 
@@ -807,7 +930,7 @@ export function renderUI(): string {
         html += '</span></div>';
         html += '<div style="margin-top:20px;display:flex;gap:10px;flex-direction:column;">';
         html += '<button class="btn-primary" style="width:100%;" onclick="saveDetail(\\'' + item.id + '\\')">Save Changes</button>';
-        html += '<button class="btn-danger" style="width:100%;" onclick="deleteItem(\\'' + item.id + '\\')"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M18 10C18 11.5823 17.5308 13.129 16.6518 14.4446C15.7727 15.7602 14.5233 16.7855 13.0615 17.391C11.5997 17.9965 9.99113 18.155 8.43928 17.8463C6.88743 17.5376 5.46197 16.7757 4.34315 15.6569C3.22433 14.538 2.4624 13.1126 2.15372 11.5607C1.84504 10.0089 2.00347 8.40034 2.60897 6.93853C3.21447 5.47672 4.23985 4.22729 5.55544 3.34824C6.87104 2.46919 8.41775 2 10 2C12.1217 2 14.1566 2.84285 15.6569 4.34315C17.1572 5.84344 18 7.87827 18 10ZM20 10C20 11.9778 19.4135 13.9112 18.3147 15.5557C17.2159 17.2002 15.6541 18.4819 13.8268 19.2388C11.9996 19.9957 9.98891 20.1937 8.0491 19.8079C6.10929 19.422 4.32746 18.4696 2.92894 17.0711C1.53041 15.6725 0.578004 13.8907 0.192152 11.9509C-0.193701 10.0111 0.00433284 8.00043 0.761209 6.17317C1.51809 4.3459 2.79981 2.78412 4.4443 1.6853C6.08879 0.58649 8.02219 0 10 0C12.6522 0 15.1957 1.05357 17.0711 2.92893C18.9464 4.8043 20 7.34784 20 10ZM5 9C4.73479 9 4.48043 9.10536 4.2929 9.29289C4.10536 9.48043 4 9.73478 4 10C4 10.2652 4.10536 10.5196 4.2929 10.7071C4.48043 10.8946 4.73479 11 5 11H15C15.2652 11 15.5196 10.8946 15.7071 10.7071C15.8946 10.5196 16 10.2652 16 10C16 9.73478 15.8946 9.48043 15.7071 9.29289C15.5196 9.10536 15.2652 9 15 9H5Z" fill="currentColor"/></svg> Delete Item</button>';
+        html += '<button class="btn-danger" style="width:100%;" onclick="deleteItem(\\'' + item.id + '\\')"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M18 10C18 11.5823 17.5308 13.129 16.6518 14.4446C15.7727 15.7602 14.5233 16.7855 13.0615 17.391C11.5997 17.9965 9.99113 18.155 8.43928 17.8463C6.88743 17.5376 5.46197 16.7757 4.34315 15.6569C3.22433 14.538 2.4624 13.1126 2.15372 11.5607C1.84504 10.0089 2.00347 8.40034 2.60897 6.93853C3.21447 5.47672 4.23985 4.22729 5.55544 3.34824C6.87104 2.46919 8.41775 2 10 2C12.1217 2 14.1566 2.84285 15.6569 4.34315C17.1572 5.84344 18 7.87827 18 10ZM20 10C20 11.9778 19.4135 13.9112 18.3147 15.5557C17.2159 17.2002 15.6541 18.4819 13.8268 19.2388C11.9996 19.9957 9.98891 20.1937 8.0491 19.8079C6.10929 19.422 4.32746 18.4696 2.92894 17.0711C1.53041 15.6725 0.578004 13.8907 0.192152 11.9509C-0.193701 10.0111 0.00433284 8.00043 0.761209 6.17317C1.51809 4.3459 2.79981 2.78412 4.4443 1.6853C6.08879 0.58649 8.02219 0 10 0C12.6522 0 15.1957 1.05357 17.0711 2.92893C18.9464 4.8043 20 7.34784 20 10ZM5 9C4.73479 9 4.48043 9.10536 4.2929 9.29289C4.10536 9.48043 4 9.73478 4 10C4 10.2652 4.10536 10.5196 4.2929 10.7071C4.48043 10.8946 4.73479 11 5 11H15C15.2652 11 15.5196 10.8946 15.7071 10.7071C15.8946 10.5196 16 10.2652 16 10C16 9.73478 15.8946 9.48043 15.7071 9.29289C15.5196 9.10536 15.2652 9 15 9H5Z" fill="currentColor"/></svg> Archive Item</button>';
         html += '</div>';
         html += '</div>'; // end action-card
         html += '</div>'; // end detail-right
@@ -879,14 +1002,15 @@ export function renderUI(): string {
     };
 
     window.deleteItem = async function(itemId) {
-      if (!confirm('Delete this item? This cannot be undone.')) return;
+      if (!confirm('Archive this item? You can restore it later from the Archive tab.')) return;
       try {
         const res = await fetch('/items/' + itemId, { method: 'DELETE' });
-        if (!res.ok) throw new Error('Failed to delete');
+        if (!res.ok) throw new Error('Failed to archive');
+        showToast('Item archived', '');
         switchTab('items');
         loadMyItems();
       } catch {
-        alert('Failed to delete item');
+        alert('Failed to archive item');
       }
     };
 
@@ -1125,6 +1249,9 @@ export function renderUI(): string {
     };
 
     // ===== Negotiations =====
+    let cachedIncoming = [];
+    let cachedOutgoing = [];
+
     function renderNegotiationCards(negs, isSeller) {
       if (negs.length === 0) return '<p class="empty">No negotiations yet</p>';
       return negs.map(n => {
@@ -1134,9 +1261,15 @@ export function renderUI(): string {
           actions = '<div class="neg-actions">' +
             '<button class="btn-primary btn-sm" onclick="openRespondModal(\\'' + n.id + '\\', \\'' + escapeHtml(n.itemName || n.itemId.slice(0,8)) + '\\', ' + n.price + ', \\'' + escapeHtml(n.priceCurrency) + '\\', \\'' + escapeHtml(n.message || '') + '\\')">Respond</button>' +
             '</div>';
+        } else if (isSeller && n.role === 'seller' && n.status === 'accepted') {
+          actions = '<div class="neg-actions">' +
+            '<button class="btn-primary btn-sm" onclick="markAsSold(\\'' + n.id + '\\')">Mark as Sold</button>' +
+            '</div>';
         } else if (!isSeller && n.role === 'buyer' && n.status === 'pending') {
           actions = '<div class="neg-actions"><button class="btn-secondary btn-sm" onclick="withdrawNeg(\\'' + n.id + '\\')">Withdraw</button></div>';
         }
+
+        const displayStatus = negStatusLabels[n.status] || n.status;
 
         let details = '<strong>' + escapeHtml(n.priceCurrency) + ' ' + n.price.toFixed(2) + '</strong>';
         if (n.message) details += ' &mdash; ' + escapeHtml(n.message);
@@ -1146,7 +1279,7 @@ export function renderUI(): string {
         return '<div class="neg-card ' + n.status + '">' +
           '<div class="neg-header">' +
             '<span class="neg-item-name">' + escapeHtml(n.itemName || n.itemId.slice(0, 8)) + '</span>' +
-            '<span class="neg-status ' + n.status + '">' + n.status + '</span>' +
+            '<span class="neg-status ' + n.status + '">' + displayStatus + '</span>' +
           '</div>' +
           '<div class="neg-details">' + details + '</div>' +
           '<div class="beacon-id">' + (n.role === 'seller' ? 'Buyer' : 'Seller') + ': ' + escapeHtml((n.role === 'seller' ? n.buyerBeaconId : n.sellerBeaconId).slice(0, 16)) + '...</div>' +
@@ -1155,19 +1288,71 @@ export function renderUI(): string {
       }).join('');
     }
 
+    function renderGroupedNegotiations(negs, isSeller) {
+      if (negs.length === 0) return '<p class="empty">No negotiations yet</p>';
+      const groups = {};
+      negs.forEach(n => {
+        if (!groups[n.itemId]) groups[n.itemId] = { itemName: n.itemName || n.itemId.slice(0, 8), negs: [] };
+        groups[n.itemId].negs.push(n);
+      });
+      const tab = isSeller ? 'incoming' : 'outgoing';
+      return Object.keys(groups).map(itemId => {
+        const g = groups[itemId];
+        const total = g.negs.length;
+        const pendingCount = g.negs.filter(n => n.status === 'pending' || n.status === 'countered').length;
+        const latestStatus = g.negs[0].status;
+        const latestDate = new Date(g.negs[0].updatedAt || g.negs[0].createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const countClass = pendingCount > 0 ? 'neg-group-count has-pending' : 'neg-group-count';
+        const countLabel = pendingCount > 0 ? total + ' (' + pendingCount + ' active)' : String(total);
+        const displayStatus = negStatusLabels[latestStatus] || latestStatus;
+        return '<div class="neg-group-row" onclick="showItemNegotiations(\\'' + escapeHtml(itemId) + '\\', ' + (isSeller ? 'true' : 'false') + ', \\'' + tab + '\\')">' +
+          '<div class="neg-group-left">' +
+            '<span class="neg-group-name">' + escapeHtml(g.itemName) + '</span>' +
+            '<span class="' + countClass + '">' + countLabel + '</span>' +
+          '</div>' +
+          '<div class="neg-group-right">' +
+            '<span class="neg-status ' + latestStatus + '">' + displayStatus + '</span>' +
+            '<span class="neg-group-date">' + latestDate + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    window.showItemNegotiations = function(itemId, isSeller, tab) {
+      const source = isSeller ? cachedIncoming : cachedOutgoing;
+      const filtered = source.filter(n => n.itemId === itemId);
+      const containerId = tab === 'incoming' ? 'negIncoming' : 'negOutgoing';
+      const container = document.getElementById(containerId);
+      const itemName = filtered.length > 0 ? escapeHtml(filtered[0].itemName || itemId.slice(0, 8)) : escapeHtml(itemId.slice(0, 8));
+      let html = '<span class="neg-group-back" onclick="renderNegGroupedView(\\'' + tab + '\\')">';
+      html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#EC526F"/></svg>';
+      html += ' Back to all items</span>';
+      html += '<h3 style="font-size:18px;font-weight:700;color:#141416;margin-bottom:16px;">' + itemName + '</h3>';
+      html += renderNegotiationCards(filtered, isSeller);
+      container.innerHTML = html;
+    };
+
+    window.renderNegGroupedView = function(tab) {
+      if (tab === 'incoming') {
+        document.getElementById('negIncoming').innerHTML = renderGroupedNegotiations(cachedIncoming, true);
+      } else {
+        document.getElementById('negOutgoing').innerHTML = renderGroupedNegotiations(cachedOutgoing, false);
+      }
+    };
+
     async function loadNegotiations() {
       try {
         const [incRes, outRes] = await Promise.all([
           fetch('/negotiations?role=seller'),
           fetch('/negotiations?role=buyer')
         ]);
-        const incoming = await incRes.json();
-        const outgoing = await outRes.json();
+        cachedIncoming = await incRes.json();
+        cachedOutgoing = await outRes.json();
 
-        document.getElementById('negIncoming').innerHTML = renderNegotiationCards(incoming, true);
-        document.getElementById('negOutgoing').innerHTML = renderNegotiationCards(outgoing, false);
+        document.getElementById('negIncoming').innerHTML = renderGroupedNegotiations(cachedIncoming, true);
+        document.getElementById('negOutgoing').innerHTML = renderGroupedNegotiations(cachedOutgoing, false);
 
-        const pendingCount = incoming.filter(n => n.status === 'pending').length;
+        const pendingCount = cachedIncoming.filter(n => n.status === 'pending').length;
         const badge = document.getElementById('negCount');
         if (pendingCount > 0) {
           badge.textContent = pendingCount;
@@ -1277,6 +1462,22 @@ export function renderUI(): string {
         loadNegotiations();
       } catch (err) {
         alert(err.message);
+      }
+    };
+
+    window.markAsSold = async function(negId) {
+      if (!confirm('Mark this deal as sold? This will decrement the item quantity.')) return;
+      try {
+        const res = await fetch('/negotiations/' + negId + '/mark-sold', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.error); }
+        showToast('Deal marked as sold!', 'sold');
+        loadNegotiations();
+        loadMyItems();
+      } catch (err) {
+        showToast('Failed: ' + err.message, 'rejected');
       }
     };
 
@@ -1417,6 +1618,8 @@ export function renderUI(): string {
             } else if (neg.status === 'countered') {
               const cp = neg.counterPrice ? ' at $' + neg.counterPrice : '';
               showToast('\u21a9 Counter offer received for "' + itemLabel + '"' + cp, 'countered');
+            } else if (neg.status === 'sold') {
+              showToast('\u2713 Deal for "' + itemLabel + '" is complete!', 'sold');
             }
           }
           prevOutgoingStatuses[neg.id] = neg.status;
