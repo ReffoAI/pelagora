@@ -286,14 +286,38 @@ These tests verify the connection between the beacon and the webapp.
 
 ## 5. CLI Installer Verification
 
-Run these tests from outside the reffo-beacon project directory.
+### Important: Local Development Setup
+
+The `create-reffo-beacon` CLI is **not published to npm**. It links to the local `reffo-beacon` source code using a `file:` dependency. Before testing:
+
+1. **Build reffo-beacon first** — the CLI depends on the compiled `dist/` output:
+   ```bash
+   cd reffo-beacon
+   npm run build
+   ```
+
+2. **Run the CLI using `npx`** from the `create-reffo-beacon` directory, or invoke the entry point directly with `node`. Both work:
+   ```bash
+   # Option A: npx from the create-reffo-beacon directory
+   cd create-reffo-beacon
+   npx .
+
+   # Option B: direct node invocation from anywhere
+   node /path/to/create-reffo-beacon/src/index.js
+   ```
+
+3. **Choose a test directory outside both repos** (e.g. a temp folder or `~/reffo-test/`). The CLI creates the project relative to your current directory.
+
+4. **Use a different port** than your development beacon (e.g. `3002`) to avoid conflicts.
 
 | # | Test Case | Steps | Expected Result | Pass/Fail | Notes |
 |---|-----------|-------|-----------------|-----------|-------|
-| 5.1 | **CLI prompts appear** | 1. `cd` to a temp directory 2. Run `node /path/to/create-reffo-beacon/src/index.js` | Banner: "create-reffo-beacon v0.1.0". Prompts appear in order: Project directory, HTTP port, Package manager, API key. | ☐ | |
+| 5.1 | **CLI prompts appear** | 1. `cd` to a temp directory outside the repos 2. Run `npx /path/to/create-reffo-beacon` or `node /path/to/create-reffo-beacon/src/index.js` | Banner: "create-reffo-beacon v0.1.0". Prompts appear in order: Project directory (default: `reffo-beacon`), HTTP port (default: `3000`), Package manager (`npm/yarn/pnpm`), Reffo.ai API key. | ☐ | |
 | 5.2 | **Valid API key accepted** | 1. At the API key prompt, enter a key starting with `rfk_` | Key is accepted without warnings. Installer proceeds to file generation. | ☐ | |
 | 5.3 | **Invalid API key — warning** | 1. At the API key prompt, enter a key NOT starting with `rfk_` | Warning: `Warning: Reffo API keys start with "rfk_". The key you entered may be invalid.` Prompt: `Use this key anyway? [y/N]:`. Entering `N` (or Enter) skips with message: `Skipped — you can add it later in .env`. | ☐ | |
-| 5.4 | **Generated project structure** | 1. Complete the installer with defaults 2. Inspect the generated directory | Contains: `.env` (with PORT and REFFO_API_KEY filled in), `package.json` (with `reffo-beacon` dependency and start/dev scripts), `.gitignore` (excludes node_modules, .env, *.db, uploads/), `uploads/` directory (empty), `node_modules/` (dependencies installed). Success messages: `Created .env`, `Created package.json`, `Created .gitignore`, `Created uploads/`, `Dependencies installed`, `Reffo Beacon is ready!` | ☐ | |
+| 5.4 | **Generated project structure** | 1. Complete the installer with defaults 2. Inspect the generated directory | Contains: `.env` (with PORT and REFFO_API_KEY filled in), `package.json` (with `reffo-beacon` as a `file:` dependency and `start`/`dev` scripts), `.gitignore` (excludes node_modules, .env, *.db, uploads/), `uploads/` directory (empty), `node_modules/` (dependencies installed with `reffo-beacon` symlinked). Success messages: `Created .env`, `Created package.json`, `Created .gitignore`, `Created uploads/`, `Dependencies installed`, `Reffo Beacon is ready!` | ☐ | |
+| 5.5 | **Scaffolded beacon starts** | 1. `cd` into the generated project directory 2. Run `npm start` | Beacon boots: `[DB] SQLite initialized`, `[Beacon] Reffo Beacon running on http://localhost:<port>`. UI loads in browser at the configured port. If an API key was provided, Settings tab shows "Connected" (green dot). | ☐ | |
+| 5.6 | **Dev mode works** | 1. In the generated project directory 2. Run `npm run dev` | Beacon starts via `tsx` (TypeScript source). Same output as `npm start`. Useful for development/debugging. | ☐ | |
 
 ---
 
@@ -321,9 +345,9 @@ Run these tests from outside the reffo-beacon project directory.
 | 2. Webapp Verification | 12 | | |
 | 3. Beacon Server Verification | 8 | | |
 | 4. End-to-End Sync Verification | 5 | | |
-| 5. CLI Installer Verification | 4 | | |
+| 5. CLI Installer Verification | 6 | | |
 | 6. Edge Cases & Error States | 10 | | |
-| **Total** | **39** | | |
+| **Total** | **41** | | |
 
 **Tested by:** ____________________
 **Date:** ____________________
