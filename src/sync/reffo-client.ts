@@ -165,6 +165,32 @@ export class ReffoClient {
     }
   }
 
+  async pushOfferResponse(
+    offerId: string,
+    status: string,
+    counterAmount?: number,
+    responseMessage?: string,
+  ): Promise<{ ok: boolean; error?: string }> {
+    try {
+      const body: Record<string, unknown> = { offerId, status };
+      if (counterAmount != null) body.counterAmount = counterAmount;
+      if (responseMessage) body.responseMessage = responseMessage;
+
+      const res = await this.request('/offer-responses', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const data = await res.json() as Record<string, unknown>;
+        return { ok: false, error: (data.error as string) || `HTTP ${res.status}` };
+      }
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: (err as Error).message };
+    }
+  }
+
   async heartbeat(beaconId: string): Promise<{ ok: boolean; error?: string }> {
     try {
       const res = await this.request('/heartbeat', {

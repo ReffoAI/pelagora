@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { v4 as uuid } from 'uuid';
 import { NegotiationQueries } from '../db';
 import type { DhtDiscovery } from '../dht/discovery';
+import type { SyncManager } from '../sync';
 import type { NegotiationStatus } from '../types';
 
 const router = Router();
@@ -127,6 +128,18 @@ router.patch('/:id/respond', async (req: Request, res: Response) => {
   }
 
   const updated = negotiations.updateStatus(negId, status, counterPrice, responseMessage);
+
+  // Push response back to webapp (fire-and-forget)
+  const syncManager: SyncManager | undefined = req.app.get('syncManager');
+  if (syncManager) {
+    syncManager.pushOfferResponse(
+      negId,
+      status,
+      status === 'countered' ? counterPrice : undefined,
+      responseMessage,
+    ).catch(() => {});
+  }
+
   res.json({ ...updated, delivered });
 });
 

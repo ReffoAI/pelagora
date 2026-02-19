@@ -170,6 +170,27 @@ export class SyncManager {
     return { received, errors };
   }
 
+  async pushOfferResponse(
+    offerId: string,
+    status: string,
+    counterAmount?: number,
+    responseMessage?: string,
+  ): Promise<{ ok: boolean; error?: string }> {
+    try {
+      const result = await this.client.pushOfferResponse(offerId, status, counterAmount, responseMessage);
+      if (!result.ok) {
+        console.warn(`[Sync] Failed to push offer response for ${offerId}: ${result.error}`);
+      } else {
+        console.log(`[Sync] Pushed offer response for ${offerId}: ${status}`);
+      }
+      return result;
+    } catch (err) {
+      const msg = (err as Error).message;
+      console.warn(`[Sync] Failed to push offer response for ${offerId}: ${msg}`);
+      return { ok: false, error: msg };
+    }
+  }
+
   startHeartbeat(intervalMs = 5 * 60 * 1000): void {
     if (this.heartbeatInterval) return;
 
