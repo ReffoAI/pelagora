@@ -122,6 +122,16 @@ router.post('/', upload.array('files', MAX_FILES), (req: Request, res: Response)
     return res.status(400).json({ error: errors.join('; ') });
   }
 
+  // If item is synced to Reffo.ai, push media update (fire-and-forget)
+  if (item.reffoSynced && results.length > 0) {
+    const syncManager = req.app.get('syncManager');
+    if (syncManager) {
+      syncManager.syncItem(itemId).catch((err: Error) => {
+        console.warn('[Sync] Auto re-sync failed for media upload on item', itemId, err.message);
+      });
+    }
+  }
+
   res.status(201).json({ uploaded: results, errors });
 });
 
@@ -150,6 +160,16 @@ router.delete('/:mediaId', (req: Request, res: Response) => {
     if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
   } catch {
     // File already gone
+  }
+
+  // If item is synced to Reffo.ai, push media update (fire-and-forget)
+  if (item.reffoSynced) {
+    const syncManager = req.app.get('syncManager');
+    if (syncManager) {
+      syncManager.syncItem(itemId).catch((err: Error) => {
+        console.warn('[Sync] Auto re-sync failed for media delete on item', itemId, err.message);
+      });
+    }
   }
 
   res.status(204).send();

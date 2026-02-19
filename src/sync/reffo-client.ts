@@ -9,6 +9,20 @@ import type { Item, Offer, ItemMedia } from '../types';
 
 const DEFAULT_BASE_URL = 'https://reffo.ai';
 
+export interface WebappOffer {
+  id: string;
+  item_id: string;
+  buyer_id: string;
+  seller_id: string;
+  item_name: string;
+  amount: number;
+  currency: string;
+  message: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export class ReffoClient {
   private apiKey: string;
   private baseUrl: string;
@@ -134,6 +148,18 @@ export class ReffoClient {
         return { ok: false, error: (data.error as string) || `HTTP ${res.status}` };
       }
       return { ok: true };
+    } catch (err) {
+      return { ok: false, error: (err as Error).message };
+    }
+  }
+
+  async fetchOffers(since?: string): Promise<{ ok: boolean; offers?: WebappOffer[]; error?: string }> {
+    try {
+      const params = since ? `?since=${encodeURIComponent(since)}` : '';
+      const res = await this.request(`/offers${params}`, { method: 'GET' });
+      const data = await res.json() as Record<string, unknown>;
+      if (!res.ok) return { ok: false, error: (data.error as string) || `HTTP ${res.status}` };
+      return { ok: true, offers: (data.offers as WebappOffer[]) || [] };
     } catch (err) {
       return { ok: false, error: (err as Error).message };
     }

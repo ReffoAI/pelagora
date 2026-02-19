@@ -84,6 +84,17 @@ router.patch('/:id', (req: Request, res: Response) => {
 
   const updated = items.update(String(req.params.id), { name, description, category, subcategory, image, sku, listingStatus, quantity });
   if (!updated) return res.status(404).json({ error: 'Item not found' });
+
+  // If item is synced to Reffo.ai, push update (fire-and-forget)
+  if (updated.reffoSynced) {
+    const syncManager = req.app.get('syncManager');
+    if (syncManager) {
+      syncManager.syncItem(updated.id).catch((err: Error) => {
+        console.warn('[Sync] Auto re-sync failed for item', updated.id, err.message);
+      });
+    }
+  }
+
   res.json(updated);
 });
 

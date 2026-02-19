@@ -3,7 +3,7 @@
  */
 
 import { ReffoClient } from './reffo-client';
-import { ItemQueries, OfferQueries, MediaQueries } from '../db/queries';
+import { ItemQueries, OfferQueries, MediaQueries, NegotiationQueries } from '../db/queries';
 
 export class SyncManager {
   private client: ReffoClient;
@@ -12,6 +12,8 @@ export class SyncManager {
   private items: ItemQueries;
   private offers: OfferQueries;
   private media: MediaQueries;
+  private negotiations: NegotiationQueries;
+  private lastOfferPoll: string | null = null;
   public registered: boolean = false;
 
   constructor(apiKey: string, beaconId: string, baseUrl?: string) {
@@ -20,6 +22,7 @@ export class SyncManager {
     this.items = new ItemQueries();
     this.offers = new OfferQueries();
     this.media = new MediaQueries();
+    this.negotiations = new NegotiationQueries();
   }
 
   async testConnection(): Promise<{ ok: boolean; error?: string }> {
@@ -107,16 +110,80 @@ export class SyncManager {
     return { synced, errors };
   }
 
+  async pollOffers(): Promise<{ received: number; errors: string[] }> {
+    let received = 0;
+    const errors: string[] = [];
+
+    try {
+      const result = await this.client.fetchOffers(this.lastOfferPoll || undefined);
+      if (!result.ok || !result.offers) {
+        errors.push(result.error || 'Unknown error fetching offers');
+        return { received, errors };
+      }
+
+      // Build a map of synced items: local item ID -> item (keyed by local ID which is also the ref ID on webapp)
+      const syncedItems = this.items.listSynced();
+      const syncedItemMap = new Map(syncedItems.map(item => [item.id, item]));
+
+      for (const offer of result.offers) {
+        // Check if we already have this negotiation
+        const existing = this.negotiations.get(offer.id);
+        if (existing) continue;
+
+        // Map the offer's item_id back to a local item
+        const localItem = syncedItemMap.get(offer.item_id);
+        if (!localItem) {
+          console.warn(`[Sync] Offer ${offer.id} references unknown item ${offer.item_id}, skipping`);
+          continue;
+        }
+
+        try {
+          this.negotiations.create({
+            id: offer.id,
+            itemId: localItem.id,
+            itemName: offer.item_name || localItem.name,
+            buyerBeaconId: offer.buyer_id,
+            sellerBeaconId: this.beaconId,
+            price: offer.amount,
+            priceCurrency: offer.currency || 'USD',
+            message: offer.message || '',
+            role: 'seller',
+            status: 'pending',
+          });
+          received++;
+          console.log(`[Sync] Received offer ${offer.id} for item "${localItem.name}"`);
+        } catch (err) {
+          errors.push(`Offer ${offer.id}: ${(err as Error).message}`);
+        }
+      }
+
+      // Update last poll timestamp
+      this.lastOfferPoll = new Date().toISOString();
+    } catch (err) {
+      errors.push((err as Error).message);
+    }
+
+    if (received > 0) {
+      console.log(`[Sync] Received ${received} new offer(s)`);
+    }
+
+    return { received, errors };
+  }
+
   startHeartbeat(intervalMs = 5 * 60 * 1000): void {
     if (this.heartbeatInterval) return;
 
-    // Initial heartbeat
-    this.client.heartbeat(this.beaconId).catch(() => {});
+    // Initial heartbeat + offer poll
+    this.client.heartbeat(this.beaconId)
+      .then(() => this.pollOffers())
+      .catch(() => {});
 
     this.heartbeatInterval = setInterval(() => {
-      this.client.heartbeat(this.beaconId).catch((err) => {
-        console.warn('[Sync] Heartbeat failed:', err.message);
-      });
+      this.client.heartbeat(this.beaconId)
+        .then(() => this.pollOffers())
+        .catch((err) => {
+          console.warn('[Sync] Heartbeat failed:', err.message);
+        });
     }, intervalMs);
   }
 
