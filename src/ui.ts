@@ -412,10 +412,12 @@ export function renderUI(): string {
       <section>
         <h2>Reffo.ai Connection</h2>
         <div id="settingsMsg"></div>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
           <div id="syncStatusDot" style="width:12px;height:12px;border-radius:50%;background:#E6E8EC;flex-shrink:0;"></div>
           <span id="syncStatusText" style="font-size:14px;font-weight:500;color:#777E90;">Not connected</span>
+          <button id="retryConnectionBtn" class="btn-primary btn-sm" style="display:none;font-size:12px;padding:4px 12px;" onclick="retryConnection()">Retry</button>
         </div>
+        <div id="syncErrorDetail" style="font-size:12px;color:#F5A623;margin-bottom:16px;display:none;"></div>
         <div style="display:flex;gap:10px;align-items:flex-end;">
           <div style="flex:1;">
             <label for="settingsApiKey">API Key</label>
@@ -1496,18 +1498,31 @@ export function renderUI(): string {
 
         const dot = document.getElementById('syncStatusDot');
         const text = document.getElementById('syncStatusText');
+        const retryBtn = document.getElementById('retryConnectionBtn');
+        const errorDetail = document.getElementById('syncErrorDetail');
         if (data.connected) {
           dot.style.background = '#1a8a42';
-          text.textContent = 'Connected';
+          text.textContent = 'Connected to Reffo.ai';
           text.style.color = '#1a8a42';
+          retryBtn.style.display = 'none';
+          errorDetail.style.display = 'none';
         } else if (data.hasApiKey) {
           dot.style.background = '#F5A623';
-          text.textContent = 'Key saved — not connected to Reffo.ai';
+          text.textContent = 'Key saved — not connected';
           text.style.color = '#F5A623';
+          retryBtn.style.display = '';
+          if (data.syncError) {
+            errorDetail.textContent = data.syncError;
+            errorDetail.style.display = 'block';
+          } else {
+            errorDetail.style.display = 'none';
+          }
         } else {
           dot.style.background = '#E6E8EC';
           text.textContent = 'Not connected';
           text.style.color = '#777E90';
+          retryBtn.style.display = 'none';
+          errorDetail.style.display = 'none';
         }
 
         if (data.hasApiKey) {
@@ -1545,6 +1560,27 @@ export function renderUI(): string {
         loadSettings();
       } catch (err) {
         showMsg('settingsMsg', err.message, false);
+      }
+    };
+
+    window.retryConnection = async function() {
+      const btn = document.getElementById('retryConnectionBtn');
+      btn.textContent = 'Connecting...';
+      btn.disabled = true;
+      try {
+        const res = await fetch('/settings/retry-connection', { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+          showMsg('settingsMsg', 'Connected to Reffo.ai!', true);
+        } else {
+          showMsg('settingsMsg', 'Connection failed: ' + (data.error || 'Unknown error'), false);
+        }
+        loadSettings();
+      } catch (err) {
+        showMsg('settingsMsg', 'Connection failed: ' + err.message, false);
+      } finally {
+        btn.textContent = 'Retry';
+        btn.disabled = false;
       }
     };
 

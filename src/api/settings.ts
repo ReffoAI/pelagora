@@ -77,6 +77,7 @@ router.get('/', (_req: Request, res: Response) => {
     apiKey: apiKey ? `${apiKey.slice(0, 12)}...` : '',
     hasApiKey: !!apiKey,
     connected: !!(syncManager && syncManager.registered),
+    syncError: syncManager && !syncManager.registered ? (syncManager.lastError || null) : null,
     syncedItemCount: syncedCount,
     beaconId: _req.app.get('beaconId') || '',
     version: '0.1.0',
@@ -112,14 +113,50 @@ router.post('/api-key', async (req: Request, res: Response) => {
 
   if (regResult.ok) {
     manager.registered = true;
+    manager.lastError = null;
     manager.startHeartbeat();
     req.app.set('syncManager', manager);
     res.json({ ok: true, message: 'Connected!' });
   } else {
     // Key is saved but connection failed — user can still sync locally
     manager.registered = false;
+    manager.lastError = regResult.error || 'Connection failed';
     req.app.set('syncManager', manager);
     res.json({ ok: true, message: `API key saved. Reffo.ai connection pending — items can still be marked for sync locally.` });
+  }
+});
+
+// POST /settings/retry-connection — Retry Reffo.ai registration
+router.post('/retry-connection', async (req: Request, res: Response) => {
+  const apiKey = process.env.REFFO_API_KEY;
+  if (!apiKey) {
+    return res.status(400).json({ error: 'No API key configured' });
+  }
+
+  const { SyncManager } = require('../sync');
+  const beaconId = req.app.get('beaconId');
+  const reffoUrl = process.env.REFFO_API_URL || 'https://reffo.ai';
+  const beaconUrl = process.env.BEACON_URL || `http://localhost:${process.env.PORT || 3000}`;
+
+  // Reuse existing manager or create new one
+  let manager = req.app.get('syncManager');
+  if (!manager) {
+    manager = new SyncManager(apiKey, beaconId, reffoUrl);
+    req.app.set('syncManager', manager);
+  }
+
+  const regResult = await manager.registerBeacon('Reffo Beacon', '0.1.0', beaconUrl);
+
+  if (regResult.ok) {
+    manager.registered = true;
+    manager.lastError = null;
+    manager.startHeartbeat();
+    req.app.set('syncManager', manager);
+    res.json({ ok: true, message: 'Connected!' });
+  } else {
+    manager.registered = false;
+    manager.lastError = regResult.error || 'Connection failed';
+    res.json({ ok: false, error: regResult.error || 'Connection failed' });
   }
 });
 

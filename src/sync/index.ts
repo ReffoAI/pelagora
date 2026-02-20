@@ -15,6 +15,7 @@ export class SyncManager {
   private negotiations: NegotiationQueries;
   private lastOfferPoll: string | null = null;
   public registered: boolean = false;
+  public lastError: string | null = null;
 
   constructor(apiKey: string, beaconId: string, baseUrl?: string) {
     this.client = new ReffoClient(apiKey, baseUrl);
