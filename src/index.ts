@@ -67,14 +67,19 @@ async function main(): Promise<void> {
       .then(result => {
         if (result.ok) {
           syncManager.registered = true;
+          syncManager.lastError = null;
           console.log('[Sync] Registered with Reffo.ai');
           syncManager.startHeartbeat();
         } else {
           syncManager.registered = false;
+          syncManager.lastError = result.error || 'Registration failed';
           console.warn('[Sync] Registration failed:', result.error);
         }
       })
-      .catch(err => console.warn('[Sync] Registration error:', err.message));
+      .catch(err => {
+        syncManager.lastError = err.message;
+        console.warn('[Sync] Registration error:', err.message);
+      });
   }
 
   // Start DHT discovery
