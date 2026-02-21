@@ -70,6 +70,11 @@ CREATE TABLE refs (
   location_point GEOMETRY(Point, 4326),
   location_data JSONB,
 
+  -- Selling scope and radius
+  selling_scope TEXT DEFAULT 'global'
+    CHECK (selling_scope IN ('global', 'national', 'range')),
+  selling_radius_miles INTEGER,
+
   -- Full Schema.org data
   schema_data JSONB NOT NULL,
 

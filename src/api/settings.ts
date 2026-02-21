@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
+import { SettingsQueries } from '../db';
+import type { SellingScope } from '../types';
 
 const router = Router();
 
@@ -73,6 +75,9 @@ router.get('/', (_req: Request, res: Response) => {
     }
   })() : 0;
 
+  const settingsQ = new SettingsQueries();
+  const locationSettings = settingsQ.get();
+
   res.json({
     apiKey: apiKey ? `${apiKey.slice(0, 12)}...` : '',
     hasApiKey: !!apiKey,
@@ -82,7 +87,51 @@ router.get('/', (_req: Request, res: Response) => {
     beaconId: _req.app.get('beaconId') || '',
     version: '0.1.0',
     uptime: Math.floor((Date.now() - (_req.app.get('startTime') || Date.now())) / 1000),
+    location: locationSettings || null,
   });
+});
+
+// GET /settings/location — Return default location settings
+router.get('/location', (_req: Request, res: Response) => {
+  const settingsQ = new SettingsQueries();
+  const settings = settingsQ.get();
+  if (!settings) {
+    return res.json({
+      locationLat: null, locationLng: null, locationAddress: null,
+      locationCity: null, locationState: null, locationZip: null,
+      locationCountry: 'US', defaultSellingScope: 'global', defaultSellingRadiusMiles: 250,
+    });
+  }
+  res.json(settings);
+});
+
+// POST /settings/location — Save default location settings
+router.post('/location', (req: Request, res: Response) => {
+  const { locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry, defaultSellingScope, defaultSellingRadiusMiles } = req.body;
+
+  const validScopes: SellingScope[] = ['global', 'national', 'range'];
+  if (defaultSellingScope && !validScopes.includes(defaultSellingScope)) {
+    return res.status(400).json({ error: `Invalid selling scope: ${defaultSellingScope}` });
+  }
+
+  if (defaultSellingRadiusMiles !== undefined && (typeof defaultSellingRadiusMiles !== 'number' || defaultSellingRadiusMiles < 1)) {
+    return res.status(400).json({ error: 'Selling radius must be a positive number' });
+  }
+
+  const settingsQ = new SettingsQueries();
+  const updated = settingsQ.upsert({
+    locationLat: locationLat != null ? Number(locationLat) : undefined,
+    locationLng: locationLng != null ? Number(locationLng) : undefined,
+    locationAddress: locationAddress ?? undefined,
+    locationCity: locationCity ?? undefined,
+    locationState: locationState ?? undefined,
+    locationZip: locationZip ?? undefined,
+    locationCountry: locationCountry ?? undefined,
+    defaultSellingScope: defaultSellingScope ?? undefined,
+    defaultSellingRadiusMiles: defaultSellingRadiusMiles != null ? Number(defaultSellingRadiusMiles) : undefined,
+  });
+
+  res.json({ ok: true, settings: updated });
 });
 
 // POST /settings/api-key — Save API key and initialize sync

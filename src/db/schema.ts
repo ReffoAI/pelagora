@@ -35,6 +35,15 @@ function initSchema(database: Database.Database): void {
       sku TEXT,
       listing_status TEXT NOT NULL DEFAULT 'private' CHECK(listing_status IN ('private', 'for_sale', 'willing_to_sell', 'archived_sold', 'archived_deleted')),
       quantity INTEGER NOT NULL DEFAULT 1,
+      location_lat REAL,
+      location_lng REAL,
+      location_address TEXT,
+      location_city TEXT,
+      location_state TEXT,
+      location_zip TEXT,
+      location_country TEXT,
+      selling_scope TEXT DEFAULT 'global',
+      selling_radius_miles INTEGER,
       beacon_id TEXT NOT NULL,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -60,6 +69,19 @@ function initSchema(database: Database.Database): void {
     database.exec(`ALTER TABLE items ADD COLUMN reffo_ref_id TEXT`);
   }
 
+  // Migration: add location and selling scope columns to existing items
+  if (!columns.some(c => c.name === 'location_lat')) {
+    database.exec(`ALTER TABLE items ADD COLUMN location_lat REAL`);
+    database.exec(`ALTER TABLE items ADD COLUMN location_lng REAL`);
+    database.exec(`ALTER TABLE items ADD COLUMN location_address TEXT`);
+    database.exec(`ALTER TABLE items ADD COLUMN location_city TEXT`);
+    database.exec(`ALTER TABLE items ADD COLUMN location_state TEXT`);
+    database.exec(`ALTER TABLE items ADD COLUMN location_zip TEXT`);
+    database.exec(`ALTER TABLE items ADD COLUMN location_country TEXT`);
+    database.exec(`ALTER TABLE items ADD COLUMN selling_scope TEXT DEFAULT 'global'`);
+    database.exec(`ALTER TABLE items ADD COLUMN selling_radius_miles INTEGER`);
+  }
+
   // Migration: expand CHECK constraints for archived statuses on items table
   // Check if the items table already supports the new statuses by attempting a test
   const itemsCheckInfo = database.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='items'").get() as { sql: string } | undefined;
@@ -79,11 +101,20 @@ function initSchema(database: Database.Database): void {
         quantity INTEGER NOT NULL DEFAULT 1,
         reffo_synced INTEGER NOT NULL DEFAULT 0,
         reffo_ref_id TEXT,
+        location_lat REAL,
+        location_lng REAL,
+        location_address TEXT,
+        location_city TEXT,
+        location_state TEXT,
+        location_zip TEXT,
+        location_country TEXT,
+        selling_scope TEXT DEFAULT 'global',
+        selling_radius_miles INTEGER,
         beacon_id TEXT NOT NULL,
         created_at TEXT NOT NULL DEFAULT (datetime('now')),
         updated_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
-      INSERT INTO items_new SELECT id, name, description, category, subcategory, image, sku, listing_status, quantity, reffo_synced, reffo_ref_id, beacon_id, created_at, updated_at FROM items;
+      INSERT INTO items_new SELECT id, name, description, category, subcategory, image, sku, listing_status, quantity, reffo_synced, reffo_ref_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'global', NULL, beacon_id, created_at, updated_at FROM items;
       DROP TABLE items;
       ALTER TABLE items_new RENAME TO items;
       CREATE INDEX IF NOT EXISTS idx_items_category ON items(category);
@@ -186,6 +217,21 @@ function initSchema(database: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_negotiations_role ON negotiations(role);
     CREATE INDEX IF NOT EXISTS idx_negotiations_status ON negotiations(status);
     CREATE INDEX IF NOT EXISTS idx_negotiations_item ON negotiations(item_id);
+
+    CREATE TABLE IF NOT EXISTS beacon_settings (
+      id TEXT PRIMARY KEY DEFAULT 'default',
+      location_lat REAL,
+      location_lng REAL,
+      location_address TEXT,
+      location_city TEXT,
+      location_state TEXT,
+      location_zip TEXT,
+      location_country TEXT DEFAULT 'US',
+      default_selling_scope TEXT NOT NULL DEFAULT 'global'
+        CHECK(default_selling_scope IN ('global','national','range')),
+      default_selling_radius_miles INTEGER NOT NULL DEFAULT 250,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
 }
 

@@ -89,12 +89,15 @@ async function main(): Promise<void> {
 
   // Expose DHT search endpoint
   app.get('/search', async (req, res) => {
-    const { q, c, sc, maxPrice } = req.query;
+    const { q, c, sc, maxPrice, lat, lng, radius } = req.query;
     const query = {
       search: typeof q === 'string' ? q : undefined,
       category: typeof c === 'string' ? c : undefined,
       subcategory: typeof sc === 'string' ? sc : undefined,
       maxPrice: typeof maxPrice === 'string' ? parseFloat(maxPrice) : undefined,
+      lat: typeof lat === 'string' ? parseFloat(lat) : undefined,
+      lng: typeof lng === 'string' ? parseFloat(lng) : undefined,
+      radiusMiles: typeof radius === 'string' ? parseFloat(radius) : undefined,
     };
     const responses = await dht.queryPeers(query);
     res.json({

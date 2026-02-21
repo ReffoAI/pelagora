@@ -326,6 +326,35 @@ export function renderUI(): string {
           <label for="itemSku">SKU</label>
           <input id="itemSku" name="sku" placeholder="Optional SKU or part number">
 
+          <details style="margin-bottom:14px;border:2px solid #E6E8EC;border-radius:12px;padding:14px;">
+            <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.02em;">Location Override</summary>
+            <p style="font-size:12px;color:#B1B5C3;margin:8px 0;">Leave blank to use your default location from Settings.</p>
+            <div class="row">
+              <div><label for="itemLocCity">City</label><input id="itemLocCity" placeholder="City"></div>
+              <div><label for="itemLocState">State</label><input id="itemLocState" placeholder="State"></div>
+              <div><label for="itemLocZip">Zip</label><input id="itemLocZip" placeholder="Zip"></div>
+            </div>
+            <div class="row">
+              <div><label for="itemLocLat">Latitude</label><input id="itemLocLat" type="number" step="any" placeholder="e.g. 28.54"></div>
+              <div><label for="itemLocLng">Longitude</label><input id="itemLocLng" type="number" step="any" placeholder="e.g. -81.38"></div>
+            </div>
+            <div class="row">
+              <div>
+                <label for="itemSellingScope">Selling Scope</label>
+                <select id="itemSellingScope">
+                  <option value="">Use default</option>
+                  <option value="global">Global</option>
+                  <option value="national">National</option>
+                  <option value="range">Range (miles)</option>
+                </select>
+              </div>
+              <div>
+                <label for="itemSellingRadius">Radius (miles)</label>
+                <input id="itemSellingRadius" type="number" min="1" placeholder="250">
+              </div>
+            </div>
+          </details>
+
           <label>Photos (up to 4)</label>
           <div class="upload-area" onclick="document.getElementById('itemPhotos').click()">
             <div class="upload-icon">+</div>
@@ -387,6 +416,10 @@ export function renderUI(): string {
             <label for="searchMaxPrice">Max Price</label>
             <input id="searchMaxPrice" type="number" min="0" step="0.01" placeholder="No limit">
           </div>
+          <div>
+            <label for="searchRadius">Within (miles)</label>
+            <input id="searchRadius" type="number" min="1" placeholder="Any distance">
+          </div>
           <button id="searchBtn" class="btn-primary"><svg width="16" height="16" viewBox="0 0 17 17" fill="none"><path d="M15.067 15.067L11.967 11.96M13.686 7.80798C13.6862 8.97015 13.3418 10.1063 12.6963 11.0727C12.0508 12.0391 11.1332 12.7924 10.0596 13.2373C8.98597 13.6822 7.80452 13.7988 6.66465 13.5723C5.52478 13.3457 4.47768 12.7863 3.65577 11.9647C2.83386 11.143 2.27405 10.0961 2.04712 8.95632C1.8202 7.81652 1.93637 6.63503 2.38092 5.56126C2.82548 4.48748 3.57847 3.56965 4.54466 2.92382C5.51086 2.278 6.64686 1.93318 7.80902 1.93298C9.36744 1.93298 10.862 2.55206 11.964 3.65402C13.0659 4.75599 13.685 6.25057 13.685 7.80898L13.686 7.80798Z" stroke="white" stroke-width="2" stroke-linecap="round"/></svg> Search</button>
         </div>
         <div id="searchResults"><p class="empty">Enter a query and click Search</p></div>
@@ -437,6 +470,52 @@ export function renderUI(): string {
             <div id="syncedCount" style="font-size:24px;font-weight:700;color:#141416;">0</div>
           </div>
         </div>
+      </section>
+
+      <section>
+        <h2>Default Location</h2>
+        <div id="locationMsg"></div>
+        <p style="font-size:12px;color:#B1B5C3;margin-bottom:12px;">Set your default location. New items will inherit these values. Street address is stored locally and never shared.</p>
+        <label for="locAddress">Address (private)</label>
+        <input id="locAddress" placeholder="123 Main St (never shared)">
+        <div class="row">
+          <div><label for="locCity">City</label><input id="locCity" placeholder="City"></div>
+          <div><label for="locState">State</label><input id="locState" placeholder="FL"></div>
+          <div><label for="locZip">Zip</label><input id="locZip" placeholder="32801"></div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="locCountry">Country</label>
+            <select id="locCountry">
+              <option value="US">US</option>
+              <option value="CA">CA</option>
+              <option value="GB">GB</option>
+              <option value="AU">AU</option>
+              <option value="DE">DE</option>
+              <option value="FR">FR</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div><label for="locLat">Latitude</label><input id="locLat" type="number" step="any" placeholder="28.5383"></div>
+          <div><label for="locLng">Longitude</label><input id="locLng" type="number" step="any" placeholder="-81.3792"></div>
+          <div style="display:flex;align-items:flex-end;"><button class="btn-secondary btn-sm" style="margin-bottom:14px;white-space:nowrap;" onclick="useMyLocation()">Use My Location</button></div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="locScope">Default Selling Scope</label>
+            <select id="locScope">
+              <option value="global">Global</option>
+              <option value="national">National</option>
+              <option value="range">Range (miles)</option>
+            </select>
+          </div>
+          <div>
+            <label for="locRadius">Default Radius (miles)</label>
+            <input id="locRadius" type="number" min="1" value="250">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="saveLocation()">Save Location</button>
       </section>
 
       <section>
@@ -714,30 +793,50 @@ export function renderUI(): string {
         const price = priceVal ? parseFloat(priceVal) : 0;
         const currency = document.getElementById('itemCurrency').value;
         const sku = document.getElementById('itemSku').value.trim() || undefined;
+        const locCity = document.getElementById('itemLocCity').value.trim() || undefined;
+        const locState = document.getElementById('itemLocState').value.trim() || undefined;
+        const locZip = document.getElementById('itemLocZip').value.trim() || undefined;
+        const locLat = document.getElementById('itemLocLat').value ? parseFloat(document.getElementById('itemLocLat').value) : undefined;
+        const locLng = document.getElementById('itemLocLng').value ? parseFloat(document.getElementById('itemLocLng').value) : undefined;
+        const sellingScope = document.getElementById('itemSellingScope').value || undefined;
+        const sellingRadiusMiles = document.getElementById('itemSellingRadius').value ? parseInt(document.getElementById('itemSellingRadius').value) : undefined;
 
         const itemRes = await fetch('/items', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, description, category, subcategory, listingStatus, quantity, sku })
+          body: JSON.stringify({ name, description, category, subcategory, listingStatus, quantity, sku,
+            locationCity: locCity, locationState: locState, locationZip: locZip,
+            locationLat: locLat, locationLng: locLng,
+            sellingScope, sellingRadiusMiles })
         });
         if (!itemRes.ok) { const err = await itemRes.json(); throw new Error(err.error || 'Failed to create item'); }
         const item = await itemRes.json();
 
-        // Upload all media in one request
+        // Upload photos and video separately so one failure doesn't kill the other
         const photoFiles = document.getElementById('itemPhotos').files;
         const videoFile = document.getElementById('itemVideo').files[0];
-        if (photoFiles.length > 0 || videoFile) {
+        const uploadErrors = [];
+        if (photoFiles.length > 0) {
           const fd = new FormData();
-          for (let i = 0; i < Math.min(photoFiles.length, 4); i++) {
-            fd.append('files', photoFiles[i]);
-          }
-          if (videoFile) fd.append('files', videoFile);
-          const mediaRes = await fetch('/items/' + item.id + '/media', { method: 'POST', body: fd });
-          if (!mediaRes.ok) {
-            const err = await mediaRes.json();
-            console.warn('Media upload issues:', err);
+          for (let i = 0; i < Math.min(photoFiles.length, 4); i++) fd.append('files', photoFiles[i]);
+          const photoRes = await fetch('/items/' + item.id + '/media', { method: 'POST', body: fd });
+          if (!photoRes.ok) {
+            let errMsg = 'Photo upload failed';
+            try { const err = await photoRes.json(); errMsg = err.error || errMsg; } catch {}
+            uploadErrors.push(errMsg);
           }
         }
+        if (videoFile) {
+          const fd = new FormData();
+          fd.append('files', videoFile);
+          const videoRes = await fetch('/items/' + item.id + '/media', { method: 'POST', body: fd });
+          if (!videoRes.ok) {
+            let errMsg = 'Video upload failed';
+            try { const err = await videoRes.json(); errMsg = err.error || errMsg; } catch {}
+            uploadErrors.push(errMsg);
+          }
+        }
+        if (uploadErrors.length > 0) console.warn('Media upload issues:', uploadErrors.join('; '));
 
         // Create offer if price > 0 and not private
         if (listingStatus !== 'private' && price > 0) {
@@ -883,6 +982,20 @@ export function renderUI(): string {
         html += '<div><label>Subcategory</label><select id="dSubcat"><option value="">Select...</option></select></div></div>';
         html += '<div class="row"><div><label>Quantity</label><input id="dQty" type="number" min="1" value="' + item.quantity + '"></div>';
         html += '<div><label>SKU</label><input id="dSku" value="' + escapeHtml(item.sku || '') + '"></div></div>';
+        html += '<details style="margin-bottom:14px;border:2px solid #E6E8EC;border-radius:12px;padding:14px;">';
+        html += '<summary style="cursor:pointer;font-size:12px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.02em;">Location</summary>';
+        html += '<div class="row"><div><label>City</label><input id="dLocCity" value="' + escapeHtml(item.locationCity || '') + '"></div>';
+        html += '<div><label>State</label><input id="dLocState" value="' + escapeHtml(item.locationState || '') + '"></div>';
+        html += '<div><label>Zip</label><input id="dLocZip" value="' + escapeHtml(item.locationZip || '') + '"></div></div>';
+        html += '<div class="row"><div><label>Latitude</label><input id="dLocLat" type="number" step="any" value="' + (item.locationLat || '') + '"></div>';
+        html += '<div><label>Longitude</label><input id="dLocLng" type="number" step="any" value="' + (item.locationLng || '') + '"></div></div>';
+        html += '<div class="row"><div><label>Selling Scope</label><select id="dSellingScope">';
+        ['global','national','range'].forEach(s => {
+          html += '<option value="' + s + '"' + ((item.sellingScope || 'global') === s ? ' selected' : '') + '>' + ({global:'Global',national:'National',range:'Range (miles)'})[s] + '</option>';
+        });
+        html += '</select></div>';
+        html += '<div><label>Radius (miles)</label><input id="dSellingRadius" type="number" min="1" value="' + (item.sellingRadiusMiles || '') + '"></div></div>';
+        html += '</details>';
         html += '</form>';
 
         // Media management
@@ -927,6 +1040,16 @@ export function renderUI(): string {
         if (item.category) html += '<div class="action-row"><span class="action-label">Category</span><span class="action-value">' + escapeHtml(item.category) + '</span></div>';
         if (item.subcategory) html += '<div class="action-row"><span class="action-label">Subcategory</span><span class="action-value">' + escapeHtml(item.subcategory) + '</span></div>';
         if (item.sku) html += '<div class="action-row"><span class="action-label">SKU</span><span class="action-value">' + escapeHtml(item.sku) + '</span></div>';
+        const locParts = [item.locationCity, item.locationState, item.locationZip].filter(Boolean);
+        if (locParts.length > 0) {
+          html += '<div class="action-row"><span class="action-label">Location</span><span class="action-value">' + escapeHtml(locParts.join(', ')) + '</span></div>';
+        }
+        const scopeLabels = { global: 'Global', national: 'National', range: 'Range' };
+        if (item.sellingScope) {
+          let scopeText = scopeLabels[item.sellingScope] || item.sellingScope;
+          if (item.sellingScope === 'range' && item.sellingRadiusMiles) scopeText += ' (' + item.sellingRadiusMiles + ' mi)';
+          html += '<div class="action-row"><span class="action-label">Selling Scope</span><span class="action-value">' + escapeHtml(scopeText) + '</span></div>';
+        }
         html += '<div class="action-row"><span class="action-label">Share on Reffo</span><span class="action-value">';
         html += '<label class="sync-toggle"><input type="checkbox" ' + (item.reffoSynced ? 'checked' : '') + ' onchange="toggleSync(\\'' + item.id + '\\', this)"><span class="toggle-track"></span></label>';
         html += '</span></div>';
@@ -960,6 +1083,8 @@ export function renderUI(): string {
 
     window.saveDetail = async function(itemId) {
       try {
+        const dLocLat = document.getElementById('dLocLat');
+        const dLocLng = document.getElementById('dLocLng');
         const res = await fetch('/items/' + itemId, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -971,6 +1096,13 @@ export function renderUI(): string {
             quantity: parseInt(document.getElementById('dQty').value) || 1,
             sku: document.getElementById('dSku').value.trim() || undefined,
             listingStatus: document.getElementById('dStatus').value,
+            locationCity: document.getElementById('dLocCity').value.trim() || null,
+            locationState: document.getElementById('dLocState').value.trim() || null,
+            locationZip: document.getElementById('dLocZip').value.trim() || null,
+            locationLat: dLocLat && dLocLat.value ? parseFloat(dLocLat.value) : null,
+            locationLng: dLocLng && dLocLng.value ? parseFloat(dLocLng.value) : null,
+            sellingScope: document.getElementById('dSellingScope').value,
+            sellingRadiusMiles: document.getElementById('dSellingRadius').value ? parseInt(document.getElementById('dSellingRadius').value) : null,
           })
         });
         if (!res.ok) { const err = await res.json(); throw new Error(err.error); }
@@ -990,15 +1122,33 @@ export function renderUI(): string {
     window.uploadDetailMedia = async function(itemId) {
       const input = document.getElementById('detailFileInput');
       if (!input.files.length) return;
-      const fd = new FormData();
+      const errors = [];
+      // Split photos and video into separate requests
+      const photos = [];
+      const videos = [];
       for (let i = 0; i < input.files.length; i++) {
-        fd.append('files', input.files[i]);
+        if (input.files[i].type.startsWith('video/')) videos.push(input.files[i]);
+        else photos.push(input.files[i]);
       }
-      const res = await fetch('/items/' + itemId + '/media', { method: 'POST', body: fd });
-      if (!res.ok) {
-        const err = await res.json();
-        alert(err.error || err.errors?.join('; ') || 'Upload failed');
+      if (photos.length > 0) {
+        const fd = new FormData();
+        photos.forEach(f => fd.append('files', f));
+        const res = await fetch('/items/' + itemId + '/media', { method: 'POST', body: fd });
+        if (!res.ok) {
+          try { const err = await res.json(); errors.push(err.error || 'Photo upload failed'); }
+          catch { errors.push('Photo upload failed (server error ' + res.status + ')'); }
+        }
       }
+      if (videos.length > 0) {
+        const fd = new FormData();
+        videos.forEach(f => fd.append('files', f));
+        const res = await fetch('/items/' + itemId + '/media', { method: 'POST', body: fd });
+        if (!res.ok) {
+          try { const err = await res.json(); errors.push(err.error || 'Video upload failed'); }
+          catch { errors.push('Video upload failed (server error ' + res.status + ')'); }
+        }
+      }
+      if (errors.length > 0) alert(errors.join('\\n'));
       input.value = '';
       openDetail(itemId);
     };
@@ -1029,11 +1179,25 @@ export function renderUI(): string {
         const c = document.getElementById('searchCat').value;
         const sc = document.getElementById('searchSubcat').value;
         const maxPrice = document.getElementById('searchMaxPrice').value;
+        const radiusVal = document.getElementById('searchRadius').value;
 
         if (q) params.set('q', q);
         if (c) params.set('c', c);
         if (sc) params.set('sc', sc);
         if (maxPrice) params.set('maxPrice', maxPrice);
+
+        // If radius specified, fetch default location and pass lat/lng/radius
+        if (radiusVal) {
+          try {
+            const locRes = await fetch('/settings/location');
+            const locData = await locRes.json();
+            if (locData.locationLat && locData.locationLng) {
+              params.set('lat', String(locData.locationLat));
+              params.set('lng', String(locData.locationLng));
+              params.set('radius', radiusVal);
+            }
+          } catch {}
+        }
 
         const res = await fetch('/search?' + params.toString());
         const data = await res.json();
@@ -1086,6 +1250,10 @@ export function renderUI(): string {
                 '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + badges + '</div>' +
                 (priceStr ? '<div class="card-price">' + escapeHtml(priceStr) + '</div>' : '') +
                 (item.description ? '<div class="card-desc">' + escapeHtml(item.description) + '</div>' : '') +
+                (function() {
+                  const lp = [item.locationCity, item.locationState, item.locationZip].filter(Boolean);
+                  return lp.length > 0 ? '<div style="font-size:12px;color:#777E90;margin-top:4px;font-weight:500;">Near ' + escapeHtml(lp.join(', ')) + '</div>' : '';
+                })() +
                 '<div class="beacon-id">Beacon: ' + escapeHtml(peer.beaconId.slice(0, 16)) + '...</div>' +
                 (actionBtn ? '<div style="margin-top:10px;">' + actionBtn + '</div>' : '') +
               '</div></div>';
@@ -1165,6 +1333,10 @@ export function renderUI(): string {
       html += '<div class="card-meta" style="margin-bottom:12px;"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + catBadges + '</div>';
       if (item.description) {
         html += '<p style="font-size:15px;color:#353945;line-height:1.71;margin-bottom:16px;">' + escapeHtml(item.description) + '</p>';
+      }
+      const remoteLoc = [item.locationCity, item.locationState, item.locationZip].filter(Boolean);
+      if (remoteLoc.length > 0) {
+        html += '<p style="font-size:14px;color:#777E90;margin-bottom:8px;">Near ' + escapeHtml(remoteLoc.join(', ')) + '</p>';
       }
       html += '<div class="beacon-id" style="margin-top:8px;">Seller beacon: ' + escapeHtml(peer.beaconId) + '</div>';
       html += '</div>'; // end detail-left
@@ -1529,8 +1701,63 @@ export function renderUI(): string {
           document.getElementById('settingsApiKey').value = '';
           document.getElementById('settingsApiKey').placeholder = data.apiKey;
         }
+        // Load location settings
+        try {
+          const locRes = await fetch('/settings/location');
+          const loc = await locRes.json();
+          if (loc.locationAddress) document.getElementById('locAddress').value = loc.locationAddress;
+          if (loc.locationCity) document.getElementById('locCity').value = loc.locationCity;
+          if (loc.locationState) document.getElementById('locState').value = loc.locationState;
+          if (loc.locationZip) document.getElementById('locZip').value = loc.locationZip;
+          if (loc.locationCountry) document.getElementById('locCountry').value = loc.locationCountry;
+          if (loc.locationLat) document.getElementById('locLat').value = loc.locationLat;
+          if (loc.locationLng) document.getElementById('locLng').value = loc.locationLng;
+          document.getElementById('locScope').value = loc.defaultSellingScope || 'global';
+          document.getElementById('locRadius').value = loc.defaultSellingRadiusMiles || 250;
+        } catch {}
       } catch {}
     }
+
+    window.useMyLocation = function() {
+      if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          document.getElementById('locLat').value = pos.coords.latitude.toFixed(6);
+          document.getElementById('locLng').value = pos.coords.longitude.toFixed(6);
+        },
+        (err) => {
+          alert('Could not get location: ' + err.message);
+        }
+      );
+    };
+
+    window.saveLocation = async function() {
+      try {
+        const res = await fetch('/settings/location', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            locationAddress: document.getElementById('locAddress').value.trim() || null,
+            locationCity: document.getElementById('locCity').value.trim() || null,
+            locationState: document.getElementById('locState').value.trim() || null,
+            locationZip: document.getElementById('locZip').value.trim() || null,
+            locationCountry: document.getElementById('locCountry').value || 'US',
+            locationLat: document.getElementById('locLat').value ? parseFloat(document.getElementById('locLat').value) : null,
+            locationLng: document.getElementById('locLng').value ? parseFloat(document.getElementById('locLng').value) : null,
+            defaultSellingScope: document.getElementById('locScope').value,
+            defaultSellingRadiusMiles: parseInt(document.getElementById('locRadius').value) || 250,
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showMsg('locationMsg', 'Location saved!', true);
+      } catch (err) {
+        showMsg('locationMsg', err.message, false);
+      }
+    };
 
     window.saveApiKey = async function() {
       const input = document.getElementById('settingsApiKey');

@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { v4 as uuid } from 'uuid';
 import { getDb } from './schema';
-import type { Item, ItemCreate, ItemUpdate, ListingStatus, Offer, OfferCreate, OfferUpdate, ItemMedia, MediaType, Negotiation, NegotiationCreate, NegotiationStatus, NegotiationRole } from '../types';
+import type { Item, ItemCreate, ItemUpdate, ListingStatus, Offer, OfferCreate, OfferUpdate, ItemMedia, MediaType, Negotiation, NegotiationCreate, NegotiationStatus, NegotiationRole, BeaconSettings, SellingScope } from '../types';
 
 function rowToItem(row: Record<string, unknown>): Item {
   return {
@@ -16,6 +16,15 @@ function rowToItem(row: Record<string, unknown>): Item {
     quantity: (row.quantity as number) || 1,
     reffoSynced: !!(row.reffo_synced as number),
     reffoRefId: row.reffo_ref_id as string | undefined,
+    locationLat: row.location_lat as number | undefined,
+    locationLng: row.location_lng as number | undefined,
+    locationAddress: row.location_address as string | undefined,
+    locationCity: row.location_city as string | undefined,
+    locationState: row.location_state as string | undefined,
+    locationZip: row.location_zip as string | undefined,
+    locationCountry: row.location_country as string | undefined,
+    sellingScope: (row.selling_scope as SellingScope) || undefined,
+    sellingRadiusMiles: row.selling_radius_miles as number | undefined,
     beaconId: row.beacon_id as string,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
@@ -71,10 +80,42 @@ export class ItemQueries {
   create(data: ItemCreate, beaconId: string): Item {
     const id = uuid();
     const now = new Date().toISOString();
+
+    // Apply default location from settings if not provided
+    let locLat = data.locationLat ?? null;
+    let locLng = data.locationLng ?? null;
+    let locAddress = data.locationAddress ?? null;
+    let locCity = data.locationCity ?? null;
+    let locState = data.locationState ?? null;
+    let locZip = data.locationZip ?? null;
+    let locCountry = data.locationCountry ?? null;
+    let scope = data.sellingScope ?? null;
+    let radiusMiles = data.sellingRadiusMiles ?? null;
+
+    if (locLat == null && locLng == null) {
+      const settings = new SettingsQueries(this.db).get();
+      if (settings) {
+        locLat = settings.locationLat ?? null;
+        locLng = settings.locationLng ?? null;
+        locAddress = settings.locationAddress ?? null;
+        locCity = locCity ?? settings.locationCity ?? null;
+        locState = locState ?? settings.locationState ?? null;
+        locZip = locZip ?? settings.locationZip ?? null;
+        locCountry = locCountry ?? settings.locationCountry ?? null;
+        scope = scope ?? settings.defaultSellingScope;
+        radiusMiles = radiusMiles ?? settings.defaultSellingRadiusMiles;
+      }
+    }
+
     this.db.prepare(`
-      INSERT INTO items (id, name, description, category, subcategory, image, sku, listing_status, quantity, beacon_id, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(id, data.name, data.description || '', data.category || '', data.subcategory || '', data.image || null, data.sku || null, data.listingStatus || 'private', data.quantity || 1, beaconId, now, now);
+      INSERT INTO items (id, name, description, category, subcategory, image, sku, listing_status, quantity,
+        location_lat, location_lng, location_address, location_city, location_state, location_zip, location_country,
+        selling_scope, selling_radius_miles, beacon_id, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(id, data.name, data.description || '', data.category || '', data.subcategory || '', data.image || null, data.sku || null,
+      data.listingStatus || 'private', data.quantity || 1,
+      locLat, locLng, locAddress, locCity, locState, locZip, locCountry,
+      scope || 'global', radiusMiles, beaconId, now, now);
     return this.get(id)!;
   }
 
@@ -93,6 +134,15 @@ export class ItemQueries {
     if (data.sku !== undefined) { fields.push('sku = ?'); values.push(data.sku); }
     if (data.listingStatus !== undefined) { fields.push('listing_status = ?'); values.push(data.listingStatus); }
     if (data.quantity !== undefined) { fields.push('quantity = ?'); values.push(data.quantity); }
+    if (data.locationLat !== undefined) { fields.push('location_lat = ?'); values.push(data.locationLat); }
+    if (data.locationLng !== undefined) { fields.push('location_lng = ?'); values.push(data.locationLng); }
+    if (data.locationAddress !== undefined) { fields.push('location_address = ?'); values.push(data.locationAddress); }
+    if (data.locationCity !== undefined) { fields.push('location_city = ?'); values.push(data.locationCity); }
+    if (data.locationState !== undefined) { fields.push('location_state = ?'); values.push(data.locationState); }
+    if (data.locationZip !== undefined) { fields.push('location_zip = ?'); values.push(data.locationZip); }
+    if (data.locationCountry !== undefined) { fields.push('location_country = ?'); values.push(data.locationCountry); }
+    if (data.sellingScope !== undefined) { fields.push('selling_scope = ?'); values.push(data.sellingScope); }
+    if (data.sellingRadiusMiles !== undefined) { fields.push('selling_radius_miles = ?'); values.push(data.sellingRadiusMiles); }
 
     if (fields.length === 0) return existing;
 
@@ -396,5 +446,65 @@ export class NegotiationQueries {
   countPending(): number {
     const row = this.db.prepare("SELECT COUNT(*) as cnt FROM negotiations WHERE status = 'pending' AND role = 'seller'").get() as { cnt: number };
     return row.cnt;
+  }
+}
+
+function rowToSettings(row: Record<string, unknown>): BeaconSettings {
+  return {
+    id: row.id as string,
+    locationLat: row.location_lat as number | undefined,
+    locationLng: row.location_lng as number | undefined,
+    locationAddress: row.location_address as string | undefined,
+    locationCity: row.location_city as string | undefined,
+    locationState: row.location_state as string | undefined,
+    locationZip: row.location_zip as string | undefined,
+    locationCountry: row.location_country as string | undefined,
+    defaultSellingScope: (row.default_selling_scope as SellingScope) || 'global',
+    defaultSellingRadiusMiles: (row.default_selling_radius_miles as number) || 250,
+  };
+}
+
+export class SettingsQueries {
+  private db: Database.Database;
+
+  constructor(db?: Database.Database) {
+    this.db = db || getDb();
+  }
+
+  get(): BeaconSettings | undefined {
+    const row = this.db.prepare("SELECT * FROM beacon_settings WHERE id = 'default'").get();
+    return row ? rowToSettings(row as Record<string, unknown>) : undefined;
+  }
+
+  upsert(data: Partial<Omit<BeaconSettings, 'id'>>): BeaconSettings {
+    const existing = this.get();
+    if (existing) {
+      const fields: string[] = [];
+      const values: unknown[] = [];
+      if (data.locationLat !== undefined) { fields.push('location_lat = ?'); values.push(data.locationLat); }
+      if (data.locationLng !== undefined) { fields.push('location_lng = ?'); values.push(data.locationLng); }
+      if (data.locationAddress !== undefined) { fields.push('location_address = ?'); values.push(data.locationAddress); }
+      if (data.locationCity !== undefined) { fields.push('location_city = ?'); values.push(data.locationCity); }
+      if (data.locationState !== undefined) { fields.push('location_state = ?'); values.push(data.locationState); }
+      if (data.locationZip !== undefined) { fields.push('location_zip = ?'); values.push(data.locationZip); }
+      if (data.locationCountry !== undefined) { fields.push('location_country = ?'); values.push(data.locationCountry); }
+      if (data.defaultSellingScope !== undefined) { fields.push('default_selling_scope = ?'); values.push(data.defaultSellingScope); }
+      if (data.defaultSellingRadiusMiles !== undefined) { fields.push('default_selling_radius_miles = ?'); values.push(data.defaultSellingRadiusMiles); }
+      if (fields.length > 0) {
+        fields.push("updated_at = datetime('now')");
+        values.push('default');
+        this.db.prepare(`UPDATE beacon_settings SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+      }
+    } else {
+      this.db.prepare(`
+        INSERT INTO beacon_settings (id, location_lat, location_lng, location_address, location_city, location_state, location_zip, location_country, default_selling_scope, default_selling_radius_miles)
+        VALUES ('default', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        data.locationLat ?? null, data.locationLng ?? null, data.locationAddress ?? null,
+        data.locationCity ?? null, data.locationState ?? null, data.locationZip ?? null,
+        data.locationCountry ?? 'US', data.defaultSellingScope ?? 'global', data.defaultSellingRadiusMiles ?? 250
+      );
+    }
+    return this.get()!;
   }
 }

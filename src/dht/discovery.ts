@@ -3,6 +3,7 @@ import b4a from 'b4a';
 import crypto from 'crypto';
 import { ItemQueries, OfferQueries, MediaQueries, NegotiationQueries } from '../db';
 import type { PeerMessage, QueryPayload, AnnouncePayload, ProposalPayload, ProposalResponsePayload } from '../types';
+import { blurLocation, haversineDistanceMiles } from '../types';
 
 // All Reffo beacons join this topic to find each other
 const REFFO_TOPIC = crypto.createHash('sha256').update('reffo-beacon-v1').digest();
@@ -68,7 +69,17 @@ export class DhtDiscovery {
     const discoverableItemIds = new Set(discoverableItems.map(i => i.id));
 
     const payload: AnnouncePayload = {
-      items: discoverableItems.map(i => ({ id: i.id, name: i.name, category: i.category, subcategory: i.subcategory, listingStatus: i.listingStatus })),
+      items: discoverableItems.map(i => {
+        const blurred = (i.locationLat != null && i.locationLng != null)
+          ? blurLocation(i.locationLat, i.locationLng) : null;
+        return {
+          id: i.id, name: i.name, category: i.category, subcategory: i.subcategory, listingStatus: i.listingStatus,
+          locationLat: blurred?.lat, locationLng: blurred?.lng,
+          locationCity: i.locationCity, locationState: i.locationState,
+          locationZip: i.locationZip, locationCountry: i.locationCountry,
+          sellingScope: i.sellingScope, sellingRadiusMiles: i.sellingRadiusMiles,
+        };
+      }),
       offers: offers.list().filter(o => discoverableItemIds.has(o.itemId)).map(o => ({
         id: o.id, itemId: o.itemId, price: o.price,
         priceCurrency: o.priceCurrency, status: o.status,
@@ -124,6 +135,19 @@ export class DhtDiscovery {
       return itemOffers;
     });
 
+    // Geo-filter if query has lat/lng/radiusMiles
+    if (query.lat != null && query.lng != null && query.radiusMiles != null) {
+      results = results.filter(item => {
+        const scope = item.sellingScope || 'global';
+        if (scope === 'global') return true;
+        if (scope === 'national') return true;
+        if (item.locationLat == null || item.locationLng == null) return true; // no location = show everywhere
+        const dist = haversineDistanceMiles(query.lat!, query.lng!, item.locationLat, item.locationLng);
+        if (scope === 'range') return dist <= (item.sellingRadiusMiles || Infinity);
+        return dist <= query.radiusMiles!;
+      });
+    }
+
     // Include media metadata per item
     const mediaMap: Record<string, { id: string; filePath: string; mediaType: string }[]> = {};
     for (const item of results) {
@@ -133,10 +157,22 @@ export class DhtDiscovery {
       }
     }
 
+    // Blur location in response — never send exact lat/lng or address
+    const blurredResults = results.map(item => {
+      const blurred = (item.locationLat != null && item.locationLng != null)
+        ? blurLocation(item.locationLat, item.locationLng) : null;
+      return {
+        ...item,
+        locationLat: blurred?.lat,
+        locationLng: blurred?.lng,
+        locationAddress: undefined, // never share street address
+      };
+    });
+
     const response: PeerMessage = {
       type: 'response',
       beaconId: this.beaconId,
-      payload: { items: results, offers: matchingOffers, media: mediaMap, httpPort: this.httpPort },
+      payload: { items: blurredResults, offers: matchingOffers, media: mediaMap, httpPort: this.httpPort },
     };
 
     stream.write(b4a.from(JSON.stringify(response)));

@@ -13,7 +13,7 @@ const VIDEO_MIMES = ['video/mp4', 'video/webm', 'video/quicktime'];
 const ALL_MIMES = [...PHOTO_MIMES, ...VIDEO_MIMES];
 
 const MAX_PHOTO_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
 const MAX_PHOTOS = 4;
 const MAX_FILES = 5; // 4 photos + 1 video
 

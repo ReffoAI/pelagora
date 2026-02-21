@@ -40,7 +40,9 @@ router.get('/:id', (req: Request, res: Response) => {
 // POST /items
 router.post('/', (req: Request, res: Response) => {
   const items = new ItemQueries();
-  const { name, description, category, subcategory, image, sku, listingStatus, quantity } = req.body;
+  const { name, description, category, subcategory, image, sku, listingStatus, quantity,
+    locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry,
+    sellingScope, sellingRadiusMiles } = req.body;
 
   if (!name || typeof name !== 'string') {
     return res.status(400).json({ error: 'name is required' });
@@ -63,14 +65,22 @@ router.post('/', (req: Request, res: Response) => {
   }
 
   const beaconId = req.app.get('beaconId') as string;
-  const item = items.create({ name, description, category, subcategory, image, sku, listingStatus, quantity }, beaconId);
+  const item = items.create({
+    name, description, category, subcategory, image, sku, listingStatus, quantity,
+    locationLat: locationLat != null ? Number(locationLat) : undefined,
+    locationLng: locationLng != null ? Number(locationLng) : undefined,
+    locationAddress, locationCity, locationState, locationZip, locationCountry,
+    sellingScope, sellingRadiusMiles: sellingRadiusMiles != null ? Number(sellingRadiusMiles) : undefined,
+  }, beaconId);
   res.status(201).json(item);
 });
 
 // PATCH /items/:id
 router.patch('/:id', (req: Request, res: Response) => {
   const items = new ItemQueries();
-  const { name, description, category, subcategory, image, sku, listingStatus, quantity } = req.body;
+  const { name, description, category, subcategory, image, sku, listingStatus, quantity,
+    locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry,
+    sellingScope, sellingRadiusMiles } = req.body;
 
   if (listingStatus !== undefined && !VALID_LISTING_STATUSES.includes(listingStatus)) {
     return res.status(400).json({ error: `Invalid listingStatus: ${listingStatus}. Must be one of: ${VALID_LISTING_STATUSES.join(', ')}` });
@@ -88,7 +98,13 @@ router.patch('/:id', (req: Request, res: Response) => {
     return res.status(400).json({ error: `Invalid subcategory: ${subcategory} for category: ${category}` });
   }
 
-  const updated = items.update(String(req.params.id), { name, description, category, subcategory, image, sku, listingStatus, quantity });
+  const updated = items.update(String(req.params.id), {
+    name, description, category, subcategory, image, sku, listingStatus, quantity,
+    locationLat: locationLat != null ? Number(locationLat) : locationLat,
+    locationLng: locationLng != null ? Number(locationLng) : locationLng,
+    locationAddress, locationCity, locationState, locationZip, locationCountry,
+    sellingScope, sellingRadiusMiles: sellingRadiusMiles != null ? Number(sellingRadiusMiles) : sellingRadiusMiles,
+  });
   if (!updated) return res.status(404).json({ error: 'Item not found' });
 
   // If item is synced to Reffo.ai, push update (fire-and-forget)

@@ -35,5 +35,12 @@ export function createApp(): express.Express {
   app.use('/negotiations', negotiationsRouter);
   app.use('/settings', settingsRouter);
 
+  // Global error handler — catches multer errors, etc., and returns JSON instead of HTML
+  app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    console.error('[API] Error:', err.message);
+    const status = (err as any).status || (err as any).statusCode || 500;
+    res.status(status).json({ error: err.message });
+  });
+
   return app;
 }

@@ -6,6 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Item, Offer, ItemMedia } from '../types';
+import { blurLocation } from '../types';
 
 const DEFAULT_BASE_URL = 'https://reffo.ai';
 
@@ -77,6 +78,8 @@ export class ReffoClient {
   ): Promise<{ ok: boolean; refId?: string; error?: string }> {
     try {
       const activeOffer = offers.find(o => o.status === 'active');
+      const blurred = (item.locationLat != null && item.locationLng != null)
+        ? blurLocation(item.locationLat, item.locationLng) : null;
       const res = await this.request('/items', {
         method: 'POST',
         body: JSON.stringify({
@@ -90,6 +93,14 @@ export class ReffoClient {
           quantity: item.quantity,
           price: activeOffer?.price,
           priceCurrency: activeOffer?.priceCurrency || 'USD',
+          locationLat: blurred?.lat,
+          locationLng: blurred?.lng,
+          locationCity: item.locationCity,
+          locationState: item.locationState,
+          locationZip: item.locationZip,
+          locationCountry: item.locationCountry,
+          sellingScope: item.sellingScope,
+          sellingRadiusMiles: item.sellingRadiusMiles,
         }),
       });
       const data = await res.json() as Record<string, unknown>;
