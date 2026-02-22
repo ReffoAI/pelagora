@@ -23,10 +23,67 @@ export function renderUI(): string {
     @keyframes fadeIn { 0% { opacity: 0; transform: translateY(3px); } 100% { opacity: 1; transform: translateY(0); } }
 
     /* Header */
-    .header { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-    h1 { font-size: 1.7rem; font-weight: 700; color: #141416; }
+    h1 { font-size: 1.25rem; font-weight: 700; color: #141416; margin: 0; }
     .bolt { display: inline-block; filter: drop-shadow(0 0 8px rgba(234,82,111,0.4)); }
-    .subtitle { color: #777E90; font-size: 14px; line-height: 1.71; margin-bottom: 28px; }
+
+    /* App Header — sticky bar */
+    .app-header { position: sticky; top: 0; z-index: 100; background: #FCFCFD; border-bottom: 1px solid #E6E8EC; padding: 0 24px; }
+    .app-header-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
+    .app-header-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; flex-shrink: 0; }
+    .app-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .header-settings-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #E6E8EC; background: #FCFCFD; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; position: relative; color: #777E90; }
+    .header-settings-btn:hover { border-color: #141416; color: #141416; }
+    .header-settings-btn .notif-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: #EC526F; display: none; }
+
+    /* Avatar dropdown */
+    .header-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #E6E8EC; background: #FCFCFD; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s; overflow: hidden; font-size: 14px; font-weight: 700; color: #EC526F; font-family: 'Poppins', sans-serif; }
+    .header-avatar:hover { border-color: #EC526F; }
+    .header-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-dropdown { position: absolute; right: 0; top: 100%; margin-top: 8px; width: 220px; background: #FCFCFD; border: 1px solid #E6E8EC; border-radius: 16px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); padding: 8px 0; z-index: 200; display: none; }
+    .avatar-dropdown.open { display: block; }
+    .avatar-dropdown .dd-item { display: block; width: 100%; padding: 10px 20px; font-size: 14px; font-weight: 500; color: #23262F; cursor: pointer; transition: background 0.15s; border: none; background: none; text-align: left; font-family: 'Poppins', sans-serif; }
+    .avatar-dropdown .dd-item:hover { background: #F4F5F6; }
+    .avatar-dropdown .dd-divider { height: 1px; background: #E6E8EC; margin: 4px 0; }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .app-header-inner { gap: 8px; }
+      .app-header-logo h1 { display: none; }
+      .search-filter-segment { padding: 0 10px; }
+    }
+
+    /* List Item Modal */
+    .list-item-modal .modal { width: 640px; max-height: 90vh; overflow-y: auto; }
+
+    /* Search Filter Bar — 3 segment pill (matching webapp) */
+    .search-filter-bar { display: flex; align-items: center; background: #FCFCFD; border-radius: 48px; box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px #E6E8EC; overflow: hidden; height: 56px; padding-right: 8px; max-width: 660px; margin: 0 auto; }
+    .search-filter-segment { display: flex; align-items: center; gap: 8px; padding: 0 16px; height: 100%; white-space: nowrap; }
+    .search-filter-segment svg { flex-shrink: 0; color: #777E90; }
+    .search-filter-bar input { border: none; outline: none; background: transparent; height: 100%; font-size: 14px; font-weight: 500; font-family: 'Poppins', sans-serif; color: #23262F; flex: 1; min-width: 0; padding: 0; margin: 0; }
+    .search-filter-bar input::placeholder { color: #777E90; font-weight: 400; }
+    .sfb-divider { width: 1px; height: 24px; background: #E6E8EC; flex-shrink: 0; }
+    .search-filter-bar select { border: none; outline: none; background: transparent; height: 100%; font-size: 14px; font-weight: 500; font-family: 'Poppins', sans-serif; color: #23262F; cursor: pointer; -webkit-appearance: none; appearance: none; padding: 0; margin: 0; }
+    .sfb-search-btn { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: #EC526F; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: 4px; transition: background 0.2s; }
+    .sfb-search-btn:hover { background: #DD436C; }
+    @media (max-width: 768px) { .search-filter-segment { padding: 0 10px; } }
+
+    /* Layout toggle */
+    .layout-toggle { display: flex; gap: 0; border: 1px solid #E6E8EC; border-radius: 8px; overflow: hidden; }
+    .layout-toggle button { width: 36px; height: 32px; border: none; background: #FCFCFD; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #777E90; transition: all 0.15s; }
+    .layout-toggle button.active { background: #141416; color: #FCFCFD; }
+    .layout-toggle button:hover:not(.active) { background: #F4F5F6; }
+
+    /* Row layout */
+    .rows { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+    .item-row { display: flex; align-items: center; gap: 16px; background: #FCFCFD; border-radius: 12px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(15,15,15,0.08); cursor: pointer; transition: all 0.15s; }
+    .item-row:hover { box-shadow: 0 4px 12px rgba(15,15,15,0.12); transform: translateY(-1px); }
+    .item-row .row-img { width: 48px; height: 48px; border-radius: 8px; overflow: hidden; background: #F4F5F6; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .item-row .row-img img { width: 100%; height: 100%; object-fit: cover; }
+    .item-row .row-img .placeholder { color: #E6E8EC; font-size: 1.2rem; }
+    .item-row .row-name { font-size: 14px; font-weight: 600; color: #141416; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .item-row .row-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .item-row .row-price { font-size: 14px; font-weight: 700; color: #1a8a42; white-space: nowrap; }
+    .item-row .row-qty { font-size: 12px; color: #777E90; white-space: nowrap; }
 
     /* Sections — Card.module.sass shadow depth */
     section { background: #FCFCFD; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); }
@@ -93,18 +150,7 @@ export function renderUI(): string {
     .tab.active { color: #EC526F; border-bottom-color: #EC526F; }
     .tab:hover { color: #EC526F; }
 
-    /* Nav tabs — Header.module.sass style */
-    .nav-tabs { display: flex; gap: 0; margin-bottom: 24px; background: #FCFCFD; border-radius: 16px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); overflow: hidden; }
-    .nav-tab { flex: 1; padding: 16px; text-align: center; cursor: pointer; font-size: 14px; font-weight: 700; color: #777E90; transition: all 0.2s; border-bottom: 3px solid transparent; display: flex; align-items: center; justify-content: center; gap: 8px; user-select: none; }
-    .nav-tab.active { color: #EC526F; border-bottom-color: #EC526F; background: rgba(236,82,111,0.03); }
-    .nav-tab:hover { color: #141416; }
-    .nav-tab .nav-icon { display: flex; align-items: center; }
-    .nav-tab .nav-count { display: inline-block; background: #EC526F; color: #FCFCFD; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 6px; }
-
-    /* Search bar — SearchBar.module.sass */
-    .search-bar { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
-    .search-bar > div { flex: 1; min-width: 140px; }
-    .search-bar .btn-primary { margin-bottom: 14px; align-self: flex-end; }
+    /* (nav-tabs removed — navigation is in app-header) */
 
     /* Detail view — ImageCarousel.module.sass: flex 3/1, 16px radius */
     .detail-back { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: #EC526F; cursor: pointer; margin-bottom: 16px; font-weight: 600; transition: color 0.2s; }
@@ -226,37 +272,66 @@ export function renderUI(): string {
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <svg class="bolt" width="32" height="56" viewBox="0 0 40 71" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <g clip-path="url(#clip0_bolt)">
-          <path d="M38.2716 3.78854C38.2716 3.78854 38.7667 2.8058 38.3666 2.04318C37.9665 1.28055 36.9939 1.38634 36.9939 1.38634H13.1158C13.1158 1.38634 12.4831 1.35329 12.0879 1.72511C11.6928 2.09694 11.5333 2.87255 11.5333 2.87255L2.17826 33.9717C2.17826 33.9717 1.69159 35.1465 2.10971 36.0513C2.52784 36.9562 3.51555 36.8775 3.51555 36.8775H12.0048L2.50338 68.2648C2.50338 68.2648 1.778 69.9001 2.94329 70.7193C4.10858 71.5384 5.31358 70.3035 5.31358 70.3035L39.6806 25.9846C39.6806 25.9846 40.2489 25.3305 39.869 24.3183C39.489 23.3061 38.6423 23.4047 38.6423 23.4047H28.8156L38.2716 3.78884V3.78854Z" fill="black"/>
-          <path d="M38.2717 3.78859C38.2717 3.78859 38.7667 2.80584 38.3666 2.04322C37.9666 1.2806 35.8421 0.132507 35.8421 0.132507L35.2449 0.599455L13.1159 1.38722C13.1159 1.38722 12.4831 1.35417 12.088 1.726C11.6928 2.09782 11.5333 2.87343 11.5333 2.87343L2.17837 33.9718C2.17837 33.9718 1.6917 35.1466 2.10982 36.0514C2.52795 36.9563 3.51566 36.8776 3.51566 36.8776H12.0048L2.79675 65.1328L1.43411 67.4081C1.43411 67.4081 0.508245 68.9521 0.915212 69.252C1.43797 69.6377 2.25309 70.2344 2.94304 70.7193C4.10863 71.5378 5.31333 70.3035 5.31333 70.3035L39.6805 25.9846C39.6805 25.9846 40.2488 25.3305 39.8689 24.3183C39.4889 23.3061 38.6421 23.4047 38.6421 23.4047H28.8154L38.2714 3.78889L38.2717 3.78859Z" fill="black"/>
-          <path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#EA526F"/>
-        </g>
-        <defs><clipPath id="clip0_bolt"><rect width="40" height="71" fill="white"/></clipPath></defs>
-      </svg>
-      <h1>Reffo Beacon</h1>
-    </div>
-    <p class="subtitle">Decentralized commerce &mdash; your node, your inventory</p>
+  <!-- App Header -->
+  <div class="app-header">
+    <div class="app-header-inner">
+      <div class="app-header-logo" onclick="switchTab('items')">
+        <svg class="bolt" width="24" height="42" viewBox="0 0 40 71" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g clip-path="url(#clip0_bolt)">
+            <path d="M38.27 3.79s.5-.98.1-1.75c-.4-.76-1.37-.66-1.37-.66H13.12s-.63-.03-1.03.34c-.4.37-.55 1.15-.55 1.15L2.18 33.97s-.49 1.18-.07 2.08c.42.9 1.4.83 1.4.83h8.49l-9.5 31.39s-.73 1.63.43 2.45c1.17.82 2.37-.41 2.37-.41L39.68 25.98s.57-.65.19-1.67c-.38-1.01-1.23-.91-1.23-.91H28.82l9.45-19.61z" fill="black"/>
+            <path d="M36.33 2.41s.5-.98.1-1.75C36.03-.1 35.05.01 35.05.01H11.18s-.63-.03-1.03.34c-.4.37-.55 1.15-.55 1.15L.24 32.59s-.49 1.18-.07 2.08c.42.9 1.4.83 1.4.83h8.49L.56 66.88s-.73 1.64.44 2.45c1.16.82 2.37-.42 2.37-.42L37.74 24.6s.57-.65.19-1.67c-.38-1.01-1.23-.91-1.23-.91H26.88l9.45-19.61z" fill="#EA526F"/>
+          </g>
+          <defs><clipPath id="clip0_bolt"><rect width="40" height="71" fill="white"/></clipPath></defs>
+        </svg>
+        <h1>Reffo Beacon</h1>
+      </div>
 
-    <!-- Nav Tabs -->
-    <div class="nav-tabs">
-      <div class="nav-tab active" data-tab="items" onclick="switchTab('items')">
-        <span class="nav-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 0C2.86739 0 2.74021 0.0526784 2.64645 0.146447C2.55268 0.240215 2.5 0.367392 2.5 0.5V2.5H0.5C0.367392 2.5 0.240215 2.55268 0.146447 2.64645C0.0526784 2.74021 0 2.86739 0 3C0 3.13261 0.0526784 3.25979 0.146447 3.35355C0.240215 3.44732 0.367392 3.5 0.5 3.5H2.5V6.5H0.5C0.367392 6.5 0.240215 6.55268 0.146447 6.64645C0.0526784 6.74021 0 6.86739 0 7C0 7.13261 0.0526784 7.25979 0.146447 7.35355C0.240215 7.44732 0.367392 7.5 0.5 7.5H2.5V9.5C2.5 9.63261 2.55268 9.75979 2.64645 9.85355C2.74021 9.94732 2.86739 10 3 10C3.13261 10 3.25979 9.94732 3.35355 9.85355C3.44732 9.75979 3.5 9.63261 3.5 9.5V7.5H6.5V9.5C6.5 9.63261 6.55268 9.75979 6.64645 9.85355C6.74021 9.94732 6.86739 10 7 10C7.13261 10 7.25979 9.94732 7.35355 9.85355C7.44732 9.75979 7.5 9.63261 7.5 9.5V7.5H9.5C9.63261 7.5 9.75979 7.44732 9.85355 7.35355C9.94732 7.25979 10 7.13261 10 7C10 6.86739 9.94732 6.74021 9.85355 6.64645C9.75979 6.55268 9.63261 6.5 9.5 6.5H7.5V3.5H9.5C9.63261 3.5 9.75979 3.44732 9.85355 3.35355C9.94732 3.25979 10 3.13261 10 3C10 2.86739 9.94732 2.74021 9.85355 2.64645C9.75979 2.55268 9.63261 2.5 9.5 2.5H7.5V0.5C7.5 0.367392 7.44732 0.240215 7.35355 0.146447C7.25979 0.0526784 7.13261 0 7 0C6.86739 0 6.74021 0.0526784 6.64645 0.146447C6.55268 0.240215 6.5 0.367392 6.5 0.5V2.5H3.5V0.5C3.5 0.367392 3.44732 0.240215 3.35355 0.146447C3.25979 0.0526784 3.13261 0 3 0ZM6.5 6.5V3.5H3.5V6.5H6.5Z" fill="currentColor"/></svg></span>
-        My Items
+      <!-- Header actions: bell + avatar -->
+      <div class="app-header-actions">
+        <button class="header-settings-btn" onclick="switchTab('negotiations')" title="Negotiations">
+          <svg width="18" height="18" viewBox="0 0 18 19" fill="none"><path d="M17.97 15.02c0 .24-.09.46-.26.63-.16.17-.39.26-.62.26H.85c-.23-.01-.45-.1-.61-.27a.87.87 0 010-1.23c.16-.16.38-.26.61-.27h.02V7.98c.02-2.13.88-4.17 2.4-5.67C4.79.82 6.84-.02 8.97 0c2.13-.02 4.18.82 5.7 2.31 1.52 1.5 2.38 3.5 2.4 5.67v6.16h.02c.23 0 .46.09.62.26.17.17.26.39.26.62zM2.67 14.14h12.6V7.98c0-1.67-.66-3.27-1.85-4.45-1.18-1.18-2.78-1.85-4.45-1.85s-3.27.67-4.45 1.85C3.33 4.71 2.67 6.31 2.67 7.98v6.16zm4.28 3.62c-.25-.5.22-.97.77-.97h2.5c.55 0 1.02.47.77.97-.11.22-.26.42-.43.6-.43.41-1 .65-1.6.65-.59 0-1.16-.24-1.59-.65-.18-.17-.32-.38-.43-.6z" fill="currentColor"/></svg>
+          <span class="notif-dot" id="headerNotifDot"></span>
+        </button>
+        <div style="position:relative;" id="avatarContainer">
+          <button class="header-avatar" onclick="toggleAvatarDropdown()" title="Menu" id="avatarBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </button>
+          <div class="avatar-dropdown" id="avatarDropdown">
+            <button class="dd-item" onclick="closeAvatarDropdown(); switchTab('items');">My Items</button>
+            <button class="dd-item" onclick="closeAvatarDropdown(); switchTab('negotiations');">Negotiations</button>
+            <div class="dd-divider"></div>
+            <button class="dd-item" onclick="closeAvatarDropdown(); switchTab('settings');">Settings</button>
+          </div>
+        </div>
       </div>
-      <div class="nav-tab" data-tab="search" onclick="switchTab('search')">
-        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 17 17" fill="none"><path d="M15.067 15.067L11.967 11.96M13.686 7.80798C13.6862 8.97015 13.3418 10.1063 12.6963 11.0727C12.0508 12.0391 11.1332 12.7924 10.0596 13.2373C8.98597 13.6822 7.80452 13.7988 6.66465 13.5723C5.52478 13.3457 4.47768 12.7863 3.65577 11.9647C2.83386 11.143 2.27405 10.0961 2.04712 8.95632C1.8202 7.81652 1.93637 6.63503 2.38092 5.56126C2.82548 4.48748 3.57847 3.56965 4.54466 2.92382C5.51086 2.278 6.64686 1.93318 7.80902 1.93298C9.36744 1.93298 10.862 2.55206 11.964 3.65402C13.0659 4.75599 13.685 6.25057 13.685 7.80898L13.686 7.80798Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
-        Search Network
-      </div>
-      <div class="nav-tab" data-tab="negotiations" onclick="switchTab('negotiations')">
-        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 18 19" fill="none"><path d="M17.9703 15.0232C17.9703 15.2577 17.8771 15.4825 17.7114 15.6483C17.5456 15.8141 17.3207 15.9072 17.0863 15.9072H0.854272C0.625098 15.8995 0.407887 15.803 0.248494 15.6382C0.0891013 15.4734 0 15.253 0 15.0237C0 14.7944 0.0891013 14.5741 0.248494 14.4092C0.407887 14.2444 0.625098 14.1479 0.854272 14.1402H0.870272V7.98122C0.886126 5.84877 1.74841 3.80995 3.26743 2.31324C4.78646 0.816524 6.83782 -0.0154876 8.97027 0.000218389C11.1027 -0.0154876 13.1541 0.816524 14.6731 2.31324C16.1921 3.80995 17.0544 5.84877 17.0703 7.98122V14.1402H17.0863C17.3205 14.1402 17.5452 14.2332 17.711 14.3988C17.8768 14.5643 17.97 14.7889 17.9703 15.0232ZM2.67027 14.1392H15.2703V7.98122C15.2703 6.31035 14.6065 4.70792 13.425 3.52645C12.2436 2.34497 10.6411 1.68122 8.97027 1.68122C7.29941 1.68122 5.69698 2.34497 4.5155 3.52645C3.33402 4.70792 2.67027 6.31035 2.67027 7.98122V14.1392ZM6.94627 17.7552C6.70127 17.2552 7.16827 16.7902 7.72027 16.7902H10.2203C10.7723 16.7902 11.2393 17.2602 10.9943 17.7552C10.8847 17.9781 10.7383 18.181 10.5613 18.3552C10.1357 18.7702 9.56472 19.0025 8.97027 19.0025C8.37582 19.0025 7.80489 18.7702 7.37927 18.3552C7.20232 18.1813 7.05594 17.9788 6.94627 17.7562V17.7552Z" fill="currentColor"/></svg></span>
-        Negotiations <span id="negCount" class="nav-count hidden">0</span>
-      </div>
-      <div class="nav-tab" data-tab="settings" onclick="switchTab('settings')">
-        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></span>
-        Settings
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Search Filter Bar -->
+    <div style="margin-bottom:24px;">
+      <div class="search-filter-bar" id="searchFilterBar">
+        <div class="search-filter-segment">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <select id="headerSearchSort">
+            <option value="newest">Newest First</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+          </select>
+        </div>
+        <span class="sfb-divider"></span>
+        <div class="search-filter-segment">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <select id="headerSearchCat"><option value="">All Categories</option></select>
+        </div>
+        <span class="sfb-divider"></span>
+        <div class="search-filter-segment" style="flex:1;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="headerSearchQ" placeholder="Search Item..." onkeydown="if(event.key==='Enter')executeHeaderSearch()">
+        </div>
+        <button class="sfb-search-btn" onclick="executeHeaderSearch()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </button>
       </div>
     </div>
 
@@ -268,116 +343,21 @@ export function renderUI(): string {
       </div>
 
       <div id="itemSubtabActive">
-      <!-- List an Item -->
       <section>
-        <h2>List an Item</h2>
-        <div id="listMsg"></div>
-        <form id="listForm">
-          <label for="itemName">Name *</label>
-          <input id="itemName" name="name" required placeholder="e.g. Fender Stratocaster">
-
-          <label for="itemDesc">Description</label>
-          <textarea id="itemDesc" name="description" placeholder="Condition, details..."></textarea>
-
-          <div class="row">
-            <div>
-              <label for="itemCat">Category</label>
-              <select id="itemCat" name="category"><option value="">Select...</option></select>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h2 style="margin:0;border:none;padding:0;">My Items</h2>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="layout-toggle">
+              <button id="layoutCardBtn" class="active" onclick="setItemLayout('card')" title="Card view">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              </button>
+              <button id="layoutRowBtn" onclick="setItemLayout('row')" title="Row view">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+              </button>
             </div>
-            <div>
-              <label for="itemSubcat">Subcategory</label>
-              <select id="itemSubcat" name="subcategory"><option value="">Select...</option></select>
-            </div>
+            <button class="btn-primary btn-sm" onclick="openListItemModal()">+ Add New Item</button>
           </div>
-
-          <div class="row">
-            <div>
-              <label for="itemListingStatus">Listing Status</label>
-              <select id="itemListingStatus" name="listingStatus">
-                <option value="private">Private</option>
-                <option value="for_sale">For Sale</option>
-                <option value="willing_to_sell">Willing to Sell</option>
-              </select>
-            </div>
-            <div>
-              <label for="itemQuantity">Quantity</label>
-              <input id="itemQuantity" name="quantity" type="number" min="1" step="1" value="1">
-            </div>
-          </div>
-
-          <div class="row">
-            <div>
-              <label for="itemPrice">Price</label>
-              <input id="itemPrice" name="price" type="number" min="0" step="0.01" placeholder="0.00">
-            </div>
-            <div>
-              <label for="itemCurrency">Currency</label>
-              <select id="itemCurrency" name="currency">
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-                <option value="CAD">CAD</option>
-                <option value="AUD">AUD</option>
-                <option value="JPY">JPY</option>
-              </select>
-            </div>
-          </div>
-
-          <label for="itemSku">SKU</label>
-          <input id="itemSku" name="sku" placeholder="Optional SKU or part number">
-
-          <details style="margin-bottom:14px;border:2px solid #E6E8EC;border-radius:12px;padding:14px;">
-            <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.02em;">Location Override</summary>
-            <p style="font-size:12px;color:#B1B5C3;margin:8px 0;">Leave blank to use your default location from Settings.</p>
-            <div class="row">
-              <div><label for="itemLocCity">City</label><input id="itemLocCity" placeholder="City"></div>
-              <div><label for="itemLocState">State</label><input id="itemLocState" placeholder="State"></div>
-              <div><label for="itemLocZip">Zip</label><input id="itemLocZip" placeholder="Zip"></div>
-            </div>
-            <div class="row">
-              <div><label for="itemLocLat">Latitude</label><input id="itemLocLat" type="number" step="any" placeholder="e.g. 28.54"></div>
-              <div><label for="itemLocLng">Longitude</label><input id="itemLocLng" type="number" step="any" placeholder="e.g. -81.38"></div>
-            </div>
-            <div class="row">
-              <div>
-                <label for="itemSellingScope">Selling Scope</label>
-                <select id="itemSellingScope">
-                  <option value="">Use default</option>
-                  <option value="global">Global</option>
-                  <option value="national">National</option>
-                  <option value="range">Range (miles)</option>
-                </select>
-              </div>
-              <div>
-                <label for="itemSellingRadius">Radius (miles)</label>
-                <input id="itemSellingRadius" type="number" min="1" placeholder="250">
-              </div>
-            </div>
-          </details>
-
-          <label>Photos (up to 4)</label>
-          <div class="upload-area" onclick="document.getElementById('itemPhotos').click()">
-            <div class="upload-icon">+</div>
-            <p>Click to upload photos</p>
-            <input type="file" id="itemPhotos" accept="image/*" multiple>
-          </div>
-          <div id="photoPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div>
-
-          <label>Video (optional, 1 max)</label>
-          <div class="upload-area" onclick="document.getElementById('itemVideo').click()">
-            <div class="upload-icon">+</div>
-            <p>Click to upload a video</p>
-            <input type="file" id="itemVideo" accept="video/*">
-          </div>
-          <div id="videoPreview" style="margin-bottom:12px;"></div>
-
-          <button type="submit" class="btn-primary">List Item</button>
-        </form>
-      </section>
-
-      <!-- My Items Grid -->
-      <section>
-        <h2>My Items</h2>
+        </div>
         <div id="myItems"><p class="empty">Loading...</p></div>
       </section>
       </div>
@@ -398,31 +378,8 @@ export function renderUI(): string {
     <!-- Search Tab -->
     <div id="tab-search" class="hidden">
       <section>
-        <h2>Search Network</h2>
-        <div class="search-bar">
-          <div>
-            <label for="searchQ">Search</label>
-            <input id="searchQ" placeholder="Keywords...">
-          </div>
-          <div>
-            <label for="searchCat">Category</label>
-            <select id="searchCat"><option value="">Any</option></select>
-          </div>
-          <div>
-            <label for="searchSubcat">Subcategory</label>
-            <select id="searchSubcat"><option value="">Any</option></select>
-          </div>
-          <div>
-            <label for="searchMaxPrice">Max Price</label>
-            <input id="searchMaxPrice" type="number" min="0" step="0.01" placeholder="No limit">
-          </div>
-          <div>
-            <label for="searchRadius">Within (miles)</label>
-            <input id="searchRadius" type="number" min="1" placeholder="Any distance">
-          </div>
-          <button id="searchBtn" class="btn-primary"><svg width="16" height="16" viewBox="0 0 17 17" fill="none"><path d="M15.067 15.067L11.967 11.96M13.686 7.80798C13.6862 8.97015 13.3418 10.1063 12.6963 11.0727C12.0508 12.0391 11.1332 12.7924 10.0596 13.2373C8.98597 13.6822 7.80452 13.7988 6.66465 13.5723C5.52478 13.3457 4.47768 12.7863 3.65577 11.9647C2.83386 11.143 2.27405 10.0961 2.04712 8.95632C1.8202 7.81652 1.93637 6.63503 2.38092 5.56126C2.82548 4.48748 3.57847 3.56965 4.54466 2.92382C5.51086 2.278 6.64686 1.93318 7.80902 1.93298C9.36744 1.93298 10.862 2.55206 11.964 3.65402C13.0659 4.75599 13.685 6.25057 13.685 7.80898L13.686 7.80798Z" stroke="white" stroke-width="2" stroke-linecap="round"/></svg> Search</button>
-        </div>
-        <div id="searchResults"><p class="empty">Enter a query and click Search</p></div>
+        <h2>Search Results</h2>
+        <div id="searchResults"><p class="empty">Use the search bar above to find items</p></div>
       </section>
     </div>
 
@@ -438,7 +395,6 @@ export function renderUI(): string {
         <div id="negOutgoing" class="hidden"></div>
       </section>
     </div>
-  </div>
 
     <!-- Settings Tab -->
     <div id="tab-settings" class="hidden">
@@ -527,6 +483,119 @@ export function renderUI(): string {
         </div>
       </section>
     </div>
+  </div>
+
+  <!-- List Item Modal -->
+  <div id="listItemModal" class="modal-overlay hidden list-item-modal">
+    <div class="modal">
+      <h3>List an Item</h3>
+      <div id="listMsg"></div>
+      <form id="listForm">
+        <label for="itemName">Name *</label>
+        <input id="itemName" name="name" required placeholder="e.g. Fender Stratocaster">
+
+        <label for="itemDesc">Description</label>
+        <textarea id="itemDesc" name="description" placeholder="Condition, details..."></textarea>
+
+        <div class="row">
+          <div>
+            <label for="itemCat">Category</label>
+            <select id="itemCat" name="category"><option value="">Select...</option></select>
+          </div>
+          <div>
+            <label for="itemSubcat">Subcategory</label>
+            <select id="itemSubcat" name="subcategory"><option value="">Select...</option></select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="itemListingStatus">Listing Status</label>
+            <select id="itemListingStatus" name="listingStatus">
+              <option value="private">Private</option>
+              <option value="for_sale">For Sale</option>
+              <option value="willing_to_sell">Willing to Sell</option>
+            </select>
+          </div>
+          <div>
+            <label for="itemQuantity">Quantity</label>
+            <input id="itemQuantity" name="quantity" type="number" min="1" step="1" value="1">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="itemPrice">Price</label>
+            <input id="itemPrice" name="price" type="number" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div>
+            <label for="itemCurrency">Currency</label>
+            <select id="itemCurrency" name="currency">
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+              <option value="CAD">CAD</option>
+              <option value="AUD">AUD</option>
+              <option value="JPY">JPY</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="itemSku">SKU</label>
+        <input id="itemSku" name="sku" placeholder="Optional SKU or part number">
+
+        <details style="margin-bottom:14px;border:2px solid #E6E8EC;border-radius:12px;padding:14px;">
+          <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.02em;">Location Override</summary>
+          <p style="font-size:12px;color:#B1B5C3;margin:8px 0;">Leave blank to use your default location from Settings.</p>
+          <div class="row">
+            <div><label for="itemLocCity">City</label><input id="itemLocCity" placeholder="City"></div>
+            <div><label for="itemLocState">State</label><input id="itemLocState" placeholder="State"></div>
+            <div><label for="itemLocZip">Zip</label><input id="itemLocZip" placeholder="Zip"></div>
+          </div>
+          <div class="row">
+            <div><label for="itemLocLat">Latitude</label><input id="itemLocLat" type="number" step="any" placeholder="e.g. 28.54"></div>
+            <div><label for="itemLocLng">Longitude</label><input id="itemLocLng" type="number" step="any" placeholder="e.g. -81.38"></div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="itemSellingScope">Selling Scope</label>
+              <select id="itemSellingScope">
+                <option value="">Use default</option>
+                <option value="global">Global</option>
+                <option value="national">National</option>
+                <option value="range">Range (miles)</option>
+              </select>
+            </div>
+            <div>
+              <label for="itemSellingRadius">Radius (miles)</label>
+              <input id="itemSellingRadius" type="number" min="1" placeholder="250">
+            </div>
+          </div>
+        </details>
+
+        <label>Photos (up to 4)</label>
+        <div class="upload-area" onclick="document.getElementById('itemPhotos').click()">
+          <div class="upload-icon">+</div>
+          <p>Click to upload photos</p>
+          <input type="file" id="itemPhotos" accept="image/*" multiple>
+        </div>
+        <div id="photoPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div>
+
+        <label>Video (optional, 1 max)</label>
+        <div class="upload-area" onclick="document.getElementById('itemVideo').click()">
+          <div class="upload-icon">+</div>
+          <p>Click to upload a video</p>
+          <input type="file" id="itemVideo" accept="video/*">
+        </div>
+        <div id="videoPreview" style="margin-bottom:12px;"></div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button type="button" class="btn-secondary" onclick="closeListItemModal()">Cancel</button>
+          <button type="submit" class="btn-primary">List Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Proposal Modal (buyer sending offer) -->
   <div id="proposalModal" class="modal-overlay hidden">
@@ -594,12 +663,14 @@ export function renderUI(): string {
 
     // ===== Tab switching =====
     function switchTab(tab) {
-      document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       document.getElementById('tab-items').classList.toggle('hidden', tab !== 'items');
       document.getElementById('tab-detail').classList.toggle('hidden', tab !== 'detail');
       document.getElementById('tab-search').classList.toggle('hidden', tab !== 'search');
       document.getElementById('tab-negotiations').classList.toggle('hidden', tab !== 'negotiations');
       document.getElementById('tab-settings').classList.toggle('hidden', tab !== 'settings');
+      // Show/hide search filter bar
+      var sfb = document.getElementById('searchFilterBar');
+      if (sfb) sfb.parentElement.style.display = (tab === 'items' || tab === 'search') ? '' : 'none';
       if (tab === 'negotiations') loadNegotiations();
       if (tab === 'items') loadMyItems();
       if (tab === 'settings') loadSettings();
@@ -715,9 +786,7 @@ export function renderUI(): string {
     populateCategories(document.getElementById('itemCat'), () =>
       populateSubcategories(document.getElementById('itemCat'), document.getElementById('itemSubcat'))
     );
-    populateCategories(document.getElementById('searchCat'), () =>
-      populateSubcategories(document.getElementById('searchCat'), document.getElementById('searchSubcat'))
-    );
+    populateCategories(document.getElementById('headerSearchCat'));
 
     // ===== Helpers =====
     function escapeHtml(s) {
@@ -751,29 +820,64 @@ export function renderUI(): string {
 
     let lastSearchResults = [];
 
-    // ===== File Preview =====
-    document.getElementById('itemPhotos').addEventListener('change', function() {
+    // ===== File Preview with Delete =====
+    let selectedPhotos = [];
+    let selectedVideo = null;
+
+    function renderPhotoPreview() {
       const preview = document.getElementById('photoPreview');
       preview.innerHTML = '';
-      const files = this.files;
-      for (let i = 0; i < Math.min(files.length, 4); i++) {
-        const url = URL.createObjectURL(files[i]);
+      selectedPhotos.forEach(function(file, idx) {
+        const url = URL.createObjectURL(file);
         const thumb = document.createElement('div');
-        thumb.style.cssText = 'width:72px;height:72px;border-radius:8px;overflow:hidden;background:#F4F5F6;flex-shrink:0;';
-        thumb.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;">';
+        thumb.className = 'media-thumb';
+        thumb.style.cssText = 'width:72px;height:72px;';
+        thumb.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;">' +
+          '<button class="del-btn" type="button" onclick="removePhoto(' + idx + ')" title="Remove">&times;</button>';
         preview.appendChild(thumb);
-      }
-    });
-    document.getElementById('itemVideo').addEventListener('change', function() {
+      });
+    }
+
+    function renderVideoPreview() {
       const preview = document.getElementById('videoPreview');
       preview.innerHTML = '';
-      if (this.files[0]) {
-        const url = URL.createObjectURL(this.files[0]);
+      if (selectedVideo) {
+        const url = URL.createObjectURL(selectedVideo);
         const thumb = document.createElement('div');
-        thumb.style.cssText = 'width:72px;height:72px;border-radius:8px;overflow:hidden;background:#F4F5F6;flex-shrink:0;';
-        thumb.innerHTML = '<video src="' + url + '" style="width:100%;height:100%;object-fit:cover;" muted></video>';
+        thumb.className = 'media-thumb';
+        thumb.style.cssText = 'width:72px;height:72px;';
+        thumb.innerHTML = '<video src="' + url + '" style="width:100%;height:100%;object-fit:cover;" muted></video>' +
+          '<button class="del-btn" type="button" onclick="removeVideo()" title="Remove">&times;</button>';
         preview.appendChild(thumb);
       }
+    }
+
+    window.removePhoto = function(idx) {
+      selectedPhotos.splice(idx, 1);
+      renderPhotoPreview();
+    };
+
+    window.removeVideo = function() {
+      selectedVideo = null;
+      document.getElementById('itemVideo').value = '';
+      renderVideoPreview();
+    };
+
+    document.getElementById('itemPhotos').addEventListener('change', function() {
+      var files = this.files;
+      for (var i = 0; i < files.length; i++) {
+        if (selectedPhotos.length < 4) selectedPhotos.push(files[i]);
+      }
+      this.value = '';
+      renderPhotoPreview();
+    });
+
+    document.getElementById('itemVideo').addEventListener('change', function() {
+      if (this.files[0]) {
+        selectedVideo = this.files[0];
+      }
+      this.value = '';
+      renderVideoPreview();
     });
 
     // ===== List Form =====
@@ -813,12 +917,10 @@ export function renderUI(): string {
         const item = await itemRes.json();
 
         // Upload photos and video separately so one failure doesn't kill the other
-        const photoFiles = document.getElementById('itemPhotos').files;
-        const videoFile = document.getElementById('itemVideo').files[0];
         const uploadErrors = [];
-        if (photoFiles.length > 0) {
+        if (selectedPhotos.length > 0) {
           const fd = new FormData();
-          for (let i = 0; i < Math.min(photoFiles.length, 4); i++) fd.append('files', photoFiles[i]);
+          for (let i = 0; i < Math.min(selectedPhotos.length, 4); i++) fd.append('files', selectedPhotos[i]);
           const photoRes = await fetch('/items/' + item.id + '/media', { method: 'POST', body: fd });
           if (!photoRes.ok) {
             let errMsg = 'Photo upload failed';
@@ -826,9 +928,9 @@ export function renderUI(): string {
             uploadErrors.push(errMsg);
           }
         }
-        if (videoFile) {
+        if (selectedVideo) {
           const fd = new FormData();
-          fd.append('files', videoFile);
+          fd.append('files', selectedVideo);
           const videoRes = await fetch('/items/' + item.id + '/media', { method: 'POST', body: fd });
           if (!videoRes.ok) {
             let errMsg = 'Video upload failed';
@@ -851,8 +953,11 @@ export function renderUI(): string {
         e.target.reset();
         document.getElementById('itemQuantity').value = '1';
         document.getElementById('itemSubcat').innerHTML = '<option value="">Select...</option>';
+        selectedPhotos = [];
+        selectedVideo = null;
         document.getElementById('photoPreview').innerHTML = '';
         document.getElementById('videoPreview').innerHTML = '';
+        closeListItemModal();
         loadMyItems();
       } catch (err) {
         showMsg('listMsg', err.message, false);
@@ -870,7 +975,7 @@ export function renderUI(): string {
         const offers = await offersRes.json();
 
         if (items.length === 0) {
-          container.innerHTML = '<p class="empty">No items yet. List your first item above!</p>';
+          container.innerHTML = '<p class="empty">No items yet. Click "+ Add New Item" to list your first item!</p>';
           return;
         }
 
@@ -884,33 +989,61 @@ export function renderUI(): string {
           mediaMap[item.id] = await mRes.json();
         }));
 
-        container.innerHTML = '<div class="cards">' + items.map(item => {
-          const itemOffers = offerMap[item.id] || [];
-          const activeOffer = itemOffers.find(o => o.status === 'active');
-          const priceStr = activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
-          const photos = (mediaMap[item.id] || []).filter(m => m.mediaType === 'photo');
-          const firstPhoto = photos[0];
-          const catBadges = [item.category, item.subcategory].filter(Boolean).map(b =>
-            '<span class="badge badge-cat">' + escapeHtml(b) + '</span>'
-          ).join('');
-          const statusClass = statusBadgeClass[item.listingStatus] || 'badge-private';
-          const statusLabel = statusLabels[item.listingStatus] || 'Private';
+        if (itemLayout === 'row') {
+          container.innerHTML = '<div class="rows">' + items.map(item => {
+            const itemOffers = offerMap[item.id] || [];
+            const activeOffer = itemOffers.find(o => o.status === 'active');
+            const priceStr = activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
+            const photos = (mediaMap[item.id] || []).filter(m => m.mediaType === 'photo');
+            const firstPhoto = photos[0];
+            const statusClass = statusBadgeClass[item.listingStatus] || 'badge-private';
+            const statusLabel = statusLabels[item.listingStatus] || 'Private';
 
-          const imgHtml = firstPhoto
-            ? '<div class="card-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
-            : '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#E6E8EC"/></svg></span></div>';
+            const imgHtml = firstPhoto
+              ? '<div class="row-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
+              : '<div class="row-img"><span class="placeholder"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></span></div>';
 
-          return '<div class="card" onclick="openDetail(\\'' + item.id + '\\')">' +
-            imgHtml +
-            '<div class="card-body">' +
-              '<h3>' + escapeHtml(item.name) + '</h3>' +
-              '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + catBadges +
-              (item.reffoSynced ? '<span class="badge badge-synced">Synced</span>' : '') + '</div>' +
-              (priceStr ? '<div class="card-price">' + escapeHtml(priceStr) + '</div>' : '') +
-              (item.quantity > 1 ? '<div class="card-qty">Qty: ' + item.quantity + '</div>' : '') +
-              (item.description ? '<div class="card-desc">' + escapeHtml(item.description) + '</div>' : '') +
-            '</div></div>';
-        }).join('') + '</div>';
+            return '<div class="item-row" onclick="openDetail(\\'' + item.id + '\\')">' +
+              imgHtml +
+              '<span class="row-name">' + escapeHtml(item.name) + '</span>' +
+              '<div class="row-meta">' +
+                '<span class="badge ' + statusClass + '" style="font-size:10px;padding:0 8px;line-height:22px;">' + statusLabel + '</span>' +
+                (item.category ? '<span class="badge badge-cat" style="font-size:10px;padding:0 8px;line-height:22px;">' + escapeHtml(item.category) + '</span>' : '') +
+                (priceStr ? '<span class="row-price">' + escapeHtml(priceStr) + '</span>' : '') +
+                (item.quantity > 1 ? '<span class="row-qty">Qty: ' + item.quantity + '</span>' : '') +
+                (item.reffoSynced ? '<span class="badge badge-synced" style="font-size:10px;padding:0 8px;line-height:22px;">Synced</span>' : '') +
+              '</div>' +
+            '</div>';
+          }).join('') + '</div>';
+        } else {
+          container.innerHTML = '<div class="cards">' + items.map(item => {
+            const itemOffers = offerMap[item.id] || [];
+            const activeOffer = itemOffers.find(o => o.status === 'active');
+            const priceStr = activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
+            const photos = (mediaMap[item.id] || []).filter(m => m.mediaType === 'photo');
+            const firstPhoto = photos[0];
+            const catBadges = [item.category, item.subcategory].filter(Boolean).map(b =>
+              '<span class="badge badge-cat">' + escapeHtml(b) + '</span>'
+            ).join('');
+            const statusClass = statusBadgeClass[item.listingStatus] || 'badge-private';
+            const statusLabel = statusLabels[item.listingStatus] || 'Private';
+
+            const imgHtml = firstPhoto
+              ? '<div class="card-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
+              : '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#E6E8EC"/></svg></span></div>';
+
+            return '<div class="card" onclick="openDetail(\\'' + item.id + '\\')">' +
+              imgHtml +
+              '<div class="card-body">' +
+                '<h3>' + escapeHtml(item.name) + '</h3>' +
+                '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + catBadges +
+                (item.reffoSynced ? '<span class="badge badge-synced">Synced</span>' : '') + '</div>' +
+                (priceStr ? '<div class="card-price">' + escapeHtml(priceStr) + '</div>' : '') +
+                (item.quantity > 1 ? '<div class="card-qty">Qty: ' + item.quantity + '</div>' : '') +
+                (item.description ? '<div class="card-desc">' + escapeHtml(item.description) + '</div>' : '') +
+              '</div></div>';
+          }).join('') + '</div>';
+        }
       } catch {
         container.innerHTML = '<p class="empty">Failed to load items</p>';
       }
@@ -1167,105 +1300,107 @@ export function renderUI(): string {
     };
 
     // ===== Search Network =====
-    document.getElementById('searchBtn').addEventListener('click', async () => {
+    function renderSearchResults(data) {
       const container = document.getElementById('searchResults');
-      const btn = document.getElementById('searchBtn');
-      btn.disabled = true;
+      if (data.results.length === 0) {
+        container.innerHTML = '<p class="empty">No peers responded. Are other beacons running?</p>';
+        return;
+      }
+
+      let cards = '';
+      lastSearchResults = [];
+      data.results.forEach(peer => {
+        const peerItems = peer.items || [];
+        const peerOffers = peer.offers || [];
+        const peerMedia = peer.media || {};
+        const peerHttpPort = peer.httpPort || 0;
+        const offerMap = {};
+        peerOffers.forEach(o => { if (!offerMap[o.itemId]) offerMap[o.itemId] = []; offerMap[o.itemId].push(o); });
+
+        peerItems.forEach(item => {
+          const itemOffers = offerMap[item.id] || [];
+          const activeOffer = itemOffers.find(o => o.status === 'active');
+          const priceStr = activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
+          const badges = [item.category, item.subcategory].filter(Boolean).map(b =>
+            '<span class="badge badge-cat">' + escapeHtml(b) + '</span>'
+          ).join('');
+          const statusClass = statusBadgeClass[item.listingStatus] || 'badge-for-sale';
+          const statusLabel = statusLabels[item.listingStatus] || '';
+          const itemMedia = peerMedia[item.id] || [];
+          const firstPhoto = itemMedia.find(m => m.mediaType === 'photo');
+
+          let actionBtn = '';
+          if (item.listingStatus === 'for_sale' && activeOffer) {
+            actionBtn = '<button class="btn-primary btn-sm" onclick="event.stopPropagation(); openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + activeOffer.price + ', \\'' + escapeHtml(activeOffer.priceCurrency) + '\\')"><svg width="12" height="12" viewBox="0 0 13 14" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.3231 4.33301H2.66709C2.48518 4.33295 2.30518 4.37002 2.1381 4.44199C1.97098 4.51473 1.8203 4.62052 1.69511 4.75299C1.57019 4.88603 1.47385 5.04327 1.41209 5.215C1.35099 5.38639 1.32515 5.56837 1.3361 5.75L1.66911 11.083C1.69023 11.4216 1.83968 11.7394 2.08699 11.9717C2.33429 12.2039 2.66084 12.3332 3.0001 12.333H9.99009C10.3294 12.3332 10.6559 12.2039 10.9032 11.9717C11.1505 11.7394 11.3 11.4216 11.3211 11.083L11.6541 5.75C11.6661 5.56833 11.6402 5.38615 11.5781 5.215C11.5163 5.04327 11.42 4.88603 11.2951 4.75299C11.1706 4.62002 11.02 4.51412 10.8528 4.44186C10.6856 4.36961 10.5053 4.33255 10.3231 4.33301Z" fill="white"/><path d="M3.16212 3.66602C3.15445 3.2234 3.23504 2.78368 3.39912 2.37253C3.5632 1.96137 3.80751 1.58703 4.11781 1.2713C4.42811 0.955576 4.79818 0.704808 5.20643 0.53363C5.61468 0.362453 6.05296 0.274292 6.49565 0.274292C6.93833 0.274292 7.37658 0.362453 7.78483 0.53363C8.19308 0.704808 8.56315 0.955576 8.87346 1.2713C9.18376 1.58703 9.42809 1.96137 9.59217 2.37253C9.75626 2.78368 9.83681 3.2234 9.82914 3.66602V5.00003C9.82247 5.17233 9.74931 5.33535 9.62504 5.4549C9.50078 5.57444 9.33507 5.6412 9.16264 5.6412C8.99021 5.6412 8.82447 5.57444 8.70021 5.4549C8.57594 5.33535 8.50281 5.17233 8.49614 5.00003V3.66602C8.49614 3.13558 8.28542 2.6269 7.91035 2.25183C7.53528 1.87676 7.02657 1.66602 6.49614 1.66602C5.9657 1.66602 5.45699 1.87676 5.08192 2.25183C4.70685 2.6269 4.49614 3.13558 4.49614 3.66602V5.00003C4.49614 5.17693 4.42585 5.34659 4.30076 5.47168C4.17568 5.59677 4.00604 5.66702 3.82914 5.66702C3.65224 5.66702 3.48258 5.59677 3.35749 5.47168C3.23241 5.34659 3.16212 5.17693 3.16212 5.00003V3.66602Z" fill="white"/></svg> Buy at ' + escapeHtml(activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2)) + '</button>';
+          } else if (item.listingStatus === 'willing_to_sell') {
+            actionBtn = '<button class="btn-secondary btn-sm" onclick="event.stopPropagation(); openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')">Make Offer</button>';
+          }
+
+          const idx = lastSearchResults.length;
+          lastSearchResults.push({ item: item, peer: peer, offer: activeOffer || null, media: itemMedia, httpPort: peerHttpPort });
+
+          const imgHtml = (firstPhoto && peerHttpPort)
+            ? '<div class="card-img"><img src="http://' + location.hostname + ':' + peerHttpPort + '/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
+            : '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#E6E8EC"/></svg></span></div>';
+
+          cards += '<div class="card result-card" onclick="openRemoteDetail(' + idx + ')">' +
+            imgHtml +
+            '<div class="card-body">' +
+              '<h3>' + escapeHtml(item.name) + '</h3>' +
+              '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + badges + '</div>' +
+              (priceStr ? '<div class="card-price">' + escapeHtml(priceStr) + '</div>' : '') +
+              (item.description ? '<div class="card-desc">' + escapeHtml(item.description) + '</div>' : '') +
+              (function() {
+                const lp = [item.locationCity, item.locationState, item.locationZip].filter(Boolean);
+                return lp.length > 0 ? '<div style="font-size:12px;color:#777E90;margin-top:4px;font-weight:500;">Near ' + escapeHtml(lp.join(', ')) + '</div>' : '';
+              })() +
+              '<div class="beacon-id">Beacon: ' + escapeHtml(peer.beaconId.slice(0, 16)) + '...</div>' +
+              (actionBtn ? '<div style="margin-top:10px;">' + actionBtn + '</div>' : '') +
+            '</div></div>';
+        });
+      });
+
+      container.innerHTML = '<p style="font-size:14px;color:#777E90;margin-bottom:12px;font-weight:500;">' +
+        data.peers + ' peer(s) responded</p><div class="cards">' + cards + '</div>';
+    }
+
+    async function executeHeaderSearch() {
+      switchTab('search');
+      const container = document.getElementById('searchResults');
       container.innerHTML = '<p class="empty">Searching peers...</p>';
 
+      var q = document.getElementById('headerSearchQ').value.trim();
+      var c = document.getElementById('headerSearchCat').value;
+
+      var params = new URLSearchParams();
+      if (q) params.set('q', q);
+      if (c) params.set('c', c);
+
       try {
-        const params = new URLSearchParams();
-        const q = document.getElementById('searchQ').value.trim();
-        const c = document.getElementById('searchCat').value;
-        const sc = document.getElementById('searchSubcat').value;
-        const maxPrice = document.getElementById('searchMaxPrice').value;
-        const radiusVal = document.getElementById('searchRadius').value;
-
-        if (q) params.set('q', q);
-        if (c) params.set('c', c);
-        if (sc) params.set('sc', sc);
-        if (maxPrice) params.set('maxPrice', maxPrice);
-
-        // If radius specified, fetch default location and pass lat/lng/radius
-        if (radiusVal) {
-          try {
-            const locRes = await fetch('/settings/location');
-            const locData = await locRes.json();
-            if (locData.locationLat && locData.locationLng) {
-              params.set('lat', String(locData.locationLat));
-              params.set('lng', String(locData.locationLng));
-              params.set('radius', radiusVal);
-            }
-          } catch {}
-        }
-
-        const res = await fetch('/search?' + params.toString());
-        const data = await res.json();
-
-        if (data.results.length === 0) {
-          container.innerHTML = '<p class="empty">No peers responded. Are other beacons running?</p>';
-          return;
-        }
-
-        let cards = '';
-        lastSearchResults = [];
-        data.results.forEach(peer => {
-          const peerItems = peer.items || [];
-          const peerOffers = peer.offers || [];
-          const peerMedia = peer.media || {};
-          const peerHttpPort = peer.httpPort || 0;
-          const offerMap = {};
-          peerOffers.forEach(o => { if (!offerMap[o.itemId]) offerMap[o.itemId] = []; offerMap[o.itemId].push(o); });
-
-          peerItems.forEach(item => {
-            const itemOffers = offerMap[item.id] || [];
-            const activeOffer = itemOffers.find(o => o.status === 'active');
-            const priceStr = activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
-            const badges = [item.category, item.subcategory].filter(Boolean).map(b =>
-              '<span class="badge badge-cat">' + escapeHtml(b) + '</span>'
-            ).join('');
-            const statusClass = statusBadgeClass[item.listingStatus] || 'badge-for-sale';
-            const statusLabel = statusLabels[item.listingStatus] || '';
-            const itemMedia = peerMedia[item.id] || [];
-            const firstPhoto = itemMedia.find(m => m.mediaType === 'photo');
-
-            let actionBtn = '';
-            if (item.listingStatus === 'for_sale' && activeOffer) {
-              actionBtn = '<button class="btn-primary btn-sm" onclick="event.stopPropagation(); openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + activeOffer.price + ', \\'' + escapeHtml(activeOffer.priceCurrency) + '\\')"><svg width="12" height="12" viewBox="0 0 13 14" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.3231 4.33301H2.66709C2.48518 4.33295 2.30518 4.37002 2.1381 4.44199C1.97098 4.51473 1.8203 4.62052 1.69511 4.75299C1.57019 4.88603 1.47385 5.04327 1.41209 5.215C1.35099 5.38639 1.32515 5.56837 1.3361 5.75L1.66911 11.083C1.69023 11.4216 1.83968 11.7394 2.08699 11.9717C2.33429 12.2039 2.66084 12.3332 3.0001 12.333H9.99009C10.3294 12.3332 10.6559 12.2039 10.9032 11.9717C11.1505 11.7394 11.3 11.4216 11.3211 11.083L11.6541 5.75C11.6661 5.56833 11.6402 5.38615 11.5781 5.215C11.5163 5.04327 11.42 4.88603 11.2951 4.75299C11.1706 4.62002 11.02 4.51412 10.8528 4.44186C10.6856 4.36961 10.5053 4.33255 10.3231 4.33301Z" fill="white"/><path d="M3.16212 3.66602C3.15445 3.2234 3.23504 2.78368 3.39912 2.37253C3.5632 1.96137 3.80751 1.58703 4.11781 1.2713C4.42811 0.955576 4.79818 0.704808 5.20643 0.53363C5.61468 0.362453 6.05296 0.274292 6.49565 0.274292C6.93833 0.274292 7.37658 0.362453 7.78483 0.53363C8.19308 0.704808 8.56315 0.955576 8.87346 1.2713C9.18376 1.58703 9.42809 1.96137 9.59217 2.37253C9.75626 2.78368 9.83681 3.2234 9.82914 3.66602V5.00003C9.82247 5.17233 9.74931 5.33535 9.62504 5.4549C9.50078 5.57444 9.33507 5.6412 9.16264 5.6412C8.99021 5.6412 8.82447 5.57444 8.70021 5.4549C8.57594 5.33535 8.50281 5.17233 8.49614 5.00003V3.66602C8.49614 3.13558 8.28542 2.6269 7.91035 2.25183C7.53528 1.87676 7.02657 1.66602 6.49614 1.66602C5.9657 1.66602 5.45699 1.87676 5.08192 2.25183C4.70685 2.6269 4.49614 3.13558 4.49614 3.66602V5.00003C4.49614 5.17693 4.42585 5.34659 4.30076 5.47168C4.17568 5.59677 4.00604 5.66702 3.82914 5.66702C3.65224 5.66702 3.48258 5.59677 3.35749 5.47168C3.23241 5.34659 3.16212 5.17693 3.16212 5.00003V3.66602Z" fill="white"/></svg> Buy at ' + escapeHtml(activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2)) + '</button>';
-            } else if (item.listingStatus === 'willing_to_sell') {
-              actionBtn = '<button class="btn-secondary btn-sm" onclick="event.stopPropagation(); openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')">Make Offer</button>';
-            }
-
-            const idx = lastSearchResults.length;
-            lastSearchResults.push({ item: item, peer: peer, offer: activeOffer || null, media: itemMedia, httpPort: peerHttpPort });
-
-            const imgHtml = (firstPhoto && peerHttpPort)
-              ? '<div class="card-img"><img src="http://' + location.hostname + ':' + peerHttpPort + '/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
-              : '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#E6E8EC"/></svg></span></div>';
-
-            cards += '<div class="card result-card" onclick="openRemoteDetail(' + idx + ')">' +
-              imgHtml +
-              '<div class="card-body">' +
-                '<h3>' + escapeHtml(item.name) + '</h3>' +
-                '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + badges + '</div>' +
-                (priceStr ? '<div class="card-price">' + escapeHtml(priceStr) + '</div>' : '') +
-                (item.description ? '<div class="card-desc">' + escapeHtml(item.description) + '</div>' : '') +
-                (function() {
-                  const lp = [item.locationCity, item.locationState, item.locationZip].filter(Boolean);
-                  return lp.length > 0 ? '<div style="font-size:12px;color:#777E90;margin-top:4px;font-weight:500;">Near ' + escapeHtml(lp.join(', ')) + '</div>' : '';
-                })() +
-                '<div class="beacon-id">Beacon: ' + escapeHtml(peer.beaconId.slice(0, 16)) + '...</div>' +
-                (actionBtn ? '<div style="margin-top:10px;">' + actionBtn + '</div>' : '') +
-              '</div></div>';
-          });
-        });
-
-        container.innerHTML = '<p style="font-size:14px;color:#777E90;margin-bottom:12px;font-weight:500;">' +
-          data.peers + ' peer(s) responded</p><div class="cards">' + cards + '</div>';
+        var res = await fetch('/search?' + params.toString());
+        var data = await res.json();
+        renderSearchResults(data);
       } catch {
         container.innerHTML = '<p class="empty">Search failed</p>';
-      } finally {
-        btn.disabled = false;
+      }
+    }
+    window.executeHeaderSearch = executeHeaderSearch;
+
+    // ===== Avatar Dropdown =====
+    window.toggleAvatarDropdown = function() {
+      var dd = document.getElementById('avatarDropdown');
+      dd.classList.toggle('open');
+    };
+
+    window.closeAvatarDropdown = function() {
+      document.getElementById('avatarDropdown').classList.remove('open');
+    };
+
+    // Close avatar dropdown on outside click
+    document.addEventListener('mousedown', function(e) {
+      var container = document.getElementById('avatarContainer');
+      if (container && !container.contains(e.target)) {
+        document.getElementById('avatarDropdown').classList.remove('open');
       }
     });
 
@@ -1527,12 +1662,11 @@ export function renderUI(): string {
         document.getElementById('negOutgoing').innerHTML = renderGroupedNegotiations(cachedOutgoing, false);
 
         const pendingCount = cachedIncoming.filter(n => n.status === 'pending').length;
-        const badge = document.getElementById('negCount');
+        const notifDot = document.getElementById('headerNotifDot');
         if (pendingCount > 0) {
-          badge.textContent = pendingCount;
-          badge.classList.remove('hidden');
+          notifDot.style.display = 'block';
         } else {
-          badge.classList.add('hidden');
+          notifDot.style.display = 'none';
         }
       } catch {
         document.getElementById('negIncoming').innerHTML = '<p class="empty">Failed to load</p>';
@@ -1836,6 +1970,24 @@ export function renderUI(): string {
       }
     };
 
+    // ===== Layout Toggle =====
+    let itemLayout = 'card';
+    window.setItemLayout = function(layout) {
+      itemLayout = layout;
+      document.getElementById('layoutCardBtn').classList.toggle('active', layout === 'card');
+      document.getElementById('layoutRowBtn').classList.toggle('active', layout === 'row');
+      loadMyItems();
+    };
+
+    // ===== List Item Modal =====
+    window.openListItemModal = function() {
+      document.getElementById('listItemModal').classList.remove('hidden');
+    };
+
+    window.closeListItemModal = function() {
+      document.getElementById('listItemModal').classList.add('hidden');
+    };
+
     // ===== Init =====
     let prevOutgoingStatuses = {};
 
@@ -1857,12 +2009,11 @@ export function renderUI(): string {
         const res = await fetch('/negotiations?role=seller');
         const incoming = await res.json();
         const pendingCount = incoming.filter(n => n.status === 'pending').length;
-        const badge = document.getElementById('negCount');
+        const notifDot = document.getElementById('headerNotifDot');
         if (pendingCount > 0) {
-          badge.textContent = pendingCount;
-          badge.classList.remove('hidden');
+          notifDot.style.display = 'block';
         } else {
-          badge.classList.add('hidden');
+          notifDot.style.display = 'none';
         }
       } catch {}
 
