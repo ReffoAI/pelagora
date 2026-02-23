@@ -294,23 +294,50 @@ export function buildSchemaOrgLD(
   category: string | undefined,
   subcategory: string | undefined,
   attrs: Record<string, unknown>,
-  baseFields: { name?: string; description?: string; price?: number; currency?: string; condition?: string },
+  baseFields: {
+    name?: string;
+    description?: string;
+    price?: number;
+    currency?: string;
+    condition?: string;
+    image?: string;
+    sku?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    offerStatus?: string;
+    sellerId?: string;
+    offerLocation?: string;
+  },
 ): Record<string, unknown> {
   const schema = getCategorySchema(category, subcategory);
   const ld = schema.buildSchemaOrg(attrs);
 
+  // JSON-LD @context with reffo namespace
+  ld['@context'] = {
+    '@vocab': 'https://schema.org/',
+    'reffo': 'https://reffo.ai/ns/',
+  };
+
   // Add base Schema.org fields
   if (baseFields.name) ld.name = baseFields.name;
   if (baseFields.description) ld.description = baseFields.description;
+  if (baseFields.image) ld.image = baseFields.image;
+  if (baseFields.sku) ld.sku = baseFields.sku;
+  if (baseFields.createdAt) ld.dateCreated = baseFields.createdAt;
+  if (baseFields.updatedAt) ld.dateModified = baseFields.updatedAt;
   if (baseFields.condition) {
     ld['reffo:condition'] = baseFields.condition;
   }
   if (baseFields.price != null) {
-    ld.offers = {
+    const offer: Record<string, unknown> = {
       '@type': 'Offer',
       price: baseFields.price,
       priceCurrency: baseFields.currency || 'USD',
     };
+    if (baseFields.offerStatus) offer.availability = baseFields.offerStatus;
+    if (baseFields.sellerId) offer.seller = { '@type': 'Organization', '@id': baseFields.sellerId };
+    if (baseFields.offerLocation) offer.availableAtOrFrom = baseFields.offerLocation;
+    ld.offers = offer;
   }
 
   return ld;
