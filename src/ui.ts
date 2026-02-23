@@ -283,7 +283,7 @@ export function renderUI(): string {
     .deal-posted-by .avatar img { width: 100%; height: 100%; object-fit: cover; }
     .deal-posted-by .poster-name { font-size: 14px; font-weight: 600; color: #23262F; }
     .deal-posted-by .poster-label { font-size: 12px; color: #777E90; }
-    .deal-content { padding: 20px 0; font-size: 16px; color: #353945; line-height: 1.71; }
+    .deal-content { padding: 20px 0; font-size: 16px; color: #353945; line-height: 1.71; white-space: pre-line; }
     .deal-heading { font-weight: 700; font-size: 16px; color: #141416; padding: 40px 0 16px; }
     .info-grid { display: flex; flex-wrap: wrap; gap: 16px; padding: 10px 0; }
     .info-item { display: flex; align-items: center; gap: 12px; width: calc(50% - 8px); cursor: pointer; }
