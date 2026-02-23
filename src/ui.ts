@@ -262,7 +262,7 @@ export function renderUI(): string {
     .payment-card-header { display: flex; justify-content: space-between; align-items: center; padding: 30px 30px 0; }
     .payment-card-amount { font-size: 40px; font-weight: 700; color: #141416; line-height: 1.2; }
     .payment-card-amount small { font-size: 14px; font-weight: 500; color: #777E90; display: block; margin-top: 4px; }
-    .payment-card-thumb { width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: #F4F5F6; flex-shrink: 0; }
+    .payment-card-thumb { width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: #F4F5F6; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
     .payment-card-thumb img { width: 100%; height: 100%; object-fit: cover; }
     .payment-card-details { background: #F4F5F6; border-radius: 15px; padding: 20px; margin: 20px 30px; }
     .payment-card-detail-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
@@ -296,10 +296,10 @@ export function renderUI(): string {
     .info-type { font-size: 14px; font-weight: 500; color: #23262F; }
 
     /* Old Reffo gradient button */
-    .button-gradient { display: inline-flex; justify-content: center; align-items: center; height: 48px; padding: 0 24px; background: linear-gradient(90deg, #8101B4 0%, #EA526F 100%); border-radius: 24px; font-size: 14px; font-weight: 500; color: #FCFCFD; border: none; cursor: pointer; transition: all 0.2s; flex: 1; gap: 8px; font-family: 'Poppins', sans-serif; }
+    .button-gradient { display: inline-flex; justify-content: center; align-items: center; height: 40px; padding: 0 20px; background: linear-gradient(90deg, #8101B4 0%, #EA526F 100%); border-radius: 20px; font-size: 13px; font-weight: 500; color: #FCFCFD; border: none; cursor: pointer; transition: all 0.2s; flex: 1; gap: 6px; font-family: 'Poppins', sans-serif; }
     .button-gradient:hover { background: linear-gradient(90deg, #6e019a 0%, #d44560 100%); }
     /* Old Reffo stroke button */
-    .button-stroke { display: inline-flex; justify-content: center; align-items: center; height: 48px; padding: 0 24px; background: none; border-radius: 24px; font-size: 14px; font-weight: 500; color: #23262F; box-shadow: 0 0 0 2px #E6E8EC inset; border: none; cursor: pointer; transition: all 0.2s; gap: 8px; font-family: 'Poppins', sans-serif; }
+    .button-stroke { display: inline-flex; justify-content: center; align-items: center; height: 40px; padding: 0 20px; background: none; border-radius: 20px; font-size: 13px; font-weight: 500; color: #23262F; box-shadow: 0 0 0 2px #E6E8EC inset; border: none; cursor: pointer; transition: all 0.2s; gap: 6px; font-family: 'Poppins', sans-serif; }
     .button-stroke:hover { background: #23262F; box-shadow: 0 0 0 2px #23262F inset; color: #FCFCFD; }
 
     @media (max-width: 767px) {
@@ -1465,29 +1465,26 @@ export function renderUI(): string {
         html += '<div class="detail-right">';
         html += '<div class="payment-card">';
 
-        // Header: price + thumbnail
+        // Header: price + user avatar
         html += '<div class="payment-card-header">';
         html += '<div class="payment-card-amount">' + priceDisplay;
-        html += '<small>' + statusLabels[ref.listingStatus] + '</small></div>';
+        html += '</div>';
         html += '<div class="payment-card-thumb">';
-        if (thumbSrc) {
-          html += '<img src="' + thumbSrc + '" alt="">';
-        } else {
-          html += '<svg width="28" height="28" viewBox="0 0 40 71" fill="none"><path d="M36.33 2.41s.5-.98.1-1.75C36.03-.1 35.05.01 35.05.01H11.18s-.63-.03-1.03.34c-.4.37-.55 1.15-.55 1.15L.24 32.59s-.49 1.18-.07 2.08c.42.9 1.4.83 1.4.83h8.49L.56 66.88s-.73 1.64.44 2.45c1.16.82 2.37-.42 2.37-.42L37.74 24.6s.57-.65.19-1.67c-.38-1.01-1.23-.91-1.23-.91H26.88l9.45-19.61z" fill="#E6E8EC"/></svg>';
-        }
+        html += '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><circle cx="12" cy="12" r="3"/></svg>';
         html += '</div></div>';
 
-        // Details box
-        html += '<div class="payment-card-details">';
-        html += '<div class="payment-card-detail-row"><span class="label">Status</span><span class="value">';
+        // Category + status below price
+        html += '<div style="padding:0 30px 10px;">';
+        html += '<div style="margin-bottom:6px;">';
         html += '<select id="dStatus" style="width:auto;height:32px;padding:0 10px;font-size:13px;border-radius:10px;border:1px solid #E6E8EC;margin:0;font-family:Poppins,sans-serif;font-weight:600;background:#fff;">';
         ['private','for_sale','willing_to_sell'].forEach(s => {
           html += '<option value="' + s + '"' + (ref.listingStatus === s ? ' selected' : '') + '>' + statusLabels[s] + '</option>';
         });
-        html += '</select></span></div>';
-        html += '<div class="payment-card-detail-row"><span class="label">Quantity</span><span class="value">' + ref.quantity + '</span></div>';
-        if (ref.category) html += '<div class="payment-card-detail-row"><span class="label">Category</span><span class="value">' + escapeHtml(ref.category) + '</span></div>';
-        if (ref.subcategory) html += '<div class="payment-card-detail-row"><span class="label">Subcategory</span><span class="value">' + escapeHtml(ref.subcategory) + '</span></div>';
+        html += '</select></div>';
+        const catParts = [ref.category, ref.subcategory].filter(Boolean);
+        if (catParts.length > 0) {
+          html += '<div style="font-size:13px;color:#777E90;font-weight:500;">' + escapeHtml(catParts.join(' / ')) + '</div>';
+        }
         html += '</div>';
 
         // Buttons row
@@ -1524,7 +1521,9 @@ export function renderUI(): string {
         html += '</span></div>';
 
         if (listedDate) {
-          html += '<div class="payment-card-footer">Listed on ' + listedDate + '</div>';
+          let footerText = 'Listed ' + listedDate;
+          if (ref.listingStatus === 'for_sale' || ref.listingStatus === 'willing_to_sell') footerText += ' · Open to negotiation';
+          html += '<div class="payment-card-footer">' + footerText + '</div>';
         }
 
         // Archive button
@@ -1826,11 +1825,14 @@ export function renderUI(): string {
       const remoteLoc = [item.locationCity, item.locationState, item.locationZip].filter(Boolean);
       const conditionDisplay = item.condition ? item.condition.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }) : '';
 
-      let gradientBtn = '';
+      // Build action buttons for remote detail
+      let purchaseBtn = '';
+      let negotiateBtn = '';
       if (item.listingStatus === 'for_sale' && offer) {
-        gradientBtn = '<button class="button-gradient" onclick="openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + offer.price + ', \\'' + escapeHtml(offer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3L14 8"/><path d="m17 7 1.5 1.5a1 1 0 1 0 3-3L18 2"/></svg> Buy at ' + escapeHtml(offer.priceCurrency + ' ' + offer.price.toFixed(2)) + '</button>';
+        purchaseBtn = '<button class="button-gradient" onclick="openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + offer.price + ', \\'' + escapeHtml(offer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Purchase</button>';
+        negotiateBtn = '<button class="button-stroke" onclick="openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Negotiate</button>';
       } else if (item.listingStatus === 'willing_to_sell') {
-        gradientBtn = '<button class="button-gradient" onclick="openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3L14 8"/><path d="m17 7 1.5 1.5a1 1 0 1 0 3-3L18 2"/></svg> Make Offer</button>';
+        purchaseBtn = '<button class="button-gradient" onclick="openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Make an Offer</button>';
       }
 
       let html = '';
@@ -1883,30 +1885,28 @@ export function renderUI(): string {
       html += '<div class="detail-right">';
       html += '<div class="payment-card">';
 
-      // Header: price + thumbnail
+      // Header: price + seller avatar
       html += '<div class="payment-card-header">';
       html += '<div class="payment-card-amount">' + priceDisplay;
-      html += '<small>' + statusLabel + '</small></div>';
+      html += '</div>';
       html += '<div class="payment-card-thumb">';
-      if (thumbSrc) {
-        html += '<img src="' + thumbSrc + '" alt="">';
-      } else {
-        html += '<svg width="28" height="28" viewBox="0 0 40 71" fill="none"><path d="M36.33 2.41s.5-.98.1-1.75C36.03-.1 35.05.01 35.05.01H11.18s-.63-.03-1.03.34c-.4.37-.55 1.15-.55 1.15L.24 32.59s-.49 1.18-.07 2.08c.42.9 1.4.83 1.4.83h8.49L.56 66.88s-.73 1.64.44 2.45c1.16.82 2.37-.42 2.37-.42L37.74 24.6s.57-.65.19-1.67c-.38-1.01-1.23-.91-1.23-.91H26.88l9.45-19.61z" fill="#E6E8EC"/></svg>';
-      }
+      html += '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
       html += '</div></div>';
 
-      // Details box
-      html += '<div class="payment-card-details">';
-      html += '<div class="payment-card-detail-row"><span class="label">Status</span><span class="value">' + statusLabel + '</span></div>';
-      if (item.quantity > 1) html += '<div class="payment-card-detail-row"><span class="label">Qty available</span><span class="value">' + item.quantity + '</span></div>';
-      if (item.category) html += '<div class="payment-card-detail-row"><span class="label">Category</span><span class="value">' + escapeHtml(item.category) + '</span></div>';
-      if (item.subcategory) html += '<div class="payment-card-detail-row"><span class="label">Subcategory</span><span class="value">' + escapeHtml(item.subcategory) + '</span></div>';
+      // Status badge + category below price
+      html += '<div style="padding:0 30px 10px;">';
+      html += '<div style="margin-bottom:6px;"><span class="badge badge-' + (item.listingStatus === 'for_sale' ? 'for-sale' : 'willing-to-sell') + '">' + statusLabel + '</span></div>';
+      const remoteCatParts = [item.category, item.subcategory].filter(Boolean);
+      if (remoteCatParts.length > 0) {
+        html += '<div style="font-size:13px;color:#777E90;font-weight:500;">' + escapeHtml(remoteCatParts.join(' / ')) + '</div>';
+      }
       html += '</div>';
 
       // Buttons row
       html += '<div class="payment-card-buttons">';
-      html += '<button class="button-stroke" onclick="navigator.clipboard.writeText(location.href).then(function(){ showToast(\\'Link copied!\\',\\'\\'); })"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Share</button>';
-      if (gradientBtn) html += gradientBtn;
+      html += '<button class="button-stroke" onclick="navigator.clipboard.writeText(location.href).then(function(){ showToast(\\'Link copied!\\',\\'\\'); })"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Share</button>';
+      if (negotiateBtn) html += negotiateBtn;
+      if (purchaseBtn) html += purchaseBtn;
       html += '</div>';
 
       // Invoice rows
@@ -1931,7 +1931,10 @@ export function renderUI(): string {
       }
 
       // Footer
-      html += '<div class="payment-card-footer">Seller beacon is online</div>';
+      const remoteListedDate = item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      let remoteFooterText = remoteListedDate ? 'Listed ' + remoteListedDate : 'Seller beacon is online';
+      if (item.listingStatus === 'willing_to_sell' || item.listingStatus === 'for_sale') remoteFooterText += ' · Open to negotiation';
+      html += '<div class="payment-card-footer">' + remoteFooterText + '</div>';
 
       html += '</div>'; // end payment-card
       html += '</div>'; // end detail-right
