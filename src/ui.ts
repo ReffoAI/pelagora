@@ -257,6 +257,57 @@ export function renderUI(): string {
     .badge-archived-sold { background: #e8eaed; color: #1a8a42; }
     .badge-archived-deleted { background: #fce8e6; color: #E92222; }
 
+    /* PaymentCard — Old Reffo: sticky, 15px radius, soft shadow */
+    .payment-card { background: #fff; border-radius: 15px; box-shadow: 0px 35px 46px 0px rgba(0,0,0,0.05); border: 1px solid #E6E8EC; position: sticky; top: 100px; overflow: hidden; }
+    .payment-card-header { display: flex; justify-content: space-between; align-items: center; padding: 30px 30px 0; }
+    .payment-card-amount { font-size: 40px; font-weight: 700; color: #141416; line-height: 1.2; }
+    .payment-card-amount small { font-size: 14px; font-weight: 500; color: #777E90; display: block; margin-top: 4px; }
+    .payment-card-thumb { width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: #F4F5F6; flex-shrink: 0; }
+    .payment-card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .payment-card-details { background: #F4F5F6; border-radius: 15px; padding: 20px; margin: 20px 30px; }
+    .payment-card-detail-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+    .payment-card-detail-row .label { font-size: 10px; text-transform: uppercase; color: #777E90; letter-spacing: 0.02em; }
+    .payment-card-detail-row .value { font-size: 14px; font-weight: 600; color: #23262F; }
+    .payment-card-buttons { display: flex; gap: 10px; margin: 20px 30px; }
+    .invoice-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; margin: 0 30px; font-size: 14px; color: #23262F; }
+    .invoice-row .invoice-label { color: #777E90; }
+    .invoice-row .invoice-value { font-weight: 600; }
+    .invoice-row-bg { background: #F4F5F6; border-radius: 10px; }
+    .payment-card-footer { text-align: center; padding: 15px; margin: 0 30px; color: #777E90; font-size: 12px; }
+
+    /* DealBody — Old Reffo: title, posted by, content, info section */
+    .deal-body { max-width: 640px; padding-right: 50px; }
+    .deal-title { font-size: 24px; font-weight: 700; color: #141416; margin-bottom: 8px; }
+    .deal-posted-by { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #E0E0E0; margin-bottom: 16px; }
+    .deal-posted-by .avatar { width: 36px; height: 36px; border-radius: 50%; background: #F4F5F6; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .deal-posted-by .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .deal-posted-by .poster-name { font-size: 14px; font-weight: 600; color: #23262F; }
+    .deal-posted-by .poster-label { font-size: 12px; color: #777E90; }
+    .deal-content { padding: 20px 0; font-size: 16px; color: #353945; line-height: 1.71; }
+    .deal-heading { font-weight: 700; font-size: 16px; color: #141416; padding: 40px 0 16px; }
+    .info-grid { display: flex; flex-wrap: wrap; gap: 16px; padding: 10px 0; }
+    .info-item { display: flex; align-items: center; gap: 12px; width: calc(50% - 8px); cursor: pointer; }
+    .info-icon { width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s; }
+    .info-icon.blue { border: 2px solid #92A5EF; }
+    .info-icon.teal { border: 2px solid #8BC5E5; }
+    .info-icon.orange { border: 2px solid #FA8F54; }
+    .info-icon.green { border: 2px solid #58C27D; }
+    .info-item:hover .info-icon { background: #E6E8EC; }
+    .info-type { font-size: 14px; font-weight: 500; color: #23262F; }
+
+    /* Old Reffo gradient button */
+    .button-gradient { display: inline-flex; justify-content: center; align-items: center; height: 48px; padding: 0 24px; background: linear-gradient(90deg, #8101B4 0%, #EA526F 100%); border-radius: 24px; font-size: 14px; font-weight: 500; color: #FCFCFD; border: none; cursor: pointer; transition: all 0.2s; flex: 1; gap: 8px; font-family: 'Poppins', sans-serif; }
+    .button-gradient:hover { background: linear-gradient(90deg, #6e019a 0%, #d44560 100%); }
+    /* Old Reffo stroke button */
+    .button-stroke { display: inline-flex; justify-content: center; align-items: center; height: 48px; padding: 0 24px; background: none; border-radius: 24px; font-size: 14px; font-weight: 500; color: #23262F; box-shadow: 0 0 0 2px #E6E8EC inset; border: none; cursor: pointer; transition: all 0.2s; gap: 8px; font-family: 'Poppins', sans-serif; }
+    .button-stroke:hover { background: #23262F; box-shadow: 0 0 0 2px #23262F inset; color: #FCFCFD; }
+
+    @media (max-width: 767px) {
+      .deal-body { max-width: 100%; padding-right: 0; }
+      .info-item { width: 100%; }
+      .payment-card { position: static; }
+    }
+
     /* Sold negotiation status */
     .neg-card.sold { border-left-color: #1a8a42; }
     .neg-status.sold { background: #e6f9ed; color: #1a8a42; }
@@ -1280,6 +1331,7 @@ export function renderUI(): string {
         const video = media.find(m => m.mediaType === 'video');
         const mainMedia = photos[0] || video;
         const sideMedia = photos.slice(1);
+        const thumbSrc = photos[0] ? '/' + escapeHtml(photos[0].filePath) : '';
 
         // Gallery
         let mainImgHtml = mainMedia
@@ -1298,6 +1350,18 @@ export function renderUI(): string {
           }
         }
 
+        const priceDisplay = activeOffer ? escapeHtml(activeOffer.priceCurrency) + ' ' + activeOffer.price.toFixed(2) : 'No price';
+        const locParts = [ref.locationCity, ref.locationState, ref.locationZip].filter(Boolean);
+        const scopeLabels = { global: 'Global', national: 'National', range: 'Range' };
+        let scopeText = '';
+        if (ref.sellingScope) {
+          scopeText = scopeLabels[ref.sellingScope] || ref.sellingScope;
+          if (ref.sellingScope === 'range' && ref.sellingRadiusMiles) scopeText += ' (' + ref.sellingRadiusMiles + ' mi)';
+        }
+        const conditionDisplay = ref.condition ? ref.condition.replace(/_/g, ' ').replace(/\\b\\w/g, function(c) { return c.toUpperCase(); }) : '';
+        const detailAttrSummary = buildAttributeSummary(ref.category, ref.subcategory, ref.attributes, null);
+        const listedDate = ref.createdAt ? new Date(ref.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+
         // Build detail HTML
         let html = '<span class="detail-back" onclick="switchTab(\\'refs\\')">';
         html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#EC526F"/></svg>';
@@ -1310,10 +1374,42 @@ export function renderUI(): string {
 
         html += '<div class="detail-columns">';
 
-        // Left: edit form
-        html += '<div class="detail-left">';
-        html += '<h2>Edit Ref</h2>';
+        // ===== Left: DealBody =====
+        html += '<div class="detail-left deal-body">';
+        html += '<h1 class="deal-title">' + escapeHtml(ref.name) + '</h1>';
         html += '<div id="detailMsg"></div>';
+
+        // Posted By
+        html += '<div class="deal-posted-by">';
+        html += '<div class="avatar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><circle cx="12" cy="12" r="3"/></svg></div>';
+        html += '<div><div class="poster-name">Your Beacon</div><div class="poster-label">' + escapeHtml(ref.beaconId ? ref.beaconId.slice(0, 16) + '...' : '') + '</div></div>';
+        html += '</div>';
+
+        // Description
+        if (ref.description) {
+          html += '<div class="deal-content">' + escapeHtml(ref.description) + '</div>';
+        }
+
+        // Information grid
+        html += '<div class="deal-heading">Information</div>';
+        html += '<div class="info-grid">';
+        html += '<div class="info-item" onclick="document.getElementById(\\'editFormSection\\').style.display=\\'block\\';document.getElementById(\\'editFormSection\\').scrollIntoView({behavior:\\'smooth\\'})">';
+        html += '<div class="info-icon teal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8BC5E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>';
+        html += '<span class="info-type">View Details</span></div>';
+        html += '<div class="info-item" onclick="document.getElementById(\\'editFormSection\\').style.display=\\'block\\';document.getElementById(\\'dLocCity\\').scrollIntoView({behavior:\\'smooth\\'})">';
+        html += '<div class="info-icon blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#92A5EF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>';
+        html += '<span class="info-type">Location</span></div>';
+        html += '<div class="info-item">';
+        html += '<div class="info-icon orange"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FA8F54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>';
+        html += '<span class="info-type">' + escapeHtml(ref.category || 'Category') + (ref.subcategory ? ' / ' + escapeHtml(ref.subcategory) : '') + '</span></div>';
+        html += '<div class="info-item">';
+        html += '<div class="info-icon green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#58C27D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>';
+        html += '<span class="info-type">' + (conditionDisplay || 'Condition') + '</span></div>';
+        html += '</div>';
+
+        // Edit form (collapsible)
+        html += '<div id="editFormSection" style="display:none;">';
+        html += '<div class="deal-heading">Edit Ref</div>';
         html += '<form id="detailForm" data-ref-id="' + ref.id + '">';
         html += '<label>Name</label><input id="dName" value="' + escapeHtml(ref.name) + '">';
         html += '<label>Description</label><textarea id="dDesc">' + escapeHtml(ref.description) + '</textarea>';
@@ -1322,7 +1418,7 @@ export function renderUI(): string {
         html += '<div id="detailCategoryFields"></div>';
         html += '<div class="row"><div><label>Quantity</label><input id="dQty" type="number" min="1" value="' + ref.quantity + '"></div>';
         html += '<div><label>SKU</label><input id="dSku" value="' + escapeHtml(ref.sku || '') + '"></div></div>';
-        html += '<details style="margin-bottom:14px;border:2px solid #E6E8EC;border-radius:12px;padding:14px;">';
+        html += '<details style="margin-bottom:14px;border:2px solid #E6E8EC;border-radius:12px;padding:14px;" open>';
         html += '<summary style="cursor:pointer;font-size:12px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.02em;">Location</summary>';
         html += '<div class="row"><div><label>City</label><input id="dLocCity" value="' + escapeHtml(ref.locationCity || '') + '"></div>';
         html += '<div><label>State</label><input id="dLocState" value="' + escapeHtml(ref.locationState || '') + '"></div>';
@@ -1337,9 +1433,10 @@ export function renderUI(): string {
         html += '<div><label>Radius (miles)</label><input id="dSellingRadius" type="number" min="1" value="' + (ref.sellingRadiusMiles || '') + '"></div></div>';
         html += '</details>';
         html += '</form>';
+        html += '</div>';
 
         // Media management
-        html += '<h2 style="margin-top:24px;">Media</h2>';
+        html += '<div class="deal-heading">Media</div>';
         html += '<div class="media-thumbs" id="mediaThumbs">';
         media.forEach(m => {
           const isVid = m.mediaType === 'video';
@@ -1358,49 +1455,84 @@ export function renderUI(): string {
 
         // Negotiations for this ref
         if (refNegs.length > 0) {
-          html += '<h2 style="margin-top:24px;">Negotiations</h2>';
+          html += '<div class="deal-heading">Negotiations</div>';
           html += renderNegotiationCards(refNegs, true);
         }
 
-        html += '</div>'; // end detail-left
+        html += '</div>'; // end detail-left deal-body
 
-        // Right: action card
+        // ===== Right: PaymentCard =====
         html += '<div class="detail-right">';
-        html += '<div class="action-card">';
-        if (activeOffer) {
-          html += '<div class="action-price">' + escapeHtml(activeOffer.priceCurrency) + ' ' + activeOffer.price.toFixed(2) + '</div>';
+        html += '<div class="payment-card">';
+
+        // Header: price + thumbnail
+        html += '<div class="payment-card-header">';
+        html += '<div class="payment-card-amount">' + priceDisplay;
+        html += '<small>' + statusLabels[ref.listingStatus] + '</small></div>';
+        html += '<div class="payment-card-thumb">';
+        if (thumbSrc) {
+          html += '<img src="' + thumbSrc + '" alt="">';
+        } else {
+          html += '<svg width="28" height="28" viewBox="0 0 40 71" fill="none"><path d="M36.33 2.41s.5-.98.1-1.75C36.03-.1 35.05.01 35.05.01H11.18s-.63-.03-1.03.34c-.4.37-.55 1.15-.55 1.15L.24 32.59s-.49 1.18-.07 2.08c.42.9 1.4.83 1.4.83h8.49L.56 66.88s-.73 1.64.44 2.45c1.16.82 2.37-.42 2.37-.42L37.74 24.6s.57-.65.19-1.67c-.38-1.01-1.23-.91-1.23-.91H26.88l9.45-19.61z" fill="#E6E8EC"/></svg>';
         }
-        html += '<div class="action-row"><span class="action-label">Status</span><span class="action-value">';
-        html += '<select id="dStatus" style="width:auto;height:36px;padding:0 10px;font-size:14px;border-radius:12px;border:2px solid #E6E8EC;margin:0;font-family:Poppins,sans-serif;font-weight:600;background:#FCFCFD;">';
+        html += '</div></div>';
+
+        // Details box
+        html += '<div class="payment-card-details">';
+        html += '<div class="payment-card-detail-row"><span class="label">Status</span><span class="value">';
+        html += '<select id="dStatus" style="width:auto;height:32px;padding:0 10px;font-size:13px;border-radius:10px;border:1px solid #E6E8EC;margin:0;font-family:Poppins,sans-serif;font-weight:600;background:#fff;">';
         ['private','for_sale','willing_to_sell'].forEach(s => {
           html += '<option value="' + s + '"' + (ref.listingStatus === s ? ' selected' : '') + '>' + statusLabels[s] + '</option>';
         });
         html += '</select></span></div>';
-        html += '<div class="action-row"><span class="action-label">Quantity</span><span class="action-value">' + ref.quantity + '</span></div>';
-        if (ref.category) html += '<div class="action-row"><span class="action-label">Category</span><span class="action-value">' + escapeHtml(ref.category) + '</span></div>';
-        if (ref.subcategory) html += '<div class="action-row"><span class="action-label">Subcategory</span><span class="action-value">' + escapeHtml(ref.subcategory) + '</span></div>';
-        if (ref.condition) html += '<div class="action-row"><span class="action-label">Condition</span><span class="action-value">' + escapeHtml(ref.condition.replace(/_/g, ' ').replace(/\\b\\w/g, function(c) { return c.toUpperCase(); })) + '</span></div>';
-        var detailAttrSummary = buildAttributeSummary(ref.category, ref.subcategory, ref.attributes, null);
-        if (detailAttrSummary) html += '<div class="action-row"><span class="action-label">Details</span><span class="action-value" style="font-size:12px;">' + escapeHtml(detailAttrSummary) + '</span></div>';
-        if (ref.sku) html += '<div class="action-row"><span class="action-label">SKU</span><span class="action-value">' + escapeHtml(ref.sku) + '</span></div>';
-        const locParts = [ref.locationCity, ref.locationState, ref.locationZip].filter(Boolean);
+        html += '<div class="payment-card-detail-row"><span class="label">Quantity</span><span class="value">' + ref.quantity + '</span></div>';
+        if (ref.category) html += '<div class="payment-card-detail-row"><span class="label">Category</span><span class="value">' + escapeHtml(ref.category) + '</span></div>';
+        if (ref.subcategory) html += '<div class="payment-card-detail-row"><span class="label">Subcategory</span><span class="value">' + escapeHtml(ref.subcategory) + '</span></div>';
+        html += '</div>';
+
+        // Buttons row
+        html += '<div class="payment-card-buttons">';
+        html += '<button class="button-stroke" onclick="navigator.clipboard.writeText(location.origin + \\'/refs/' + ref.id + '\\').then(function(){ showToast(\\'Link copied!\\',\\'\\'); })"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Share</button>';
+        html += '<button class="button-gradient" onclick="saveDetail(\\'' + ref.id + '\\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Changes</button>';
+        html += '</div>';
+
+        // Invoice rows
+        if (conditionDisplay) {
+          html += '<div class="invoice-row"><span class="invoice-label">Condition</span><span class="invoice-value">' + escapeHtml(conditionDisplay) + '</span></div>';
+        }
+        if (detailAttrSummary) {
+          html += '<div class="invoice-row"><span class="invoice-label">Details</span><span class="invoice-value" style="font-size:12px;">' + escapeHtml(detailAttrSummary) + '</span></div>';
+        }
+        if (ref.sku) {
+          html += '<div class="invoice-row"><span class="invoice-label">SKU</span><span class="invoice-value">' + escapeHtml(ref.sku) + '</span></div>';
+        }
         if (locParts.length > 0) {
-          html += '<div class="action-row"><span class="action-label">Location</span><span class="action-value">' + escapeHtml(locParts.join(', ')) + '</span></div>';
+          html += '<div class="invoice-row"><span class="invoice-label">Location</span><span class="invoice-value">' + escapeHtml(locParts.join(', ')) + '</span></div>';
         }
-        const scopeLabels = { global: 'Global', national: 'National', range: 'Range' };
-        if (ref.sellingScope) {
-          let scopeText = scopeLabels[ref.sellingScope] || ref.sellingScope;
-          if (ref.sellingScope === 'range' && ref.sellingRadiusMiles) scopeText += ' (' + ref.sellingRadiusMiles + ' mi)';
-          html += '<div class="action-row"><span class="action-label">Selling Scope</span><span class="action-value">' + escapeHtml(scopeText) + '</span></div>';
+        if (scopeText) {
+          html += '<div class="invoice-row"><span class="invoice-label">Selling Scope</span><span class="invoice-value">' + escapeHtml(scopeText) + '</span></div>';
         }
-        html += '<div class="action-row"><span class="action-label">Share on Reffo</span><span class="action-value">';
+
+        // Hidden invoice rows (future use)
+        html += '<div class="invoice-row" style="display:none;"><span class="invoice-label">Commission</span><span class="invoice-value">$0.00</span></div>';
+        html += '<div class="invoice-row" style="display:none;"><span class="invoice-label">Referral Fee</span><span class="invoice-value">$0.00</span></div>';
+        html += '<div class="invoice-row" style="display:none;"><span class="invoice-label">Tax</span><span class="invoice-value">$0.00</span></div>';
+
+        // Sync toggle + footer
+        html += '<div class="invoice-row"><span class="invoice-label">Share on Reffo</span><span class="invoice-value">';
         html += '<label class="sync-toggle"><input type="checkbox" ' + (ref.reffoSynced ? 'checked' : '') + ' onchange="toggleSync(\\'' + ref.id + '\\', this)"><span class="toggle-track"></span></label>';
         html += '</span></div>';
-        html += '<div style="margin-top:20px;display:flex;gap:10px;flex-direction:column;">';
-        html += '<button class="btn-primary" style="width:100%;" onclick="saveDetail(\\'' + ref.id + '\\')">Save Changes</button>';
+
+        if (listedDate) {
+          html += '<div class="payment-card-footer">Listed on ' + listedDate + '</div>';
+        }
+
+        // Archive button
+        html += '<div style="padding:0 30px 20px;">';
         html += '<button class="btn-danger" style="width:100%;" onclick="deleteRef(\\'' + ref.id + '\\')"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M18 10C18 11.5823 17.5308 13.129 16.6518 14.4446C15.7727 15.7602 14.5233 16.7855 13.0615 17.391C11.5997 17.9965 9.99113 18.155 8.43928 17.8463C6.88743 17.5376 5.46197 16.7757 4.34315 15.6569C3.22433 14.538 2.4624 13.1126 2.15372 11.5607C1.84504 10.0089 2.00347 8.40034 2.60897 6.93853C3.21447 5.47672 4.23985 4.22729 5.55544 3.34824C6.87104 2.46919 8.41775 2 10 2C12.1217 2 14.1566 2.84285 15.6569 4.34315C17.1572 5.84344 18 7.87827 18 10ZM20 10C20 11.9778 19.4135 13.9112 18.3147 15.5557C17.2159 17.2002 15.6541 18.4819 13.8268 19.2388C11.9996 19.9957 9.98891 20.1937 8.0491 19.8079C6.10929 19.422 4.32746 18.4696 2.92894 17.0711C1.53041 15.6725 0.578004 13.8907 0.192152 11.9509C-0.193701 10.0111 0.00433284 8.00043 0.761209 6.17317C1.51809 4.3459 2.79981 2.78412 4.4443 1.6853C6.08879 0.58649 8.02219 0 10 0C12.6522 0 15.1957 1.05357 17.0711 2.92893C18.9464 4.8043 20 7.34784 20 10ZM5 9C4.73479 9 4.48043 9.10536 4.2929 9.29289C4.10536 9.48043 4 9.73478 4 10C4 10.2652 4.10536 10.5196 4.2929 10.7071C4.48043 10.8946 4.73479 11 5 11H15C15.2652 11 15.5196 10.8946 15.7071 10.7071C15.8946 10.5196 16 10.2652 16 10C16 9.73478 15.8946 9.48043 15.7071 9.29289C15.5196 9.10536 15.2652 9 15 9H5Z" fill="currentColor"/></svg> Archive Ref</button>';
         html += '</div>';
-        html += '</div>'; // end action-card
+
+        html += '</div>'; // end payment-card
         html += '</div>'; // end detail-right
 
         html += '</div>'; // end detail-columns
@@ -1672,6 +1804,7 @@ export function renderUI(): string {
       const photos = mediaList.filter(m => m.mediaType === 'photo');
       const mainPhoto = photos[0];
       const sidePhotos = photos.slice(1);
+      const thumbSrc = (mainPhoto && baseUrl) ? baseUrl + '/' + escapeHtml(mainPhoto.filePath) : '';
 
       let mainImgHtml = (mainPhoto && baseUrl)
         ? '<img src="' + baseUrl + '/' + escapeHtml(mainPhoto.filePath) + '" alt="">'
@@ -1688,17 +1821,16 @@ export function renderUI(): string {
         }
       }
 
-      const catBadges = [item.category, item.subcategory].filter(Boolean).map(b =>
-        '<span class="badge badge-cat">' + escapeHtml(b) + '</span>'
-      ).join('');
-      const statusClass = statusBadgeClass[item.listingStatus] || 'badge-for-sale';
       const statusLabel = statusLabels[item.listingStatus] || '';
+      const priceDisplay = offer ? escapeHtml(offer.priceCurrency) + ' ' + offer.price.toFixed(2) : 'Make an offer';
+      const remoteLoc = [item.locationCity, item.locationState, item.locationZip].filter(Boolean);
+      const conditionDisplay = item.condition ? item.condition.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }) : '';
 
-      let actionBtn = '';
+      let gradientBtn = '';
       if (item.listingStatus === 'for_sale' && offer) {
-        actionBtn = '<button class="btn-primary" style="width:100%;" onclick="openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + offer.price + ', \\'' + escapeHtml(offer.priceCurrency) + '\\')"><svg width="12" height="12" viewBox="0 0 13 14" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.3231 4.33301H2.66709C2.48518 4.33295 2.30518 4.37002 2.1381 4.44199C1.97098 4.51473 1.8203 4.62052 1.69511 4.75299C1.57019 4.88603 1.47385 5.04327 1.41209 5.215C1.35099 5.38639 1.32515 5.56837 1.3361 5.75L1.66911 11.083C1.69023 11.4216 1.83968 11.7394 2.08699 11.9717C2.33429 12.2039 2.66084 12.3332 3.0001 12.333H9.99009C10.3294 12.3332 10.6559 12.2039 10.9032 11.9717C11.1505 11.7394 11.3 11.4216 11.3211 11.083L11.6541 5.75C11.6661 5.56833 11.6402 5.38615 11.5781 5.215C11.5163 5.04327 11.42 4.88603 11.2951 4.75299C11.1706 4.62002 11.02 4.51412 10.8528 4.44186C10.6856 4.36961 10.5053 4.33255 10.3231 4.33301Z" fill="white"/><path d="M3.16212 3.66602C3.15445 3.2234 3.23504 2.78368 3.39912 2.37253C3.5632 1.96137 3.80751 1.58703 4.11781 1.2713C4.42811 0.955576 4.79818 0.704808 5.20643 0.53363C5.61468 0.362453 6.05296 0.274292 6.49565 0.274292C6.93833 0.274292 7.37658 0.362453 7.78483 0.53363C8.19308 0.704808 8.56315 0.955576 8.87346 1.2713C9.18376 1.58703 9.42809 1.96137 9.59217 2.37253C9.75626 2.78368 9.83681 3.2234 9.82914 3.66602V5.00003C9.82247 5.17233 9.74931 5.33535 9.62504 5.4549C9.50078 5.57444 9.33507 5.6412 9.16264 5.6412C8.99021 5.6412 8.82447 5.57444 8.70021 5.4549C8.57594 5.33535 8.50281 5.17233 8.49614 5.00003V3.66602C8.49614 3.13558 8.28542 2.6269 7.91035 2.25183C7.53528 1.87676 7.02657 1.66602 6.49614 1.66602C5.9657 1.66602 5.45699 1.87676 5.08192 2.25183C4.70685 2.6269 4.49614 3.13558 4.49614 3.66602V5.00003C4.49614 5.17693 4.42585 5.34659 4.30076 5.47168C4.17568 5.59677 4.00604 5.66702 3.82914 5.66702C3.65224 5.66702 3.48258 5.59677 3.35749 5.47168C3.23241 5.34659 3.16212 5.17693 3.16212 5.00003V3.66602Z" fill="white"/></svg> Buy at ' + escapeHtml(offer.priceCurrency + ' ' + offer.price.toFixed(2)) + '</button>';
+        gradientBtn = '<button class="button-gradient" onclick="openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + offer.price + ', \\'' + escapeHtml(offer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3L14 8"/><path d="m17 7 1.5 1.5a1 1 0 1 0 3-3L18 2"/></svg> Buy at ' + escapeHtml(offer.priceCurrency + ' ' + offer.price.toFixed(2)) + '</button>';
       } else if (item.listingStatus === 'willing_to_sell') {
-        actionBtn = '<button class="btn-secondary" style="width:100%;" onclick="openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')">Make Offer</button>';
+        gradientBtn = '<button class="button-gradient" onclick="openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3L14 8"/><path d="m17 7 1.5 1.5a1 1 0 1 0 3-3L18 2"/></svg> Make Offer</button>';
       }
 
       let html = '';
@@ -1713,32 +1845,95 @@ export function renderUI(): string {
 
       html += '<div class="detail-columns">';
 
-      // Left: ref info
-      html += '<div class="detail-left">';
-      html += '<h1 style="font-size:24px;font-weight:700;color:#141416;margin-bottom:12px;">' + escapeHtml(item.name) + '</h1>';
-      html += '<div class="card-meta" style="margin-bottom:12px;"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + catBadges + '</div>';
-      if (item.description) {
-        html += '<p style="font-size:15px;color:#353945;line-height:1.71;margin-bottom:16px;">' + escapeHtml(item.description) + '</p>';
-      }
-      const remoteLoc = [item.locationCity, item.locationState, item.locationZip].filter(Boolean);
-      if (remoteLoc.length > 0) {
-        html += '<p style="font-size:14px;color:#777E90;margin-bottom:8px;">Near ' + escapeHtml(remoteLoc.join(', ')) + '</p>';
-      }
-      html += '<div class="beacon-id" style="margin-top:8px;">Seller beacon: ' + escapeHtml(peer.beaconId) + '</div>';
-      html += '</div>'; // end detail-left
+      // ===== Left: DealBody =====
+      html += '<div class="detail-left deal-body">';
+      html += '<h1 class="deal-title">' + escapeHtml(item.name) + '</h1>';
 
-      // Right: action card
-      html += '<div class="detail-right">';
-      html += '<div class="action-card">';
-      if (offer) {
-        html += '<div class="action-price">' + escapeHtml(offer.priceCurrency) + ' ' + offer.price.toFixed(2) + '</div>';
+      // Posted By
+      html += '<div class="deal-posted-by">';
+      html += '<div class="avatar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
+      html += '<div><div class="poster-name">Seller Beacon</div><div class="poster-label">' + escapeHtml(peer.beaconId.slice(0, 16)) + '...</div></div>';
+      html += '</div>';
+
+      // Description
+      if (item.description) {
+        html += '<div class="deal-content">' + escapeHtml(item.description) + '</div>';
       }
-      html += '<div class="action-row"><span class="action-label">Status</span><span class="action-value">' + statusLabel + '</span></div>';
-      if (item.quantity > 1) html += '<div class="action-row"><span class="action-label">Qty available</span><span class="action-value">' + item.quantity + '</span></div>';
-      if (item.category) html += '<div class="action-row"><span class="action-label">Category</span><span class="action-value">' + escapeHtml(item.category) + '</span></div>';
-      if (item.subcategory) html += '<div class="action-row"><span class="action-label">Subcategory</span><span class="action-value">' + escapeHtml(item.subcategory) + '</span></div>';
-      if (actionBtn) html += '<div style="margin-top:20px;">' + actionBtn + '</div>';
-      html += '</div>'; // end action-card
+
+      // Information grid
+      html += '<div class="deal-heading">Information</div>';
+      html += '<div class="info-grid">';
+      html += '<div class="info-item">';
+      html += '<div class="info-icon blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#92A5EF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>';
+      html += '<span class="info-type">' + (remoteLoc.length > 0 ? 'Near ' + escapeHtml(remoteLoc.join(', ')) : 'Location N/A') + '</span></div>';
+      html += '<div class="info-item">';
+      html += '<div class="info-icon teal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8BC5E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>';
+      html += '<span class="info-type">' + escapeHtml(item.category || 'General') + (item.subcategory ? ' / ' + escapeHtml(item.subcategory) : '') + '</span></div>';
+      html += '<div class="info-item">';
+      html += '<div class="info-icon orange"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FA8F54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
+      html += '<span class="info-type">Beacon: ' + escapeHtml(peer.beaconId.slice(0, 12)) + '...</span></div>';
+      html += '<div class="info-item">';
+      html += '<div class="info-icon green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#58C27D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>';
+      html += '<span class="info-type">' + (conditionDisplay || 'Condition N/A') + '</span></div>';
+      html += '</div>';
+
+      html += '</div>'; // end detail-left deal-body
+
+      // ===== Right: PaymentCard =====
+      html += '<div class="detail-right">';
+      html += '<div class="payment-card">';
+
+      // Header: price + thumbnail
+      html += '<div class="payment-card-header">';
+      html += '<div class="payment-card-amount">' + priceDisplay;
+      html += '<small>' + statusLabel + '</small></div>';
+      html += '<div class="payment-card-thumb">';
+      if (thumbSrc) {
+        html += '<img src="' + thumbSrc + '" alt="">';
+      } else {
+        html += '<svg width="28" height="28" viewBox="0 0 40 71" fill="none"><path d="M36.33 2.41s.5-.98.1-1.75C36.03-.1 35.05.01 35.05.01H11.18s-.63-.03-1.03.34c-.4.37-.55 1.15-.55 1.15L.24 32.59s-.49 1.18-.07 2.08c.42.9 1.4.83 1.4.83h8.49L.56 66.88s-.73 1.64.44 2.45c1.16.82 2.37-.42 2.37-.42L37.74 24.6s.57-.65.19-1.67c-.38-1.01-1.23-.91-1.23-.91H26.88l9.45-19.61z" fill="#E6E8EC"/></svg>';
+      }
+      html += '</div></div>';
+
+      // Details box
+      html += '<div class="payment-card-details">';
+      html += '<div class="payment-card-detail-row"><span class="label">Status</span><span class="value">' + statusLabel + '</span></div>';
+      if (item.quantity > 1) html += '<div class="payment-card-detail-row"><span class="label">Qty available</span><span class="value">' + item.quantity + '</span></div>';
+      if (item.category) html += '<div class="payment-card-detail-row"><span class="label">Category</span><span class="value">' + escapeHtml(item.category) + '</span></div>';
+      if (item.subcategory) html += '<div class="payment-card-detail-row"><span class="label">Subcategory</span><span class="value">' + escapeHtml(item.subcategory) + '</span></div>';
+      html += '</div>';
+
+      // Buttons row
+      html += '<div class="payment-card-buttons">';
+      html += '<button class="button-stroke" onclick="navigator.clipboard.writeText(location.href).then(function(){ showToast(\\'Link copied!\\',\\'\\'); })"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Share</button>';
+      if (gradientBtn) html += gradientBtn;
+      html += '</div>';
+
+      // Invoice rows
+      if (offer) {
+        html += '<div class="invoice-row"><span class="invoice-label">Item Price</span><span class="invoice-value">' + escapeHtml(offer.priceCurrency + ' ' + offer.price.toFixed(2)) + '</span></div>';
+      }
+      if (conditionDisplay) {
+        html += '<div class="invoice-row"><span class="invoice-label">Condition</span><span class="invoice-value">' + escapeHtml(conditionDisplay) + '</span></div>';
+      }
+      if (remoteLoc.length > 0) {
+        html += '<div class="invoice-row"><span class="invoice-label">Location</span><span class="invoice-value">' + escapeHtml(remoteLoc.join(', ')) + '</span></div>';
+      }
+
+      // Hidden invoice rows (future use)
+      html += '<div class="invoice-row" style="display:none;"><span class="invoice-label">Commission</span><span class="invoice-value">$0.00</span></div>';
+      html += '<div class="invoice-row" style="display:none;"><span class="invoice-label">Referral Fee</span><span class="invoice-value">$0.00</span></div>';
+      html += '<div class="invoice-row" style="display:none;"><span class="invoice-label">Tax</span><span class="invoice-value">$0.00</span></div>';
+
+      // Total row
+      if (offer) {
+        html += '<div class="invoice-row invoice-row-bg"><span class="invoice-label" style="font-weight:600;color:#141416;">Total</span><span class="invoice-value" style="font-size:16px;">' + escapeHtml(offer.priceCurrency + ' ' + offer.price.toFixed(2)) + '</span></div>';
+      }
+
+      // Footer
+      html += '<div class="payment-card-footer">Seller beacon is online</div>';
+
+      html += '</div>'; // end payment-card
       html += '</div>'; // end detail-right
 
       html += '</div>'; // end detail-columns

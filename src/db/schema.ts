@@ -24,6 +24,112 @@ export function getTestDb(): Database.Database {
 }
 
 function initSchema(database: Database.Database): void {
+  // Force WAL checkpoint to ensure sqlite_master and pragma are consistent
+  database.pragma('wal_checkpoint(TRUNCATE)');
+
+  // === Migration: rename old items/item_media tables from pre-rename databases ===
+  const oldItemsTable = database.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='items'").get();
+  if (oldItemsTable) {
+    // A previous run may have created an empty `refs` table via CREATE TABLE IF NOT EXISTS — drop it first
+    const emptyRefsTable = database.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='refs'").get();
+    if (emptyRefsTable) {
+      database.exec(`DROP TABLE refs`);
+    }
+    database.exec(`ALTER TABLE items RENAME TO refs`);
+  }
+  const oldItemMediaTable = database.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='item_media'").get();
+  if (oldItemMediaTable) {
+    const emptyRefMediaTable = database.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='ref_media'").get();
+    if (emptyRefMediaTable) {
+      database.exec(`DROP TABLE ref_media`);
+    }
+    database.exec(`ALTER TABLE item_media RENAME TO ref_media`);
+  }
+
+  // Migration: rename item_id→ref_id in ref_media table
+  const refMediaSql = database.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='ref_media'").get() as { sql: string } | undefined;
+  if (refMediaSql && refMediaSql.sql.includes('item_id')) {
+    database.exec(`
+      PRAGMA foreign_keys = OFF;
+      BEGIN TRANSACTION;
+      CREATE TABLE ref_media_new (
+        id TEXT PRIMARY KEY,
+        ref_id TEXT NOT NULL REFERENCES refs(id) ON DELETE CASCADE,
+        media_type TEXT NOT NULL CHECK(media_type IN ('photo', 'video')),
+        file_path TEXT NOT NULL,
+        mime_type TEXT NOT NULL,
+        file_size INTEGER NOT NULL DEFAULT 0,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      INSERT INTO ref_media_new (id, ref_id, media_type, file_path, mime_type, file_size, sort_order, created_at)
+        SELECT id, item_id, media_type, file_path, mime_type, file_size, sort_order, created_at FROM ref_media;
+      DROP TABLE ref_media;
+      ALTER TABLE ref_media_new RENAME TO ref_media;
+      COMMIT;
+      PRAGMA foreign_keys = ON;
+    `);
+  }
+
+  // Migration: rename item_id→ref_id in offers table
+  // Use sqlite_master SQL (not pragma) to detect old columns reliably after WAL recovery
+  const offersSql = database.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='offers'").get() as { sql: string } | undefined;
+  if (offersSql && offersSql.sql.includes('item_id')) {
+    database.exec(`
+      PRAGMA foreign_keys = OFF;
+      BEGIN TRANSACTION;
+      CREATE TABLE offers_new (
+        id TEXT PRIMARY KEY,
+        ref_id TEXT NOT NULL REFERENCES refs(id) ON DELETE CASCADE,
+        price REAL NOT NULL,
+        price_currency TEXT NOT NULL DEFAULT 'USD',
+        status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'sold', 'withdrawn')),
+        seller_id TEXT NOT NULL,
+        location TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      INSERT INTO offers_new (id, ref_id, price, price_currency, status, seller_id, location, created_at, updated_at)
+        SELECT id, item_id, price, price_currency, status, seller_id, location, created_at, updated_at FROM offers;
+      DROP TABLE offers;
+      ALTER TABLE offers_new RENAME TO offers;
+      COMMIT;
+      PRAGMA foreign_keys = ON;
+    `);
+  }
+
+  // Migration: rename item_id→ref_id, item_name→ref_name in negotiations table
+  const negsSql = database.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='negotiations'").get() as { sql: string } | undefined;
+  if (negsSql && negsSql.sql.includes('item_id')) {
+    database.exec(`
+      PRAGMA foreign_keys = OFF;
+      BEGIN TRANSACTION;
+      CREATE TABLE negotiations_new (
+        id TEXT PRIMARY KEY,
+        ref_id TEXT NOT NULL,
+        ref_name TEXT NOT NULL DEFAULT '',
+        buyer_beacon_id TEXT NOT NULL,
+        seller_beacon_id TEXT NOT NULL,
+        price REAL NOT NULL,
+        price_currency TEXT NOT NULL DEFAULT 'USD',
+        message TEXT NOT NULL DEFAULT '',
+        status TEXT NOT NULL DEFAULT 'pending'
+          CHECK(status IN ('pending', 'accepted', 'rejected', 'countered', 'withdrawn', 'sold')),
+        role TEXT NOT NULL CHECK(role IN ('buyer', 'seller')),
+        counter_price REAL,
+        response_message TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      INSERT INTO negotiations_new (id, ref_id, ref_name, buyer_beacon_id, seller_beacon_id, price, price_currency, message, status, role, counter_price, response_message, created_at, updated_at)
+        SELECT id, item_id, item_name, buyer_beacon_id, seller_beacon_id, price, price_currency, message, status, role, counter_price, response_message, created_at, updated_at FROM negotiations;
+      DROP TABLE negotiations;
+      ALTER TABLE negotiations_new RENAME TO negotiations;
+      COMMIT;
+      PRAGMA foreign_keys = ON;
+    `);
+  }
+
   database.exec(`
     CREATE TABLE IF NOT EXISTS refs (
       id TEXT PRIMARY KEY,
