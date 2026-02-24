@@ -2,5 +2,10 @@ node_modules/
 dist/
 .env
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
 uploads/
+data/
+Context_From_Doug/
+.claude/settings.local.json

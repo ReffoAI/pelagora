@@ -65,9 +65,6 @@ export function renderUI(): string {
       .search-filter-segment { padding: 0 10px; }
     }
 
-    /* List Ref Modal */
-    .list-ref-modal .modal { width: 640px; max-height: 90vh; overflow-y: auto; }
-
     /* Search Filter Bar — 3 segment pill (matching webapp) */
     .search-filter-bar { display: flex; align-items: center; background: #FCFCFD; border-radius: 48px; box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px #E6E8EC; overflow: hidden; height: 56px; padding-right: 8px; max-width: 660px; margin: 0 auto; }
     .search-filter-segment { display: flex; align-items: center; gap: 8px; padding: 0 16px; height: 100%; white-space: nowrap; }
@@ -643,10 +640,16 @@ export function renderUI(): string {
     </div>
   </div>
 
-  <!-- List Ref Modal -->
-  <div id="listRefModal" class="modal-overlay hidden list-ref-modal">
-    <div class="modal">
-      <h3>List a Ref</h3>
+  <!-- List Ref Tab -->
+  <div id="tab-list" class="hidden">
+    <section>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <span class="detail-header-back" onclick="switchTab('refs')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </span>
+        <h3 style="margin:0;font-size:1.25rem;font-weight:700;">List a Ref</h3>
+      </div>
+      <div style="background:#FCFCFD;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06),0 0 0 1px #E6E8EC;">
       <div id="listMsg"></div>
       <form id="listForm">
         <label for="refName">Name *</label>
@@ -764,7 +767,8 @@ export function renderUI(): string {
           </div>
         </div>
       </form>
-    </div>
+      </div>
+    </section>
   </div>
 
   <!-- Proposal Modal (buyer sending offer) -->
@@ -859,6 +863,7 @@ export function renderUI(): string {
       document.getElementById('tab-search').classList.toggle('hidden', tab !== 'search');
       document.getElementById('tab-negotiations').classList.toggle('hidden', tab !== 'negotiations');
       document.getElementById('tab-settings').classList.toggle('hidden', tab !== 'settings');
+      document.getElementById('tab-list').classList.toggle('hidden', tab !== 'list');
       // Show/hide search filter bar
       var sfb = document.getElementById('searchFilterBar');
       if (sfb) sfb.parentElement.style.display = (tab === 'refs' || tab === 'search') ? '' : 'none';
@@ -1807,8 +1812,8 @@ export function renderUI(): string {
         return;
       }
 
-      let cards = '';
-      lastSearchResults = [];
+      // Flatten all items from all peers into one array
+      var allItems = [];
       data.results.forEach(peer => {
         const peerRefs = peer.refs || [];
         const peerOffers = peer.offers || [];
@@ -1820,13 +1825,34 @@ export function renderUI(): string {
         peerRefs.forEach(item => {
           const refOffers = offerMap[item.id] || [];
           const activeOffer = refOffers.find(o => o.status === 'active');
+          const refMedia = peerMedia[item.id] || [];
+          allItems.push({ item: item, peer: peer, activeOffer: activeOffer || null, refMedia: refMedia, peerHttpPort: peerHttpPort });
+        });
+      });
+
+      // Sort by newest first and limit to 30
+      allItems.sort((a, b) => {
+        const da = a.item.createdAt || '';
+        const db = b.item.createdAt || '';
+        return da < db ? 1 : da > db ? -1 : 0;
+      });
+      allItems = allItems.slice(0, 30);
+
+      let cards = '';
+      lastSearchResults = [];
+      allItems.forEach(entry => {
+          const item = entry.item;
+          const peer = entry.peer;
+          const activeOffer = entry.activeOffer;
+          const refMedia = entry.refMedia;
+          const peerHttpPort = entry.peerHttpPort;
+
           const priceStr = activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
           const badges = [item.category, item.subcategory].filter(Boolean).map(b =>
             '<span class="badge badge-cat">' + escapeHtml(b) + '</span>'
           ).join('');
           const statusClass = statusBadgeClass[item.listingStatus] || 'badge-for-sale';
           const statusLabel = statusLabels[item.listingStatus] || '';
-          const refMedia = peerMedia[item.id] || [];
           const firstPhoto = refMedia.find(m => m.mediaType === 'photo');
 
           let actionBtn = '';
@@ -1857,11 +1883,10 @@ export function renderUI(): string {
               '<div class="beacon-id">Beacon: ' + escapeHtml(peer.beaconId.slice(0, 16)) + '...</div>' +
               (actionBtn ? '<div style="margin-top:10px;">' + actionBtn + '</div>' : '') +
             '</div></div>';
-        });
       });
 
       container.innerHTML = '<p style="font-size:14px;color:#777E90;margin-bottom:12px;font-weight:500;">' +
-        data.peers + ' peer(s) responded</p><div class="cards">' + cards + '</div>';
+        data.peers + ' peer(s) responded &middot; showing ' + allItems.length + ' newest</p><div class="cards">' + cards + '</div>';
     }
 
     async function executeHeaderSearch() {
@@ -2581,13 +2606,13 @@ export function renderUI(): string {
       loadMyRefs();
     };
 
-    // ===== List Ref Modal =====
+    // ===== List Ref =====
     window.openListRefModal = function() {
-      document.getElementById('listRefModal').classList.remove('hidden');
+      switchTab('list');
     };
 
     window.closeListRefModal = function() {
-      document.getElementById('listRefModal').classList.add('hidden');
+      switchTab('refs');
     };
 
     // ===== Init =====
