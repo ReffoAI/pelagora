@@ -1,0 +1,95 @@
+name: Build Release Bundles
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - runner: macos-14
+            platform: macos
+            arch: arm64
+          - runner: macos-13
+            platform: macos
+            arch: x64
+          - runner: windows-latest
+            platform: windows
+            arch: x64
+
+    runs-on: ${{ matrix.runner }}
+    name: Build (${{ matrix.platform }}-${{ matrix.arch }})
+
+    steps:
+      - name: Checkout reffo-beacon
+        uses: actions/checkout@v4
+        with:
+          path: reffo-beacon
+
+      - name: Checkout reffo-protocol
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/reffo-protocol
+          path: reffo-protocol
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install beacon dependencies
+        working-directory: reffo-beacon
+        run: npm ci
+
+      - name: Build release (macOS/Linux)
+        if: runner.os != 'Windows'
+        working-directory: reffo-beacon
+        run: bash scripts/build-release.sh
+
+      - name: Build release (Windows)
+        if: runner.os == 'Windows'
+        working-directory: reffo-beacon
+        shell: bash
+        run: bash scripts/build-release.sh
+
+      - name: Find release artifact
+        id: artifact
+        shell: bash
+        working-directory: reffo-beacon
+        run: |
+          ZIP_FILE=$(ls release/reffo-beacon-*.zip 2>/dev/null || ls release/reffo-beacon-*.tar.gz 2>/dev/null)
+          echo "path=$ZIP_FILE" >> "$GITHUB_OUTPUT"
+          echo "name=$(basename "$ZIP_FILE")" >> "$GITHUB_OUTPUT"
+          echo "Found artifact: $ZIP_FILE"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-${{ matrix.arch }}
+          path: reffo-beacon/${{ steps.artifact.outputs.path }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    name: Create GitHub Release
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: find artifacts -type f | sort
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: artifacts/**/*
