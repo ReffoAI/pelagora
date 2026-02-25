@@ -20,8 +20,8 @@ export function renderUI(): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reffo Beacon</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='40' height='71' viewBox='0 0 40 71' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23c)'%3E%3Cpath d='M38.27 3.79s.5-.98.1-1.75c-.4-.76-1.37-.66-1.37-.66H13.12s-.63-.03-1.03.34c-.4.37-.55 1.15-.55 1.15L2.18 33.97s-.49 1.18-.07 2.08c.42.9 1.4.83 1.4.83h8.49l-9.5 31.39s-.73 1.63.43 2.45c1.17.82 2.37-.41 2.37-.41L39.68 25.98s.57-.65.19-1.67c-.38-1.01-1.23-.91-1.23-.91H28.82l9.45-19.61z' fill='%23000'/%3E%3Cpath d='M36.33 2.41s.5-.98.1-1.75C36.03-.1 35.05.01 35.05.01H11.18s-.63-.03-1.03.34c-.4.37-.55 1.15-.55 1.15L.24 32.59s-.49 1.18-.07 2.08c.42.9 1.4.83 1.4.83h8.49L.56 66.88s-.73 1.64.44 2.45c1.16.82 2.37-.42 2.37-.42L37.74 24.6s.57-.65.19-1.67c-.38-1.01-1.23-.91-1.23-.91H26.88l9.45-19.61z' fill='%23EA526F'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='c'%3E%3Crect width='40' height='71' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E">
+  <title>beacon</title>
+  <link rel="icon" href="/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -37,7 +37,7 @@ export function renderUI(): string {
 
     /* Header */
     h1 { font-size: 1.25rem; font-weight: 700; color: #141416; margin: 0; }
-    .bolt { display: inline-block; filter: drop-shadow(0 0 8px rgba(234,82,111,0.4)); }
+    .header-beacon-icon { height: 28px; width: auto; }
 
     /* App Header — sticky bar */
     .app-header { position: sticky; top: 0; z-index: 100; background: #FCFCFD; border-bottom: 1px solid #E6E8EC; padding: 0 24px; }
@@ -417,14 +417,8 @@ export function renderUI(): string {
   <div class="app-header">
     <div class="app-header-inner">
       <div class="app-header-logo" onclick="switchTab('refs')">
-        <svg class="bolt" width="24" height="42" viewBox="0 0 40 71" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <g clip-path="url(#clip0_bolt)">
-            <path d="M38.27 3.79s.5-.98.1-1.75c-.4-.76-1.37-.66-1.37-.66H13.12s-.63-.03-1.03.34c-.4.37-.55 1.15-.55 1.15L2.18 33.97s-.49 1.18-.07 2.08c.42.9 1.4.83 1.4.83h8.49l-9.5 31.39s-.73 1.63.43 2.45c1.17.82 2.37-.41 2.37-.41L39.68 25.98s.57-.65.19-1.67c-.38-1.01-1.23-.91-1.23-.91H28.82l9.45-19.61z" fill="black"/>
-            <path d="M36.33 2.41s.5-.98.1-1.75C36.03-.1 35.05.01 35.05.01H11.18s-.63-.03-1.03.34c-.4.37-.55 1.15-.55 1.15L.24 32.59s-.49 1.18-.07 2.08c.42.9 1.4.83 1.4.83h8.49L.56 66.88s-.73 1.64.44 2.45c1.16.82 2.37-.42 2.37-.42L37.74 24.6s.57-.65.19-1.67c-.38-1.01-1.23-.91-1.23-.91H26.88l9.45-19.61z" fill="#EA526F"/>
-          </g>
-          <defs><clipPath id="clip0_bolt"><rect width="40" height="71" fill="white"/></clipPath></defs>
-        </svg>
-        <h1>Reffo Beacon</h1>
+        <img class="header-beacon-icon" src="/beacon.png" alt="beacon">
+        <h1>beacon</h1>
       </div>
 
       <!-- Header actions: bell + avatar -->
@@ -837,10 +831,8 @@ export function renderUI(): string {
   <footer class="app-footer">
     <div class="app-footer-inner">
       <div class="app-footer-brand">
-        <svg width="20" height="36" viewBox="0 0 40 71" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M36.33 2.41s.5-.98.1-1.75C36.03-.1 35.05.01 35.05.01H11.18s-.63-.03-1.03.34c-.4.37-.55 1.15-.55 1.15L.24 32.59s-.49 1.18-.07 2.08c.42.9 1.4.83 1.4.83h8.49L.56 66.88s-.73 1.64.44 2.45c1.16.82 2.37-.42 2.37-.42L37.74 24.6s.57-.65.19-1.67c-.38-1.01-1.23-.91-1.23-.91H26.88l9.45-19.61z" fill="#EA526F"/>
-        </svg>
-        <span>Reffo Beacon</span>
+        <img src="/beacon.png" alt="beacon" style="height: 20px; width: auto;">
+        <span>beacon</span>
       </div>
       <div class="app-footer-links">
         <a href="mailto:help@reffo.ai">Support</a>
