@@ -223,6 +223,37 @@ router.delete('/api-key', (_req: Request, res: Response) => {
   res.json({ ok: true, message: 'API key removed' });
 });
 
+// POST /settings/price-estimate — Proxy price estimate to webapp
+router.post('/price-estimate', async (req: Request, res: Response) => {
+  const apiKey = process.env.REFFO_API_KEY;
+  if (!apiKey) {
+    return res.status(400).json({ error: 'Not connected to Reffo.ai. Set an API key first.' });
+  }
+
+  const reffoUrl = process.env.REFFO_API_URL || 'https://reffo.ai';
+
+  try {
+    const upstream = await fetch(`${reffoUrl}/api/price-estimate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    const data = await upstream.json();
+
+    if (!upstream.ok) {
+      return res.status(upstream.status).json(data);
+    }
+
+    res.json(data);
+  } catch (err) {
+    res.status(502).json({ error: 'Failed to reach Reffo.ai price estimate service' });
+  }
+});
+
 // POST /settings/sync-item/:id — Toggle sync for an item
 router.post('/sync-item/:id', async (req: Request, res: Response) => {
   const syncManager = req.app.get('syncManager');

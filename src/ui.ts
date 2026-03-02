@@ -148,6 +148,28 @@ export function renderUI(): string {
     .card-qty { font-size: 12px; color: #777E90; margin-top: 4px; font-weight: 500; }
     .card-desc { font-size: 14px; color: #777E90; margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.71; }
 
+    /* Status segmented control */
+    .status-segmented { display: flex; gap: 4px; padding: 4px; background: #F4F5F6; border: 1px solid #E6E8EC; border-radius: 24px; margin-bottom: 14px; }
+    .status-segmented button { flex: 1; padding: 8px 12px; border: none; border-radius: 20px; font-size: 13px; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.2s; background: transparent; color: #777E90; text-align: center; white-space: nowrap; }
+    .seg-active-private { background: #E6E8EC !important; color: #353945 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .seg-active-for_sale { background: #e6f9ed !important; color: #1a8a42 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .seg-active-willing_to_sell { background: #fff8e1 !important; color: #e6a200 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .seg-active-for_rent { background: #e6f0ff !important; color: #1a6aba !important; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+    /* Price estimate card */
+    .price-estimate-card { background: linear-gradient(135deg, #f0f2ff 0%, #e8eeff 100%); border: 1px solid #d4dbf5; border-left: 3px solid #7B61FF; border-radius: 12px; padding: 14px 14px 14px 16px; margin-bottom: 14px; }
+    .price-estimate-card .est-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .price-estimate-card .est-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em; color: #5B4FC7; }
+    .price-estimate-card .est-badge { font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 10px; }
+    .price-estimate-card .est-badge-high { background: #e6f9ed; color: #1a8a42; }
+    .price-estimate-card .est-badge-medium { background: #fff8e1; color: #e6a200; }
+    .price-estimate-card .est-badge-low { background: #F4F5F6; color: #777E90; }
+    .price-estimate-card .est-text { font-size: 15px; color: #23262F; }
+    .price-estimate-card .est-text strong { font-weight: 700; }
+    .price-estimate-card .est-muted { font-size: 14px; color: #777E90; }
+    .price-estimate-spinner { width: 16px; height: 16px; border: 2px solid #92A5EF; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
     /* Upload area */
     .upload-area { border: 2px dashed #E6E8EC; border-radius: 16px; padding: 24px; text-align: center; color: #B1B5C3; cursor: pointer; transition: border-color 0.2s, background 0.2s; margin-bottom: 14px; }
     .upload-area:hover { border-color: #EC526F; background: rgba(236,82,111,0.03); }
@@ -647,6 +669,16 @@ export function renderUI(): string {
       <div style="background:#FCFCFD;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06),0 0 0 1px #E6E8EC;">
       <div id="listMsg"></div>
       <form id="listForm">
+        <input type="hidden" id="refListingStatus" name="listingStatus" value="private">
+
+        <!-- Segmented status control -->
+        <div class="status-segmented" id="createStatusSegment">
+          <button type="button" class="seg-active-private" onclick="selectCreateStatus('private')">Private</button>
+          <button type="button" onclick="selectCreateStatus('for_sale')">For Sale</button>
+          <button type="button" onclick="selectCreateStatus('willing_to_sell')">Willing to Sell</button>
+          <button type="button" onclick="selectCreateStatus('for_rent')">For Rent</button>
+        </div>
+
         <label for="refName">Name *</label>
         <input id="refName" name="name" required placeholder="e.g. Fender Stratocaster">
 
@@ -666,7 +698,6 @@ export function renderUI(): string {
 
         <div id="createCategoryFields"></div>
 
-        <input type="hidden" id="refListingStatus" name="listingStatus" value="private">
         <div class="row">
           <div>
             <label for="refQuantity">Quantity</label>
@@ -674,26 +705,25 @@ export function renderUI(): string {
           </div>
         </div>
 
-        <div class="row">
-          <div>
-            <label for="refPrice">Price</label>
-            <input id="refPrice" name="price" type="number" min="0" step="0.01" placeholder="0.00">
-          </div>
-          <div>
-            <label for="refCurrency">Currency</label>
-            <select id="refCurrency" name="currency">
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-              <option value="GBP">GBP</option>
-              <option value="CAD">CAD</option>
-              <option value="AUD">AUD</option>
-              <option value="JPY">JPY</option>
-            </select>
+        <div id="createPriceSection" style="display:none;">
+          <div class="row">
+            <div>
+              <label for="refPrice">Price</label>
+              <input id="refPrice" name="price" type="number" min="0" step="0.01" placeholder="0.00">
+            </div>
+            <div>
+              <label for="refCurrency">Currency</label>
+              <select id="refCurrency" name="currency">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="CAD">CAD</option>
+                <option value="AUD">AUD</option>
+                <option value="JPY">JPY</option>
+              </select>
+            </div>
           </div>
         </div>
-
-        <label for="refSku">SKU</label>
-        <input id="refSku" name="sku" placeholder="Optional SKU or part number">
 
         <div id="rentalFieldsCreate" style="display:none;margin-bottom:14px;border:2px solid #e6f0ff;border-radius:12px;padding:14px;background:#f8fbff;">
           <div style="font-size:12px;font-weight:600;color:#1a6aba;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:10px;">Rental Details</div>
@@ -712,6 +742,9 @@ export function renderUI(): string {
             </div>
           </div>
         </div>
+
+        <label for="refSku">SKU</label>
+        <input id="refSku" name="sku" placeholder="Optional SKU or part number">
 
         <details style="margin-bottom:14px;border:2px solid #E6E8EC;border-radius:12px;padding:14px;">
           <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.02em;">Location Override</summary>
@@ -765,20 +798,11 @@ export function renderUI(): string {
             <span class="toggle-track"></span>
           </label>
         </div>
+        <div id="createPriceEstimate"></div>
+
         <div style="display:flex;gap:10px;justify-content:flex-end;align-items:center;">
           <button type="button" class="btn-secondary" onclick="closeListRefModal()">Cancel</button>
-          <div style="position:relative;display:inline-flex;" id="createBtnGroup">
-            <button type="button" class="btn-primary" id="createBtnMain" style="border-radius:24px 0 0 24px;padding-right:12px;" onclick="document.getElementById('refListingStatus').value=this.dataset.status;document.getElementById('listForm').requestSubmit();" data-status="private">Create Private</button>
-            <button type="button" class="btn-primary" id="createBtnToggle" style="border-radius:0 24px 24px 0;padding:0 10px;border-left:1px solid rgba(255,255,255,0.3);" onclick="var m=document.getElementById('createDropdown');m.style.display=m.style.display==='block'?'none':'block';">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-            </button>
-            <div id="createDropdown" style="display:none;position:absolute;bottom:100%;right:0;margin-bottom:4px;background:#FCFCFD;border:1px solid #E6E8EC;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);overflow:hidden;min-width:180px;z-index:10;">
-              <div style="padding:6px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#F4F5F6'" onmouseout="this.style.background=''" onclick="document.getElementById('createBtnMain').textContent='Create Private';document.getElementById('createBtnMain').dataset.status='private';document.getElementById('createDropdown').style.display='none';document.getElementById('rentalFieldsCreate').style.display='none';">Private</div>
-              <div style="padding:6px 16px;font-size:13px;font-weight:600;cursor:pointer;color:#1a8a42;transition:background 0.15s;" onmouseover="this.style.background='#F4F5F6'" onmouseout="this.style.background=''" onclick="document.getElementById('createBtnMain').textContent='Create For Sale';document.getElementById('createBtnMain').dataset.status='for_sale';document.getElementById('createDropdown').style.display='none';document.getElementById('rentalFieldsCreate').style.display='none';">For Sale</div>
-              <div style="padding:6px 16px;font-size:13px;font-weight:600;cursor:pointer;color:#e6a200;transition:background 0.15s;" onmouseover="this.style.background='#F4F5F6'" onmouseout="this.style.background=''" onclick="document.getElementById('createBtnMain').textContent='Create Willing to Sell';document.getElementById('createBtnMain').dataset.status='willing_to_sell';document.getElementById('createDropdown').style.display='none';document.getElementById('rentalFieldsCreate').style.display='none';">Willing to Sell</div>
-              <div style="padding:6px 16px;font-size:13px;font-weight:600;cursor:pointer;color:#1a6aba;transition:background 0.15s;" onmouseover="this.style.background='#F4F5F6'" onmouseout="this.style.background=''" onclick="document.getElementById('createBtnMain').textContent='Create For Rent';document.getElementById('createBtnMain').dataset.status='for_rent';document.getElementById('createDropdown').style.display='none';document.getElementById('rentalFieldsCreate').style.display='block';">For Rent</div>
-            </div>
-          </div>
+          <button type="submit" class="btn-primary" id="createSubmitBtn">Create Listing</button>
         </div>
       </form>
       </div>
@@ -1222,7 +1246,7 @@ export function renderUI(): string {
     // ===== List Form =====
     document.getElementById('listForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = e.target.querySelector('.btn-primary');
+      const btn = document.getElementById('createSubmitBtn');
       btn.disabled = true;
 
       try {
@@ -1323,10 +1347,9 @@ export function renderUI(): string {
         document.getElementById('refQuantity').value = '1';
         document.getElementById('refSubcat').innerHTML = '<option value="">Select...</option>';
         document.getElementById('createCategoryFields').innerHTML = '';
-        // Reset split button state
-        document.getElementById('createBtnMain').textContent = 'Create Private';
-        document.getElementById('createBtnMain').dataset.status = 'private';
-        document.getElementById('rentalFieldsCreate').style.display = 'none';
+        // Reset segmented control to Private
+        selectCreateStatus('private');
+        document.getElementById('createPriceEstimate').innerHTML = '';
         selectedPhotos = [];
         selectedVideo = null;
         document.getElementById('photoPreview').innerHTML = '';
@@ -1616,15 +1639,18 @@ export function renderUI(): string {
         html += '<div class="payment-card-thumb initial-avatar">Y</div>';
         html += '</div>';
 
-        // Status below price (category removed from here, moved to invoice row)
-        html += '<div style="padding:0 30px 10px;">';
-        html += '<div style="margin-bottom:6px;">';
-        html += '<select id="dStatus" style="width:auto;height:32px;padding:0 10px;font-size:13px;border-radius:10px;border:1px solid #E6E8EC;margin:0;font-family:Poppins,sans-serif;font-weight:600;background:#fff;">';
+        // Status segmented control (replaces dropdown)
+        html += '<input type="hidden" id="dStatus" value="' + (ref.listingStatus || 'private') + '">';
+        html += '<div style="padding:0 20px 10px;">';
+        html += '<div class="status-segmented" id="detailStatusSegment">';
         ['private','for_sale','willing_to_sell','for_rent'].forEach(s => {
-          html += '<option value="' + s + '"' + (ref.listingStatus === s ? ' selected' : '') + '>' + statusLabels[s] + '</option>';
+          const activeClass = ref.listingStatus === s ? segClassMap[s] : '';
+          html += '<button type="button" class="' + activeClass + '" onclick="selectDetailStatus(\\'' + s + '\\')">' + statusLabels[s] + '</button>';
         });
-        html += '</select></div>';
         html += '</div>';
+        html += '</div>';
+        // Price estimate for private items
+        html += '<div style="padding:0 20px 10px;"><div id="detailPriceEstimate"></div></div>';
 
         // Share button — own row, icon only
         html += '<div style="margin:12px 30px 0;"><button class="button-stroke" onclick="navigator.clipboard.writeText(location.origin + \\'/refs/' + ref.id + '\\').then(function(){ showToast(\\'Link copied!\\',\\'\\'); })" title="Share" style="width:40px;height:40px;padding:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button></div>';
@@ -1706,19 +1732,74 @@ export function renderUI(): string {
         dSubcat.addEventListener('change', function() {
           renderCategoryFields('detailCategoryFields', dCat.value, this.value, {});
         });
-        // Toggle rental fields visibility when status changes
-        const dStatusEl = document.getElementById('dStatus');
-        if (dStatusEl) {
-          dStatusEl.addEventListener('change', function() {
-            const rentalSection = document.getElementById('rentalFieldsDetail');
-            if (rentalSection) rentalSection.style.display = this.value === 'for_rent' ? 'block' : 'none';
-          });
+        // Trigger price estimate if currently private
+        if (ref.listingStatus === 'private') {
+          setTimeout(function() { triggerDetailPriceEstimate(); }, 100);
         }
       } catch (err) {
         container.innerHTML = '<p class="empty">Failed to load ref details</p>';
       }
     }
     window.openDetail = openDetail;
+
+    // ===== Segmented Status Control (Detail) =====
+    let detailEstimateTimer = null;
+
+    window.selectDetailStatus = function(status) {
+      document.getElementById('dStatus').value = status;
+      const seg = document.getElementById('detailStatusSegment');
+      if (seg) {
+        seg.querySelectorAll('button').forEach(function(btn, i) {
+          const statuses = ['private', 'for_sale', 'willing_to_sell', 'for_rent'];
+          btn.className = statuses[i] === status ? segClassMap[status] : '';
+        });
+      }
+      // Toggle rental fields
+      const rentalSection = document.getElementById('rentalFieldsDetail');
+      if (rentalSection) rentalSection.style.display = status === 'for_rent' ? 'block' : 'none';
+      // Toggle price estimate
+      const estimateSection = document.getElementById('detailPriceEstimate');
+      if (estimateSection) {
+        if (status === 'private') {
+          triggerDetailPriceEstimate();
+        } else {
+          estimateSection.innerHTML = '';
+        }
+      }
+    };
+
+    window.triggerDetailPriceEstimate = function() {
+      if (detailEstimateTimer) clearTimeout(detailEstimateTimer);
+      var status = document.getElementById('dStatus').value;
+      if (status !== 'private') return;
+      var nameEl = document.getElementById('dName');
+      var catEl = document.getElementById('dCat');
+      var nameVal = nameEl ? nameEl.value.trim() : '';
+      var catVal = catEl ? catEl.value : '';
+      if (!nameVal || !catVal) {
+        renderPriceEstimateUnavailable('detailPriceEstimate', 'Enter a name and category to see price suggestions.');
+        return;
+      }
+      var container = document.getElementById('detailPriceEstimate');
+      if (!container) return;
+      container.innerHTML = '<div class="price-estimate-card"><div style="display:flex;align-items:center;gap:8px;"><div class="price-estimate-spinner"></div><span class="est-muted">Estimating price...</span></div></div>';
+      detailEstimateTimer = setTimeout(function() {
+        var subcatEl = document.getElementById('dSubcat');
+        var subcatVal = subcatEl ? subcatEl.value : '';
+        fetch('/settings/price-estimate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: nameVal, category: catVal, subcategory: subcatVal })
+        }).then(function(res) {
+          if (!res.ok) throw new Error('API error');
+          return res.json();
+        }).then(function(data) {
+          renderPriceEstimate('detailPriceEstimate', data);
+        }).catch(function() {
+          renderPriceEstimateUnavailable('detailPriceEstimate', 'Connect to Reffo.ai for price suggestions');
+        });
+      }, 800);
+    };
 
     window.setMainImage = function(src) {
       document.getElementById('detailMainImg').innerHTML = '<img src="' + src + '" alt="">';
@@ -2668,6 +2749,100 @@ export function renderUI(): string {
     window.closeListRefModal = function() {
       switchTab('refs');
     };
+
+    // ===== Segmented Status Control (Create) =====
+    const segClassMap = { private: 'seg-active-private', for_sale: 'seg-active-for_sale', willing_to_sell: 'seg-active-willing_to_sell', for_rent: 'seg-active-for_rent' };
+    let createEstimateTimer = null;
+
+    window.selectCreateStatus = function(status) {
+      document.getElementById('refListingStatus').value = status;
+      const seg = document.getElementById('createStatusSegment');
+      if (seg) {
+        seg.querySelectorAll('button').forEach(function(btn, i) {
+          const statuses = ['private', 'for_sale', 'willing_to_sell', 'for_rent'];
+          btn.className = statuses[i] === status ? segClassMap[status] : '';
+        });
+      }
+      // Toggle price section: hidden when private
+      var priceSection = document.getElementById('createPriceSection');
+      if (priceSection) priceSection.style.display = status === 'private' ? 'none' : '';
+      // Toggle rental fields: visible when for_rent
+      var rentalSection = document.getElementById('rentalFieldsCreate');
+      if (rentalSection) rentalSection.style.display = status === 'for_rent' ? 'block' : 'none';
+      // Toggle price estimate: visible when private
+      var estimateSection = document.getElementById('createPriceEstimate');
+      if (estimateSection) {
+        if (status === 'private') {
+          triggerCreatePriceEstimate();
+        } else {
+          estimateSection.innerHTML = '';
+        }
+      }
+    };
+
+    window.triggerCreatePriceEstimate = function() {
+      if (createEstimateTimer) clearTimeout(createEstimateTimer);
+      var status = document.getElementById('refListingStatus').value;
+      if (status !== 'private') return;
+      var nameVal = (document.getElementById('refName').value || '').trim();
+      var catVal = document.getElementById('refCat').value || '';
+      if (!nameVal || !catVal) {
+        renderPriceEstimateUnavailable('createPriceEstimate', 'Enter a name and category to see price suggestions.');
+        return;
+      }
+      var container = document.getElementById('createPriceEstimate');
+      container.innerHTML = '<div class="price-estimate-card"><div style="display:flex;align-items:center;gap:8px;"><div class="price-estimate-spinner"></div><span class="est-muted">Estimating price...</span></div></div>';
+      createEstimateTimer = setTimeout(function() {
+        var subcatVal = document.getElementById('refSubcat').value || '';
+        fetch('/settings/price-estimate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: nameVal, category: catVal, subcategory: subcatVal })
+        }).then(function(res) {
+          if (!res.ok) throw new Error('API error');
+          return res.json();
+        }).then(function(data) {
+          renderPriceEstimate('createPriceEstimate', data);
+        }).catch(function() {
+          renderPriceEstimateUnavailable('createPriceEstimate', 'Connect to Reffo.ai for price suggestions');
+        });
+      }, 800);
+    };
+
+    window.renderPriceEstimate = function(containerId, data) {
+      var c = document.getElementById(containerId);
+      if (!c) return;
+      if (!data || !data.typical || data.typical <= 0) {
+        c.innerHTML = '<div class="price-estimate-card"><span class="est-muted">Could not estimate price for this item.</span></div>';
+        return;
+      }
+      var badgeClass = 'est-badge-' + (data.confidence || 'low');
+      c.innerHTML = '<div class="price-estimate-card">' +
+        '<div class="est-header">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>' +
+        '<span class="est-label">AI Price Suggestion</span>' +
+        '<span class="est-badge ' + badgeClass + '">' + (data.confidence || 'low') + '</span>' +
+        '</div>' +
+        '<div class="est-text">Similar items typically sell for <strong>$' + Math.round(data.low) + '\\u2013$' + Math.round(data.high) + '</strong> <span class="est-muted">(avg $' + Math.round(data.typical) + ')</span></div>' +
+        '</div>';
+    };
+
+    window.renderPriceEstimateUnavailable = function(containerId, message) {
+      var c = document.getElementById(containerId);
+      if (!c) return;
+      c.innerHTML = '<div class="price-estimate-card"><span class="est-muted">' + escapeHtml(message) + '</span></div>';
+    };
+
+    // Wire input listeners on name + category fields to trigger estimate
+    document.getElementById('refName').addEventListener('input', function() {
+      if (document.getElementById('refListingStatus').value === 'private') triggerCreatePriceEstimate();
+    });
+    document.getElementById('refCat').addEventListener('change', function() {
+      if (document.getElementById('refListingStatus').value === 'private') triggerCreatePriceEstimate();
+    });
+    document.getElementById('refSubcat').addEventListener('change', function() {
+      if (document.getElementById('refListingStatus').value === 'private') triggerCreatePriceEstimate();
+    });
 
     // ===== Init =====
     let prevOutgoingStatuses = {};
