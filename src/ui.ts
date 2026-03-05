@@ -571,6 +571,21 @@ export function renderUI(): string {
     <!-- Settings Tab -->
     <div id="tab-settings" class="hidden">
       <section>
+        <h2>Profile Picture</h2>
+        <div style="display:flex;align-items:center;gap:20px;">
+          <div id="profilePicPreview" style="width:80px;height:80px;border-radius:50%;border:2px solid #E6E8EC;background:#FCFCFD;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex-shrink:0;" onclick="document.getElementById('profilePicInput').click()">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#B1B5C3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div>
+            <button class="btn-secondary btn-sm" onclick="document.getElementById('profilePicInput').click()">Upload Photo</button>
+            <button class="btn-danger btn-sm" id="removeProfilePicBtn" style="display:none;margin-left:8px;" onclick="removeProfilePicture()">Remove</button>
+            <input type="file" id="profilePicInput" accept="image/*" style="display:none;" onchange="uploadProfilePicture(this)">
+            <p style="font-size:12px;color:#B1B5C3;margin-top:6px;margin-bottom:0;">Click the circle or button to upload. Max 10 MB.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
         <h2>Reffo.ai Connection</h2>
         <div id="settingsMsg"></div>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
@@ -2552,6 +2567,9 @@ export function renderUI(): string {
     };
 
     // ===== Settings =====
+    const userSvgPlaceholder = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+    const previewSvgPlaceholder = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#B1B5C3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+
     async function loadSettings() {
       try {
         const res = await fetch('/settings');
@@ -2563,6 +2581,21 @@ export function renderUI(): string {
         const mins = Math.floor((uptime % 3600) / 60);
         document.getElementById('settingsUptime').textContent = hours + 'h ' + mins + 'm';
         document.getElementById('syncedCount').textContent = data.syncedItemCount || '0';
+
+        // Profile picture
+        const avatarBtn = document.getElementById('avatarBtn');
+        const preview = document.getElementById('profilePicPreview');
+        const removeBtn = document.getElementById('removeProfilePicBtn');
+        if (data.profilePicturePath) {
+          const ts = Date.now();
+          avatarBtn.innerHTML = '<img src="' + data.profilePicturePath + '?t=' + ts + '" alt="avatar">';
+          preview.innerHTML = '<img src="' + data.profilePicturePath + '?t=' + ts + '" alt="preview" style="width:100%;height:100%;object-fit:cover;">';
+          removeBtn.style.display = '';
+        } else {
+          avatarBtn.innerHTML = userSvgPlaceholder;
+          preview.innerHTML = previewSvgPlaceholder;
+          removeBtn.style.display = 'none';
+        }
 
         const dot = document.getElementById('syncStatusDot');
         const text = document.getElementById('syncStatusText');
@@ -2704,6 +2737,32 @@ export function renderUI(): string {
       } finally {
         btn.textContent = 'Retry';
         btn.disabled = false;
+      }
+    };
+
+    window.uploadProfilePicture = async function(input) {
+      if (!input.files || !input.files[0]) return;
+      const formData = new FormData();
+      formData.append('file', input.files[0]);
+      try {
+        const res = await fetch('/settings/profile-picture', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        loadSettings();
+      } catch (err) {
+        showToast('Upload failed: ' + err.message, 'rejected');
+      }
+      input.value = '';
+    };
+
+    window.removeProfilePicture = async function() {
+      try {
+        const res = await fetch('/settings/profile-picture', { method: 'DELETE' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        loadSettings();
+      } catch (err) {
+        showToast('Remove failed: ' + err.message, 'rejected');
       }
     };
 

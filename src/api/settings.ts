@@ -1,8 +1,35 @@
 import { Router, Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
+import multer from 'multer';
+import { v4 as uuid } from 'uuid';
 import { SettingsQueries } from '../db';
 import type { SellingScope } from '@reffo/protocol';
+
+const PROFILE_DIR = path.join(process.cwd(), 'uploads', 'profile');
+
+const profileStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    fs.mkdirSync(PROFILE_DIR, { recursive: true });
+    cb(null, PROFILE_DIR);
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname) || '.bin';
+    cb(null, `${uuid()}${ext}`);
+  },
+});
+
+const profileUpload = multer({
+  storage: profileStorage,
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  },
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
 
 const router = Router();
 
@@ -88,6 +115,7 @@ router.get('/', (_req: Request, res: Response) => {
     version: '0.1.0',
     uptime: Math.floor((Date.now() - (_req.app.get('startTime') || Date.now())) / 1000),
     location: locationSettings || null,
+    profilePicturePath: locationSettings?.profilePicturePath || null,
   });
 });
 
@@ -277,6 +305,38 @@ router.post('/sync-item/:id', async (req: Request, res: Response) => {
     }
     res.json({ ok: true, synced: false, warning: result.warning });
   }
+});
+
+// POST /settings/profile-picture — Upload profile picture
+router.post('/profile-picture', profileUpload.single('file'), (req: Request, res: Response) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No image file uploaded' });
+  }
+
+  const profilePicturePath = `/uploads/profile/${req.file.filename}`;
+  const settingsQ = new SettingsQueries();
+
+  // Delete old file if replacing
+  const existing = settingsQ.get();
+  if (existing?.profilePicturePath) {
+    const oldPath = path.join(process.cwd(), existing.profilePicturePath);
+    try { fs.unlinkSync(oldPath); } catch {}
+  }
+
+  settingsQ.upsert({ profilePicturePath });
+  res.json({ ok: true, profilePicturePath });
+});
+
+// DELETE /settings/profile-picture — Remove profile picture
+router.delete('/profile-picture', (_req: Request, res: Response) => {
+  const settingsQ = new SettingsQueries();
+  const existing = settingsQ.get();
+  if (existing?.profilePicturePath) {
+    const oldPath = path.join(process.cwd(), existing.profilePicturePath);
+    try { fs.unlinkSync(oldPath); } catch {}
+    settingsQ.upsert({ profilePicturePath: null as unknown as string });
+  }
+  res.json({ ok: true });
 });
 
 export default router;

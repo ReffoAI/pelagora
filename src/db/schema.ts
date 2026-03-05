@@ -412,9 +412,18 @@ function initSchema(database: Database.Database): void {
       default_selling_scope TEXT NOT NULL DEFAULT 'global'
         CHECK(default_selling_scope IN ('global','national','range')),
       default_selling_radius_miles INTEGER NOT NULL DEFAULT 250,
+      profile_picture_path TEXT,
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `);
+
+  // Migration: add profile_picture_path to existing beacon_settings
+  try {
+    const settingsCols = database.pragma('table_info(beacon_settings)') as { name: string }[];
+    if (!settingsCols.some(c => c.name === 'profile_picture_path')) {
+      database.exec(`ALTER TABLE beacon_settings ADD COLUMN profile_picture_path TEXT`);
+    }
+  } catch {}
 }
 
 export function closeDb(): void {

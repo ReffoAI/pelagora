@@ -477,6 +477,7 @@ function rowToSettings(row: Record<string, unknown>): BeaconSettings {
     locationCountry: row.location_country as string | undefined,
     defaultSellingScope: (row.default_selling_scope as SellingScope) || 'global',
     defaultSellingRadiusMiles: (row.default_selling_radius_miles as number) || 250,
+    profilePicturePath: row.profile_picture_path as string | undefined,
   };
 }
 
@@ -506,6 +507,7 @@ export class SettingsQueries {
       if (data.locationCountry !== undefined) { fields.push('location_country = ?'); values.push(data.locationCountry); }
       if (data.defaultSellingScope !== undefined) { fields.push('default_selling_scope = ?'); values.push(data.defaultSellingScope); }
       if (data.defaultSellingRadiusMiles !== undefined) { fields.push('default_selling_radius_miles = ?'); values.push(data.defaultSellingRadiusMiles); }
+      if (data.profilePicturePath !== undefined) { fields.push('profile_picture_path = ?'); values.push(data.profilePicturePath); }
       if (fields.length > 0) {
         fields.push("updated_at = datetime('now')");
         values.push('default');
@@ -513,12 +515,13 @@ export class SettingsQueries {
       }
     } else {
       this.db.prepare(`
-        INSERT INTO beacon_settings (id, location_lat, location_lng, location_address, location_city, location_state, location_zip, location_country, default_selling_scope, default_selling_radius_miles)
-        VALUES ('default', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO beacon_settings (id, location_lat, location_lng, location_address, location_city, location_state, location_zip, location_country, default_selling_scope, default_selling_radius_miles, profile_picture_path)
+        VALUES ('default', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         data.locationLat ?? null, data.locationLng ?? null, data.locationAddress ?? null,
         data.locationCity ?? null, data.locationState ?? null, data.locationZip ?? null,
-        data.locationCountry ?? 'US', data.defaultSellingScope ?? 'global', data.defaultSellingRadiusMiles ?? 250
+        data.locationCountry ?? 'US', data.defaultSellingScope ?? 'global', data.defaultSellingRadiusMiles ?? 250,
+        data.profilePicturePath ?? null
       );
     }
     return this.get()!;
