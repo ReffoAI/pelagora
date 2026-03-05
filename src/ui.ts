@@ -595,21 +595,41 @@ export function renderUI(): string {
       <section>
         <h2>Reffo.ai Connection</h2>
         <div id="settingsMsg"></div>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
-          <div id="syncStatusDot" style="width:12px;height:12px;border-radius:50%;background:#E6E8EC;flex-shrink:0;"></div>
-          <span id="syncStatusText" style="font-size:14px;font-weight:500;color:#777E90;">Not connected</span>
-          <button id="retryConnectionBtn" class="btn-primary btn-sm" style="display:none;font-size:12px;padding:4px 12px;" onclick="retryConnection()">Retry</button>
-        </div>
-        <div id="syncErrorDetail" style="font-size:12px;color:#F5A623;margin-bottom:16px;display:none;"></div>
-        <div style="display:flex;gap:10px;align-items:flex-end;">
-          <div style="flex:1;">
-            <label for="settingsApiKey">API Key</label>
-            <input id="settingsApiKey" type="password" placeholder="rfk_xxxxxxxxxxxx">
+
+        <!-- Promo card: shown when no API key -->
+        <div id="connectionPromo" style="display:none; border-radius:16px; overflow:hidden; background:linear-gradient(135deg, #f8f0fc 0%, #fdedf0 100%); padding:24px; margin-bottom:16px;">
+          <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+            <div style="width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(135deg, #8101B4 0%, #EA526F 100%);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FCFCFD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            </div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:15px; font-weight:600; color:#141416; margin-bottom:4px;">Connect to Reffo.ai</div>
+              <div style="font-size:13px; color:#777E90; line-height:1.5;">Sync your inventory with the Reffo.ai marketplace. Get an API key from your account, paste it below, and your listed items will appear on reffo.ai.</div>
+            </div>
           </div>
-          <button class="btn-primary" style="margin-bottom:14px;" onclick="saveApiKey()">Save</button>
-          <button class="btn-danger btn-sm" style="margin-bottom:14px;" id="removeKeyBtn" onclick="removeApiKey()">Remove</button>
+          <div style="display:flex; gap:10px; align-items:flex-end; margin-top:16px;">
+            <div style="flex:1;">
+              <label for="settingsApiKey">API Key</label>
+              <input id="settingsApiKey" type="password" placeholder="rfk_xxxxxxxxxxxx">
+            </div>
+            <button class="btn-primary" style="margin-bottom:14px;" onclick="saveApiKey()">Save</button>
+          </div>
+          <p style="font-size:12px; color:#B1B5C3; margin-top:-6px;">Get your API key at <a href="https://reffo.ai/account" target="_blank" style="color:#EC526F;">reffo.ai/account</a></p>
         </div>
-        <p style="font-size:12px;color:#B1B5C3;margin-top:-6px;">Get your API key at <a href="https://reffo.ai/account" target="_blank" style="color:#EC526F;">reffo.ai/account</a></p>
+
+        <!-- Connected state: shown when API key exists -->
+        <div id="connectionConnected" style="display:none;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
+            <div id="syncStatusDot" style="width:12px;height:12px;border-radius:50%;background:#E6E8EC;flex-shrink:0;"></div>
+            <span id="syncStatusText" style="font-size:14px;font-weight:500;color:#777E90;">Not connected</span>
+            <button id="retryConnectionBtn" class="btn-primary btn-sm" style="display:none;font-size:12px;padding:4px 12px;" onclick="retryConnection()">Retry</button>
+          </div>
+          <div id="syncErrorDetail" style="font-size:12px;color:#F5A623;margin-bottom:16px;display:none;"></div>
+          <div style="display:flex;gap:10px;align-items:center;margin-top:12px;">
+            <span style="font-size:13px;color:#777E90;" id="connectedKeyPrefix"></span>
+            <button class="btn-danger btn-sm" id="removeKeyBtn" onclick="removeApiKey()">Remove</button>
+          </div>
+        </div>
       </section>
 
       <section>
@@ -2604,42 +2624,39 @@ export function renderUI(): string {
           removeBtn.style.display = 'none';
         }
 
-        const dot = document.getElementById('syncStatusDot');
-        const text = document.getElementById('syncStatusText');
-        const retryBtn = document.getElementById('retryConnectionBtn');
-        const errorDetail = document.getElementById('syncErrorDetail');
-        if (data.connected) {
-          dot.style.background = '#1a8a42';
-          text.textContent = 'Connected to Reffo.ai';
-          text.style.color = '#1a8a42';
-          retryBtn.style.display = 'none';
-          errorDetail.style.display = 'none';
-        } else if (data.hasApiKey) {
-          dot.style.background = '#F5A623';
-          text.textContent = 'Key saved — not connected';
-          text.style.color = '#F5A623';
-          retryBtn.style.display = '';
-          if (data.syncError) {
-            errorDetail.textContent = data.syncError;
-            errorDetail.style.display = 'block';
-          } else {
-            errorDetail.style.display = 'none';
-          }
-        } else {
-          dot.style.background = '#E6E8EC';
-          text.textContent = 'Not connected';
-          text.style.color = '#777E90';
-          retryBtn.style.display = 'none';
-          errorDetail.style.display = 'none';
-        }
-
-        // Update header link button visibility
+        // Toggle promo vs connected state
         var linkBtn = document.getElementById('headerLinkBtn');
+        var promoEl = document.getElementById('connectionPromo');
+        var connEl = document.getElementById('connectionConnected');
         if (linkBtn) linkBtn.style.display = data.hasApiKey ? 'none' : '';
+        promoEl.style.display = data.hasApiKey ? 'none' : '';
+        connEl.style.display = data.hasApiKey ? '' : 'none';
 
         if (data.hasApiKey) {
-          document.getElementById('settingsApiKey').value = '';
-          document.getElementById('settingsApiKey').placeholder = data.apiKey;
+          const dot = document.getElementById('syncStatusDot');
+          const text = document.getElementById('syncStatusText');
+          const retryBtn = document.getElementById('retryConnectionBtn');
+          const errorDetail = document.getElementById('syncErrorDetail');
+          const keyPrefix = document.getElementById('connectedKeyPrefix');
+          keyPrefix.textContent = 'Key: ' + (data.apiKey || 'rfk_***');
+          if (data.connected) {
+            dot.style.background = '#1a8a42';
+            text.textContent = 'Connected to Reffo.ai';
+            text.style.color = '#1a8a42';
+            retryBtn.style.display = 'none';
+            errorDetail.style.display = 'none';
+          } else {
+            dot.style.background = '#F5A623';
+            text.textContent = 'Key saved — not connected';
+            text.style.color = '#F5A623';
+            retryBtn.style.display = '';
+            if (data.syncError) {
+              errorDetail.textContent = data.syncError;
+              errorDetail.style.display = 'block';
+            } else {
+              errorDetail.style.display = 'none';
+            }
+          }
         }
         // Load location settings
         try {
