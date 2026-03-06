@@ -206,17 +206,20 @@ export class ReffoClient {
     }
   }
 
-  async heartbeat(beaconId: string): Promise<{ ok: boolean; error?: string }> {
+  async heartbeat(beaconId: string): Promise<{ ok: boolean; latestVersion?: string; error?: string }> {
     try {
       const res = await this.request('/heartbeat', {
         method: 'POST',
         body: JSON.stringify({ beaconId }),
       });
+      const data = await res.json() as Record<string, unknown>;
       if (!res.ok) {
-        const data = await res.json() as Record<string, unknown>;
         return { ok: false, error: (data.error as string) || `HTTP ${res.status}` };
       }
-      return { ok: true };
+      return {
+        ok: true,
+        latestVersion: (data.latest_version as string) || undefined,
+      };
     } catch (err) {
       return { ok: false, error: (err as Error).message };
     }

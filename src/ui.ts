@@ -110,6 +110,19 @@ export function renderUI(): string {
     .settings-card .info-label { color: #777E90; font-weight: 500; }
     .settings-card .info-value { font-weight: 600; color: #23262F; }
 
+    .update-banner {
+      background: linear-gradient(90deg, rgba(129,1,180,0.06), rgba(234,82,111,0.06));
+      border: 1px solid rgba(129,1,180,0.15);
+      border-radius: 12px; padding: 16px 20px;
+      margin-bottom: 24px; display: none;
+    }
+    .update-banner .update-title {
+      font-weight: 600; font-size: 14px; color: #23262F; margin-bottom: 4px;
+    }
+    .update-banner .update-cmd {
+      font-size: 13px; color: #777E90; font-family: monospace;
+    }
+
     /* Forms — Form.module.sass: 48px height, pill shape, 2px border */
     label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #777E90; text-transform: uppercase; letter-spacing: 0.02em; }
     input, select { width: 100%; height: 48px; padding: 0 14px; border: 2px solid #E6E8EC; border-radius: 12px; font-size: 14px; font-family: 'Poppins', sans-serif; font-weight: 500; margin-bottom: 14px; background: #FCFCFD; color: #23262F; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; }
@@ -586,6 +599,10 @@ export function renderUI(): string {
     <!-- Settings Tab -->
     <div id="tab-settings" class="hidden">
       <h1 style="font-size:24px;font-weight:600;color:#23262F;margin-bottom:32px;">Settings</h1>
+      <div id="updateBanner" class="update-banner">
+        <div class="update-title">&#x2B06; Update available: <span id="updateVersionLabel"></span></div>
+        <div class="update-cmd">Run: npx create-reffo-beacon@latest</div>
+      </div>
       <section class="settings-card">
         <h2>Profile Picture</h2>
         <div style="display:flex;align-items:center;gap:20px;">
@@ -927,6 +944,8 @@ export function renderUI(): string {
         <a href="https://reffo.ai/about" target="_blank" rel="noopener noreferrer">About</a>
         <span class="sep">|</span>
         <a href="https://reffo.ai/docs" target="_blank" rel="noopener noreferrer">Docs</a>
+        <span class="sep" id="footerUpdateSep" style="display:none;">|</span>
+        <button id="footerUpdateBtn" class="button-gradient" style="display:none;height:32px;padding:0 16px;font-size:12px;border-radius:16px;" onclick="switchTab('settings')">&#x2B06; Update available</button>
       </div>
       <div class="app-footer-copy">&copy; <script>document.write(new Date().getFullYear())</script> Reffo Beacon</div>
     </div>
@@ -2661,6 +2680,26 @@ export function renderUI(): string {
             }
           }
         }
+        // Check for update
+        try {
+          const healthRes = await fetch('/health');
+          const healthData = await healthRes.json();
+          var banner = document.getElementById('updateBanner');
+          var versionLabel = document.getElementById('updateVersionLabel');
+          var footerBtn = document.getElementById('footerUpdateBtn');
+          var footerSep = document.getElementById('footerUpdateSep');
+          if (healthData.updateAvailable && healthData.latestVersion) {
+            versionLabel.textContent = 'v' + healthData.latestVersion;
+            banner.style.display = 'block';
+            footerBtn.style.display = '';
+            footerSep.style.display = '';
+          } else {
+            banner.style.display = 'none';
+            footerBtn.style.display = 'none';
+            footerSep.style.display = 'none';
+          }
+        } catch {}
+
         // Load location settings
         try {
           const locRes = await fetch('/settings/location');
@@ -2958,6 +2997,20 @@ export function renderUI(): string {
       } catch {}
     }
     updateHeaderLinkBtn();
+
+    // Check for update on page load (footer button)
+    (async function checkFooterUpdate() {
+      try {
+        const res = await fetch('/health');
+        const data = await res.json();
+        var footerBtn = document.getElementById('footerUpdateBtn');
+        var footerSep = document.getElementById('footerUpdateSep');
+        if (data.updateAvailable && data.latestVersion) {
+          footerBtn.style.display = '';
+          footerSep.style.display = '';
+        }
+      } catch {}
+    })();
 
     // Check for pending negotiations periodically
     setInterval(async () => {

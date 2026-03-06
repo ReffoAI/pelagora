@@ -5,6 +5,7 @@ import multer from 'multer';
 import { v4 as uuid } from 'uuid';
 import { SettingsQueries } from '../db';
 import type { SellingScope } from '@reffo/protocol';
+import { getVersion } from '../version';
 
 const PROFILE_DIR = path.join(process.cwd(), 'uploads', 'profile');
 
@@ -112,7 +113,7 @@ router.get('/', (_req: Request, res: Response) => {
     syncError: syncManager && !syncManager.registered ? (syncManager.lastError || null) : null,
     syncedItemCount: syncedCount,
     beaconId: _req.app.get('beaconId') || '',
-    version: '0.1.0',
+    version: getVersion(),
     uptime: Math.floor((Date.now() - (_req.app.get('startTime') || Date.now())) / 1000),
     location: locationSettings || null,
     profilePicturePath: locationSettings?.profilePicturePath || null,
@@ -186,7 +187,7 @@ router.post('/api-key', async (req: Request, res: Response) => {
 
   // Try to register beacon (non-blocking — key is saved regardless)
   const beaconUrl = process.env.BEACON_URL || `http://localhost:${process.env.PORT || 3000}`;
-  const regResult = await manager.registerBeacon('Reffo Beacon', '0.1.0', beaconUrl);
+  const regResult = await manager.registerBeacon('Reffo Beacon', getVersion(), beaconUrl);
 
   if (regResult.ok) {
     manager.registered = true;
@@ -222,7 +223,7 @@ router.post('/retry-connection', async (req: Request, res: Response) => {
     req.app.set('syncManager', manager);
   }
 
-  const regResult = await manager.registerBeacon('Reffo Beacon', '0.1.0', beaconUrl);
+  const regResult = await manager.registerBeacon('Reffo Beacon', getVersion(), beaconUrl);
 
   if (regResult.ok) {
     manager.registered = true;

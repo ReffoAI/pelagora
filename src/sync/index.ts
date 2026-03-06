@@ -4,6 +4,18 @@
 
 import { ReffoClient } from './reffo-client';
 import { RefQueries, OfferQueries, MediaQueries, NegotiationQueries } from '../db/queries';
+import { getVersion } from '../version';
+import { setUpdateInfo } from '../api/health';
+
+function semverNewer(remote: string, local: string): boolean {
+  const r = remote.split('.').map(Number);
+  const l = local.split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((r[i] || 0) > (l[i] || 0)) return true;
+    if ((r[i] || 0) < (l[i] || 0)) return false;
+  }
+  return false;
+}
 
 export class SyncManager {
   private client: ReffoClient;
@@ -16,6 +28,8 @@ export class SyncManager {
   private lastOfferPoll: string | null = null;
   public registered: boolean = false;
   public lastError: string | null = null;
+  public latestVersion: string | null = null;
+  public updateAvailable: boolean = false;
 
   constructor(apiKey: string, beaconId: string, baseUrl?: string) {
     this.client = new ReffoClient(apiKey, baseUrl);
@@ -192,17 +206,33 @@ export class SyncManager {
     }
   }
 
+  private handleHeartbeatResult(result: { ok: boolean; latestVersion?: string }): void {
+    if (result.ok && result.latestVersion) {
+      const local = getVersion();
+      const newer = semverNewer(result.latestVersion, local);
+      this.latestVersion = result.latestVersion;
+      this.updateAvailable = newer;
+      setUpdateInfo({ available: newer, version: result.latestVersion });
+    }
+  }
+
   startHeartbeat(intervalMs = 5 * 60 * 1000): void {
     if (this.heartbeatInterval) return;
 
     // Initial heartbeat + offer poll
     this.client.heartbeat(this.beaconId)
-      .then(() => this.pollOffers())
+      .then((result) => {
+        this.handleHeartbeatResult(result);
+        return this.pollOffers();
+      })
       .catch(() => {});
 
     this.heartbeatInterval = setInterval(() => {
       this.client.heartbeat(this.beaconId)
-        .then(() => this.pollOffers())
+        .then((result) => {
+          this.handleHeartbeatResult(result);
+          return this.pollOffers();
+        })
         .catch((err) => {
           console.warn('[Sync] Heartbeat failed:', err.message);
         });

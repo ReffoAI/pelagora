@@ -15,6 +15,7 @@
 4. [End-to-End Sync Verification](#4-end-to-end-sync-verification)
 5. [CLI Installer Verification](#5-cli-installer-verification)
 6. [Edge Cases & Error States](#6-edge-cases--error-states)
+7. [Auto-Update Notification](#7-auto-update-notification)
 
 ---
 
@@ -329,7 +330,37 @@ PASS | 6.10 | **Password too short on signup** | 1. Go to `/auth/signup` 2. Ente
 
 ---
 
-** HOLD FOR NOW ** 
+## 7. Auto-Update Notification
+
+These tests verify the update notification system. You do **not** need to publish an actual new version — just set an environment variable to simulate a newer version being available.
+
+### Setup
+
+Add `LATEST_BEACON_VERSION` to your webapp `.env.local`:
+
+```env
+# In reffo-webapp/.env.local — add this line
+LATEST_BEACON_VERSION=0.2.0
+```
+
+Restart the webapp dev server after adding the env var. No changes are needed to the beacon itself.
+
+### Test Cases
+
+| # | Test Case | Steps | Expected Result | Pass/Fail | Notes |
+|---|-----------|-------|-----------------|-----------|-------|
+| 7.1 | **Health endpoint returns update info** | 1. Start beacon with API key configured 2. Wait for first heartbeat (a few seconds) 3. `curl http://localhost:3000/health` | Response JSON includes `"updateAvailable": true`, `"latestVersion": "0.2.0"`, and `"version": "0.1.0"`. | ☐ | |
+| 7.2 | **Update banner appears in Settings** | 1. Open beacon UI at `http://localhost:3000` 2. Click "Settings" tab | Purple/pink gradient banner appears below the "Settings" heading showing "Update available: v0.2.0" and "Run: npx create-reffo-beacon@latest". | ☐ | |
+| 7.3 | **Banner hidden when no update** | 1. In webapp `.env.local`, change `LATEST_BEACON_VERSION=0.1.0` (same as current) 2. Restart webapp dev server 3. Wait for next beacon heartbeat (or restart beacon) 4. Open Settings tab | No update banner is visible. | ☐ | |
+| 7.4 | **Banner hidden when env var removed** | 1. Remove `LATEST_BEACON_VERSION` from webapp `.env.local` 2. Restart webapp dev server 3. Wait for next heartbeat (or restart beacon) 4. Open Settings tab | No update banner is visible. Health endpoint shows `"updateAvailable": false`, `"latestVersion": null`. | ☐ | |
+| 7.5 | **Version from package.json** | 1. Check beacon health: `curl http://localhost:3000/health` 2. Check `"version"` field 3. Compare with `package.json` version | The `version` field matches `package.json` exactly (currently `0.1.0`). It is NOT hardcoded. | ☐ | |
+| 7.6 | **Settings page shows dynamic version** | 1. Open Settings tab 2. Check "Beacon Info" section | Version shown matches `package.json` version. | ☐ | |
+| 7.7 | **No update without API key** | 1. Remove API key from beacon (Settings > Remove) 2. Open Settings tab | No update banner appears (heartbeat doesn't run without an API key, so no update info is received). | ☐ | |
+| 7.8 | **Other tabs unchanged** | 1. With update banner active, click through My Items, Search, and Negotiations tabs | All tabs function normally. Banner only appears on Settings tab. | ☐ | |
+
+---
+
+** HOLD FOR NOW **
 **Invalid API key on sync endpoint** | `curl -H "Authorization: Bearer invalid_key" https://reffo.ai/api/sync/beacon` | Returns `{"error": "Invalid API key format"}` with HTTP 401. | ☐ | |
 
 ** FEATURE ADDS **
@@ -346,7 +377,8 @@ PASS | 6.10 | **Password too short on signup** | 1. Go to `/auth/signup` 2. Ente
 | 4. End-to-End Sync Verification | 5 | | |
 | 5. CLI Installer Verification | 4 | | |
 | 6. Edge Cases & Error States | 10 | | |
-| **Total** | **39** | | |
+| 7. Auto-Update Notification | 8 | | |
+| **Total** | **47** | | |
 
 **Tested by:** ____________________
 **Date:** ____________________

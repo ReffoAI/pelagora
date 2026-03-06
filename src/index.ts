@@ -6,6 +6,7 @@ import { setBeaconId, setDhtStatus } from './api/health';
 import { DhtDiscovery } from './dht';
 import { getDb } from './db';
 import { SyncManager } from './sync';
+import { getVersion } from './version';
 
 // Load .env into process.env (no dotenv dependency)
 function loadEnv(): void {
@@ -63,7 +64,7 @@ async function main(): Promise<void> {
     const beaconUrl = process.env.BEACON_URL || `http://localhost:${PORT}`;
     app.set('syncManager', syncManager);
 
-    syncManager.registerBeacon('Reffo Beacon', '0.1.0', beaconUrl)
+    syncManager.registerBeacon('Reffo Beacon', getVersion(), beaconUrl)
       .then(result => {
         if (result.ok) {
           syncManager.registered = true;
