@@ -455,17 +455,23 @@ export function renderUI(): string {
     .neg-group-back:hover { color: #DD436C; }
 
     /* Footer */
-    .app-footer { border-top: 1px solid #E6E8EC; background: #FCFCFD; padding: 32px 24px; }
-    .app-footer-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .app-footer { border-top: 1px solid #E6E8EC; background: #FCFCFD; padding: 40px 24px; }
+    .app-footer-inner { max-width: 1100px; margin: 0 auto; }
+    .app-footer-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 32px; }
     .app-footer-brand { display: flex; align-items: center; gap: 8px; }
     .app-footer-brand span { font-size: 14px; font-weight: 600; color: #141416; }
-    .app-footer-links { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+    .app-footer-links { display: flex; align-items: center; gap: 24px; font-size: 14px; }
     .app-footer-links a { color: #777E90; text-decoration: none; transition: color 0.2s; }
     .app-footer-links a:hover { color: #141416; }
-    .app-footer-links .sep { color: #E6E8EC; }
-    .app-footer-copy { font-size: 14px; color: #777E90; }
+    .app-footer-divider { border: none; border-top: 1px solid #E6E8EC; margin: 0 0 24px 0; }
+    .app-footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .app-footer-copy { font-size: 12px; color: #777E90; }
+    .app-footer-legal { display: flex; align-items: center; gap: 16px; font-size: 12px; }
+    .app-footer-legal a { color: #777E90; text-decoration: none; transition: color 0.2s; }
+    .app-footer-legal a:hover { color: #141416; }
     @media (max-width: 768px) {
-      .app-footer-inner { flex-direction: column; text-align: center; gap: 12px; }
+      .app-footer-top { flex-direction: column; text-align: center; gap: 16px; }
+      .app-footer-bottom { flex-direction: column; text-align: center; gap: 12px; }
     }
   </style>
 </head>
@@ -955,20 +961,27 @@ export function renderUI(): string {
   <!-- Footer -->
   <footer class="app-footer">
     <div class="app-footer-inner">
-      <div class="app-footer-brand">
-        <img src="/beacon.png" alt="beacon" style="height: 20px; width: auto;">
-        <span>beacon</span>
+      <div class="app-footer-top">
+        <div class="app-footer-brand">
+          <img src="/beacon.png" alt="beacon" style="height: 20px; width: auto;">
+          <span>beacon</span>
+        </div>
+        <div class="app-footer-links">
+          <a href="https://reffo.ai/about" target="_blank" rel="noopener noreferrer">About</a>
+          <a href="https://reffo.ai/docs" target="_blank" rel="noopener noreferrer">Docs</a>
+          <a href="mailto:help@reffo.ai">Support</a>
+          <button id="footerUpdateBtn" class="button-gradient" style="display:none;height:32px;padding:0 16px;font-size:12px;border-radius:16px;" onclick="switchTab('settings')">&#x2B06; Update available</button>
+        </div>
       </div>
-      <div class="app-footer-links">
-        <a href="mailto:help@reffo.ai">Support</a>
-        <span class="sep">|</span>
-        <a href="https://reffo.ai/about" target="_blank" rel="noopener noreferrer">About</a>
-        <span class="sep">|</span>
-        <a href="https://reffo.ai/docs" target="_blank" rel="noopener noreferrer">Docs</a>
-        <span class="sep" id="footerUpdateSep" style="display:none;">|</span>
-        <button id="footerUpdateBtn" class="button-gradient" style="display:none;height:32px;padding:0 16px;font-size:12px;border-radius:16px;" onclick="switchTab('settings')">&#x2B06; Update available</button>
+      <hr class="app-footer-divider">
+      <div class="app-footer-bottom">
+        <div class="app-footer-copy">&copy; <script>document.write(new Date().getFullYear())</script> Reffo Beacon</div>
+        <div class="app-footer-legal">
+          <a href="https://reffo.ai/terms" target="_blank" rel="noopener noreferrer">Terms</a>
+          <a href="https://reffo.ai/privacy" target="_blank" rel="noopener noreferrer">Privacy</a>
+          <a href="https://reffo.ai/acceptable-use" target="_blank" rel="noopener noreferrer">Acceptable Use</a>
+        </div>
       </div>
-      <div class="app-footer-copy">&copy; <script>document.write(new Date().getFullYear())</script> Reffo Beacon</div>
     </div>
   </footer>
 
@@ -2850,16 +2863,13 @@ export function renderUI(): string {
           var banner = document.getElementById('updateBanner');
           var versionLabel = document.getElementById('updateVersionLabel');
           var footerBtn = document.getElementById('footerUpdateBtn');
-          var footerSep = document.getElementById('footerUpdateSep');
           if (healthData.updateAvailable && healthData.latestVersion) {
             versionLabel.textContent = 'v' + healthData.latestVersion;
             banner.style.display = 'block';
-            footerBtn.style.display = '';
-            footerSep.style.display = '';
+            if (footerBtn) footerBtn.style.display = '';
           } else {
             banner.style.display = 'none';
-            footerBtn.style.display = 'none';
-            footerSep.style.display = 'none';
+            if (footerBtn) footerBtn.style.display = 'none';
           }
         } catch {}
 
@@ -3167,10 +3177,8 @@ export function renderUI(): string {
         const res = await fetch('/health');
         const data = await res.json();
         var footerBtn = document.getElementById('footerUpdateBtn');
-        var footerSep = document.getElementById('footerUpdateSep');
         if (data.updateAvailable && data.latestVersion) {
-          footerBtn.style.display = '';
-          footerSep.style.display = '';
+          if (footerBtn) footerBtn.style.display = '';
         }
       } catch {}
     })();
