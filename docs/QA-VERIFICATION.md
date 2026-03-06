@@ -67,7 +67,15 @@ CREATE TABLE refs (
   negotiable BOOLEAN DEFAULT true,
   min_acceptable_price NUMERIC,
   listing_status TEXT DEFAULT 'private'
-    CHECK (listing_status IN ('private', 'for_sale', 'willing_to_sell')),
+    CHECK (listing_status IN ('private', 'for_sale', 'willing_to_sell', 'for_rent', 'archived_sold', 'archived_deleted')),
+  condition TEXT,
+  attributes JSONB,
+  selling_scope TEXT DEFAULT 'global',
+  selling_radius_miles INTEGER,
+  rental_terms TEXT,
+  rental_deposit NUMERIC,
+  rental_duration INTEGER,
+  rental_duration_unit TEXT,
   location_point GEOMETRY(Point, 4326),
   location_data JSONB,
   schema_data JSONB NOT NULL,
@@ -146,6 +154,7 @@ CREATE POLICY "Users can manage own beacons" ON beacons FOR ALL   USING (auth.ui
 -- refs: public reads for listed items, owner management
 CREATE POLICY "Anyone can view for_sale items"        ON refs FOR SELECT USING (listing_status = 'for_sale');
 CREATE POLICY "Anyone can view willing_to_sell items" ON refs FOR SELECT USING (listing_status = 'willing_to_sell');
+CREATE POLICY "Anyone can view for_rent items"       ON refs FOR SELECT USING (listing_status = 'for_rent');
 CREATE POLICY "Users can view own items"   ON refs FOR SELECT USING (
   beacon_id IN (SELECT id FROM beacons WHERE user_id = auth.uid())
 );
@@ -155,7 +164,7 @@ CREATE POLICY "Users can manage own items" ON refs FOR ALL USING (
 
 -- ref_media: public reads for listed item media, owner management
 CREATE POLICY "Anyone can view listed item media" ON ref_media FOR SELECT USING (
-  ref_id IN (SELECT id FROM refs WHERE listing_status IN ('for_sale', 'willing_to_sell'))
+  ref_id IN (SELECT id FROM refs WHERE listing_status IN ('for_sale', 'willing_to_sell', 'for_rent'))
 );
 CREATE POLICY "Users can view own item media"  ON ref_media FOR SELECT USING (
   ref_id IN (SELECT id FROM refs WHERE beacon_id IN (SELECT id FROM beacons WHERE user_id = auth.uid()))
@@ -240,33 +249,32 @@ Verify both servers start without errors before proceeding.
 
 | # | Test Case | Steps | Expected Result | Pass/Fail | Notes |
 |---|-----------|-------|-----------------|-----------|-------|
-| 2.1 | **Landing page loads** | Navigate to `http://localhost:3001/` | Landing page renders with branding, navigation, and call-to-action. No console errors. | ☐ | |
-| 2.2 | **Signup flow** | 1. Go to `/auth/signup` 2. Enter email, password (min 6 chars) 3. Submit | Success message: "Check your email - We sent a confirmation link to [email]". A `user_profiles` row is created in Supabase. | ☐ | |
-| 2.3 | **Login flow** | 1. Confirm email from step 2.2 2. Go to `/auth/login` 3. Enter credentials 4. Submit | Redirected to home page. Session persists on page refresh. | ☐ | |
-| 2.4 | **Password reset** | 1. Go to `/auth/reset-password` 2. Enter registered email 3. Submit | "Check your email" confirmation shown. Reset email arrives in inbox. | ☐ | |
-| 2.5 | **Protected route redirect** | 1. Log out 2. Navigate directly to `/account` | Redirected to `/auth/login`. Cannot access account page without authentication. | ☐ | |
-| 2.6 | **Account page — edit profile** | 1. Log in 2. Go to `/account` 3. Change display name 4. Click Save | Toast/message: "Profile saved." Refreshing the page shows updated name. | ☐ | |
-| 2.7 | **API key generation** | 1. Go to `/account` 2. Click "Generate API Key" | Key displayed with `rfk_` prefix. Alert: "Your new API key (copy it now -- it will not be shown again):". Copy button works. Key appears in key list with prefix only. | ☐ | |
-| 2.8 | **API key revocation** | 1. On `/account`, locate the key from 2.7 2. Click Revoke/Delete | Key disappears from the list. Using the old key in beacon returns 401. | ☐ | |
-| 2.9 | **My Listings — create item** | 1. Go to `/my-listings` 2. Click "Add New Item" 3. Fill in name, description, category, subcategory, SKU, price, quantity, listing status 4. Upload a photo 5. Save | Item appears in the grid. Photo thumbnail visible. All fields saved correctly. | ☐ | |
-| 2.10 | **My Listings — edit & delete** | 1. Click an item from 2.9 2. Edit the name and save 3. Return to grid, verify update 4. Delete the item | Edit: name updates immediately. Delete: item removed from grid. | ☐ | |
-| 2.11 | **Search page** | 1. Create items with `for_sale` and `willing_to_sell` statuses 2. Go to `/search` 3. Verify items appear 4. Try category/text filters | Listed items appear in search results. `private` items do NOT appear. Filters narrow results correctly. | ☐ | |
-| 2.12 | **Item detail & offer** | 1. Click a search result 2. View `/items/[id]` page 3. Check photo gallery 4. Click "Make Offer" 5. Enter amount and message 6. Submit | Detail page shows all item fields and gallery. Offer modal accepts amount. Success message: "Offer Sent - Your offer has been submitted. The seller will be notified." | ☐ | |
-
+PASS | 2.1 | **Landing page loads** | Navigate to `http://localhost:3001/` | Landing page renders with branding, navigation, and call-to-action. No console errors. | ☐ | |
+PASS | 2.2 | **Signup flow** | 1. Go to `/auth/signup` 2. Enter email, password (min 6 chars) 3. Submit | Success message: "Check your email - We sent a confirmation link to [email]". A `user_profiles` row is created in Supabase. | ☐ | |
+PASS | 2.3 | **Login flow** | 1. Confirm email from step 2.2 2. Go to `/auth/login` 3. Enter credentials 4. Submit | Redirected to home page. Session persists on page refresh. | ☐ | |
+PASS | 2.4 | **Password reset** | 1. Go to `/auth/reset-password` 2. Enter registered email 3. Submit | "Check your email" confirmation shown. Reset email arrives in inbox. | ☐ | |
+PASS | 2.5 | **Protected route redirect** | 1. Log out 2. Navigate directly to `/account` | Redirected to `/auth/login`. Cannot access account page without authentication. | ☐ | |
+PASS | 2.6 | **Account page — edit profile** | 1. Log in 2. Go to `/account` 3. Change display name 4. Click Save | Toast/message: "Profile saved." Refreshing the page shows updated name. | ☐ | |
+PASS | 2.7 | **API key generation** | 1. Go to `/account` 2. Click "Generate API Key" | Key displayed with `rfk_` prefix. Alert: "Your new API key (copy it now -- it will not be shown again):". Copy button works. Key appears in key list with prefix only. | ☐ | |
+PASS | 2.8 | **API key revocation** | 1. On `/account`, locate the key from 2.7 2. Click Revoke/Delete | Key disappears from the list. Using the old key in beacon returns 401. | ☐ | |
+PASS | 2.9 | **My Listings — create item** | 1. Go to `/my-listings` 2. Click "Add New Item" 3. Fill in name, description, category, subcategory, SKU, price, quantity, listing status 4. Upload a photo 5. Save | Item appears in the grid. Photo thumbnail visible. All fields saved correctly. | ☐ | |
+PASS | 2.10 | **My Listings — edit & delete** | 1. Click an item from 2.9 2. Edit the name and save 3. Return to grid, verify update 4. Delete the item | Edit: name updates immediately. Delete: item removed from grid. | ☐ | |
+PASS | 2.11 | **Search page** | 1. Create items with `for_sale` and `willing_to_sell` statuses 2. Go to `/search` 3. Verify items appear 4. Try category/text filters | Listed items appear in search results. `private` items do NOT appear. Filters narrow results correctly. | ☐ | |
+PASS | 2.12 | **Item detail & offer** | 1. Click a search result 2. View `/items/[id]` page 3. Check photo gallery 4. Click "Make Offer" 5. Enter amount and message 6. Submit | Detail page shows all item fields and gallery. Offer modal accepts amount. Success message: "Offer Sent - Your offer has been submitted. The seller will be notified." | ☐ | |
 ---
 
 ## 3. Beacon Server Verification
 
 | # | Test Case | Steps | Expected Result | Pass/Fail | Notes |
 |---|-----------|-------|-----------------|-----------|-------|
-| 3.1 | **Beacon starts and serves UI** | 1. Start beacon (`npm run dev`) 2. Open `http://localhost:3000` | Web UI loads with tabs: My Items, Search, Negotiations, Settings. No console errors. | ☐ | |
-| 3.2 | **Create items via UI** | 1. Go to "My Items" tab 2. Click "Add Item" 3. Fill in all fields (name, description, category, subcategory, SKU, quantity, listing status) 4. Upload a photo 5. Save | Item appears in grid. Photo thumbnail displays. All fields saved to local SQLite DB. | ☐ | |
-| 3.3 | **Settings — enter API key** | 1. Go to "Settings" tab 2. Paste a valid `rfk_` API key 3. Click Save | Status dot turns green. Text shows "Connected". Success message: "Connected!" | ☐ | |
-| 3.4 | **Settings — remove API key** | 1. On Settings tab, click "Remove" | Status dot turns red/gray. Text shows "Not Connected". API key input is cleared. | ☐ | |
-| 3.5 | **Per-item sync — toggle ON** | 1. Create an item (or use existing) 2. Toggle the "Share on Reffo" switch ON | Toast: "Item synced to Reffo.ai". Synced badge (blue "Synced" label) appears on item card. | ☐ | |
-| 3.6 | **Per-item sync — toggle OFF** | 1. Find a synced item 2. Toggle the switch OFF | Toast: "Item removed from Reffo.ai". Synced badge disappears. Item is removed from reffo.ai search. | ☐ | |
-| 3.7 | **Settings — synced item count** | 1. Go to Settings tab 2. Check the "Synced Items" count 3. Toggle a few items on/off 4. Return to Settings | Count reflects the actual number of items with sync enabled. | ☐ | |
-| 3.8 | **DHT/P2P search** | 1. Go to "Search" tab 2. Enter a search query 3. Submit | Search executes against peer network via `/search?q=...`. Results (if peers available) display in the UI. No errors on empty results. | ☐ | |
+PASS | 3.1 | **Beacon starts and serves UI** | 1. Start beacon (`npm run dev`) 2. Open `http://localhost:3000` | Web UI loads with tabs: My Items, Search, Negotiations, Settings. No console errors. | ☐ | |
+PASS | 3.2 | **Create items via UI** | 1. Go to "My Items" tab 2. Click "Add Item" 3. Fill in all fields (name, description, category, subcategory, SKU, quantity, listing status) 4. Upload a photo 5. Save | Item appears in grid. Photo thumbnail displays. All fields saved to local SQLite DB. | ☐ | |
+PASS | 3.3 | **Settings — enter API key** | 1. Go to "Settings" tab 2. Paste a valid `rfk_` API key 3. Click Save | Status dot turns green. Text shows "Connected". Success message: "Connected!" | ☐ | |
+PASS | 3.4 | **Settings — remove API key** | 1. On Settings tab, click "Remove" | Status dot turns red/gray. Text shows "Not Connected". API key input is cleared. | ☐ | |
+PASS | 3.5 | **Per-item sync — toggle ON** | 1. Create an item (or use existing) 2. Toggle the "Share on Reffo" switch ON | Toast: "Item synced to Reffo.ai". Synced badge (blue "Synced" label) appears on item card. | ☐ | |
+PASS | 3.6 | **Per-item sync — toggle OFF** | 1. Find a synced item 2. Toggle the switch OFF | Toast: "Item removed from Reffo.ai". Synced badge disappears. Item is removed from reffo.ai search. | ☐ | |
+PASS | 3.7 | **Settings — synced item count** | 1. Go to Settings tab 2. Check the "Synced Items" count 3. Toggle a few items on/off 4. Return to Settings | Count reflects the actual number of items with sync enabled. | ☐ | |
+PASS | 3.8 | **DHT/P2P search** | 1. Go to "Search" tab 2. Enter a search query 3. Submit | Search executes against peer network via `/search?q=...`. Results (if peers available) display in the UI. No errors on empty results. | ☐ | |
 
 ---
 
@@ -276,48 +284,24 @@ These tests verify the connection between the beacon and the webapp.
 
 | # | Test Case | Steps | Expected Result | Pass/Fail | Notes |
 |---|-----------|-------|-----------------|-----------|-------|
-| 4.1 | **API key connection** | 1. On webapp `/account`, generate a new API key 2. Copy the full key 3. On beacon Settings tab, paste the key and click Save | Beacon shows "Connected" (green dot). Beacon registers with reffo.ai (`beacons` row created in Supabase with `self_hosted` type). Heartbeat starts (every 5 minutes). | ☐ | |
-| 4.2 | **Sync item to webapp** | 1. Create an item on beacon 2. Toggle "Share on Reffo" ON 3. On webapp, go to `/search` | Item appears in webapp search results. Name, description, category, price, and listing status match. | ☐ | |
-| 4.3 | **Sync media to webapp** | 1. Upload a photo to a beacon item 2. Toggle sync ON (or re-sync if already on) 3. On webapp, open the item detail page | Photo appears in the webapp item gallery. Image loads from Supabase `ref-media` storage bucket. | ☐ | |
-| 4.4 | **Unsync item from webapp** | 1. On beacon, toggle "Share on Reffo" OFF for a synced item 2. On webapp, search for the item | Item no longer appears in webapp search results. The `refs` row is removed from Supabase (or listing_status set to private). | ☐ | |
-| 4.5 | **Webapp-only listing** | 1. On webapp, go to `/my-listings` 2. Create an item with `for_sale` status 3. Go to `/search` | Item appears in search results. This confirms webapp-created items work independently of beacon sync. | ☐ | |
+PASS | 4.1 | **API key connection** | 1. On webapp `/account`, generate a new API key 2. Copy the full key 3. On beacon Settings tab, paste the key and click Save | Beacon shows "Connected" (green dot). Beacon registers with reffo.ai (`beacons` row created in Supabase with `self_hosted` type). Heartbeat starts (every 5 minutes). | ☐ | |
+PASS | 4.2 | **Sync item to webapp** | 1. Create an item on beacon 2. Toggle "Share on Reffo" ON 3. On webapp, go to `/search` | Item appears in webapp search results. Name, description, category, price, and listing status match. | ☐ | |
+PASS | 4.3 | **Sync media to webapp** | 1. Upload a photo to a beacon item 2. Toggle sync ON (or re-sync if already on) 3. On webapp, open the item detail page | Photo appears in the webapp item gallery. Image loads from Supabase `ref-media` storage bucket. | ☐ | |
+PASS | 4.4 | **Unsync item from webapp** | 1. On beacon, toggle "Share on Reffo" OFF for a synced item 2. On webapp, search for the item | Item no longer appears in webapp search results. The `refs` row is removed from Supabase (or listing_status set to private). | ☐ | |
+PASS | 4.5 | **Webapp-only listing** | 1. On webapp, go to `/my-listings` 2. Create an item with `for_sale` status 3. Go to `/search` | Item appears in search results. This confirms webapp-created items work independently of beacon sync. | ☐ | |
 
 ---
 
 ## 5. CLI Installer Verification
 
-### Important: Local Development Setup
-
-The `create-reffo-beacon` CLI is **not published to npm**. It links to the local `reffo-beacon` source code using a `file:` dependency. Before testing:
-
-1. **Build reffo-beacon first** — the CLI depends on the compiled `dist/` output:
-   ```bash
-   cd reffo-beacon
-   npm run build
-   ```
-
-2. **Run the CLI using `npx`** from the `create-reffo-beacon` directory, or invoke the entry point directly with `node`. Both work:
-   ```bash
-   # Option A: npx from the create-reffo-beacon directory
-   cd create-reffo-beacon
-   npx .
-
-   # Option B: direct node invocation from anywhere
-   node /path/to/create-reffo-beacon/src/index.js
-   ```
-
-3. **Choose a test directory outside both repos** (e.g. a temp folder or `~/reffo-test/`). The CLI creates the project relative to your current directory.
-
-4. **Use a different port** than your development beacon (e.g. `3002`) to avoid conflicts.
+Run these tests from outside the reffo-beacon project directory.
 
 | # | Test Case | Steps | Expected Result | Pass/Fail | Notes |
 |---|-----------|-------|-----------------|-----------|-------|
-| 5.1 | **CLI prompts appear** | 1. `cd` to a temp directory outside the repos 2. Run `npx /path/to/create-reffo-beacon` or `node /path/to/create-reffo-beacon/src/index.js` | Banner: "create-reffo-beacon v0.1.0". Prompts appear in order: Project directory (default: `reffo-beacon`), HTTP port (default: `3000`), Package manager (`npm/yarn/pnpm`), Reffo.ai API key. | ☐ | |
-| 5.2 | **Valid API key accepted** | 1. At the API key prompt, enter a key starting with `rfk_` | Key is accepted without warnings. Installer proceeds to file generation. | ☐ | |
-| 5.3 | **Invalid API key — warning** | 1. At the API key prompt, enter a key NOT starting with `rfk_` | Warning: `Warning: Reffo API keys start with "rfk_". The key you entered may be invalid.` Prompt: `Use this key anyway? [y/N]:`. Entering `N` (or Enter) skips with message: `Skipped — you can add it later in .env`. | ☐ | |
-| 5.4 | **Generated project structure** | 1. Complete the installer with defaults 2. Inspect the generated directory | Contains: `.env` (with PORT and REFFO_API_KEY filled in), `package.json` (with `reffo-beacon` as a `file:` dependency and `start`/`dev` scripts), `.gitignore` (excludes node_modules, .env, *.db, uploads/), `uploads/` directory (empty), `node_modules/` (dependencies installed with `reffo-beacon` symlinked). Success messages: `Created .env`, `Created package.json`, `Created .gitignore`, `Created uploads/`, `Dependencies installed`, `Reffo Beacon is ready!` | ☐ | |
-| 5.5 | **Scaffolded beacon starts** | 1. `cd` into the generated project directory 2. Run `npm start` | Beacon boots: `[DB] SQLite initialized`, `[Beacon] Reffo Beacon running on http://localhost:<port>`. UI loads in browser at the configured port. If an API key was provided, Settings tab shows "Connected" (green dot). | ☐ | |
-| 5.6 | **Dev mode works** | 1. In the generated project directory 2. Run `npm run dev` | Beacon starts via `tsx` (TypeScript source). Same output as `npm start`. Useful for development/debugging. | ☐ | |
+PASS | 5.1 | **CLI prompts appear** | 1. `cd` to a temp directory 2. Run `node /path/to/create-reffo-beacon/src/index.js` | Banner: "create-reffo-beacon v0.1.0". Prompts appear in order: Project directory, HTTP port, Package manager, API key. | ☐ | |
+PASS | 5.2 | **Valid API key accepted** | 1. At the API key prompt, enter a key starting with `rfk_` | Key is accepted without warnings. Installer proceeds to file generation. | ☐ | |
+PASS 5.3 | **Invalid API key — warning** | 1. At the API key prompt, enter a key NOT starting with `rfk_` | Warning: `Warning: Reffo API keys start with "rfk_". The key you entered may be invalid.` Prompt: `Use this key anyway? [y/N]:`. Entering `N` (or Enter) skips with message: `Skipped — you can add it later in .env`. | ☐ | |
+PASS | 5.4 | **Generated project structure** | 1. Complete the installer with defaults 2. Inspect the generated directory | Contains: `.env` (with PORT and REFFO_API_KEY filled in), `package.json` (with `reffo-beacon` dependency and start/dev scripts), `.gitignore` (excludes node_modules, .env, *.db, uploads/), `uploads/` directory (empty), `node_modules/` (dependencies installed). Success messages: `Created .env`, `Created package.json`, `Created .gitignore`, `Created uploads/`, `Dependencies installed`, `Reffo Beacon is ready!` | ☐ | |
 
 ---
 
@@ -325,18 +309,25 @@ The `create-reffo-beacon` CLI is **not published to npm**. It links to the local
 
 | # | Test Case | Steps | Expected Result | Pass/Fail | Notes |
 |---|-----------|-------|-----------------|-----------|-------|
-| 6.1 | **Offer while logged out** | 1. Log out of webapp 2. Go to `/search` and click an item 3. Click "Make Offer" | Modal shows: **"Sign in to make an offer"** with subtext "You need an account to send offers to sellers." No offer form is displayed. | ☐ | |
-| 6.2 | **Bad API key prefix in beacon** | 1. On beacon Settings tab 2. Enter a key that does NOT start with `rfk_` 3. Click Save | Error message displayed. Key is rejected. Status stays "Not Connected". | ☐ | |
-| 6.3 | **Sync toggle with no API key** | 1. Ensure no API key is configured in beacon Settings 2. Toggle "Share on Reffo" ON for an item | Error toast: "Reffo.ai is not connected. Set an API key first." Toggle reverts to OFF. | ☐ | |
-| 6.4 | **Search with no results** | 1. On webapp `/search`, enter a nonsense query (e.g. "xyzzy999") | Empty state shown — no items displayed, no errors. Page remains functional. | ☐ | |
-| 6.5 | **My Listings — empty state** | 1. Log in to webapp with a new account (no items) 2. Go to `/my-listings` | Message: "No items yet. Add your first listing to get started." | ☐ | |
-| 6.6 | **No API keys — empty state** | 1. Log in to webapp with a new account 2. Go to `/account` and check the API keys section | Message: "No API keys yet. Generate one to get started." | ☐ | |
-| 6.7 | **Media upload limits** | 1. On webapp My Listings, add an item 2. Try uploading 5 photos | Error: "Maximum 4 photos allowed." Fifth photo is rejected. | ☐ | |
-| 6.8 | **Beacon health endpoint** | `curl http://localhost:3000/health` | Returns JSON with `id`, `version`, `itemCount`, `offerCount`, `uptime`, and `dht` status. HTTP 200. | ☐ | |
-| 6.9 | **Invalid API key on sync endpoint** | `curl -H "Authorization: Bearer invalid_key" https://reffo.ai/api/sync/beacon` | Returns `{"error": "Invalid API key format"}` with HTTP 401. | ☐ | |
-| 6.10 | **Password too short on signup** | 1. Go to `/auth/signup` 2. Enter a password shorter than 6 characters 3. Submit | Error: "Password must be at least 6 characters." Account is not created. | ☐ | |
+PASS | 6.1 | **Offer while logged out** | 1. Log out of webapp 2. Go to `/search` and click an item 3. Click "Make Offer" | Modal shows: **"Sign in to make an offer"** with subtext "You need an account to send offers to sellers." No offer form is displayed. | ☐ | |
+PASS | 6.2 | **Bad API key prefix in beacon** | 1. On beacon Settings tab 2. Enter a key that does NOT start with `rfk_` 3. Click Save | Error message displayed. Key is rejected. Status stays "Not Connected". | ☐ | |
+PASS | 6.3 | **Sync toggle with no API key** | 1. Ensure no API key is configured in beacon Settings 2. Toggle "Share on Reffo" ON for an item | Error toast: "Reffo.ai is not connected. Set an API key first." Toggle reverts to OFF. | ☐ | |
+PASS | 6.4 | **Search with no results** | 1. On webapp `/search`, enter a nonsense query (e.g. "xyzzy999") | Empty state shown — no items displayed, no errors. Page remains functional. | ☐ | |
+PASS | 6.5 | **My Listings — empty state** | 1. Log in to webapp with a new account (no items) 2. Go to `/my-listings` | Message: "No items yet. Add your first listing to get started." | ☐ | |
+PASS | 6.6 | **No API keys — empty state** | 1. Log in to webapp with a new account 2. Go to `/account` and check the API keys section | Message: "No API keys yet. Generate one to get started." | ☐ | |
+PASS | 6.7 | **Media upload limits** | 1. On webapp My Listings, add an item 2. Try uploading 5 photos | Error: "Maximum 4 photos allowed." Fifth photo is rejected. | ☐ | |
+PASS | 6.8 | **Beacon health endpoint** | `curl http://localhost:3000/health` | Returns JSON with `id`, `version`, `itemCount`, `offerCount`, `uptime`, and `dht` status. HTTP 200. | ☐ | |
+PASS | 6.10 | **Password too short on signup** | 1. Go to `/auth/signup` 2. Enter a password shorter than 6 characters 3. Submit | Error: "Password must be at least 6 characters." Account is not created. | ☐ | |
 
 ---
+
+** HOLD FOR NOW ** 
+**Invalid API key on sync endpoint** | `curl -H "Authorization: Bearer invalid_key" https://reffo.ai/api/sync/beacon` | Returns `{"error": "Invalid API key format"}` with HTTP 401. | ☐ | |
+
+** FEATURE ADDS **
+
+
+
 
 ## Summary
 
@@ -345,9 +336,9 @@ The `create-reffo-beacon` CLI is **not published to npm**. It links to the local
 | 2. Webapp Verification | 12 | | |
 | 3. Beacon Server Verification | 8 | | |
 | 4. End-to-End Sync Verification | 5 | | |
-| 5. CLI Installer Verification | 6 | | |
+| 5. CLI Installer Verification | 4 | | |
 | 6. Edge Cases & Error States | 10 | | |
-| **Total** | **41** | | |
+| **Total** | **39** | | |
 
 **Tested by:** ____________________
 **Date:** ____________________
