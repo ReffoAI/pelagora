@@ -179,7 +179,15 @@ CREATE POLICY "Sellers can view offers on their items" ON offers FOR SELECT USIN
 );
 CREATE POLICY "Buyers can view own offers"  ON offers FOR SELECT USING (auth.uid() = buyer_id);
 CREATE POLICY "Sellers can view by seller_id" ON offers FOR SELECT USING (auth.uid() = seller_id);
-CREATE POLICY "Anyone can create offers"    ON offers FOR INSERT WITH CHECK (true);
+CREATE POLICY "Authenticated users can create offers" ON offers
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    auth.uid() = buyer_id
+    AND item_id IN (
+      SELECT id FROM refs
+      WHERE listing_status IN ('for_sale', 'willing_to_sell', 'for_rent')
+    )
+  );
 CREATE POLICY "Offer participants can update" ON offers FOR UPDATE USING (
   auth.uid() = buyer_id OR auth.uid() = seller_id
   OR item_id IN (SELECT r.id FROM refs r JOIN beacons b ON r.beacon_id = b.id WHERE b.user_id = auth.uid())
