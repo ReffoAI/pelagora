@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "reffo": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/Users/dougkinnison/apps/reffo/reffo-mcp-server/dist/index.js"],
+      "env": {
+        "REFFO_BEACON_URL": "http://localhost:3001"
+      }
+    }
+  }
+}
