@@ -3164,15 +3164,21 @@ export function renderUI(): string {
     initOutgoingSnapshot();
 
     // Show "Link to Reffo.ai" header button if no API key is configured
-    async function updateHeaderLinkBtn() {
+    async function updateHeaderOnLoad() {
       try {
         const res = await fetch('/settings');
         const data = await res.json();
         const btn = document.getElementById('headerLinkBtn');
         if (btn) btn.style.display = data.hasApiKey ? 'none' : '';
+        // Load profile picture into header avatar
+        const avatarBtn = document.getElementById('avatarBtn');
+        if (avatarBtn && data.profilePicturePath) {
+          const ts = Date.now();
+          avatarBtn.innerHTML = '<img src="' + data.profilePicturePath + '?t=' + ts + '" alt="avatar">';
+        }
       } catch {}
     }
-    updateHeaderLinkBtn();
+    updateHeaderOnLoad();
 
     // Check for update on page load (footer button)
     (async function checkFooterUpdate() {
