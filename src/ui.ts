@@ -969,17 +969,20 @@ export function renderUI(): string {
         <div class="app-footer-links">
           <a href="https://reffo.ai/about" target="_blank" rel="noopener noreferrer">About</a>
           <a href="https://reffo.ai/docs" target="_blank" rel="noopener noreferrer">Docs</a>
+          <a href="https://reffo.ai/agents" target="_blank" rel="noopener noreferrer">AI Agents</a>
           <a href="mailto:help@reffo.ai">Support</a>
           <button id="footerUpdateBtn" class="button-gradient" style="display:none;height:32px;padding:0 16px;font-size:12px;border-radius:16px;" onclick="switchTab('settings')">&#x2B06; Update available</button>
         </div>
       </div>
       <hr class="app-footer-divider">
       <div class="app-footer-bottom">
-        <div class="app-footer-copy">&copy; <script>document.write(new Date().getFullYear())</script> Reffo Beacon</div>
+        <div class="app-footer-copy">&copy; <script>document.write(new Date().getFullYear())</script> Reffo.ai</div>
         <div class="app-footer-legal">
           <a href="https://reffo.ai/terms" target="_blank" rel="noopener noreferrer">Terms</a>
           <a href="https://reffo.ai/privacy" target="_blank" rel="noopener noreferrer">Privacy</a>
           <a href="https://reffo.ai/acceptable-use" target="_blank" rel="noopener noreferrer">Acceptable Use</a>
+          <a href="https://reffo.ai/cookies" target="_blank" rel="noopener noreferrer">Cookies</a>
+          <a href="https://reffo.ai/dmca" target="_blank" rel="noopener noreferrer">DMCA</a>
         </div>
       </div>
     </div>
