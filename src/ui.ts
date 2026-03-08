@@ -984,7 +984,7 @@ export function renderUI(): string {
           <a href="https://reffo.ai/docs" target="_blank" rel="noopener noreferrer">Docs</a>
           <a href="https://reffo.ai/agents" target="_blank" rel="noopener noreferrer">AI Agents</a>
           <a href="https://reffo.ai/skills" target="_blank" rel="noopener noreferrer">Skills</a>
-          <a href="mailto:help@reffo.ai">Support</a>
+          <a href="https://reffo.ai/support?source=beacon" target="_blank" rel="noopener noreferrer">Support</a>
           <button id="footerUpdateBtn" class="button-gradient" style="display:none;height:32px;padding:0 16px;font-size:12px;border-radius:16px;" onclick="switchTab('settings')">&#x2B06; Update available</button>
         </div>
       </div>
