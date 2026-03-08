@@ -10,6 +10,58 @@ import { blurLocation } from '@reffo/protocol';
 
 const DEFAULT_BASE_URL = 'https://reffo.ai';
 
+export interface ReffoSearchParams {
+  search?: string;
+  category?: string;
+  lat?: number;
+  lng?: number;
+  radiusMiles?: number;
+  sort?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface ReffoSearchResult {
+  refId: string;
+  localId: string;
+  beaconId: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  subcategory: string | null;
+  listingStatus: string;
+  price: number | null;
+  currency: string;
+  condition: string | null;
+  location: { city: string | null; state: string | null; zip: string | null } | null;
+  distanceMiles: number | null;
+  photos: string[];
+  createdAt: string;
+}
+
+export async function searchReffo(
+  params: ReffoSearchParams,
+  baseUrl?: string,
+): Promise<{ results: ReffoSearchResult[]; total: number }> {
+  const base = (baseUrl || DEFAULT_BASE_URL).replace(/\/$/, '');
+  const qs = new URLSearchParams();
+  if (params.search) qs.set('q', params.search);
+  if (params.category) qs.set('category', params.category);
+  if (params.lat != null) qs.set('lat', String(params.lat));
+  if (params.lng != null) qs.set('lng', String(params.lng));
+  if (params.radiusMiles != null) qs.set('radius', String(params.radiusMiles));
+  if (params.sort) qs.set('sort', params.sort);
+  if (params.limit != null) qs.set('limit', String(params.limit));
+  if (params.offset != null) qs.set('offset', String(params.offset));
+
+  const res = await fetch(`${base}/api/search?${qs.toString()}`);
+  if (!res.ok) {
+    return { results: [], total: 0 };
+  }
+  const data = await res.json() as { results: ReffoSearchResult[]; total: number };
+  return data;
+}
+
 export interface WebappOffer {
   id: string;
   item_id: string;

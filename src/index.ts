@@ -6,6 +6,7 @@ import { setBeaconId, setDhtStatus } from './api/health';
 import { DhtDiscovery } from './dht';
 import { getDb } from './db';
 import { SyncManager } from './sync';
+import { searchReffo } from './sync/reffo-client';
 import { getVersion } from './version';
 
 // Load .env into process.env (no dotenv dependency)
@@ -88,9 +89,10 @@ async function main(): Promise<void> {
   dht.httpPort = PORT;
   app.set('dht', dht);
 
-  // Expose DHT search endpoint
+  // Expose DHT + Reffo search endpoint
   app.get('/search', async (req, res) => {
-    const { q, c, sc, maxPrice, lat, lng, radius } = req.query;
+    const { q, c, sc, maxPrice, lat, lng, radius, source } = req.query;
+    const searchSource = typeof source === 'string' ? source : 'all';
     const query = {
       search: typeof q === 'string' ? q : undefined,
       category: typeof c === 'string' ? c : undefined,
@@ -100,13 +102,71 @@ async function main(): Promise<void> {
       lng: typeof lng === 'string' ? parseFloat(lng) : undefined,
       radiusMiles: typeof radius === 'string' ? parseFloat(radius) : undefined,
     };
-    const responses = await dht.queryPeers(query);
+
+    const dhtPromise = (searchSource === 'reffo')
+      ? Promise.resolve([])
+      : dht.queryPeers(query);
+
+    const reffoUrl = process.env.REFFO_API_URL || 'https://reffo.ai';
+    const reffoPromise = (searchSource === 'beacons')
+      ? Promise.resolve({ results: [], total: 0 })
+      : searchReffo({
+          search: query.search,
+          category: query.category,
+          lat: query.lat,
+          lng: query.lng,
+          radiusMiles: query.radiusMiles,
+          sort: typeof req.query.sort === 'string' ? req.query.sort : undefined,
+        }, reffoUrl);
+
+    const [dhtResult, reffoResult] = await Promise.allSettled([dhtPromise, reffoPromise]);
+
+    const dhtResponses = dhtResult.status === 'fulfilled' ? dhtResult.value : [];
+    const reffoData = reffoResult.status === 'fulfilled' ? reffoResult.value : { results: [], total: 0 };
+
+    // Build DHT results with source tag
+    const dhtResults = dhtResponses.map(r => ({
+      beaconId: r.beaconId,
+      source: 'dht' as const,
+      ...(r.payload as object),
+    }));
+
+    // Convert Reffo results to peer-like format with source tag
+    const reffoResults = reffoData.results.map(r => ({
+      beaconId: r.beaconId,
+      source: 'reffo' as const,
+      refs: [{
+        id: r.localId,
+        name: r.name,
+        description: r.description,
+        category: r.category,
+        subcategory: r.subcategory,
+        listingStatus: r.listingStatus,
+        condition: r.condition,
+        locationCity: r.location?.city || null,
+        locationState: r.location?.state || null,
+        locationZip: r.location?.zip || null,
+        createdAt: r.createdAt,
+      }],
+      offers: r.price != null ? [{
+        refId: r.localId,
+        price: r.price,
+        priceCurrency: r.currency,
+        status: 'active',
+      }] : [],
+      media: r.photos.length > 0 ? {
+        [r.localId]: r.photos.map((url, i) => ({
+          mediaType: 'photo',
+          filePath: url,
+          sortOrder: i,
+        })),
+      } : {},
+    }));
+
     res.json({
-      peers: responses.length,
-      results: responses.map(r => ({
-        beaconId: r.beaconId,
-        ...(r.payload as object),
-      })),
+      peers: dhtResults.length,
+      reffoTotal: reffoData.total,
+      results: [...dhtResults, ...reffoResults],
     });
   });
 

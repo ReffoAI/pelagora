@@ -601,6 +601,11 @@ export function renderUI(): string {
               <option value="price_asc">Price: Low to High</option>
               <option value="price_desc">Price: High to Low</option>
             </select>
+            <div class="source-filter" style="display:inline-flex;border:1px solid #E6E8EC;border-radius:8px;overflow:hidden;height:32px;font-size:13px;font-family:'Poppins',sans-serif;">
+              <button class="source-filter-btn active" data-source="all" onclick="setSourceFilter('all')" style="padding:0 10px;border:none;background:#3B71FE;color:white;cursor:pointer;font-size:13px;font-family:'Poppins',sans-serif;">All</button>
+              <button class="source-filter-btn" data-source="beacons" onclick="setSourceFilter('beacons')" style="padding:0 10px;border:none;border-left:1px solid #E6E8EC;background:white;color:#23262F;cursor:pointer;font-size:13px;font-family:'Poppins',sans-serif;">Beacons</button>
+              <button class="source-filter-btn" data-source="reffo" onclick="setSourceFilter('reffo')" style="padding:0 10px;border:none;border-left:1px solid #E6E8EC;background:white;color:#23262F;cursor:pointer;font-size:13px;font-family:'Poppins',sans-serif;">Reffo</button>
+            </div>
             <button id="favFilterBtn" class="fav-filter-btn" onclick="toggleFavFilter()" title="Show favorites only">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             </button>
@@ -2043,10 +2048,45 @@ export function renderUI(): string {
     };
 
     // ===== Search Network =====
+    var _lastSearchSource = 'all';
+    window.setSourceFilter = function(src) {
+      _lastSearchSource = src;
+      document.querySelectorAll('.source-filter-btn').forEach(function(btn) {
+        if (btn.getAttribute('data-source') === src) {
+          btn.classList.add('active');
+          btn.style.background = '#3B71FE';
+          btn.style.color = 'white';
+        } else {
+          btn.classList.remove('active');
+          btn.style.background = 'white';
+          btn.style.color = '#23262F';
+        }
+      });
+      // Client-side filter: show/hide cards by source
+      document.querySelectorAll('.result-card').forEach(function(card) {
+        var cardSource = card.getAttribute('data-source');
+        if (src === 'all' || cardSource === src) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      // Update summary counts
+      var dhtCount = document.querySelectorAll('.result-card[data-source="dht"]:not([style*="display: none"])').length;
+      var reffoCount = document.querySelectorAll('.result-card[data-source="reffo"]:not([style*="display: none"])').length;
+      var summaryEl = document.getElementById('searchSummary');
+      if (summaryEl) {
+        var parts = [];
+        if (src === 'all' || src === 'beacons') parts.push(dhtCount + ' from beacons');
+        if (src === 'all' || src === 'reffo') parts.push(reffoCount + ' from Reffo');
+        summaryEl.textContent = parts.join(' \\u00b7 ');
+      }
+    };
+
     async function renderSearchResults(data) {
       const container = document.getElementById('searchResults');
       if (data.results.length === 0) {
-        container.innerHTML = '<p class="empty">No peers responded. Are other beacons running?</p>';
+        container.innerHTML = '<p class="empty">No results found. Try a different search or location.</p>';
         return;
       }
 
@@ -2059,7 +2099,11 @@ export function renderUI(): string {
 
       // Flatten all items from all peers into one array
       var allItems = [];
+      var dhtKeys = new Set();
+
+      // First pass: collect DHT items and build dedup keys
       data.results.forEach(peer => {
+        const peerSource = peer.source || 'dht';
         const peerRefs = peer.refs || [];
         const peerOffers = peer.offers || [];
         const peerMedia = peer.media || {};
@@ -2067,11 +2111,34 @@ export function renderUI(): string {
         const offerMap = {};
         peerOffers.forEach(o => { if (!offerMap[o.refId]) offerMap[o.refId] = []; offerMap[o.refId].push(o); });
 
+        if (peerSource === 'dht') {
+          peerRefs.forEach(item => {
+            const refOffers = offerMap[item.id] || [];
+            const activeOffer = refOffers.find(o => o.status === 'active');
+            const refMedia = peerMedia[item.id] || [];
+            dhtKeys.add(item.id + ':' + peer.beaconId);
+            allItems.push({ item: item, peer: peer, activeOffer: activeOffer || null, refMedia: refMedia, peerHttpPort: peerHttpPort, source: 'dht' });
+          });
+        }
+      });
+
+      // Second pass: collect Reffo items, dedup against DHT
+      data.results.forEach(peer => {
+        const peerSource = peer.source || 'dht';
+        if (peerSource !== 'reffo') return;
+        const peerRefs = peer.refs || [];
+        const peerOffers = peer.offers || [];
+        const peerMedia = peer.media || {};
+        const offerMap = {};
+        peerOffers.forEach(o => { if (!offerMap[o.refId]) offerMap[o.refId] = []; offerMap[o.refId].push(o); });
+
         peerRefs.forEach(item => {
+          const dedupKey = item.id + ':' + peer.beaconId;
+          if (dhtKeys.has(dedupKey)) return; // skip duplicate
           const refOffers = offerMap[item.id] || [];
           const activeOffer = refOffers.find(o => o.status === 'active');
           const refMedia = peerMedia[item.id] || [];
-          allItems.push({ item: item, peer: peer, activeOffer: activeOffer || null, refMedia: refMedia, peerHttpPort: peerHttpPort });
+          allItems.push({ item: item, peer: peer, activeOffer: activeOffer || null, refMedia: refMedia, peerHttpPort: 0, source: 'reffo' });
         });
       });
 
@@ -2083,6 +2150,9 @@ export function renderUI(): string {
       });
       allItems = allItems.slice(0, 30);
 
+      var dhtCount = allItems.filter(e => e.source === 'dht').length;
+      var reffoCount = allItems.filter(e => e.source === 'reffo').length;
+
       let cards = '';
       lastSearchResults = [];
       allItems.forEach(entry => {
@@ -2091,6 +2161,7 @@ export function renderUI(): string {
           const activeOffer = entry.activeOffer;
           const refMedia = entry.refMedia;
           const peerHttpPort = entry.peerHttpPort;
+          const entrySource = entry.source;
 
           const priceStr = activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
           const badges = [item.category, item.subcategory].filter(Boolean).map(b =>
@@ -2108,7 +2179,7 @@ export function renderUI(): string {
           }
 
           const idx = lastSearchResults.length;
-          lastSearchResults.push({ item: item, peer: peer, offer: activeOffer || null, media: refMedia, httpPort: peerHttpPort });
+          lastSearchResults.push({ item: item, peer: peer, offer: activeOffer || null, media: refMedia, httpPort: peerHttpPort, source: entrySource });
 
           const favKey = item.id + ':' + peer.beaconId;
           const isFav = window._favSet && window._favSet.has(favKey);
@@ -2117,15 +2188,26 @@ export function renderUI(): string {
           const heartClass = isFav ? 'fav-heart active' : 'fav-heart';
           const heartBtn = '<button class="' + heartClass + '" onclick="event.stopPropagation(); toggleFavorite(this, ' + idx + ')"><svg width="16" height="16" viewBox="0 0 24 24" fill="' + heartFill + '" stroke="' + heartStroke + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
 
-          const imgHtml = (firstPhoto && peerHttpPort)
-            ? '<div class="card-img" style="position:relative;"><img src="http://' + location.hostname + ':' + peerHttpPort + '/' + escapeHtml(firstPhoto.filePath) + '" alt="">' + heartBtn + '</div>'
-            : '<div class="card-img" style="position:relative;"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#E6E8EC"/></svg></span>' + heartBtn + '</div>';
+          // For Reffo results, filePath is a full URL; for DHT, it's relative
+          let imgHtml;
+          if (firstPhoto && entrySource === 'reffo') {
+            imgHtml = '<div class="card-img" style="position:relative;"><img src="' + escapeHtml(firstPhoto.filePath) + '" alt="">' + heartBtn + '</div>';
+          } else if (firstPhoto && peerHttpPort) {
+            imgHtml = '<div class="card-img" style="position:relative;"><img src="http://' + location.hostname + ':' + peerHttpPort + '/' + escapeHtml(firstPhoto.filePath) + '" alt="">' + heartBtn + '</div>';
+          } else {
+            imgHtml = '<div class="card-img" style="position:relative;"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#E6E8EC"/></svg></span>' + heartBtn + '</div>';
+          }
 
-          cards += '<div class="card result-card" onclick="openRemoteDetail(' + idx + ')">' +
+          // Source badge
+          const sourceDot = entrySource === 'reffo'
+            ? '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#7B61FF;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#7B61FF;display:inline-block;"></span>Reffo</span>'
+            : '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#45B26B;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#45B26B;display:inline-block;"></span>Beacon</span>';
+
+          cards += '<div class="card result-card" data-source="' + entrySource + '" onclick="openRemoteDetail(' + idx + ')">' +
             imgHtml +
             '<div class="card-body">' +
               '<h3>' + escapeHtml(item.name) + '</h3>' +
-              '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + badges + '</div>' +
+              '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + badges + ' ' + sourceDot + '</div>' +
               (priceStr ? '<div class="card-price">' + escapeHtml(priceStr) + '</div>' : '') +
               (item.description ? '<div class="card-desc">' + escapeHtml(item.description) + '</div>' : '') +
               (function() {
@@ -2137,14 +2219,24 @@ export function renderUI(): string {
             '</div></div>';
       });
 
-      container.innerHTML = '<p style="font-size:14px;color:#777E90;margin-bottom:12px;font-weight:500;">' +
-        data.peers + ' peer(s) responded &middot; showing ' + allItems.length + ' newest</p><div class="cards">' + cards + '</div>';
+      var summaryParts = [];
+      if (dhtCount > 0) summaryParts.push(dhtCount + ' from beacons');
+      if (reffoCount > 0) summaryParts.push(reffoCount + ' from Reffo');
+      if (summaryParts.length === 0) summaryParts.push('0 results');
+
+      container.innerHTML = '<p id="searchSummary" style="font-size:14px;color:#777E90;margin-bottom:12px;font-weight:500;">' +
+        summaryParts.join(' \\u00b7 ') + '</p><div class="cards">' + cards + '</div>';
+
+      // Re-apply active source filter
+      if (_lastSearchSource !== 'all') {
+        setSourceFilter(_lastSearchSource);
+      }
     }
 
     async function executeHeaderSearch() {
       switchTab('search');
       const container = document.getElementById('searchResults');
-      container.innerHTML = '<p class="empty">Searching peers...</p>';
+      container.innerHTML = '<p class="empty">Searching...</p>';
 
       var q = document.getElementById('headerSearchQ').value.trim();
       var c = document.getElementById('headerSearchCat').value;
@@ -2326,7 +2418,14 @@ export function renderUI(): string {
           }
         });
       } else {
-        cards.forEach(function(card) { card.style.display = ''; });
+        cards.forEach(function(card) {
+          var cardSource = card.getAttribute('data-source');
+          if (_lastSearchSource === 'all' || cardSource === _lastSearchSource) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        });
       }
     };
 
@@ -2339,7 +2438,14 @@ export function renderUI(): string {
       const offer = entry.offer;
       const mediaList = entry.media || [];
       const httpPort = entry.httpPort || 0;
+      const entrySource = entry.source || 'dht';
       const baseUrl = httpPort ? 'http://' + location.hostname + ':' + httpPort : '';
+
+      // Helper to resolve media URL based on source
+      function mediaUrl(filePath) {
+        if (entrySource === 'reffo') return escapeHtml(filePath);
+        return baseUrl ? baseUrl + '/' + escapeHtml(filePath) : '';
+      }
 
       const container = document.getElementById('detailContent');
       switchTab('detail');
@@ -2347,10 +2453,10 @@ export function renderUI(): string {
       const photos = mediaList.filter(m => m.mediaType === 'photo');
       const mainPhoto = photos[0];
       const sidePhotos = photos.slice(1);
-      const thumbSrc = (mainPhoto && baseUrl) ? baseUrl + '/' + escapeHtml(mainPhoto.filePath) : '';
+      const thumbSrc = mainPhoto ? mediaUrl(mainPhoto.filePath) : '';
 
-      let mainImgHtml = (mainPhoto && baseUrl)
-        ? '<img src="' + baseUrl + '/' + escapeHtml(mainPhoto.filePath) + '" alt="">'
+      let mainImgHtml = (mainPhoto && (baseUrl || entrySource === 'reffo'))
+        ? '<img src="' + mediaUrl(mainPhoto.filePath) + '" alt="">'
         : '<span class="placeholder">No media</span>';
 
       const hasVideo = mediaList.some(m => m.mediaType === 'video');
@@ -2358,8 +2464,8 @@ export function renderUI(): string {
       let sideImgsHtml = '';
       for (let i = 0; i < 3; i++) {
         const sm = sidePhotos[i];
-        if (sm && baseUrl) {
-          const src = baseUrl + '/' + escapeHtml(sm.filePath);
+        if (sm && (baseUrl || entrySource === 'reffo')) {
+          const src = mediaUrl(sm.filePath);
           const viewAllOverlay = (i === 2 && showViewAll) ? '<div class="detail-view-all"><span>View all</span></div>' : '';
           sideImgsHtml += '<div class="detail-side-img"><img src="' + src + '" alt="" onclick="setMainImage(this.src)">' + viewAllOverlay + '</div>';
         } else {
