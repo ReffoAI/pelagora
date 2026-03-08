@@ -473,6 +473,23 @@ export function renderUI(): string {
       .app-footer-top { flex-direction: column; text-align: center; gap: 16px; }
       .app-footer-bottom { flex-direction: column; text-align: center; gap: 12px; }
     }
+    /* Lightbox */
+    .lightbox-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; }
+    .lightbox-topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; flex-shrink: 0; }
+    .lightbox-counter { color: rgba(255,255,255,0.8); font-size: 14px; font-weight: 500; }
+    .lightbox-close { width: 40px; height: 40px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: rgba(255,255,255,0.8); transition: all 0.2s; }
+    .lightbox-close:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .lightbox-body { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; min-height: 0; padding: 0 64px; }
+    .lightbox-img { max-height: calc(100vh - 160px); max-width: 100%; object-fit: contain; user-select: none; }
+    .lightbox-prev, .lightbox-next { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: rgba(255,255,255,0.7); transition: all 0.2s; }
+    .lightbox-prev:hover, .lightbox-next:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .lightbox-prev { left: 8px; }
+    .lightbox-next { right: 8px; }
+    .lightbox-thumbs { flex-shrink: 0; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; overflow-x: auto; }
+    .lightbox-thumb { width: 56px; height: 56px; border-radius: 8px; overflow: hidden; cursor: pointer; padding: 0; border: 2px solid transparent; opacity: 0.5; transition: all 0.2s; background: none; flex-shrink: 0; }
+    .lightbox-thumb.active { border-color: #fff; opacity: 1; }
+    .lightbox-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
   </style>
 </head>
 <body>
@@ -969,7 +986,22 @@ export function renderUI(): string {
 
   <!-- Toast container -->
   <div id="toast-container"></div>
+
   </div><!-- end app-content -->
+
+  <!-- Lightbox overlay (outside app-content so z-index works) -->
+  <div id="lightboxOverlay" class="lightbox-overlay" style="display:none;" onclick="if(event.target===this)closeLightbox()">
+    <div class="lightbox-topbar">
+      <span class="lightbox-counter" id="lightboxCounter"></span>
+      <button class="lightbox-close" onclick="closeLightbox()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="lightbox-body">
+      <button class="lightbox-prev" id="lightboxPrev" onclick="lightboxNav(-1)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <img class="lightbox-img" id="lightboxImg" src="" alt="">
+      <button class="lightbox-next" id="lightboxNext" onclick="lightboxNav(1)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+    </div>
+    <div class="lightbox-thumbs" id="lightboxThumbs"></div>
+  </div>
 
   <!-- Footer -->
   <footer class="app-footer">
@@ -1604,12 +1636,13 @@ export function renderUI(): string {
 
         const hasVideo = !!video;
         const showViewAll = photos.length > 4 || (photos.length >= 4 && hasVideo);
+        const photoUrls = photos.map(p => '/' + p.filePath);
         let sideImgsHtml = '';
         for (let i = 0; i < 3; i++) {
           const sm = sideMedia[i];
           if (sm) {
-            const viewAllOverlay = (i === 2 && showViewAll) ? '<div class="detail-view-all"><span>View all</span></div>' : '';
-            sideImgsHtml += '<div class="detail-side-img"><img src="/' + escapeHtml(sm.filePath) + '" alt="" onclick="setMainImage(this.src)">' + viewAllOverlay + '</div>';
+            const viewAllOverlay = (i === 2 && showViewAll) ? '<div class="detail-view-all" onclick="event.stopPropagation();openLightbox(window._currentPhotos, 0)"><span>View all</span></div>' : '';
+            sideImgsHtml += '<div class="detail-side-img" onclick="openLightbox(window._currentPhotos, ' + (i + 1) + ')"><img src="/' + escapeHtml(sm.filePath) + '" alt="">' + viewAllOverlay + '</div>';
           } else {
             sideImgsHtml += '<div class="detail-side-img"><span class="placeholder">+</span></div>';
           }
@@ -1648,9 +1681,12 @@ export function renderUI(): string {
         html += '</div>'; // end detail-header
 
         html += '<div class="detail-gallery">';
-        html += '<div class="detail-main-img" id="detailMainImg">' + mainImgHtml + '</div>';
+        html += '<div class="detail-main-img" id="detailMainImg" style="cursor:pointer;" onclick="openLightbox(window._currentPhotos, 0)">' + mainImgHtml + '</div>';
         html += '<div class="detail-side-imgs">' + sideImgsHtml + '</div>';
         html += '</div>';
+
+        // Set photos for lightbox (innerHTML doesn't execute <script> tags)
+        window._currentPhotos = photoUrls;
 
         html += '<div class="detail-columns">';
 
@@ -1921,6 +1957,59 @@ export function renderUI(): string {
     window.setMainImage = function(src) {
       document.getElementById('detailMainImg').innerHTML = '<img src="' + src + '" alt="">';
     };
+
+    // Lightbox
+    window._lbPhotos = [];
+    window._lbIndex = 0;
+
+    function lightboxUpdate() {
+      var photos = window._lbPhotos;
+      var idx = window._lbIndex;
+      document.getElementById('lightboxImg').src = photos[idx];
+      document.getElementById('lightboxCounter').textContent = (idx + 1) + ' / ' + photos.length;
+      document.getElementById('lightboxPrev').style.display = idx > 0 ? '' : 'none';
+      document.getElementById('lightboxNext').style.display = idx < photos.length - 1 ? '' : 'none';
+      var thumbs = document.getElementById('lightboxThumbs');
+      var html = '';
+      for (var i = 0; i < photos.length; i++) {
+        html += '<button class="lightbox-thumb' + (i === idx ? ' active' : '') + '" onclick="lightboxGo(' + i + ')"><img src="' + photos[i] + '" alt=""></button>';
+      }
+      thumbs.innerHTML = photos.length > 1 ? html : '';
+    }
+
+    window.openLightbox = function(photos, startIndex) {
+      if (!photos || photos.length === 0) return;
+      window._lbPhotos = photos;
+      window._lbIndex = startIndex || 0;
+      document.getElementById('lightboxOverlay').style.display = '';
+      document.body.style.overflow = 'hidden';
+      lightboxUpdate();
+    };
+
+    window.closeLightbox = function() {
+      document.getElementById('lightboxOverlay').style.display = 'none';
+      document.body.style.overflow = '';
+    };
+
+    window.lightboxNav = function(dir) {
+      var next = window._lbIndex + dir;
+      if (next >= 0 && next < window._lbPhotos.length) {
+        window._lbIndex = next;
+        lightboxUpdate();
+      }
+    };
+
+    window.lightboxGo = function(idx) {
+      window._lbIndex = idx;
+      lightboxUpdate();
+    };
+
+    document.addEventListener('keydown', function(e) {
+      if (document.getElementById('lightboxOverlay').style.display === 'none') return;
+      if (e.key === 'Escape') closeLightbox();
+      else if (e.key === 'ArrowRight') lightboxNav(1);
+      else if (e.key === 'ArrowLeft') lightboxNav(-1);
+    });
 
     window.saveDetail = async function(refId, existingOfferId) {
       try {
@@ -2495,13 +2584,14 @@ export function renderUI(): string {
 
       const hasVideo = mediaList.some(m => m.mediaType === 'video');
       const showViewAll = photos.length > 4 || (photos.length >= 4 && hasVideo);
+      const remotePhotoUrls = photos.filter(p => baseUrl || entrySource === 'reffo').map(p => mediaUrl(p.filePath));
       let sideImgsHtml = '';
       for (let i = 0; i < 3; i++) {
         const sm = sidePhotos[i];
         if (sm && (baseUrl || entrySource === 'reffo')) {
           const src = mediaUrl(sm.filePath);
-          const viewAllOverlay = (i === 2 && showViewAll) ? '<div class="detail-view-all"><span>View all</span></div>' : '';
-          sideImgsHtml += '<div class="detail-side-img"><img src="' + src + '" alt="" onclick="setMainImage(this.src)">' + viewAllOverlay + '</div>';
+          const viewAllOverlay = (i === 2 && showViewAll) ? '<div class="detail-view-all" onclick="event.stopPropagation();openLightbox(window._currentPhotos, 0)"><span>View all</span></div>' : '';
+          sideImgsHtml += '<div class="detail-side-img" onclick="openLightbox(window._currentPhotos, ' + (i + 1) + ')"><img src="' + src + '" alt="">' + viewAllOverlay + '</div>';
         } else {
           sideImgsHtml += '<div class="detail-side-img"><span class="placeholder">+</span></div>';
         }
@@ -2550,9 +2640,12 @@ export function renderUI(): string {
       html += '</div>'; // end detail-header
 
       html += '<div class="detail-gallery">';
-      html += '<div class="detail-main-img" id="detailMainImg">' + mainImgHtml + '</div>';
+      html += '<div class="detail-main-img" id="detailMainImg" style="cursor:pointer;" onclick="openLightbox(window._currentPhotos, 0)">' + mainImgHtml + '</div>';
       html += '<div class="detail-side-imgs">' + sideImgsHtml + '</div>';
       html += '</div>';
+
+      // Set photos for lightbox (innerHTML doesn't execute <script> tags)
+      window._currentPhotos = remotePhotoUrls;
 
       html += '<div class="detail-columns">';
 
