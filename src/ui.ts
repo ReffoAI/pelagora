@@ -585,10 +585,10 @@ export function renderUI(): string {
     <!-- Search Tab -->
     <div id="tab-search" class="hidden">
       <section>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
-          <h2 style="margin:0;border:none;padding:0;">Search Results</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h2 style="margin:0;border:none;padding:0;line-height:32px;">Search Results</h2>
           <div style="display:flex;align-items:center;gap:10px;">
-            <select id="searchRadiusSelect" style="font-size:13px;border:1px solid #E6E8EC;border-radius:8px;padding:4px 8px;font-family:'Poppins',sans-serif;height:32px;display:none;" onchange="executeHeaderSearch()">
+            <select id="searchRadiusSelect" style="font-size:13px;border:1px solid #E6E8EC;border-radius:8px;padding:4px 8px;font-family:'Poppins',sans-serif;height:32px;margin-bottom:0;width:auto;display:none;" onchange="executeHeaderSearch()">
               <option value="10">10 miles</option>
               <option value="25">25 miles</option>
               <option value="50" selected>50 miles</option>
@@ -596,20 +596,20 @@ export function renderUI(): string {
               <option value="200">200 miles</option>
               <option value="500">500 miles</option>
             </select>
-            <select id="searchSortSelect" style="font-size:13px;border:1px solid #E6E8EC;border-radius:8px;padding:4px 8px;font-family:'Poppins',sans-serif;height:32px;">
+            <select id="searchSortSelect" style="font-size:13px;border:1px solid #E6E8EC;border-radius:8px;padding:4px 8px;font-family:'Poppins',sans-serif;height:32px;margin-bottom:0;width:auto;">
               <option value="newest">Newest First</option>
               <option value="price_asc">Price: Low to High</option>
               <option value="price_desc">Price: High to Low</option>
             </select>
-            <div class="source-filter" style="display:inline-flex;border:1px solid #E6E8EC;border-radius:8px;overflow:hidden;height:32px;font-size:13px;font-family:'Poppins',sans-serif;">
-              <button class="source-filter-btn active" data-source="all" onclick="setSourceFilter('all')" style="padding:0 10px;border:none;background:#3B71FE;color:white;cursor:pointer;font-size:13px;font-family:'Poppins',sans-serif;">All</button>
-              <button class="source-filter-btn" data-source="beacons" onclick="setSourceFilter('beacons')" style="padding:0 10px;border:none;border-left:1px solid #E6E8EC;background:white;color:#23262F;cursor:pointer;font-size:13px;font-family:'Poppins',sans-serif;">Beacons</button>
-              <button class="source-filter-btn" data-source="reffo" onclick="setSourceFilter('reffo')" style="padding:0 10px;border:none;border-left:1px solid #E6E8EC;background:white;color:#23262F;cursor:pointer;font-size:13px;font-family:'Poppins',sans-serif;">Reffo</button>
-            </div>
             <button id="favFilterBtn" class="fav-filter-btn" onclick="toggleFavFilter()" title="Show favorites only">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             </button>
           </div>
+        </div>
+        <div class="ref-subtabs" id="sourceFilterTabs">
+          <div class="ref-subtab active" data-source="all" onclick="setSourceFilter('all')">All</div>
+          <div class="ref-subtab" data-source="beacons" onclick="setSourceFilter('beacons')">Beacons</div>
+          <div class="ref-subtab" data-source="reffo" onclick="setSourceFilter('reffo')">Reffo</div>
         </div>
         <div id="searchResults"><p class="empty">Use the search bar above to find refs</p></div>
       </section>
@@ -2051,15 +2051,11 @@ export function renderUI(): string {
     var _lastSearchSource = 'all';
     window.setSourceFilter = function(src) {
       _lastSearchSource = src;
-      document.querySelectorAll('.source-filter-btn').forEach(function(btn) {
-        if (btn.getAttribute('data-source') === src) {
-          btn.classList.add('active');
-          btn.style.background = '#3B71FE';
-          btn.style.color = 'white';
+      document.querySelectorAll('#sourceFilterTabs .ref-subtab').forEach(function(tab) {
+        if (tab.getAttribute('data-source') === src) {
+          tab.classList.add('active');
         } else {
-          btn.classList.remove('active');
-          btn.style.background = 'white';
-          btn.style.color = '#23262F';
+          tab.classList.remove('active');
         }
       });
       // Client-side filter: show/hide cards by source
@@ -2173,9 +2169,9 @@ export function renderUI(): string {
 
           let actionBtn = '';
           if (item.listingStatus === 'for_sale' && activeOffer) {
-            actionBtn = '<button class="btn-primary btn-sm" onclick="event.stopPropagation(); openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + activeOffer.price + ', \\'' + escapeHtml(activeOffer.priceCurrency) + '\\')"><svg width="12" height="12" viewBox="0 0 13 14" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.3231 4.33301H2.66709C2.48518 4.33295 2.30518 4.37002 2.1381 4.44199C1.97098 4.51473 1.8203 4.62052 1.69511 4.75299C1.57019 4.88603 1.47385 5.04327 1.41209 5.215C1.35099 5.38639 1.32515 5.56837 1.3361 5.75L1.66911 11.083C1.69023 11.4216 1.83968 11.7394 2.08699 11.9717C2.33429 12.2039 2.66084 12.3332 3.0001 12.333H9.99009C10.3294 12.3332 10.6559 12.2039 10.9032 11.9717C11.1505 11.7394 11.3 11.4216 11.3211 11.083L11.6541 5.75C11.6661 5.56833 11.6402 5.38615 11.5781 5.215C11.5163 5.04327 11.42 4.88603 11.2951 4.75299C11.1706 4.62002 11.02 4.51412 10.8528 4.44186C10.6856 4.36961 10.5053 4.33255 10.3231 4.33301Z" fill="white"/><path d="M3.16212 3.66602C3.15445 3.2234 3.23504 2.78368 3.39912 2.37253C3.5632 1.96137 3.80751 1.58703 4.11781 1.2713C4.42811 0.955576 4.79818 0.704808 5.20643 0.53363C5.61468 0.362453 6.05296 0.274292 6.49565 0.274292C6.93833 0.274292 7.37658 0.362453 7.78483 0.53363C8.19308 0.704808 8.56315 0.955576 8.87346 1.2713C9.18376 1.58703 9.42809 1.96137 9.59217 2.37253C9.75626 2.78368 9.83681 3.2234 9.82914 3.66602V5.00003C9.82247 5.17233 9.74931 5.33535 9.62504 5.4549C9.50078 5.57444 9.33507 5.6412 9.16264 5.6412C8.99021 5.6412 8.82447 5.57444 8.70021 5.4549C8.57594 5.33535 8.50281 5.17233 8.49614 5.00003V3.66602C8.49614 3.13558 8.28542 2.6269 7.91035 2.25183C7.53528 1.87676 7.02657 1.66602 6.49614 1.66602C5.9657 1.66602 5.45699 1.87676 5.08192 2.25183C4.70685 2.6269 4.49614 3.13558 4.49614 3.66602V5.00003C4.49614 5.17693 4.42585 5.34659 4.30076 5.47168C4.17568 5.59677 4.00604 5.66702 3.82914 5.66702C3.65224 5.66702 3.48258 5.59677 3.35749 5.47168C3.23241 5.34659 3.16212 5.17693 3.16212 5.00003V3.66602Z" fill="white"/></svg> Buy at ' + escapeHtml(activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2)) + '</button>';
+            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#EC526F;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + activeOffer.price + ', \\'' + escapeHtml(activeOffer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Buy at ' + escapeHtml(activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2)) + '</a>';
           } else if (item.listingStatus === 'willing_to_sell') {
-            actionBtn = '<button class="btn-secondary btn-sm" onclick="event.stopPropagation(); openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')">Make Offer</button>';
+            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#EC526F;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Make Offer</a>';
           }
 
           const idx = lastSearchResults.length;
