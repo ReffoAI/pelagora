@@ -604,6 +604,14 @@ export function renderUI(): string {
             <button id="favFilterBtn" class="fav-filter-btn" onclick="toggleFavFilter()" title="Show favorites only">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             </button>
+            <div class="layout-toggle">
+              <button id="searchLayoutCardBtn" class="active" onclick="setSearchLayout('card')" title="Card view">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              </button>
+              <button id="searchLayoutRowBtn" onclick="setSearchLayout('row')" title="Row view">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+              </button>
+            </div>
           </div>
         </div>
         <div class="ref-subtabs" id="sourceFilterTabs">
@@ -2082,6 +2090,7 @@ export function renderUI(): string {
 
     async function renderSearchResults(data) {
       const container = document.getElementById('searchResults');
+      window._lastSearchData = data;
       if (data.results.length === 0) {
         container.innerHTML = '<p class="empty">No results found. Try a different search or location.</p>';
         return;
@@ -2151,6 +2160,7 @@ export function renderUI(): string {
       var reffoCount = allItems.filter(e => e.source === 'reffo').length;
 
       let cards = '';
+      let rows = '';
       lastSearchResults = [];
       allItems.forEach(entry => {
           const item = entry.item;
@@ -2185,23 +2195,23 @@ export function renderUI(): string {
           const heartClass = isFav ? 'fav-heart active' : 'fav-heart';
           const heartBtn = '<button class="' + heartClass + '" onclick="event.stopPropagation(); toggleFavorite(this, ' + idx + ')"><svg width="16" height="16" viewBox="0 0 24 24" fill="' + heartFill + '" stroke="' + heartStroke + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
 
-          // For Reffo results, filePath is a full URL; for DHT, it's relative
-          let imgHtml;
-          if (firstPhoto && entrySource === 'reffo') {
-            imgHtml = '<div class="card-img" style="position:relative;"><img src="' + escapeHtml(firstPhoto.filePath) + '" alt="">' + heartBtn + '</div>';
-          } else if (firstPhoto && peerHttpPort) {
-            imgHtml = '<div class="card-img" style="position:relative;"><img src="http://' + location.hostname + ':' + peerHttpPort + '/' + escapeHtml(firstPhoto.filePath) + '" alt="">' + heartBtn + '</div>';
-          } else {
-            imgHtml = '<div class="card-img" style="position:relative;"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#E6E8EC"/></svg></span>' + heartBtn + '</div>';
-          }
-
           // Source badge
           const sourceDot = entrySource === 'reffo'
             ? '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#7B61FF;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#7B61FF;display:inline-block;"></span>Reffo</span>'
             : '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#45B26B;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#45B26B;display:inline-block;"></span>Beacon</span>';
 
+          // For Reffo results, filePath is a full URL; for DHT, it's relative
+          let cardImgHtml;
+          if (firstPhoto && entrySource === 'reffo') {
+            cardImgHtml = '<div class="card-img" style="position:relative;"><img src="' + escapeHtml(firstPhoto.filePath) + '" alt="">' + heartBtn + '</div>';
+          } else if (firstPhoto && peerHttpPort) {
+            cardImgHtml = '<div class="card-img" style="position:relative;"><img src="http://' + location.hostname + ':' + peerHttpPort + '/' + escapeHtml(firstPhoto.filePath) + '" alt="">' + heartBtn + '</div>';
+          } else {
+            cardImgHtml = '<div class="card-img" style="position:relative;"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#E6E8EC"/></svg></span>' + heartBtn + '</div>';
+          }
+
           cards += '<div class="card result-card" data-source="' + entrySource + '" onclick="openRemoteDetail(' + idx + ')">' +
-            imgHtml +
+            cardImgHtml +
             '<div class="card-body">' +
               '<h3>' + escapeHtml(item.name) + '</h3>' +
               '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + badges + ' ' + sourceDot + '</div>' +
@@ -2214,6 +2224,27 @@ export function renderUI(): string {
               '<div class="beacon-id">Beacon: ' + escapeHtml(peer.beaconId.slice(0, 16)) + '...</div>' +
               (actionBtn ? '<div style="margin-top:10px;">' + actionBtn + '</div>' : '') +
             '</div></div>';
+
+          // Row view
+          let rowImgHtml;
+          if (firstPhoto && entrySource === 'reffo') {
+            rowImgHtml = '<div class="row-img"><img src="' + escapeHtml(firstPhoto.filePath) + '" alt="" style="width:100%;height:100%;object-fit:cover;"></div>';
+          } else if (firstPhoto && peerHttpPort) {
+            rowImgHtml = '<div class="row-img"><img src="http://' + location.hostname + ':' + peerHttpPort + '/' + escapeHtml(firstPhoto.filePath) + '" alt="" style="width:100%;height:100%;object-fit:cover;"></div>';
+          } else {
+            rowImgHtml = '<div class="row-img"><span class="placeholder"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></span></div>';
+          }
+
+          rows += '<div class="ref-row result-card" data-source="' + entrySource + '" onclick="openRemoteDetail(' + idx + ')">' +
+            rowImgHtml +
+            '<span class="row-name">' + escapeHtml(item.name) + '</span>' +
+            '<div class="row-meta">' +
+              '<span class="badge ' + statusClass + '" style="font-size:10px;padding:0 8px;line-height:22px;">' + statusLabel + '</span>' +
+              (item.category ? '<span class="badge badge-cat" style="font-size:10px;padding:0 8px;line-height:22px;">' + escapeHtml(item.category) + '</span>' : '') +
+              sourceDot +
+              (priceStr ? '<span class="row-price">' + escapeHtml(priceStr) + '</span>' : '') +
+            '</div>' +
+          '</div>';
       });
 
       var summaryParts = [];
@@ -2221,8 +2252,14 @@ export function renderUI(): string {
       if (reffoCount > 0) summaryParts.push(reffoCount + ' from Reffo');
       if (summaryParts.length === 0) summaryParts.push('0 results');
 
-      container.innerHTML = '<p id="searchSummary" style="font-size:14px;color:#777E90;margin-bottom:12px;font-weight:500;">' +
-        summaryParts.join(' \\u00b7 ') + '</p><div class="cards">' + cards + '</div>';
+      const summaryHtml = '<p id="searchSummary" style="font-size:14px;color:#777E90;margin-bottom:12px;font-weight:500;">' +
+        summaryParts.join(' \\u00b7 ') + '</p>';
+
+      if (searchLayout === 'row') {
+        container.innerHTML = summaryHtml + '<div class="rows">' + rows + '</div>';
+      } else {
+        container.innerHTML = summaryHtml + '<div class="cards">' + cards + '</div>';
+      }
 
       // Re-apply active source filter
       if (_lastSearchSource !== 'all') {
@@ -3147,6 +3184,14 @@ export function renderUI(): string {
       document.getElementById('layoutCardBtn').classList.toggle('active', layout === 'card');
       document.getElementById('layoutRowBtn').classList.toggle('active', layout === 'row');
       loadMyRefs();
+    };
+
+    let searchLayout = 'card';
+    window.setSearchLayout = function(layout) {
+      searchLayout = layout;
+      document.getElementById('searchLayoutCardBtn').classList.toggle('active', layout === 'card');
+      document.getElementById('searchLayoutRowBtn').classList.toggle('active', layout === 'row');
+      if (window._lastSearchData) renderSearchResults(window._lastSearchData);
     };
 
     // ===== List Ref =====
