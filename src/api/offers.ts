@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { OfferQueries, RefQueries } from '../db';
+import { sanitizeObject } from '@reffo/protocol';
 
 const router = Router();
 
@@ -22,7 +23,7 @@ router.get('/:id', (req: Request, res: Response) => {
 router.post('/', (req: Request, res: Response) => {
   const offers = new OfferQueries();
   const refs = new RefQueries();
-  const { refId, price, priceCurrency, status, location } = req.body;
+  const { refId, price, priceCurrency, status, location } = sanitizeObject(req.body);
 
   if (!refId || typeof refId !== 'string') {
     return res.status(400).json({ error: 'refId is required' });
@@ -42,7 +43,7 @@ router.post('/', (req: Request, res: Response) => {
 // PATCH /offers/:id
 router.patch('/:id', (req: Request, res: Response) => {
   const offers = new OfferQueries();
-  const { price, priceCurrency, status, location } = req.body;
+  const { price, priceCurrency, status, location } = sanitizeObject(req.body);
   const updated = offers.update(String(req.params.id), { price, priceCurrency, status, location });
   if (!updated) return res.status(404).json({ error: 'Offer not found' });
   res.json(updated);

@@ -3,7 +3,7 @@ import b4a from 'b4a';
 import crypto from 'crypto';
 import { RefQueries, OfferQueries, MediaQueries, NegotiationQueries } from '../db';
 import type { PeerMessage, QueryPayload, AnnouncePayload, ProposalPayload, ProposalResponsePayload } from '@reffo/protocol';
-import { blurLocation, haversineDistanceMiles } from '@reffo/protocol';
+import { blurLocation, haversineDistanceMiles, parseDhtMessage, sanitizeObject, sanitizeField } from '@reffo/protocol';
 
 // All Reffo beacons join this topic to find each other
 const REFFO_TOPIC = crypto.createHash('sha256').update('reffo-beacon-v1').digest();
@@ -36,12 +36,8 @@ export class DhtDiscovery {
       this.sendAnnouncement(stream);
 
       stream.on('data', (data: Buffer) => {
-        try {
-          const msg: PeerMessage = JSON.parse(b4a.toString(data));
-          this.handleMessage(msg, stream);
-        } catch {
-          // Ignore malformed messages
-        }
+        const msg = parseDhtMessage(b4a.toString(data));
+        if (msg) this.handleMessage(msg, stream);
       });
 
       stream.on('close', () => {
@@ -148,8 +144,9 @@ export class DhtDiscovery {
     const offers = new OfferQueries();
     const mediaQ = new MediaQueries();
 
-    let results = query.search
-      ? refs.searchDiscoverable(query.search)
+    const searchTerm = query.search ? sanitizeField(query.search, 'search') : undefined;
+    let results = searchTerm
+      ? refs.searchDiscoverable(searchTerm)
       : refs.listDiscoverable(query.category, query.subcategory);
 
     // Build response with matching offers
@@ -241,16 +238,17 @@ export class DhtDiscovery {
   private handleProposal(fromBeaconId: string, payload: ProposalPayload): void {
     console.log(`[DHT] Received proposal from ${fromBeaconId.slice(0, 8)}... for ref ${payload.refId}`);
     const negotiations = new NegotiationQueries();
+    const clean = sanitizeObject(payload as unknown as Record<string, unknown>) as unknown as ProposalPayload;
 
     negotiations.create({
-      id: payload.negotiationId,
-      refId: payload.refId,
-      refName: payload.refName || '',
+      id: clean.negotiationId,
+      refId: clean.refId,
+      refName: clean.refName || '',
       buyerBeaconId: fromBeaconId,
       sellerBeaconId: this.beaconId,
-      price: payload.price,
-      priceCurrency: payload.priceCurrency || 'USD',
-      message: payload.message || '',
+      price: clean.price,
+      priceCurrency: clean.priceCurrency || 'USD',
+      message: clean.message || '',
       role: 'seller',
     });
   }
@@ -288,14 +286,10 @@ export class DhtDiscovery {
 
       for (const [, peer] of this.peers) {
         const handler = (data: Buffer) => {
-          try {
-            const resp: PeerMessage = JSON.parse(b4a.toString(data));
-            if (resp.type === 'response') {
-              responses.push(resp);
-              peer.stream.off('data', handler);
-            }
-          } catch {
-            // Ignore
+          const resp = parseDhtMessage(b4a.toString(data));
+          if (resp && resp.type === 'response') {
+            responses.push(resp);
+            peer.stream.off('data', handler);
           }
         };
         peer.stream.on('data', handler);

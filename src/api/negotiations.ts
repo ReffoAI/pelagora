@@ -4,6 +4,7 @@ import { NegotiationQueries, RefQueries } from '../db';
 import type { DhtDiscovery } from '../dht/discovery';
 import type { SyncManager } from '../sync';
 import type { NegotiationStatus } from '@reffo/protocol';
+import { sanitizeObject } from '@reffo/protocol';
 
 const router = Router();
 
@@ -39,7 +40,7 @@ router.post('/', async (req: Request, res: Response) => {
   const beaconId = req.app.get('beaconId') as string;
   const dht: DhtDiscovery | undefined = req.app.get('dht');
 
-  const { refId, refName, sellerBeaconId, price, priceCurrency, message } = req.body;
+  const { refId, refName, sellerBeaconId, price, priceCurrency, message } = sanitizeObject(req.body);
 
   if (!refId || typeof refId !== 'string') {
     return res.status(400).json({ error: 'refId is required' });
@@ -95,7 +96,7 @@ router.patch('/:id/respond', async (req: Request, res: Response) => {
   const beaconId = req.app.get('beaconId') as string;
   const dht: DhtDiscovery | undefined = req.app.get('dht');
 
-  const { status, counterPrice, responseMessage } = req.body;
+  const { status, counterPrice, responseMessage } = sanitizeObject(req.body);
   const validStatuses: NegotiationStatus[] = ['accepted', 'rejected', 'countered'];
 
   if (!validStatuses.includes(status)) {

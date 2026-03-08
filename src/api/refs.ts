@@ -4,6 +4,7 @@ import path from 'path';
 import { RefQueries, MediaQueries, NegotiationQueries } from '../db';
 import { isValidCategory, isValidSubcategory } from '../taxonomy';
 import type { ListingStatus } from '@reffo/protocol';
+import { sanitizeObject } from '@reffo/protocol';
 
 const VALID_LISTING_STATUSES: ListingStatus[] = ['private', 'for_sale', 'willing_to_sell', 'for_rent'];
 
@@ -40,10 +41,11 @@ router.get('/:id', (req: Request, res: Response) => {
 // POST /refs
 router.post('/', (req: Request, res: Response) => {
   const refs = new RefQueries();
+  const body = sanitizeObject(req.body);
   const { name, description, category, subcategory, image, sku, listingStatus, quantity,
     locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry,
     sellingScope, sellingRadiusMiles, attributes, condition,
-    rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit } = req.body;
+    rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit } = body;
 
   if (!name || typeof name !== 'string') {
     return res.status(400).json({ error: 'name is required' });
@@ -82,10 +84,11 @@ router.post('/', (req: Request, res: Response) => {
 // PATCH /refs/:id
 router.patch('/:id', (req: Request, res: Response) => {
   const refs = new RefQueries();
+  const body = sanitizeObject(req.body);
   const { name, description, category, subcategory, image, sku, listingStatus, quantity,
     locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry,
     sellingScope, sellingRadiusMiles, attributes, condition,
-    rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit } = req.body;
+    rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit } = body;
 
   if (listingStatus !== undefined && !VALID_LISTING_STATUSES.includes(listingStatus)) {
     return res.status(400).json({ error: `Invalid listingStatus: ${listingStatus}. Must be one of: ${VALID_LISTING_STATUSES.join(', ')}` });

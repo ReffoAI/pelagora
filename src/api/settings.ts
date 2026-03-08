@@ -5,6 +5,7 @@ import multer from 'multer';
 import { v4 as uuid } from 'uuid';
 import { SettingsQueries } from '../db';
 import type { SellingScope } from '@reffo/protocol';
+import { sanitizeObject } from '@reffo/protocol';
 import { getVersion } from '../version';
 
 const PROFILE_DIR = path.join(process.cwd(), 'uploads', 'profile');
@@ -136,7 +137,7 @@ router.get('/location', (_req: Request, res: Response) => {
 
 // POST /settings/location — Save default location settings
 router.post('/location', (req: Request, res: Response) => {
-  const { locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry, defaultSellingScope, defaultSellingRadiusMiles } = req.body;
+  const { locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry, defaultSellingScope, defaultSellingRadiusMiles } = sanitizeObject(req.body);
 
   const validScopes: SellingScope[] = ['global', 'national', 'range'];
   if (defaultSellingScope && !validScopes.includes(defaultSellingScope)) {
