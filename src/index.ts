@@ -8,6 +8,7 @@ import { getDb } from './db';
 import { SyncManager } from './sync';
 import { searchReffo } from './sync/reffo-client';
 import { getVersion } from './version';
+import { SkillLoader, createSkillRegistryRouter, createSkillExportRouter } from './skills';
 
 // Load .env into process.env (no dotenv dependency)
 function loadEnv(): void {
@@ -88,6 +89,15 @@ async function main(): Promise<void> {
   const dht = new DhtDiscovery(BEACON_ID);
   dht.httpPort = PORT;
   app.set('dht', dht);
+
+  // Load skill plugins
+  const db = getDb();
+  const skillLoader = new SkillLoader(db, BEACON_ID, dht);
+  await skillLoader.loadAll(app);
+
+  // Mount skill registry API and export routes
+  app.use('/skills', createSkillRegistryRouter(skillLoader.getRegistry()));
+  app.use('/skills', createSkillExportRouter(skillLoader.getSkills()));
 
   // Expose DHT + Reffo search endpoint
   app.get('/search', async (req, res) => {

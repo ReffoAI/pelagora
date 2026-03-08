@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@reffo/protocol": "file:../reffo-protocol",
+    "@reffo/skill-reverse-auction": "file:../reffo-skill-reverse-auction",
     "b4a": "^1.6.7",
     "better-sqlite3": "^11.7.0",
     "express": "^4.21.0",

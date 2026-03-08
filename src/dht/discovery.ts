@@ -13,6 +13,7 @@ export class DhtDiscovery {
   private beaconId: string;
   private peers: Map<string, { stream: any; beaconId: string }> = new Map();
   private beaconIdMap: Map<string, string> = new Map(); // reffoBeaconId -> hyperswarm peerId
+  private messageHandlers = new Map<string, (fromBeaconId: string, payload: unknown) => void>();
   private onPeerConnect?: (count: number) => void;
   httpPort = 0;
 
@@ -95,6 +96,23 @@ export class DhtDiscovery {
     stream.write(b4a.from(JSON.stringify(msg)));
   }
 
+  /** Register a custom message handler for skill-defined message types */
+  registerMessageHandler(type: string, handler: (fromBeaconId: string, payload: unknown) => void): void {
+    this.messageHandlers.set(type, handler);
+  }
+
+  /** Broadcast a message to all connected peers */
+  broadcastToPeers(msg: PeerMessage): void {
+    const msgBuf = b4a.from(JSON.stringify(msg));
+    for (const [, peer] of this.peers) {
+      try {
+        peer.stream.write(msgBuf);
+      } catch {
+        // Ignore write errors to individual peers
+      }
+    }
+  }
+
   private handleMessage(msg: PeerMessage, stream: any): void {
     switch (msg.type) {
       case 'query':
@@ -113,6 +131,14 @@ export class DhtDiscovery {
       case 'proposal_response':
         this.handleProposalResponse(msg.beaconId, msg.payload as ProposalResponsePayload);
         break;
+      default: {
+        // Check for skill-registered message handlers
+        const handler = this.messageHandlers.get(msg.type);
+        if (handler) {
+          handler(msg.beaconId, msg.payload);
+        }
+        break;
+      }
     }
   }
 
