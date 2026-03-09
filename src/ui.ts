@@ -1040,11 +1040,11 @@ export function renderUI(): string {
           <span class="col-text">United States</span>
         </div>
 
-        <!-- Col 4: Download Beacon -->
-        <div class="app-footer-col">
-          <span class="app-footer-col-title">Download Beacon</span>
-          <span class="col-desc">Run your own peer-to-peer marketplace node. List items, discover deals, and trade directly with nearby sellers.</span>
-          <a href="https://reffo.ai/download" target="_blank" rel="noopener noreferrer" class="footer-download-btn" style="text-decoration:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download</a>
+        <!-- Col 4: Dynamic CTA (API key / Skills) -->
+        <div class="app-footer-col" id="footerCtaCol">
+          <span class="app-footer-col-title" id="footerCtaTitle">Connect to Reffo.ai</span>
+          <span class="col-desc" id="footerCtaDesc">Link your beacon to Reffo.ai to sync listings, access the skill marketplace, and join the network.</span>
+          <a id="footerCtaBtn" href="https://reffo.ai/api" target="_blank" rel="noopener noreferrer" class="footer-download-btn" style="text-decoration:none;"><svg id="footerCtaBtnIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Get API Key</a>
         </div>
       </div>
     </div>
@@ -3118,6 +3118,24 @@ export function renderUI(): string {
             }
           }
         }
+        // Update footer CTA based on API key status
+        var footerCtaTitle = document.getElementById('footerCtaTitle');
+        var footerCtaDesc = document.getElementById('footerCtaDesc');
+        var footerCtaBtn = document.getElementById('footerCtaBtn');
+        if (footerCtaTitle && footerCtaDesc && footerCtaBtn) {
+          if (data.hasApiKey) {
+            footerCtaTitle.textContent = 'Explore Skills';
+            footerCtaDesc.textContent = 'Browse and install skills to add new capabilities to your beacon \u2014 from reverse auctions to analytics and more.';
+            footerCtaBtn.href = 'https://reffo.ai/skills';
+            footerCtaBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> Browse Skills';
+          } else {
+            footerCtaTitle.textContent = 'Connect to Reffo.ai';
+            footerCtaDesc.textContent = 'Link your beacon to Reffo.ai to sync listings, access the skill marketplace, and join the network.';
+            footerCtaBtn.href = 'https://reffo.ai/api';
+            footerCtaBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Get API Key';
+          }
+        }
+
         // Check for update
         try {
           const healthRes = await fetch('/health');
@@ -3442,6 +3460,23 @@ export function renderUI(): string {
         if (avatarBtn && data.profilePicturePath) {
           const ts = Date.now();
           avatarBtn.innerHTML = '<img src="' + data.profilePicturePath + '?t=' + ts + '" alt="avatar">';
+        }
+        // Update footer CTA based on API key status
+        var footerCtaTitle = document.getElementById('footerCtaTitle');
+        var footerCtaDesc = document.getElementById('footerCtaDesc');
+        var footerCtaBtn = document.getElementById('footerCtaBtn');
+        if (footerCtaTitle && footerCtaDesc && footerCtaBtn) {
+          if (data.hasApiKey) {
+            footerCtaTitle.textContent = 'Explore Skills';
+            footerCtaDesc.textContent = 'Browse and install skills to add new capabilities to your beacon \u2014 from reverse auctions to analytics and more.';
+            footerCtaBtn.href = 'https://reffo.ai/skills';
+            footerCtaBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> Browse Skills';
+          } else {
+            footerCtaTitle.textContent = 'Connect to Reffo.ai';
+            footerCtaDesc.textContent = 'Link your beacon to Reffo.ai to sync listings, access the skill marketplace, and join the network.';
+            footerCtaBtn.href = 'https://reffo.ai/api';
+            footerCtaBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Get API Key';
+          }
         }
       } catch {}
     }
