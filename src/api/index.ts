@@ -21,9 +21,12 @@ export function createApp(): express.Express {
   // Serve uploaded media files
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-  // Serve brand assets (favicon.ico, beacon.png)
-  app.get('/favicon.ico', (_req, res) => { res.sendFile(path.join(__dirname, '../../favicon.ico')); });
+  // Serve brand assets (favicon.ico, beacon.png, footer_bolt.png)
+  app.get('/favicon.ico', (_req, res) => { res.type('image/x-icon').sendFile(path.join(__dirname, '../../favicon.ico')); });
   app.get('/beacon.png', (_req, res) => { res.sendFile(path.join(__dirname, '../../beacon.png')); });
+  app.get('/footer_bolt.png', (_req, res) => { res.sendFile(path.join(__dirname, '../../footer_bolt.png')); });
+  app.get('/header-brand.png', (_req, res) => { res.sendFile(path.join(__dirname, '../../header-brand.png')); });
+  app.get('/footer-brand.png', (_req, res) => { res.sendFile(path.join(__dirname, '../../footer-brand.png')); });
 
   app.get('/', (_req, res) => {
     res.type('html').send(renderUI());

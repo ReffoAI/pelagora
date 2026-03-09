@@ -21,7 +21,7 @@ export function renderUI(): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>beacon</title>
-  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -37,7 +37,7 @@ export function renderUI(): string {
 
     /* Header */
     h1 { font-size: 1.25rem; font-weight: 700; color: #141416; margin: 0; }
-    .header-beacon-icon { height: 28px; width: auto; }
+    .header-beacon-icon { height: 26px; width: auto; }
 
     /* App Header — sticky bar */
     .app-header { position: sticky; top: 0; z-index: 100; background: #FCFCFD; border-bottom: 1px solid #E6E8EC; padding: 0 24px; }
@@ -455,23 +455,34 @@ export function renderUI(): string {
     .neg-group-back:hover { color: #DD436C; }
 
     /* Footer */
-    .app-footer { border-top: 1px solid #E6E8EC; background: #FCFCFD; padding: 40px 24px; }
-    .app-footer-inner { max-width: 1100px; margin: 0 auto; }
-    .app-footer-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 32px; }
-    .app-footer-brand { display: flex; align-items: center; gap: 8px; }
-    .app-footer-brand span { font-size: 14px; font-weight: 600; color: #141416; }
-    .app-footer-links { display: flex; align-items: center; gap: 24px; font-size: 14px; }
-    .app-footer-links a { color: #777E90; text-decoration: none; transition: color 0.2s; }
-    .app-footer-links a:hover { color: #141416; }
-    .app-footer-divider { border: none; border-top: 1px solid #E6E8EC; margin: 0 0 24px 0; }
-    .app-footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .app-footer { border-top: 1px solid #E6E8EC; background: #FCFCFD; padding: 0; }
+    .app-footer-inner { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
+    .app-footer-grid { display: grid; grid-template-columns: 140px 1fr 1fr 1fr; gap: 40px; }
+    .app-footer-brand { display: flex; flex-direction: column; gap: 16px; }
+    .app-footer-brand img { height: 40px; width: auto; object-fit: contain; }
+    .app-footer-nav { display: flex; flex-direction: column; gap: 16px; }
+    .app-footer-nav a { color: #EA526F; text-decoration: none; font-size: 14px; font-weight: 500; transition: opacity 0.2s; }
+    .app-footer-nav a:hover { opacity: 0.8; }
+    .app-footer-col { border-left: 1px solid #E6E8EC; padding-left: 32px; display: flex; flex-direction: column; gap: 12px; }
+    .app-footer-col-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #141416; }
+    .app-footer-col a { color: #EA526F; text-decoration: none; font-size: 14px; transition: opacity 0.2s; }
+    .app-footer-col a:hover { opacity: 0.8; }
+    .app-footer-col .col-text { font-size: 14px; color: #23262F; }
+    .app-footer-col .col-desc { font-size: 14px; color: #777E90; line-height: 1.5; }
+    .app-footer-col input { height: 44px; padding: 0 16px; border: 1px solid #E6E8EC; border-radius: 22px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 500; color: #23262F; background: #FCFCFD; outline: none; width: 100%; margin-bottom: 0; }
+    .app-footer-col input:focus { border-color: #EA526F; }
+    .footer-download-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 20px; background: linear-gradient(90deg, #8101B4 0%, #EA526F 100%); border: none; border-radius: 20px; font-size: 13px; font-weight: 500; color: #FCFCFD !important; cursor: pointer; font-family: 'Poppins', sans-serif; transition: opacity 0.2s; align-self: flex-start; }
+    .footer-download-btn:hover { opacity: 0.9; color: #FCFCFD !important; }
+    .app-footer-bar { border-top: 1px solid #E6E8EC; }
+    .app-footer-bar-inner { max-width: 1100px; margin: 0 auto; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
     .app-footer-copy { font-size: 12px; color: #777E90; }
-    .app-footer-legal { display: flex; align-items: center; gap: 16px; font-size: 12px; }
-    .app-footer-legal a { color: #777E90; text-decoration: none; transition: color 0.2s; }
-    .app-footer-legal a:hover { color: #141416; }
+    .app-footer-social { display: flex; align-items: center; gap: 20px; }
+    .app-footer-social a { color: #777E90; transition: color 0.2s; display: flex; }
+    .app-footer-social a:hover { color: #141416; }
     @media (max-width: 768px) {
-      .app-footer-top { flex-direction: column; text-align: center; gap: 16px; }
-      .app-footer-bottom { flex-direction: column; text-align: center; gap: 12px; }
+      .app-footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .app-footer-col { border-left: none; padding-left: 0; border-top: 1px solid #E6E8EC; padding-top: 24px; }
+      .app-footer-bar-inner { flex-direction: column; text-align: center; gap: 12px; }
     }
     /* Lightbox */
     .lightbox-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; }
@@ -497,8 +508,7 @@ export function renderUI(): string {
   <div class="app-header">
     <div class="app-header-inner">
       <div class="app-header-logo" onclick="switchTab('refs')">
-        <img class="header-beacon-icon" src="/beacon.png" alt="beacon">
-        <h1>beacon</h1>
+        <img class="header-beacon-icon" src="/header-brand.png" alt="Reffo Beacon">
       </div>
 
       <!-- Header actions: link + bell + avatar -->
@@ -1006,29 +1016,44 @@ export function renderUI(): string {
   <!-- Footer -->
   <footer class="app-footer">
     <div class="app-footer-inner">
-      <div class="app-footer-top">
+      <div class="app-footer-grid">
+        <!-- Col 1: Logo -->
         <div class="app-footer-brand">
-          <img src="/beacon.png" alt="beacon" style="height: 20px; width: auto;">
-          <span>beacon</span>
+          <img src="/footer-brand.png" alt="Reffo" style="height: 40px; width: auto;">
+          <button id="footerUpdateBtn" class="button-gradient" style="display:none;height:32px;padding:0 16px;font-size:12px;border-radius:16px;" onclick="switchTab('settings')">&#x2B06; Update</button>
         </div>
-        <div class="app-footer-links">
+
+        <!-- Col 2: Nav -->
+        <div class="app-footer-nav">
+          <a href="#" onclick="switchTab('search');return false;">Marketplace</a>
           <a href="https://reffo.ai/about" target="_blank" rel="noopener noreferrer">About</a>
-          <a href="https://reffo.ai/docs" target="_blank" rel="noopener noreferrer">Docs</a>
-          <a href="https://reffo.ai/agents" target="_blank" rel="noopener noreferrer">AI Agents</a>
-          <a href="https://reffo.ai/skills" target="_blank" rel="noopener noreferrer">Skills</a>
-          <a href="https://reffo.ai/support?source=beacon" target="_blank" rel="noopener noreferrer">Support</a>
-          <button id="footerUpdateBtn" class="button-gradient" style="display:none;height:32px;padding:0 16px;font-size:12px;border-radius:16px;" onclick="switchTab('settings')">&#x2B06; Update available</button>
+          <a href="https://reffo.ai/support?source=beacon" target="_blank" rel="noopener noreferrer">Contact</a>
+          <a href="https://reffo.ai/download" target="_blank" rel="noopener noreferrer">Download</a>
+        </div>
+
+        <!-- Col 3: Contact -->
+        <div class="app-footer-col">
+          <span class="app-footer-col-title">Contact</span>
+          <a href="mailto:info@reffo.ai">info@reffo.ai</a>
+          <span class="col-text">Jacksonville Beach, FL</span>
+          <span class="col-text">United States</span>
+        </div>
+
+        <!-- Col 4: Download Beacon -->
+        <div class="app-footer-col">
+          <span class="app-footer-col-title">Download Beacon</span>
+          <span class="col-desc">Run your own peer-to-peer marketplace node. List items, discover deals, and trade directly with nearby sellers.</span>
+          <a href="https://reffo.ai/download" target="_blank" rel="noopener noreferrer" class="footer-download-btn" style="text-decoration:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download</a>
         </div>
       </div>
-      <hr class="app-footer-divider">
-      <div class="app-footer-bottom">
-        <div class="app-footer-copy">&copy; <script>document.write(new Date().getFullYear())</script> Reffo.ai</div>
-        <div class="app-footer-legal">
-          <a href="https://reffo.ai/terms" target="_blank" rel="noopener noreferrer">Terms</a>
-          <a href="https://reffo.ai/privacy" target="_blank" rel="noopener noreferrer">Privacy</a>
-          <a href="https://reffo.ai/acceptable-use" target="_blank" rel="noopener noreferrer">Acceptable Use</a>
-          <a href="https://reffo.ai/cookies" target="_blank" rel="noopener noreferrer">Cookies</a>
-          <a href="https://reffo.ai/dmca" target="_blank" rel="noopener noreferrer">DMCA</a>
+    </div>
+    <div class="app-footer-bar">
+      <div class="app-footer-bar-inner">
+        <div class="app-footer-copy">&copy; <script>document.write(new Date().getFullYear())</script> Reffo Inc. All rights reserved</div>
+        <div class="app-footer-social">
+          <a href="https://facebook.com/reffoai" target="_blank" rel="noopener noreferrer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+          <a href="https://x.com/ReffoAI" target="_blank" rel="noopener noreferrer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+          <a href="https://instagram.com/reffoai" target="_blank" rel="noopener noreferrer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
         </div>
       </div>
     </div>
