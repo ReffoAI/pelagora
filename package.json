@@ -3,6 +3,17 @@
   "version": "0.1.0",
   "description": "Self-hosted beacon server for the Reffo decentralized commerce protocol",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ReffoAI/reffo-beacon.git"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
