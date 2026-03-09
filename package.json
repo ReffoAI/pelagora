@@ -6,6 +6,8 @@
   "types": "dist/index.d.ts",
   "files": [
     "dist",
+    "header-brand.png",
+    "footer-brand.png",
     "LICENSE",
     "README.md",
     "CHANGELOG.md"
