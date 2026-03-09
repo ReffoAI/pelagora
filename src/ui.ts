@@ -82,7 +82,39 @@ export function renderUI(): string {
     .search-filter-bar select { border: none; outline: none; background: transparent; height: 100%; font-size: 14px; font-weight: 500; font-family: 'Poppins', sans-serif; color: #23262F; cursor: pointer; -webkit-appearance: none; appearance: none; padding: 0; margin: 0; }
     .sfb-search-btn { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: #EC526F; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: 4px; transition: background 0.2s; }
     .sfb-search-btn:hover { background: #DD436C; }
-    @media (max-width: 768px) { .search-filter-segment { padding: 0 10px; } }
+
+    /* Mobile search — collapsed pill + expanded panel */
+    .mobile-search-pill { display: none; width: 100%; align-items: center; gap: 12px; height: 48px; padding: 0 16px; border-radius: 24px; background: #FCFCFD; border: 1px solid #E6E8EC; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; font-family: 'Poppins', sans-serif; transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.25s ease; }
+    .mobile-search-pill .pill-text { flex: 1; min-width: 0; text-align: left; }
+    .mobile-search-pill .pill-title { font-size: 14px; font-weight: 500; color: #141416; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mobile-search-pill .pill-sub { font-size: 11px; color: #777E90; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; }
+    .mobile-search-pill .pill-btn { width: 32px; height: 32px; border-radius: 50%; background: #EC526F; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .mobile-search-expanded { display: none; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 0.25s ease, opacity 0.2s ease; }
+    .mobile-search-expanded.open { grid-template-rows: 1fr; opacity: 1; }
+    .mobile-search-expanded .expand-inner { overflow: hidden; }
+    .mobile-search-expanded .expand-card { background: #FCFCFD; border-radius: 16px; border: 1px solid #E6E8EC; padding: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); transition: transform 0.25s ease; transform: translateY(-8px); }
+    .mobile-search-expanded.open .expand-card { transform: translateY(0); }
+    .expand-field { margin-bottom: 12px; }
+    .expand-field label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: #777E90; margin-bottom: 4px; }
+    .expand-field-row { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; border-radius: 12px; background: #F4F5F6; }
+    .expand-field-row svg { flex-shrink: 0; color: #777E90; }
+    .expand-field-row input { flex: 1; border: none; outline: none; background: transparent; font-size: 14px; font-weight: 500; font-family: 'Poppins', sans-serif; color: #23262F; min-width: 0; padding: 0; margin: 0; }
+    .expand-field-row input::placeholder { color: #777E90; font-weight: 400; }
+    .expand-field-row select { flex: 1; border: none; outline: none; background: transparent; font-size: 14px; font-weight: 500; font-family: 'Poppins', sans-serif; color: #23262F; cursor: pointer; -webkit-appearance: none; appearance: none; padding: 0; margin: 0; }
+    .expand-actions { display: flex; gap: 12px; padding-top: 4px; }
+    .expand-actions button { flex: 1; height: 44px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
+    .expand-cancel { border: 1px solid #E6E8EC; background: #FCFCFD; color: #23262F; }
+    .expand-cancel:hover { background: #F4F5F6; }
+    .expand-submit { border: none; background: #EC526F; color: #FCFCFD; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .expand-submit:hover { background: #DD436C; }
+
+    @media (max-width: 639px) {
+      .search-filter-bar { display: none !important; }
+      .mobile-search-pill { display: flex; }
+      .mobile-search-expanded { display: grid; }
+      .container { padding: 16px; }
+    }
+    @media (min-width: 640px) and (max-width: 768px) { .search-filter-segment { padding: 0 10px; } }
 
     /* Layout toggle */
     .layout-toggle { display: flex; gap: 0; border: 1px solid #E6E8EC; border-radius: 8px; overflow: hidden; }
@@ -559,6 +591,7 @@ export function renderUI(): string {
   <div class="container">
     <!-- Search Filter Bar -->
     <div style="margin-bottom:24px;">
+      <!-- Desktop: full pill bar -->
       <div class="search-filter-bar" id="searchFilterBar">
         <div class="search-filter-segment">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -577,6 +610,55 @@ export function renderUI(): string {
         <button class="sfb-search-btn" onclick="executeHeaderSearch()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         </button>
+      </div>
+
+      <!-- Mobile: collapsed pill -->
+      <div class="mobile-search-pill" id="mobileSearchPill" onclick="expandMobileSearch()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <div class="pill-text">
+          <div class="pill-title" id="mobileSearchTitle">Search items...</div>
+          <div class="pill-sub" id="mobileSearchSub">All categories &middot; Anywhere</div>
+        </div>
+        <div class="pill-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </div>
+      </div>
+
+      <!-- Mobile: expanded panel -->
+      <div class="mobile-search-expanded" id="mobileSearchExpanded">
+        <div class="expand-inner">
+          <div class="expand-card">
+            <div class="expand-field">
+              <label>Search</label>
+              <div class="expand-field-row">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input id="mobileSearchQ" placeholder="What are you looking for?" onkeydown="if(event.key==='Enter'){executeHeaderSearch();collapseMobileSearch();}">
+              </div>
+            </div>
+            <div class="expand-field">
+              <label>Category</label>
+              <div class="expand-field-row">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <select id="mobileSearchCat"><option value="">All Categories</option></select>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+            </div>
+            <div class="expand-field">
+              <label>Where</label>
+              <div class="expand-field-row">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <input id="mobileSearchLoc" placeholder="City, state, or zip" onkeydown="if(event.key==='Enter'){executeHeaderSearch();collapseMobileSearch();}">
+              </div>
+            </div>
+            <div class="expand-actions">
+              <button class="expand-cancel" onclick="collapseMobileSearch()">Cancel</button>
+              <button class="expand-submit" onclick="executeHeaderSearch();collapseMobileSearch();">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                Search
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1312,9 +1394,9 @@ Website = https://reffo.ai</pre>
         var el = document.getElementById('tab-' + t);
         if (el) el.classList.toggle('hidden', tab !== t);
       });
-      // Show/hide search filter bar
-      var sfb = document.getElementById('searchFilterBar');
-      if (sfb) sfb.parentElement.style.display = (tab === 'refs' || tab === 'search') ? '' : 'none';
+      // Show/hide search filter bar (desktop + mobile)
+      var sfbWrap = document.getElementById('searchFilterBar') ? document.getElementById('searchFilterBar').parentElement : null;
+      if (sfbWrap) sfbWrap.style.display = (tab === 'refs' || tab === 'search') ? '' : 'none';
       if (tab === 'negotiations') loadNegotiations();
       if (tab === 'refs') loadMyRefs();
       if (tab === 'settings') loadSettings();
@@ -1433,6 +1515,7 @@ Website = https://reffo.ai</pre>
       populateSubcategories(document.getElementById('refCat'), document.getElementById('refSubcat'))
     );
     populateCategories(document.getElementById('headerSearchCat'));
+    populateCategories(document.getElementById('mobileSearchCat'));
 
     document.getElementById('refCat').addEventListener('change', function() {
       renderCategoryFields('createCategoryFields', this.value, document.getElementById('refSubcat').value, {});
@@ -2621,7 +2704,65 @@ Website = https://reffo.ai</pre>
       }
     }
 
+    /* ── Mobile search expand / collapse ──────────────── */
+    function expandMobileSearch() {
+      var pill = document.getElementById('mobileSearchPill');
+      var panel = document.getElementById('mobileSearchExpanded');
+      // Sync desktop → mobile inputs
+      document.getElementById('mobileSearchQ').value = document.getElementById('headerSearchQ').value;
+      document.getElementById('mobileSearchLoc').value = document.getElementById('headerSearchLoc').value;
+      document.getElementById('mobileSearchCat').value = document.getElementById('headerSearchCat').value;
+      // Animate pill out
+      pill.style.opacity = '0';
+      pill.style.transform = 'scale(0.97)';
+      pill.style.maxHeight = '0';
+      pill.style.pointerEvents = 'none';
+      // Animate panel in
+      panel.classList.add('open');
+      setTimeout(function() { document.getElementById('mobileSearchQ').focus(); }, 80);
+    }
+    function collapseMobileSearch() {
+      var pill = document.getElementById('mobileSearchPill');
+      var panel = document.getElementById('mobileSearchExpanded');
+      // Sync mobile → desktop inputs
+      document.getElementById('headerSearchQ').value = document.getElementById('mobileSearchQ').value;
+      document.getElementById('headerSearchLoc').value = document.getElementById('mobileSearchLoc').value;
+      document.getElementById('headerSearchCat').value = document.getElementById('mobileSearchCat').value;
+      // Update pill summary
+      var q = document.getElementById('mobileSearchQ').value.trim();
+      var cat = document.getElementById('mobileSearchCat').value;
+      var loc = document.getElementById('mobileSearchLoc').value.trim();
+      document.getElementById('mobileSearchTitle').textContent = q || 'Search items...';
+      document.getElementById('mobileSearchSub').textContent = (cat || 'All categories') + ' \\u00b7 ' + (loc || 'Anywhere');
+      // Animate panel out
+      panel.classList.remove('open');
+      // Animate pill in
+      pill.style.opacity = '1';
+      pill.style.transform = 'scale(1)';
+      pill.style.maxHeight = '48px';
+      pill.style.pointerEvents = 'auto';
+    }
+    // Collapse on scroll
+    window.addEventListener('scroll', function() {
+      var panel = document.getElementById('mobileSearchExpanded');
+      if (panel && panel.classList.contains('open')) collapseMobileSearch();
+    }, { passive: true });
+    // Collapse on outside click
+    document.addEventListener('mousedown', function(e) {
+      var panel = document.getElementById('mobileSearchExpanded');
+      var pill = document.getElementById('mobileSearchPill');
+      if (panel && panel.classList.contains('open') && !panel.contains(e.target) && !pill.contains(e.target)) {
+        collapseMobileSearch();
+      }
+    });
+
     async function executeHeaderSearch() {
+      // Sync mobile inputs to desktop before searching (in case called from mobile)
+      if (window.innerWidth < 640) {
+        document.getElementById('headerSearchQ').value = document.getElementById('mobileSearchQ').value;
+        document.getElementById('headerSearchLoc').value = document.getElementById('mobileSearchLoc').value;
+        document.getElementById('headerSearchCat').value = document.getElementById('mobileSearchCat').value;
+      }
       switchTab('search');
       const container = document.getElementById('searchResults');
       container.innerHTML = '<p class="empty">Searching...</p>';
