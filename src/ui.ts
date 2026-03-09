@@ -1025,10 +1025,11 @@ export function renderUI(): string {
 
         <!-- Col 2: Nav -->
         <div class="app-footer-nav">
-          <a href="#" onclick="switchTab('search');return false;">Marketplace</a>
           <a href="https://reffo.ai/about" target="_blank" rel="noopener noreferrer">About</a>
-          <a href="https://reffo.ai/support?source=beacon" target="_blank" rel="noopener noreferrer">Contact</a>
-          <a href="https://reffo.ai/download" target="_blank" rel="noopener noreferrer">Download</a>
+          <a href="https://reffo.ai/docs" target="_blank" rel="noopener noreferrer">Docs</a>
+          <a href="https://reffo.ai/agents" target="_blank" rel="noopener noreferrer">AI Agents</a>
+          <a href="https://reffo.ai/skills" target="_blank" rel="noopener noreferrer">Skills</a>
+          <a href="https://reffo.ai/support?source=beacon" target="_blank" rel="noopener noreferrer">Support</a>
         </div>
 
         <!-- Col 3: Contact -->
