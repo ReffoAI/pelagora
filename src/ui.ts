@@ -28,7 +28,7 @@ export function renderUI(): string {
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Poppins', sans-serif; background: #F4F5F6; color: #23262F; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
-    .app-content { flex: 1; }
+    .app-content { flex: 1; min-height: calc(100dvh - 80px); }
     .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
 
     /* Fade-in animation (from Modal.module.sass) */
