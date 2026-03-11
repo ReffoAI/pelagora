@@ -7,6 +7,9 @@ import { SettingsQueries } from '../db';
 import type { SellingScope } from '@reffo/protocol';
 import { sanitizeObject } from '@reffo/protocol';
 import { getVersion } from '../version';
+import { getDb } from '../db/schema';
+import { getAttributeKeys } from '../ref-schemas';
+import { callProductLookup, type AiProvider } from '../ai/product-lookup';
 
 const PROFILE_DIR = path.join(process.cwd(), 'uploads', 'profile');
 
@@ -107,6 +110,9 @@ router.get('/', (_req: Request, res: Response) => {
   const settingsQ = new SettingsQueries();
   const locationSettings = settingsQ.get();
 
+  const aiProvider = process.env.AI_PROVIDER || envVars['AI_PROVIDER'] || 'reffo';
+  const aiApiKey = process.env.AI_API_KEY || envVars['AI_API_KEY'] || '';
+
   res.json({
     apiKey: apiKey ? `${apiKey.slice(0, 12)}...` : '',
     hasApiKey: !!apiKey,
@@ -118,6 +124,8 @@ router.get('/', (_req: Request, res: Response) => {
     uptime: Math.floor((Date.now() - (_req.app.get('startTime') || Date.now())) / 1000),
     location: locationSettings || null,
     profilePicturePath: locationSettings?.profilePicturePath || null,
+    aiProvider,
+    aiApiKeySet: !!aiApiKey,
   });
 });
 
@@ -281,6 +289,161 @@ router.post('/price-estimate', async (req: Request, res: Response) => {
     res.json(data);
   } catch (err) {
     res.status(502).json({ error: 'Failed to reach Reffo.ai price estimate service' });
+  }
+});
+
+// POST /settings/ai-provider — Save AI provider settings
+router.post('/ai-provider', (req: Request, res: Response) => {
+  const { provider, apiKey } = req.body;
+
+  const validProviders = ['reffo', 'anthropic', 'openai', 'google', 'xai'];
+  if (!provider || !validProviders.includes(provider)) {
+    return res.status(400).json({ error: `Invalid provider. Must be one of: ${validProviders.join(', ')}` });
+  }
+
+  if (provider !== 'reffo' && (!apiKey || typeof apiKey !== 'string')) {
+    return res.status(400).json({ error: 'API key is required for non-Reffo providers' });
+  }
+
+  writeEnvVar('AI_PROVIDER', provider);
+  process.env.AI_PROVIDER = provider;
+
+  if (provider !== 'reffo' && apiKey) {
+    writeEnvVar('AI_API_KEY', apiKey);
+    process.env.AI_API_KEY = apiKey;
+  } else {
+    removeEnvVar('AI_API_KEY');
+    delete process.env.AI_API_KEY;
+  }
+
+  res.json({ ok: true, provider });
+});
+
+// DELETE /settings/ai-provider — Remove AI provider settings (revert to reffo)
+router.delete('/ai-provider', (_req: Request, res: Response) => {
+  removeEnvVar('AI_PROVIDER');
+  removeEnvVar('AI_API_KEY');
+  delete process.env.AI_PROVIDER;
+  delete process.env.AI_API_KEY;
+  res.json({ ok: true, provider: 'reffo' });
+});
+
+// POST /settings/product-lookup — AI product lookup with multi-provider support
+router.post('/product-lookup', async (req: Request, res: Response) => {
+  const { name, category, subcategory } = req.body;
+
+  if (!name || typeof name !== 'string' || !name.trim()) {
+    return res.status(400).json({ error: 'name is required' });
+  }
+
+  const nameNormalized = name.toLowerCase().trim();
+  const cat = (category || '').trim();
+  const subcat = (subcategory || '').trim();
+
+  // Check local SQLite cache
+  const db = getDb();
+  const cached = db.prepare(
+    `SELECT * FROM product_catalog
+     WHERE name_normalized = ? AND category = ? AND subcategory = ?
+     AND expires_at > datetime('now')`
+  ).get(nameNormalized, cat, subcat) as Record<string, unknown> | undefined;
+
+  if (cached) {
+    db.prepare(
+      `UPDATE product_catalog SET lookup_count = lookup_count + 1 WHERE id = ?`
+    ).run(cached.id);
+
+    return res.json({
+      description: cached.description,
+      sku: cached.sku,
+      product_url: cached.product_url,
+      image_url: cached.image_url,
+      attributes: JSON.parse((cached.attributes as string) || '{}'),
+      price_estimate: {
+        low: cached.price_low,
+        high: cached.price_high,
+        typical: cached.price_typical,
+        confidence: cached.price_confidence || 'low',
+      },
+      cached: true,
+    });
+  }
+
+  // Determine provider
+  const provider = (process.env.AI_PROVIDER || 'reffo').toLowerCase();
+  const attributeKeys = getAttributeKeys(cat || undefined, subcat || undefined);
+
+  try {
+    let result: Record<string, unknown>;
+
+    if (provider === 'reffo') {
+      // Proxy to Reffo.ai
+      const apiKey = process.env.REFFO_API_KEY;
+      if (!apiKey) {
+        return res.status(400).json({
+          error: 'No AI provider configured. Either connect to Reffo.ai (Settings → API Key) or set up a direct AI provider (Settings → AI Provider).',
+        });
+      }
+
+      const reffoUrl = process.env.REFFO_API_URL || 'https://reffo.ai';
+      const upstream = await fetch(`${reffoUrl}/api/product-lookup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({ name: name.trim(), category: cat, subcategory: subcat }),
+      });
+
+      if (!upstream.ok) {
+        const errData = await upstream.json().catch(() => ({}));
+        return res.status(upstream.status).json(errData);
+      }
+
+      result = await upstream.json() as Record<string, unknown>;
+    } else {
+      // Direct provider call
+      const aiApiKey = process.env.AI_API_KEY;
+      if (!aiApiKey) {
+        return res.status(400).json({
+          error: `AI provider "${provider}" is selected but no API key is configured. Go to Settings → AI Provider to add your key.`,
+        });
+      }
+
+      const lookupResult = await callProductLookup(
+        provider as AiProvider,
+        aiApiKey,
+        { name: name.trim(), category: cat, subcategory: subcat, attributeKeys },
+      );
+      result = lookupResult as unknown as Record<string, unknown>;
+    }
+
+    // Store in local cache
+    const { v4: uuid } = require('uuid');
+    const pe = (result.price_estimate || {}) as Record<string, unknown>;
+    db.prepare(
+      `INSERT INTO product_catalog (id, name_normalized, category, subcategory, description, sku, product_url, image_url, attributes, price_low, price_high, price_typical, price_confidence, ai_model, expires_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+30 days'))
+       ON CONFLICT(name_normalized, category, subcategory) DO UPDATE SET
+         description = excluded.description, sku = excluded.sku, product_url = excluded.product_url,
+         image_url = excluded.image_url, attributes = excluded.attributes,
+         price_low = excluded.price_low, price_high = excluded.price_high,
+         price_typical = excluded.price_typical, price_confidence = excluded.price_confidence,
+         ai_model = excluded.ai_model, lookup_count = product_catalog.lookup_count + 1,
+         updated_at = datetime('now'), expires_at = datetime('now', '+30 days')`
+    ).run(
+      uuid(), nameNormalized, cat, subcat,
+      result.description ?? null, result.sku ?? null,
+      result.product_url ?? null, result.image_url ?? null,
+      JSON.stringify(result.attributes || {}),
+      pe.low ?? null, pe.high ?? null, pe.typical ?? null, pe.confidence ?? 'low',
+      provider,
+    );
+
+    res.json({ ...result, cached: false });
+  } catch (err) {
+    console.error('Product lookup error:', err);
+    res.status(502).json({ error: 'Product lookup failed. Check your AI provider configuration.' });
   }
 });
 

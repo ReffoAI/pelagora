@@ -433,6 +433,30 @@ function initSchema(database: Database.Database): void {
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
     CREATE INDEX IF NOT EXISTS idx_favorites_ref_beacon ON favorites(ref_id, beacon_id);
+
+    CREATE TABLE IF NOT EXISTS product_catalog (
+      id TEXT PRIMARY KEY,
+      name_normalized TEXT NOT NULL,
+      category TEXT NOT NULL,
+      subcategory TEXT DEFAULT '',
+      description TEXT,
+      sku TEXT,
+      product_url TEXT,
+      image_url TEXT,
+      attributes TEXT DEFAULT '{}',
+      price_low REAL,
+      price_high REAL,
+      price_typical REAL,
+      price_confidence TEXT,
+      price_currency TEXT DEFAULT 'USD',
+      ai_model TEXT,
+      lookup_count INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      expires_at TEXT DEFAULT (datetime('now', '+30 days'))
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_product_catalog_lookup
+      ON product_catalog (name_normalized, category, subcategory);
   `);
 
   // Migration: add profile_picture_path to existing beacon_settings

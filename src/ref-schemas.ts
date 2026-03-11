@@ -343,4 +343,18 @@ export function buildSchemaOrgLD(
   return ld;
 }
 
+/**
+ * Get the attribute keys for a given category + subcategory.
+ * Used by the product-lookup AI prompt to constrain which fields Claude fills.
+ */
+// Keys that are unique per device/unit — AI should never fill these
+const DEVICE_UNIQUE_KEYS = new Set(['vin', 'hin', 'imei', 'parcel_id']);
+
+export function getAttributeKeys(category?: string, subcategory?: string): string[] {
+  const schema = getCategorySchema(category, subcategory);
+  return schema.attributes
+    .map((a) => a.key)
+    .filter((k) => !DEVICE_UNIQUE_KEYS.has(k));
+}
+
 export { CATEGORY_SCHEMAS, defaultSchema };

@@ -240,6 +240,16 @@ export function renderUI(): string {
     .price-estimate-spinner { width: 16px; height: 16px; border: 2px solid #92A5EF; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+    /* AI autofill badge */
+    .autofill-badge { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 1px 6px; border-radius: 8px; background: #f0f2ff; color: #7B61FF; margin-left: 6px; vertical-align: middle; }
+    .autofill-card { background: linear-gradient(135deg, #f0f2ff 0%, #e8eeff 100%); border: 1px solid #d4dbf5; border-left: 3px solid #7B61FF; border-radius: 12px; padding: 14px 14px 14px 16px; margin-bottom: 14px; }
+    .autofill-card .autofill-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .autofill-card .autofill-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em; color: #5B4FC7; }
+    .autofill-card .autofill-fields { font-size: 13px; color: #777E90; }
+    .autofill-img-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid #E6E8EC; }
+    .autofill-link { font-size: 12px; color: #7B61FF; text-decoration: none; }
+    .autofill-link:hover { text-decoration: underline; }
+
     /* Upload area */
     .upload-area { border: 2px dashed #E6E8EC; border-radius: 16px; padding: 24px; text-align: center; color: #B1B5C3; cursor: pointer; transition: border-color 0.2s, background 0.2s; margin-bottom: 14px; }
     .upload-area:hover { border-color: #EC526F; background: rgba(236,82,111,0.03); }
@@ -831,6 +841,29 @@ export function renderUI(): string {
       </section>
 
       <section class="settings-card">
+        <h2>AI Provider</h2>
+        <div id="aiProviderMsg"></div>
+        <p style="font-size:12px;color:#B1B5C3;margin-bottom:12px;">Choose how Smart Autofill gets product data. Default uses your Reffo API key.</p>
+        <label for="aiProviderSelect">Provider</label>
+        <select id="aiProviderSelect" onchange="toggleAiKeyField()">
+          <option value="reffo">Reffo (default)</option>
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="openai">OpenAI (ChatGPT)</option>
+          <option value="google">Google (Gemini)</option>
+          <option value="xai">xAI (Grok)</option>
+        </select>
+        <div id="aiKeySection" style="display:none;margin-top:10px;">
+          <label for="aiApiKeyInput">API Key</label>
+          <input id="aiApiKeyInput" type="password" placeholder="Enter your API key">
+        </div>
+        <div id="aiReffoNote" style="font-size:12px;color:#B1B5C3;margin-top:8px;">Uses your Reffo API key — no extra configuration needed.</div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn-primary btn-sm" onclick="saveAiProvider()">Save</button>
+          <button class="btn-danger btn-sm" id="removeAiProviderBtn" style="display:none;" onclick="removeAiProvider()">Remove</button>
+        </div>
+      </section>
+
+      <section class="settings-card">
         <h2>Default Location</h2>
         <div id="locationMsg"></div>
         <p style="font-size:12px;color:#B1B5C3;margin-bottom:12px;">Set your default location. New refs will inherit these values. Street address is stored locally and never shared.</p>
@@ -887,7 +920,7 @@ export function renderUI(): string {
 
   <!-- List Ref Tab -->
   <div id="tab-list" class="hidden">
-    <section>
+    <section style="max-width:860px;margin:0 auto;padding:0 24px;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
         <span class="detail-header-back" onclick="switchTab('refs')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -910,9 +943,6 @@ export function renderUI(): string {
         <label for="refName">Name *</label>
         <input id="refName" name="name" required placeholder="e.g. Fender Stratocaster">
 
-        <label for="refDesc">Description</label>
-        <textarea id="refDesc" name="description" placeholder="Condition, details..."></textarea>
-
         <div class="row">
           <div>
             <label for="refCat">Category</label>
@@ -923,6 +953,33 @@ export function renderUI(): string {
             <select id="refSubcat" name="subcategory"><option value="">Select...</option></select>
           </div>
         </div>
+
+        <div id="createAutofillSection">
+          <div id="createAutofillActive" style="display:none;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <button type="button" id="createAutofillBtn" onclick="triggerProductLookup('create')" style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#8101B4 0%,#EA526F 100%);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+                Smart Autofill
+              </button>
+              <span id="createAutofillStatus" style="font-size:12px;color:#777E90;"></span>
+            </div>
+          </div>
+          <div id="createAutofillPromo" style="display:none;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#f8f0fc 0%,#fdedf0 100%);padding:14px 16px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:linear-gradient(135deg,#8101B4 0%,#EA526F 100%);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FCFCFD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:600;color:#141416;margin-bottom:2px;">Smart Autofill with AI</div>
+                <div style="font-size:12px;color:#777E90;line-height:1.4;">Link a <a href="https://reffo.ai/api" target="_blank" style="color:#EC526F;font-weight:600;text-decoration:none;">Reffo.ai</a> account to auto-fill descriptions, attributes, images, and price estimates when you list items.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="createAutofillCard"></div>
+
+        <label for="refDesc">Description</label>
+        <textarea id="refDesc" name="description" placeholder="Condition, details..."></textarea>
 
         <div id="createCategoryFields"></div>
 
@@ -2063,6 +2120,21 @@ Website = https://reffo.ai</pre>
         html += '<label>Description</label><textarea id="dDesc">' + escapeHtml(ref.description) + '</textarea>';
         html += '<div class="row"><div><label>Category</label><select id="dCat"><option value="">Select...</option></select></div>';
         html += '<div><label>Subcategory</label><select id="dSubcat"><option value="">Select...</option></select></div></div>';
+        html += '<div id="detailAutofillSection">';
+        html += '<div id="detailAutofillActive" style="display:' + (window._aiEnabled ? 'block' : 'none') + ';">';
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">';
+        html += '<button type="button" onclick="triggerProductLookup(\\\'detail\\\')" style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#8101B4 0%,#EA526F 100%);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;">';
+        html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>';
+        html += 'Smart Autofill</button>';
+        html += '<span id="detailAutofillStatus" style="font-size:12px;color:#777E90;"></span></div></div>';
+        html += '<div id="detailAutofillPromo" style="display:' + (window._aiEnabled ? 'none' : 'block') + ';border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#f8f0fc 0%,#fdedf0 100%);padding:14px 16px;margin-bottom:14px;">';
+        html += '<div style="display:flex;align-items:center;gap:12px;">';
+        html += '<div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:linear-gradient(135deg,#8101B4 0%,#EA526F 100%);">';
+        html += '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FCFCFD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg></div>';
+        html += '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:#141416;margin-bottom:2px;">Smart Autofill with AI</div>';
+        html += '<div style="font-size:12px;color:#777E90;line-height:1.4;">Link a <a href="https://reffo.ai/api" target="_blank" style="color:#EC526F;font-weight:600;text-decoration:none;">Reffo.ai</a> account to auto-fill descriptions, attributes, images, and price estimates.</div>';
+        html += '</div></div></div></div>';
+        html += '<div id="detailAutofillCard"></div>';
         html += '<div id="detailCategoryFields"></div>';
         html += '<div class="row"><div><label>Price</label><input id="dPrice" type="number" min="0" step="0.01" value="' + (activeOffer ? activeOffer.price : '') + '"></div>';
         html += '<div><label>Currency</label><select id="dCurrency"><option value="USD"' + ((activeOffer && activeOffer.priceCurrency === 'USD') || !activeOffer ? ' selected' : '') + '>USD</option><option value="EUR"' + (activeOffer && activeOffer.priceCurrency === 'EUR' ? ' selected' : '') + '>EUR</option><option value="GBP"' + (activeOffer && activeOffer.priceCurrency === 'GBP' ? ' selected' : '') + '>GBP</option></select></div></div>';
@@ -2242,6 +2314,9 @@ Website = https://reffo.ai</pre>
       }
     }
     window.openDetail = openDetail;
+
+    // Global: whether AI autofill is available (set by loadSettings)
+    window._aiEnabled = false;
 
     // ===== Segmented Status Control (Detail) =====
     let detailEstimateTimer = null;
@@ -3498,6 +3573,27 @@ Website = https://reffo.ai</pre>
             }
           }
         }
+        // AI Provider settings
+        var aiProviderSelect = document.getElementById('aiProviderSelect');
+        var removeAiBtn = document.getElementById('removeAiProviderBtn');
+        if (aiProviderSelect && data.aiProvider) {
+          aiProviderSelect.value = data.aiProvider;
+          toggleAiKeyField();
+          if (data.aiProvider !== 'reffo') {
+            removeAiBtn.style.display = '';
+          } else {
+            removeAiBtn.style.display = 'none';
+          }
+        }
+
+        // Determine if AI autofill is available (has Reffo key OR has direct AI provider key)
+        var aiEnabled = data.hasApiKey || (data.aiProvider !== 'reffo' && data.aiApiKeySet);
+        window._aiEnabled = aiEnabled;
+        var createActive = document.getElementById('createAutofillActive');
+        var createPromo = document.getElementById('createAutofillPromo');
+        if (createActive) createActive.style.display = aiEnabled ? '' : 'none';
+        if (createPromo) createPromo.style.display = aiEnabled ? 'none' : '';
+
         // Update footer CTA based on API key status
         var footerCtaTitle = document.getElementById('footerCtaTitle');
         var footerCtaDesc = document.getElementById('footerCtaDesc');
@@ -3801,6 +3897,168 @@ Website = https://reffo.ai</pre>
       var c = document.getElementById(containerId);
       if (!c) return;
       c.innerHTML = '<div class="price-estimate-card"><span class="est-muted">' + escapeHtml(message) + '</span></div>';
+    };
+
+    // ===== AI Provider Settings =====
+    window.toggleAiKeyField = function() {
+      var provider = document.getElementById('aiProviderSelect').value;
+      var keySection = document.getElementById('aiKeySection');
+      var reffoNote = document.getElementById('aiReffoNote');
+      if (provider === 'reffo') {
+        keySection.style.display = 'none';
+        reffoNote.style.display = '';
+      } else {
+        keySection.style.display = '';
+        reffoNote.style.display = 'none';
+      }
+    };
+
+    window.saveAiProvider = async function() {
+      var provider = document.getElementById('aiProviderSelect').value;
+      var apiKey = document.getElementById('aiApiKeyInput').value.trim();
+      var msgEl = document.getElementById('aiProviderMsg');
+      try {
+        var res = await fetch('/settings/ai-provider', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider: provider, apiKey: apiKey || undefined })
+        });
+        var data = await res.json();
+        if (res.ok) {
+          msgEl.innerHTML = '<div style="color:#1a8a42;font-size:13px;margin-bottom:8px;">AI provider saved.</div>';
+          if (provider !== 'reffo') {
+            document.getElementById('removeAiProviderBtn').style.display = '';
+          }
+        } else {
+          msgEl.innerHTML = '<div style="color:#EC526F;font-size:13px;margin-bottom:8px;">' + escapeHtml(data.error || 'Failed to save') + '</div>';
+        }
+      } catch {
+        msgEl.innerHTML = '<div style="color:#EC526F;font-size:13px;margin-bottom:8px;">Failed to save AI provider.</div>';
+      }
+    };
+
+    window.removeAiProvider = async function() {
+      var msgEl = document.getElementById('aiProviderMsg');
+      try {
+        await fetch('/settings/ai-provider', { method: 'DELETE' });
+        document.getElementById('aiProviderSelect').value = 'reffo';
+        document.getElementById('aiApiKeyInput').value = '';
+        toggleAiKeyField();
+        document.getElementById('removeAiProviderBtn').style.display = 'none';
+        msgEl.innerHTML = '<div style="color:#1a8a42;font-size:13px;margin-bottom:8px;">Reverted to Reffo (default).</div>';
+      } catch {
+        msgEl.innerHTML = '<div style="color:#EC526F;font-size:13px;margin-bottom:8px;">Failed to remove AI provider.</div>';
+      }
+    };
+
+    // ===== Smart Autofill (Product Lookup) =====
+    window.triggerProductLookup = async function(context) {
+      var prefix = context === 'detail' ? 'd' : 'ref';
+      var nameEl = document.getElementById(prefix === 'd' ? 'dName' : 'refName');
+      var catEl = document.getElementById(prefix === 'd' ? 'dCat' : 'refCat');
+      var subcatEl = document.getElementById(prefix === 'd' ? 'dSubcat' : 'refSubcat');
+      var statusEl = document.getElementById(context + 'AutofillStatus');
+      var cardEl = document.getElementById(context + 'AutofillCard');
+
+      var nameVal = nameEl ? nameEl.value.trim() : '';
+      var catVal = catEl ? catEl.value : '';
+      var subcatVal = subcatEl ? subcatEl.value : '';
+
+      if (!nameVal) {
+        if (statusEl) statusEl.textContent = 'Enter a product name first.';
+        return;
+      }
+
+      if (statusEl) statusEl.innerHTML = '<div class="price-estimate-spinner" style="vertical-align:middle;"></div> Looking up product...';
+
+      try {
+        var res = await fetch('/settings/product-lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: nameVal, category: catVal, subcategory: subcatVal })
+        });
+
+        if (!res.ok) {
+          var errData = await res.json().catch(function() { return {}; });
+          if (statusEl) statusEl.textContent = errData.error || 'Lookup failed.';
+          return;
+        }
+
+        var data = await res.json();
+        if (statusEl) statusEl.textContent = data.cached ? 'Loaded from cache.' : 'AI autofill complete.';
+        applyAutofillData(context, data);
+      } catch (err) {
+        if (statusEl) statusEl.textContent = 'Lookup failed. Check your AI provider settings.';
+      }
+    };
+
+    window.applyAutofillData = function(context, data) {
+      var prefix = context === 'detail' ? 'd' : 'ref';
+      var cardEl = document.getElementById(context + 'AutofillCard');
+      var filledFields = [];
+
+      // Fill empty description
+      var descEl = document.getElementById(prefix === 'd' ? 'dDesc' : 'refDesc');
+      if (descEl && !descEl.value.trim() && data.description) {
+        descEl.value = data.description;
+        filledFields.push('description');
+      }
+
+      // Fill empty SKU
+      var skuEl = document.getElementById(prefix === 'd' ? 'dSku' : 'refSku');
+      if (skuEl && !skuEl.value.trim() && data.sku) {
+        skuEl.value = data.sku;
+        filledFields.push('SKU');
+      }
+
+      // Fill category-specific attributes (empty fields only)
+      if (data.attributes && typeof data.attributes === 'object') {
+        var attrContainer = document.getElementById(context === 'detail' ? 'detailCategoryFields' : 'createCategoryFields');
+        if (attrContainer) {
+          var inputs = attrContainer.querySelectorAll('input, select');
+          inputs.forEach(function(inp) {
+            var key = inp.getAttribute('data-attr-key');
+            if (key && data.attributes[key] && !inp.value) {
+              inp.value = String(data.attributes[key]);
+              filledFields.push(key);
+              // Add AI badge to label
+              var label = attrContainer.querySelector('label[for="' + inp.id + '"]');
+              if (label && !label.querySelector('.autofill-badge')) {
+                label.innerHTML += '<span class="autofill-badge">AI</span>';
+              }
+            }
+          });
+        }
+      }
+
+      // Price estimate
+      if (data.price_estimate && data.price_estimate.typical > 0) {
+        var priceContainerId = context === 'detail' ? 'detailPriceEstimate' : 'createPriceEstimate';
+        renderPriceEstimate(priceContainerId, data.price_estimate);
+      }
+
+      // Show autofill summary card
+      if (cardEl) {
+        var cardHtml = '<div class="autofill-card"><div class="autofill-header">';
+        cardHtml += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>';
+        cardHtml += '<span class="autofill-label">Smart Autofill</span></div>';
+        // Image thumbnail + product link
+        if (data.image_url || data.product_url) {
+          cardHtml += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">';
+          if (data.image_url) {
+            cardHtml += '<img src="' + escapeHtml(data.image_url) + '" class="autofill-img-thumb" onerror="this.style.display=\\'none\\'">';
+          }
+          if (data.product_url) {
+            cardHtml += '<a href="' + escapeHtml(data.product_url) + '" target="_blank" class="autofill-link">View product page &rarr;</a>';
+          }
+          cardHtml += '</div>';
+        }
+        if (filledFields.length > 0) {
+          cardHtml += '<div class="autofill-fields">Filled: ' + filledFields.join(', ') + '</div>';
+        }
+        cardHtml += '</div>';
+        cardEl.innerHTML = cardHtml;
+      }
     };
 
     // Wire input listeners on name + category fields to trigger estimate
