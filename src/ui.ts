@@ -920,14 +920,17 @@ export function renderUI(): string {
 
   <!-- List Ref Tab -->
   <div id="tab-list" class="hidden">
-    <section style="max-width:860px;margin:0 auto;padding:0 24px;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-        <span class="detail-header-back" onclick="switchTab('refs')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        </span>
-        <h3 style="margin:0;font-size:1.25rem;font-weight:700;">List a Ref</h3>
+    <div style="max-width:1100px;margin:0 auto;padding:0 24px;">
+      <div style="margin-bottom:8px;">
+        <a onclick="switchTab('refs')" style="cursor:pointer;color:#EC526F;font-size:14px;font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          Back to Refs
+        </a>
       </div>
-      <div style="background:#FCFCFD;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06),0 0 0 1px #E6E8EC;">
+      <h3 style="margin:0 0 20px;font-size:1.5rem;font-weight:700;">List a Ref</h3>
+    </div>
+    <section style="max-width:1100px;margin:0 auto;padding:0 24px 24px;">
+      <div style="padding-top:30px;">
       <div id="listMsg"></div>
       <form id="listForm">
         <input type="hidden" id="refListingStatus" name="listingStatus" value="private">
