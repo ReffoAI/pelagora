@@ -29,7 +29,7 @@ export function renderUI(): string {
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Poppins', sans-serif; background: #F4F5F6; color: #23262F; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
     .app-content { flex: 1; min-height: calc(100dvh - 80px); }
-    .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .container { max-width: 1100px; padding: 24px; }
 
     /* Fade-in animation (from Modal.module.sass) */
     @keyframes showModal { 0% { opacity: 0; } 100% { opacity: 1; } }
@@ -41,7 +41,7 @@ export function renderUI(): string {
 
     /* App Header — sticky bar */
     .app-header { position: sticky; top: 0; z-index: 100; background: #FCFCFD; border-bottom: 1px solid #E6E8EC; padding: 0 24px; }
-    .app-header-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
+    .app-header-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
     .app-header-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; flex-shrink: 0; }
     .app-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .header-settings-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #E6E8EC; background: #FCFCFD; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; position: relative; color: #777E90; }
@@ -671,13 +671,36 @@ export function renderUI(): string {
     .lightbox-thumb.active { border-color: #fff; opacity: 1; }
     .lightbox-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
+    /* ===== Home / Landing Page ===== */
+    .home-hero { background: linear-gradient(135deg, rgba(129,1,180,0.55), rgba(234,82,111,0.6)); background-color: #7b2d8e; padding: 56px 24px 48px; text-align: center; color: #fff; margin: -24px -24px 0; }
+    @media (max-width: 767px) { .home-hero { margin: -16px -16px 0; } }
+    .home-hero h2 { font-size: 2rem; font-weight: 700; margin: 0 0 8px; color: #fff; }
+    .home-hero p { color: rgba(255,255,255,0.82); font-size: 1rem; margin: 0 0 28px; max-width: 540px; margin-left: auto; margin-right: auto; }
+    .home-hero .search-filter-bar { max-width: 640px; margin: 0 auto; }
+    .home-hero .mobile-search-pill { max-width: 640px; margin: 0 auto; }
+    .home-section { max-width: 1100px; padding: 40px 24px; }
+    .home-section-label { text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; color: #777E90; margin-bottom: 4px; }
+    .home-section h3 { font-size: 1.35rem; font-weight: 700; margin: 0 0 24px; }
+    .home-quick-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 0 24px 8px; }
+    .home-recent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .home-recent-card { background: var(--surface); border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+    .home-recent-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.10); }
+    .home-recent-card img { width: 100%; height: 140px; object-fit: cover; display: block; }
+    .home-recent-card .card-body { padding: 12px 14px; }
+    .home-recent-card .card-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .home-recent-card .card-meta { font-size: 12px; color: #777E90; margin-top: 4px; }
+    .home-recent-card .card-price { font-weight: 600; font-size: 14px; color: #EC526F; margin-top: 6px; }
+    .home-recent-empty { text-align: center; padding: 48px 24px; color: #777E90; }
+    .home-recent-empty p { margin: 0 0 16px; font-size: 14px; }
+    @media (max-width: 767px) { .home-hero h2 { font-size: 1.5rem; } .home-hero { padding: 40px 16px 36px; } }
+
   </style>
 </head>
 <body>
   <!-- App Header -->
   <div class="app-header">
     <div class="app-header-inner">
-      <div class="app-header-logo" onclick="sidebarNav('dashboard')">
+      <div class="app-header-logo" onclick="sidebarNav('home')">
         <img class="header-beacon-icon" src="/header-brand.png" alt="Reffo Beacon">
       </div>
 
@@ -736,7 +759,11 @@ export function renderUI(): string {
     </div>
     <div class="sidebar-divider"></div>
     <div class="sidebar-section-title">Manage</div>
-    <button class="sidebar-nav-item active" data-sidebar="dashboard" onclick="sidebarNav('dashboard')">
+    <button class="sidebar-nav-item active" data-sidebar="home" onclick="sidebarNav('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </button>
+    <button class="sidebar-nav-item" data-sidebar="dashboard" onclick="sidebarNav('dashboard')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       Dashboard
     </button>
@@ -859,6 +886,104 @@ export function renderUI(): string {
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Home Tab -->
+    <div id="tab-home">
+      <!-- Hero -->
+      <div class="home-hero">
+        <h2>Your personal marketplace</h2>
+        <p>List items, search the network, and trade directly &mdash; zero fees, your data stays local.</p>
+
+        <!-- Desktop search -->
+        <div class="search-filter-bar" id="homeSearchBar">
+          <div class="search-filter-segment">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <input id="homeSearchLoc" placeholder="Search where?" onkeydown="if(event.key==='Enter')homeSearchSubmit()">
+          </div>
+          <span class="sfb-divider"></span>
+          <div class="search-filter-segment">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <select id="homeSearchCat"><option value="">All Categories</option></select>
+          </div>
+          <span class="sfb-divider"></span>
+          <div class="search-filter-segment" style="flex:1;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="homeSearchQ" placeholder="Search Ref..." onkeydown="if(event.key==='Enter')homeSearchSubmit()">
+          </div>
+          <button class="sfb-search-btn" onclick="homeSearchSubmit()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </button>
+        </div>
+
+        <!-- Mobile search pill -->
+        <div class="mobile-search-pill" id="homeSearchPillMobile" onclick="expandHomeMobileSearch()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <div class="pill-text">
+            <div class="pill-title">Search items...</div>
+            <div class="pill-sub">All categories &middot; Anywhere</div>
+          </div>
+          <div class="pill-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </div>
+        </div>
+
+        <!-- Mobile expanded panel -->
+        <div class="mobile-search-expanded" id="homeSearchExpandedMobile">
+          <div class="expand-inner">
+            <div class="expand-card">
+              <div class="expand-field">
+                <label>Search</label>
+                <div class="expand-field-row">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                  <input id="homeSearchQMobile" placeholder="What are you looking for?" onkeydown="if(event.key==='Enter'){homeSearchSubmit();collapseHomeMobileSearch();}">
+                </div>
+              </div>
+              <div class="expand-field">
+                <label>Category</label>
+                <div class="expand-field-row">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                  <select id="homeSearchCatMobile"><option value="">All Categories</option></select>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+              </div>
+              <div class="expand-field">
+                <label>Where</label>
+                <div class="expand-field-row">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <input id="homeSearchLocMobile" placeholder="City, state, or zip" onkeydown="if(event.key==='Enter'){homeSearchSubmit();collapseHomeMobileSearch();}">
+                </div>
+              </div>
+              <div class="expand-actions">
+                <button class="expand-cancel" onclick="collapseHomeMobileSearch()">Cancel</button>
+                <button class="expand-submit" onclick="homeSearchSubmit();collapseHomeMobileSearch();">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                  Search
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="home-quick-actions" style="padding-top:28px;padding-bottom:8px;">
+        <button class="btn-primary" onclick="sidebarNav('list')">+ Create New Listing</button>
+        <button class="btn-secondary" onclick="sidebarNav('dashboard')">Go to Dashboard</button>
+      </div>
+
+      <!-- Your Listings -->
+      <div class="home-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <h3 style="margin:0;">Your Listings</h3>
+          <a style="font-size:13px;color:#EC526F;cursor:pointer;font-weight:500;" onclick="sidebarNav('refs')">View all &rarr;</a>
+        </div>
+        <div id="homeRecentItems">
+          <div style="padding:20px;color:#777E90;font-size:13px;">Loading...</div>
+        </div>
+      </div>
+
+
     </div>
 
     <!-- Dashboard Tab -->
@@ -1860,7 +1985,7 @@ Website = https://reffo.ai</pre>
 
     // ===== Tab switching =====
     function switchTab(tab) {
-      var tabs = ['dashboard','refs','detail','search','negotiations','settings','list','terms','privacy','acceptable-use','for-bots'];
+      var tabs = ['home','dashboard','refs','detail','search','negotiations','settings','list','terms','privacy','acceptable-use','for-bots'];
       tabs.forEach(function(t) {
         var el = document.getElementById('tab-' + t);
         if (el) el.classList.toggle('hidden', tab !== t);
@@ -1868,6 +1993,7 @@ Website = https://reffo.ai</pre>
       // Show/hide global search filter bar (only for network search tab)
       var sfbWrap = document.getElementById('globalSearchBarWrapper');
       if (sfbWrap) sfbWrap.style.display = (tab === 'search') ? '' : 'none';
+      if (tab === 'home') { homeLoaded = false; loadHome(); }
       if (tab === 'negotiations') loadNegotiations();
       if (tab === 'refs') loadMyRefs();
       if (tab === 'settings') loadSettings();
@@ -1875,13 +2001,14 @@ Website = https://reffo.ai</pre>
       document.querySelectorAll('.sidebar-nav-item[data-sidebar]').forEach(function(item) {
         item.classList.remove('active');
       });
-      var sidebarMap = { dashboard: 'dashboard', refs: 'refs', detail: 'refs', search: 'search', negotiations: 'negotiations', settings: 'settings', list: 'list' };
+      var sidebarMap = { home: 'home', dashboard: 'dashboard', refs: 'refs', detail: 'refs', search: 'search', negotiations: 'negotiations', settings: 'settings', list: 'list' };
       var mappedSidebar = sidebarMap[tab];
       if (mappedSidebar) {
         var activeItem = document.querySelector('.sidebar-nav-item[data-sidebar="' + mappedSidebar + '"]');
         if (activeItem) activeItem.classList.add('active');
       }
       if (tab === 'dashboard') loadDashboard();
+      window.scrollTo(0, 0);
     }
 
     function switchNegTab(tab) {
@@ -1903,6 +2030,7 @@ Website = https://reffo.ai</pre>
     // ===== Sidebar navigation =====
     function sidebarNav(target) {
       closeSidebar();
+      if (target === 'home') { switchTab('home'); return; }
       if (target === 'dashboard') { switchTab('dashboard'); return; }
       if (target === 'refs') { switchTab('refs'); switchRefSubTab('active'); return; }
       if (target === 'archive') { switchTab('refs'); switchRefSubTab('archive'); return; }
@@ -1925,6 +2053,83 @@ Website = https://reffo.ai</pre>
       document.getElementById('sidebarOverlay').classList.remove('open');
     }
     window.closeSidebar = closeSidebar;
+
+    // ===== Home =====
+    let homeLoaded = false;
+    async function loadHome() {
+      if (homeLoaded) return;
+      try {
+        const res = await fetch('/health/dashboard');
+        const data = await res.json();
+        const container = document.getElementById('homeRecentItems');
+        if (!data.recentItems || data.recentItems.length === 0) {
+          container.innerHTML = '<div class="home-recent-empty"><p>No listings yet &mdash; create your first!</p><button class="btn-primary" onclick="sidebarNav(\\'list\\')">+ Create New Listing</button></div>';
+          homeLoaded = true;
+          return;
+        }
+        const mediaMap = {};
+        await Promise.all(data.recentItems.map(async function(ref) {
+          try {
+            const mRes = await fetch('/refs/' + ref.id + '/media');
+            mediaMap[ref.id] = await mRes.json();
+          } catch(e) { mediaMap[ref.id] = []; }
+        }));
+        container.innerHTML = '<div class="home-recent-grid">' + data.recentItems.map(function(ref) {
+          var photos = (mediaMap[ref.id] || []).filter(function(m) { return m.mediaType === 'photo'; });
+          var firstPhoto = photos[0];
+          var imgHtml = firstPhoto
+            ? '<img src="/' + escapeHtml(firstPhoto.filePath) + '" alt="">'
+            : '<div style="height:140px;display:flex;align-items:center;justify-content:center;background:var(--bg);color:#D2D5DB;font-size:32px;">&#x1F4F7;</div>';
+          var price = ref.price ? '$' + Number(ref.price).toFixed(2) : '';
+          var statusLabel = statusLabels[ref.listingStatus] || 'Private';
+          var statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
+          return '<div class="home-recent-card" onclick="showDetail(\\'' + ref.id + '\\')">' + imgHtml + '<div class="card-body"><div class="card-name">' + escapeHtml(ref.name) + '</div><div class="card-meta">' + escapeHtml(ref.category || '') + ' <span class="status-badge ' + statusClass + '">' + statusLabel + '</span></div>' + (price ? '<div class="card-price">' + price + '</div>' : '') + '</div></div>';
+        }).join('') + '</div>';
+        homeLoaded = true;
+      } catch(e) {
+        document.getElementById('homeRecentItems').innerHTML = '<div style="padding:20px;color:#777E90;font-size:13px;">Could not load listings.</div>';
+      }
+    }
+
+    function homeSearchSubmit() {
+      // Sync mobile values to desktop if mobile was used
+      var qMobile = document.getElementById('homeSearchQMobile');
+      var catMobile = document.getElementById('homeSearchCatMobile');
+      var locMobile = document.getElementById('homeSearchLocMobile');
+      var q = document.getElementById('homeSearchQ');
+      var cat = document.getElementById('homeSearchCat');
+      var loc = document.getElementById('homeSearchLoc');
+      // Prefer mobile values if they have content
+      var qVal = (qMobile && qMobile.value) || (q ? q.value : '');
+      var catVal = (catMobile && catMobile.value) || (cat ? cat.value : '');
+      var locVal = (locMobile && locMobile.value) || (loc ? loc.value : '');
+      // Copy into global search inputs
+      document.getElementById('headerSearchQ').value = qVal;
+      document.getElementById('headerSearchCat').value = catVal;
+      document.getElementById('headerSearchLoc').value = locVal;
+      // Also sync to global mobile inputs
+      var mQ = document.getElementById('mobileSearchQ'); if (mQ) mQ.value = qVal;
+      var mC = document.getElementById('mobileSearchCat'); if (mC) mC.value = catVal;
+      var mL = document.getElementById('mobileSearchLoc'); if (mL) mL.value = locVal;
+      executeHeaderSearch();
+    }
+    window.homeSearchSubmit = homeSearchSubmit;
+
+    function expandHomeMobileSearch() {
+      var el = document.getElementById('homeSearchExpandedMobile');
+      if (el) el.classList.add('open');
+      var pill = document.getElementById('homeSearchPillMobile');
+      if (pill) pill.style.display = 'none';
+    }
+    window.expandHomeMobileSearch = expandHomeMobileSearch;
+
+    function collapseHomeMobileSearch() {
+      var el = document.getElementById('homeSearchExpandedMobile');
+      if (el) el.classList.remove('open');
+      var pill = document.getElementById('homeSearchPillMobile');
+      if (pill) pill.style.display = '';
+    }
+    window.collapseHomeMobileSearch = collapseHomeMobileSearch;
 
     // ===== Dashboard =====
     async function loadDashboard() {
@@ -2283,6 +2488,8 @@ Website = https://reffo.ai</pre>
     );
     populateCategories(document.getElementById('headerSearchCat'));
     populateCategories(document.getElementById('mobileSearchCat'));
+    populateCategories(document.getElementById('homeSearchCat'));
+    populateCategories(document.getElementById('homeSearchCatMobile'));
 
     document.getElementById('refCat').addEventListener('change', function() {
       renderCategoryFields('createCategoryFields', this.value, document.getElementById('refSubcat').value, {});
@@ -4958,8 +5165,8 @@ Website = https://reffo.ai</pre>
       } catch {}
     }
 
-    loadDashboard();
-    switchTab('dashboard');
+    loadHome();
+    switchTab('home');
     initOutgoingSnapshot();
 
     // Show "Link to Reffo.ai" header button if no API key is configured
