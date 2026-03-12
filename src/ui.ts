@@ -1573,6 +1573,11 @@ Website = https://reffo.ai</pre>
   <!-- Bulk Action Bar -->
     <div class="bulk-action-bar" id="bulkActionBar">
       <span class="bulk-count" id="bulkCount">0</span> selected
+      <span style="width:1px;height:20px;background:#353945;"></span>
+      <button style="background:#E6E8EC;color:#353945;" onclick="bulkSetStatus('private')">Private</button>
+      <button style="background:#e6f9ed;color:#1a8a42;" onclick="bulkSetStatus('for_sale')">For Sale</button>
+      <button style="background:#fff8e1;color:#e6a200;" onclick="bulkSetStatus('willing_to_sell')">Willing to Sell</button>
+      <span style="width:1px;height:20px;background:#353945;"></span>
       <button class="bulk-archive" onclick="bulkArchive()">Archive</button>
       <button class="bulk-delete" onclick="bulkDelete()">Delete</button>
       <button class="bulk-cancel" onclick="clearSelection()">Cancel</button>
@@ -1794,13 +1799,18 @@ Website = https://reffo.ai</pre>
     };
 
     window.toggleSelectAll = function(checked) {
-      document.querySelectorAll('.table-row .col-check input[type=checkbox]').forEach(function(cb) {
-        var row = cb.closest('.table-row');
-        var onclick = row ? row.getAttribute('onclick') : '';
-        var match = onclick ? onclick.match(/openDetail\\('([^']+)'\\)/) : null;
-        if (match) {
-          if (checked) window._selectedRefIds.add(match[1]);
-          else window._selectedRefIds.delete(match[1]);
+      // Handle both table rows and ref-rows
+      document.querySelectorAll('.table-row .col-check input[type=checkbox], .ref-row input[type=checkbox]').forEach(function(cb) {
+        var row = cb.closest('.table-row') || cb.closest('.ref-row');
+        var refId = row ? (row.getAttribute('data-refid') || '') : '';
+        if (!refId) {
+          var onclick = row ? row.getAttribute('onclick') : '';
+          var match = onclick ? onclick.match(/openDetail\\('([^']+)'\\)/) : null;
+          if (match) refId = match[1];
+        }
+        if (refId) {
+          if (checked) window._selectedRefIds.add(refId);
+          else window._selectedRefIds.delete(refId);
           cb.checked = checked;
         }
       });
@@ -1820,7 +1830,7 @@ Website = https://reffo.ai</pre>
 
     window.clearSelection = function() {
       window._selectedRefIds.clear();
-      document.querySelectorAll('.table-row .col-check input[type=checkbox]').forEach(function(cb) { cb.checked = false; });
+      document.querySelectorAll('.table-row .col-check input[type=checkbox], .ref-row input[type=checkbox]').forEach(function(cb) { cb.checked = false; });
       var selectAll = document.querySelector('.table-header-row .col-check input[type=checkbox]');
       if (selectAll) selectAll.checked = false;
       updateBulkBar();
@@ -1865,6 +1875,29 @@ Website = https://reffo.ai</pre>
         loadMyRefs();
       } catch(e) {
         showToast('Failed to delete items', 'rejected');
+      }
+    };
+
+    window.bulkSetStatus = async function(status) {
+      var ids = Array.from(window._selectedRefIds);
+      if (ids.length === 0) return;
+      var labels = { private: 'Private', for_sale: 'For Sale', willing_to_sell: 'Willing to Sell', for_rent: 'For Rent' };
+      var label = labels[status] || status;
+      if (!confirm('Set ' + ids.length + ' item(s) to "' + label + '"?')) return;
+      try {
+        var res = await fetch('/refs/bulk-update-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: ids, listingStatus: status })
+        });
+        if (!res.ok) throw new Error('Failed');
+        var data = await res.json();
+        showToast(data.updated + ' item(s) set to ' + label, 'accepted');
+        window._selectedRefIds.clear();
+        updateBulkBar();
+        loadMyRefs();
+      } catch(e) {
+        showToast('Failed to update status', 'rejected');
       }
     };
 
@@ -2404,6 +2437,7 @@ Website = https://reffo.ai</pre>
           '</div>';
           updateBulkBar();
         } else if (refLayout === 'row') {
+          var selectedIds = window._selectedRefIds || new Set();
           container.innerHTML = '<div class="rows">' + refs.map(ref => {
             const refOffers = offerMap[ref.id] || [];
             const activeOffer = refOffers.find(o => o.status === 'active');
@@ -2413,12 +2447,14 @@ Website = https://reffo.ai</pre>
             const statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
             const statusLabel = statusLabels[ref.listingStatus] || 'Private';
             const attrSummary = buildAttributeSummary(ref.category, ref.subcategory, ref.attributes, ref.condition);
+            const isSelected = selectedIds.has(ref.id);
 
             const imgHtml = firstPhoto
               ? '<div class="row-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
               : '<div class="row-img"><span class="placeholder"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></span></div>';
 
-            return '<div class="ref-row" onclick="openDetail(\\'' + ref.id + '\\')">' +
+            return '<div class="ref-row" data-refid="' + ref.id + '" onclick="openDetail(\\'' + ref.id + '\\')">' +
+              '<div onclick="event.stopPropagation()" style="flex-shrink:0;margin-right:8px;display:flex;align-items:center;"><input type="checkbox" ' + (isSelected ? 'checked' : '') + ' onchange="toggleSelectRef(\\'' + ref.id + '\\', this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#EC526F;"></div>' +
               imgHtml +
               '<span class="row-name">' + escapeHtml(ref.name) + '</span>' +
               '<div class="row-meta">' +
@@ -2432,6 +2468,7 @@ Website = https://reffo.ai</pre>
               '</div>' +
             '</div>';
           }).join('') + '</div>';
+          updateBulkBar();
         } else {
           container.innerHTML = '<div class="cards">' + refs.map(ref => {
             const refOffers = offerMap[ref.id] || [];

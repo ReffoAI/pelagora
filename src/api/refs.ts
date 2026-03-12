@@ -67,6 +67,30 @@ router.post('/bulk-archive', (req: Request, res: Response) => {
   res.json({ archived });
 });
 
+// POST /refs/bulk-update-status
+router.post('/bulk-update-status', (req: Request, res: Response) => {
+  const refs = new RefQueries();
+  const { ids, listingStatus } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: 'ids must be a non-empty array' });
+  }
+
+  const validStatuses: ListingStatus[] = ['private', 'for_sale', 'willing_to_sell', 'for_rent'];
+  if (!validStatuses.includes(listingStatus)) {
+    return res.status(400).json({ error: `Invalid listingStatus. Must be one of: ${validStatuses.join(', ')}` });
+  }
+
+  let updated = 0;
+  for (const id of ids) {
+    const ref = refs.get(String(id));
+    if (!ref) continue;
+    refs.update(String(id), { listingStatus });
+    updated++;
+  }
+
+  res.json({ updated });
+});
+
 // POST /refs/bulk-delete
 router.post('/bulk-delete', (req: Request, res: Response) => {
   const refs = new RefQueries();
