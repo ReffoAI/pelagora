@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { RefQueries, OfferQueries } from '../db';
+import { RefQueries, OfferQueries, NegotiationQueries, FavoriteQueries } from '../db';
 import type { BeaconInfo } from '@reffo/protocol';
 import { getVersion } from '../version';
 
@@ -21,6 +21,23 @@ export function setDhtStatus(status: { connected: boolean; peers: number }): voi
 export function setUpdateInfo(info: { available: boolean; version: string | null }): void {
   updateInfo = info;
 }
+
+router.get('/dashboard', (_req: Request, res: Response) => {
+  const refs = new RefQueries();
+  const offers = new OfferQueries();
+  const negotiations = new NegotiationQueries();
+  const favorites = new FavoriteQueries();
+
+  res.json({
+    totalListed: refs.count(),
+    activeOffers: offers.countActive(),
+    pendingNegotiations: negotiations.countPending(),
+    favoritesCount: favorites.count(),
+    archivedCount: refs.listArchived().length,
+    recentItems: refs.list().slice(0, 5),
+    recentOffers: offers.list().slice(0, 3),
+  });
+});
 
 router.get('/', (_req: Request, res: Response) => {
   const refs = new RefQueries();

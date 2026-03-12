@@ -484,6 +484,93 @@ export function renderUI(): string {
     .ref-subtab.active { color: #EC526F; border-bottom-color: #EC526F; }
     .ref-subtab:hover { color: #EC526F; }
 
+    /* Dashboard layout */
+    .dashboard-layout { display: flex; min-height: calc(100dvh - 64px); }
+    .sidebar { width: 240px; background: #FCFCFD; border-right: 1px solid #E6E8EC; position: sticky; top: 64px; height: calc(100dvh - 64px); overflow-y: auto; flex-shrink: 0; transition: transform 0.3s; z-index: 90; padding: 16px 0; }
+    .sidebar-section-title { padding: 16px 20px 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #777E90; }
+    .sidebar-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 14px; font-weight: 500; color: #23262F; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; text-decoration: none; font-family: 'Poppins', sans-serif; border-top: none; border-right: none; border-bottom: none; background: none; width: 100%; text-align: left; }
+    .sidebar-nav-item:hover { background: rgba(236,82,111,0.03); color: #EC526F; }
+    .sidebar-nav-item.active { border-left-color: #EC526F; background: rgba(236,82,111,0.05); color: #EC526F; font-weight: 600; }
+    .sidebar-nav-item svg { flex-shrink: 0; width: 18px; height: 18px; }
+    .sidebar-divider { height: 1px; background: #E6E8EC; margin: 8px 20px; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(20,20,22,0.3); z-index: 89; }
+    .dashboard-main { flex: 1; min-width: 0; }
+    .sidebar-toggle { display: none; width: 40px; height: 40px; border-radius: 50%; border: 1px solid #E6E8EC; background: #FCFCFD; cursor: pointer; align-items: center; justify-content: center; color: #777E90; transition: all 0.2s; }
+    .sidebar-toggle:hover { border-color: #141416; color: #141416; }
+    @media (max-width: 768px) {
+      .sidebar { position: fixed; top: 64px; left: 0; transform: translateX(-100%); z-index: 91; height: calc(100dvh - 64px); box-shadow: 4px 0 16px rgba(0,0,0,0.1); }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+      .sidebar-toggle { display: flex; }
+    }
+
+    /* Dashboard stat cards */
+    .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #FCFCFD; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(15,15,15,0.06); transition: transform 0.2s; }
+    .stat-card:hover { transform: translateY(-2px); }
+    .stat-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+    .stat-icon.pink { background: rgba(236,82,111,0.1); color: #EC526F; }
+    .stat-icon.green { background: rgba(26,138,66,0.1); color: #1a8a42; }
+    .stat-icon.amber { background: rgba(230,162,0,0.1); color: #e6a200; }
+    .stat-icon.blue { background: rgba(26,106,186,0.1); color: #1a6aba; }
+    .stat-value { font-size: 28px; font-weight: 700; color: #23262F; line-height: 1.2; }
+    .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #777E90; margin-top: 4px; }
+    @media (max-width: 768px) { .stat-cards { grid-template-columns: repeat(2, 1fr); } #tab-dashboard > div:last-child { grid-template-columns: 1fr !important; } }
+    @media (max-width: 480px) { .stat-cards { grid-template-columns: 1fr; } }
+
+    /* Dashboard quick actions */
+    .quick-actions { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+
+    /* Dashboard recent list */
+    .recent-list { background: #FCFCFD; border-radius: 16px; box-shadow: 0 4px 16px rgba(15,15,15,0.06); overflow: hidden; margin-bottom: 24px; }
+    .recent-list-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E6E8EC; }
+    .recent-list-header h3 { font-size: 14px; font-weight: 700; color: #141416; margin: 0; }
+    .recent-list-header a { font-size: 12px; font-weight: 600; color: #EC526F; cursor: pointer; text-decoration: none; }
+    .recent-list-row { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid #F4F5F6; transition: background 0.15s; cursor: pointer; }
+    .recent-list-row:last-child { border-bottom: none; }
+    .recent-list-row:hover { background: rgba(236,82,111,0.02); }
+    .recent-list-row .row-img { width: 40px; height: 40px; border-radius: 8px; overflow: hidden; background: #F4F5F6; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .recent-list-row .row-img img { width: 100%; height: 100%; object-fit: cover; }
+    .recent-list-row .row-info { flex: 1; min-width: 0; }
+    .recent-list-row .row-info .row-name { font-size: 13px; font-weight: 600; color: #141416; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .recent-list-row .row-info .row-sub { font-size: 11px; color: #777E90; }
+    .recent-list-row .row-badge { flex-shrink: 0; }
+    .recent-list-row .row-date { font-size: 11px; color: #777E90; flex-shrink: 0; }
+
+    /* Table layout for refs */
+    .table-header-row { display: flex; align-items: center; padding: 8px 16px; background: #F4F5F6; border-radius: 12px 12px 0 0; border-bottom: 1px solid #E6E8EC; position: sticky; top: 0; z-index: 1; }
+    .table-header-row span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #777E90; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .table-header-row span:hover { color: #23262F; }
+    .table-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #E6E8EC; background: #FCFCFD; transition: background 0.15s; cursor: pointer; }
+    .table-row:nth-child(even) { background: #F9FAFB; }
+    .table-row:hover { background: rgba(236,82,111,0.03); }
+    .table-row .col-check { width: 32px; flex-shrink: 0; display: flex; align-items: center; }
+    .table-row .col-check input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: #EC526F; margin: 0; padding: 0; border-radius: 4px; }
+    .table-header-row .col-check { width: 32px; flex-shrink: 0; }
+    .table-row .col-img { width: 48px; height: 48px; border-radius: 8px; overflow: hidden; background: #F4F5F6; flex-shrink: 0; margin-right: 12px; display: flex; align-items: center; justify-content: center; }
+    .table-row .col-img img { width: 100%; height: 100%; object-fit: cover; }
+    .table-row .col-name { flex: 1; min-width: 0; }
+    .table-row .col-name .name { font-size: 14px; font-weight: 600; color: #141416; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .table-row .col-name .cat { font-size: 12px; color: #777E90; }
+    .table-row .col-status { width: 100px; flex-shrink: 0; }
+    .table-row .col-price { width: 90px; flex-shrink: 0; text-align: right; font-size: 14px; font-weight: 700; color: #1a8a42; }
+    .table-row .col-qty { width: 50px; flex-shrink: 0; text-align: center; font-size: 12px; color: #777E90; }
+    .table-row .col-date { width: 90px; flex-shrink: 0; font-size: 12px; color: #777E90; text-align: right; }
+    .table-row .col-actions { width: 80px; flex-shrink: 0; display: flex; gap: 4px; justify-content: flex-end; }
+    .table-row .col-actions button { width: 28px; height: 28px; border: none; background: none; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #777E90; transition: all 0.15s; }
+    .table-row .col-actions button:hover { background: #F4F5F6; color: #23262F; }
+    .table-row .col-actions button.del:hover { background: #fce8e6; color: #E92222; }
+    @media (max-width: 768px) { .table-row .col-qty, .table-row .col-date, .table-header-row .col-qty, .table-header-row .col-date { display: none; } }
+
+    /* Bulk action bar */
+    .bulk-action-bar { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #141416; color: #FCFCFD; padding: 12px 24px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); display: none; align-items: center; gap: 16px; z-index: 100; font-size: 14px; font-weight: 500; }
+    .bulk-action-bar.show { display: flex; }
+    .bulk-action-bar .bulk-count { font-weight: 700; }
+    .bulk-action-bar button { height: 32px; padding: 0 16px; border-radius: 16px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; border: none; }
+    .bulk-action-bar .bulk-archive { background: #E6E8EC; color: #23262F; }
+    .bulk-action-bar .bulk-delete { background: #E92222; color: #fff; }
+    .bulk-action-bar .bulk-cancel { background: transparent; color: #777E90; border: 1px solid #353945; }
+
     /* Archive card actions */
     .archive-actions { display: flex; gap: 8px; margin-top: 12px; }
     .archive-reason { font-size: 12px; color: #777E90; font-weight: 500; margin-top: 4px; }
@@ -553,12 +640,15 @@ export function renderUI(): string {
   <!-- App Header -->
   <div class="app-header">
     <div class="app-header-inner">
-      <div class="app-header-logo" onclick="switchTab('refs')">
+      <div class="app-header-logo" onclick="sidebarNav('dashboard')">
         <img class="header-beacon-icon" src="/header-brand.png" alt="Reffo Beacon">
       </div>
 
       <!-- Header actions: link + bell + avatar -->
       <div class="app-header-actions">
+        <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><path d="M3 6h18"/><path d="M3 18h18"/></svg>
+        </button>
         <button class="header-link-btn" id="headerLinkBtn" style="display:none;" onclick="switchTab('settings')" title="Connect to Reffo.ai">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
           Link to Reffo.ai
@@ -598,6 +688,60 @@ export function renderUI(): string {
   </div>
 
   <div class="app-content">
+  <div class="dashboard-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section-title">Manage</div>
+    <button class="sidebar-nav-item active" data-sidebar="dashboard" onclick="sidebarNav('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+    <button class="sidebar-nav-item" data-sidebar="refs" onclick="sidebarNav('refs')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      My Listings
+    </button>
+    <button class="sidebar-nav-item" data-sidebar="archive" onclick="sidebarNav('archive')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+      Archived
+    </button>
+    <button class="sidebar-nav-item" data-sidebar="favorites" onclick="sidebarNav('favorites')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+      Favorites
+    </button>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-title">Activity</div>
+    <button class="sidebar-nav-item" data-sidebar="negotiations" onclick="sidebarNav('negotiations')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Offers & Negotiations
+    </button>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-title">Actions</div>
+    <button class="sidebar-nav-item" data-sidebar="list" onclick="sidebarNav('list')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Create New Listing
+    </button>
+    <button class="sidebar-nav-item" data-sidebar="search" onclick="sidebarNav('search'); executeHeaderSearch();">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Search Network
+    </button>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-title">Settings</div>
+    <button class="sidebar-nav-item" data-sidebar="settings" onclick="sidebarNav('settings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </button>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-title">Links</div>
+    <a class="sidebar-nav-item" href="https://reffo.ai/docs" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Help & Docs
+    </a>
+    <a class="sidebar-nav-item" href="https://reffo.ai/about" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      About Reffo
+    </a>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+  <div class="dashboard-main">
   <div class="container">
     <!-- Search Filter Bar -->
     <div style="margin-bottom:24px;">
@@ -672,8 +816,56 @@ export function renderUI(): string {
       </div>
     </div>
 
+    <!-- Dashboard Tab -->
+    <div id="tab-dashboard">
+      <div class="stat-cards" id="dashboardStats">
+        <div class="stat-card">
+          <div class="stat-icon pink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
+          <div class="stat-value" id="statTotalListed">--</div>
+          <div class="stat-label">Total Listed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8l-8 8"/><path d="M8 8h8v8"/></svg></div>
+          <div class="stat-value" id="statActiveOffers">--</div>
+          <div class="stat-label">Active Offers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+          <div class="stat-value" id="statPendingNegs">--</div>
+          <div class="stat-label">Pending Negotiations</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+          <div class="stat-value" id="statFavorites">--</div>
+          <div class="stat-label">Favorites</div>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <button class="btn-primary" onclick="sidebarNav('list')">+ Create New Listing</button>
+        <button class="btn-secondary" onclick="sidebarNav('search'); executeHeaderSearch();">Search Network</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <div class="recent-list" id="dashboardRecentItems">
+          <div class="recent-list-header">
+            <h3>Recent Listings</h3>
+            <a onclick="sidebarNav('refs')">View all</a>
+          </div>
+          <div id="recentItemsList"><div style="padding:20px;color:#777E90;font-size:13px;">Loading...</div></div>
+        </div>
+        <div class="recent-list" id="dashboardRecentOffers">
+          <div class="recent-list-header">
+            <h3>Recent Offers</h3>
+            <a onclick="sidebarNav('negotiations')">View all</a>
+          </div>
+          <div id="recentOffersList"><div style="padding:20px;color:#777E90;font-size:13px;">Loading...</div></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Refs Tab -->
-    <div id="tab-refs">
+    <div id="tab-refs" class="hidden">
       <div class="ref-subtabs">
         <div class="ref-subtab active" data-reftab="active" onclick="switchRefSubTab('active')">Active</div>
         <div class="ref-subtab" data-reftab="archive" onclick="switchRefSubTab('archive')">Archive</div>
@@ -686,11 +878,14 @@ export function renderUI(): string {
           <h2 style="margin:0;border:none;padding:0;">My Refs</h2>
           <div style="display:flex;align-items:center;gap:12px;">
             <div class="layout-toggle">
-              <button id="layoutCardBtn" class="active" onclick="setRefLayout('card')" title="Card view">
+              <button id="layoutCardBtn" onclick="setRefLayout('card')" title="Card view">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
               </button>
-              <button id="layoutRowBtn" onclick="setRefLayout('row')" title="Row view">
+              <button id="layoutRowBtn" class="active" onclick="setRefLayout('row')" title="Row view">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+              </button>
+              <button id="layoutTableBtn" onclick="setRefLayout('table')" title="Table view">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></svg>
               </button>
             </div>
             <button class="btn-primary btn-sm" onclick="openListRefModal()">+ New Ref</button>
@@ -1375,10 +1570,21 @@ Website = https://reffo.ai</pre>
     </section>
   </div>
 
+  <!-- Bulk Action Bar -->
+    <div class="bulk-action-bar" id="bulkActionBar">
+      <span class="bulk-count" id="bulkCount">0</span> selected
+      <button class="bulk-archive" onclick="bulkArchive()">Archive</button>
+      <button class="bulk-delete" onclick="bulkDelete()">Delete</button>
+      <button class="bulk-cancel" onclick="clearSelection()">Cancel</button>
+    </div>
+
   <!-- Toast container -->
   <div id="toast-container"></div>
 
-  </div><!-- end app-content -->
+  </div><!-- end container -->
+  </div><!-- end dashboard-main -->
+</div><!-- end dashboard-layout -->
+</div><!-- end app-content -->
 
   <!-- Lightbox overlay (outside app-content so z-index works) -->
   <div id="lightboxOverlay" class="lightbox-overlay" style="display:none;" onclick="if(event.target===this)closeLightbox()">
@@ -1449,7 +1655,7 @@ Website = https://reffo.ai</pre>
 
     // ===== Tab switching =====
     function switchTab(tab) {
-      var tabs = ['refs','detail','search','negotiations','settings','list','terms','privacy','acceptable-use','for-bots'];
+      var tabs = ['dashboard','refs','detail','search','negotiations','settings','list','terms','privacy','acceptable-use','for-bots'];
       tabs.forEach(function(t) {
         var el = document.getElementById('tab-' + t);
         if (el) el.classList.toggle('hidden', tab !== t);
@@ -1460,6 +1666,17 @@ Website = https://reffo.ai</pre>
       if (tab === 'negotiations') loadNegotiations();
       if (tab === 'refs') loadMyRefs();
       if (tab === 'settings') loadSettings();
+      // Update sidebar active state
+      document.querySelectorAll('.sidebar-nav-item[data-sidebar]').forEach(function(item) {
+        item.classList.remove('active');
+      });
+      var sidebarMap = { dashboard: 'dashboard', refs: 'refs', detail: 'refs', search: 'search', negotiations: 'negotiations', settings: 'settings', list: 'list' };
+      var mappedSidebar = sidebarMap[tab];
+      if (mappedSidebar) {
+        var activeItem = document.querySelector('.sidebar-nav-item[data-sidebar="' + mappedSidebar + '"]');
+        if (activeItem) activeItem.classList.add('active');
+      }
+      if (tab === 'dashboard') loadDashboard();
     }
 
     function switchNegTab(tab) {
@@ -1477,6 +1694,203 @@ Website = https://reffo.ai</pre>
       if (tab === 'active') loadMyRefs();
       if (tab === 'favorites') loadFavorites();
     }
+
+    // ===== Sidebar navigation =====
+    function sidebarNav(target) {
+      closeSidebar();
+      if (target === 'dashboard') { switchTab('dashboard'); return; }
+      if (target === 'refs') { switchTab('refs'); switchRefSubTab('active'); return; }
+      if (target === 'archive') { switchTab('refs'); switchRefSubTab('archive'); return; }
+      if (target === 'favorites') { switchTab('refs'); switchRefSubTab('favorites'); return; }
+      if (target === 'negotiations') { switchTab('negotiations'); return; }
+      if (target === 'list') { switchTab('list'); return; }
+      if (target === 'search') { switchTab('search'); return; }
+      if (target === 'settings') { switchTab('settings'); return; }
+    }
+    window.sidebarNav = sidebarNav;
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+    window.toggleSidebar = toggleSidebar;
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+    window.closeSidebar = closeSidebar;
+
+    // ===== Dashboard =====
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/health/dashboard');
+        const data = await res.json();
+        document.getElementById('statTotalListed').textContent = data.totalListed;
+        document.getElementById('statActiveOffers').textContent = data.activeOffers;
+        document.getElementById('statPendingNegs').textContent = data.pendingNegotiations;
+        document.getElementById('statFavorites').textContent = data.favoritesCount;
+
+        // Recent items
+        const itemsContainer = document.getElementById('recentItemsList');
+        if (data.recentItems && data.recentItems.length > 0) {
+          // Load media for recent items
+          const mediaMap = {};
+          await Promise.all(data.recentItems.map(async ref => {
+            try {
+              const mRes = await fetch('/refs/' + ref.id + '/media');
+              mediaMap[ref.id] = await mRes.json();
+            } catch(e) { mediaMap[ref.id] = []; }
+          }));
+
+          itemsContainer.innerHTML = data.recentItems.map(function(ref) {
+            var photos = (mediaMap[ref.id] || []).filter(function(m) { return m.mediaType === 'photo'; });
+            var firstPhoto = photos[0];
+            var imgHtml = firstPhoto
+              ? '<div class="row-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
+              : '<div class="row-img"><span style="color:#E6E8EC;font-size:14px;">&#x26A1;</span></div>';
+            var statusLabel = statusLabels[ref.listingStatus] || 'Private';
+            var statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
+            var date = new Date(ref.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            return '<div class="recent-list-row" onclick="openDetail(\\'' + ref.id + '\\')">' +
+              imgHtml +
+              '<div class="row-info"><div class="row-name">' + escapeHtml(ref.name) + '</div>' +
+              '<div class="row-sub">' + escapeHtml(ref.category || '') + '</div></div>' +
+              '<span class="row-badge badge ' + statusClass + '" style="font-size:10px;padding:0 8px;line-height:22px;">' + statusLabel + '</span>' +
+              '<span class="row-date">' + date + '</span></div>';
+          }).join('');
+        } else {
+          itemsContainer.innerHTML = '<div style="padding:20px;color:#B1B5C3;font-size:13px;font-style:italic;">No listings yet</div>';
+        }
+
+        // Recent offers
+        const offersContainer = document.getElementById('recentOffersList');
+        if (data.recentOffers && data.recentOffers.length > 0) {
+          offersContainer.innerHTML = data.recentOffers.map(function(offer) {
+            var date = new Date(offer.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            var statusClass = { active: 'badge-for-sale', sold: 'badge-archived-sold', cancelled: 'badge-archived-deleted' }[offer.status] || 'badge-private';
+            return '<div class="recent-list-row">' +
+              '<div class="row-img"><span style="color:#1a8a42;font-size:14px;">$</span></div>' +
+              '<div class="row-info"><div class="row-name">' + escapeHtml(offer.priceCurrency + ' ' + offer.price.toFixed(2)) + '</div>' +
+              '<div class="row-sub">Ref: ' + escapeHtml(offer.refId).substring(0, 8) + '...</div></div>' +
+              '<span class="row-badge badge ' + statusClass + '" style="font-size:10px;padding:0 8px;line-height:22px;">' + escapeHtml(offer.status) + '</span>' +
+              '<span class="row-date">' + date + '</span></div>';
+          }).join('');
+        } else {
+          offersContainer.innerHTML = '<div style="padding:20px;color:#B1B5C3;font-size:13px;font-style:italic;">No offers yet</div>';
+        }
+      } catch(e) {
+        document.getElementById('recentItemsList').innerHTML = '<div style="padding:20px;color:#B1B5C3;font-size:13px;">Failed to load dashboard</div>';
+      }
+    }
+
+    // ===== Bulk selection =====
+    if (!window._selectedRefIds) window._selectedRefIds = new Set();
+
+    window.toggleSelectRef = function(refId, checked) {
+      if (checked) window._selectedRefIds.add(refId);
+      else window._selectedRefIds.delete(refId);
+      updateBulkBar();
+    };
+
+    window.toggleSelectAll = function(checked) {
+      document.querySelectorAll('.table-row .col-check input[type=checkbox]').forEach(function(cb) {
+        var row = cb.closest('.table-row');
+        var onclick = row ? row.getAttribute('onclick') : '';
+        var match = onclick ? onclick.match(/openDetail\\('([^']+)'\\)/) : null;
+        if (match) {
+          if (checked) window._selectedRefIds.add(match[1]);
+          else window._selectedRefIds.delete(match[1]);
+          cb.checked = checked;
+        }
+      });
+      updateBulkBar();
+    };
+
+    function updateBulkBar() {
+      var bar = document.getElementById('bulkActionBar');
+      var count = window._selectedRefIds.size;
+      if (count > 0) {
+        bar.classList.add('show');
+        document.getElementById('bulkCount').textContent = count;
+      } else {
+        bar.classList.remove('show');
+      }
+    }
+
+    window.clearSelection = function() {
+      window._selectedRefIds.clear();
+      document.querySelectorAll('.table-row .col-check input[type=checkbox]').forEach(function(cb) { cb.checked = false; });
+      var selectAll = document.querySelector('.table-header-row .col-check input[type=checkbox]');
+      if (selectAll) selectAll.checked = false;
+      updateBulkBar();
+    };
+
+    window.bulkArchive = async function() {
+      var ids = Array.from(window._selectedRefIds);
+      if (ids.length === 0) return;
+      if (!confirm('Archive ' + ids.length + ' item(s)?')) return;
+      try {
+        var res = await fetch('/refs/bulk-archive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: ids })
+        });
+        if (!res.ok) throw new Error('Failed');
+        var data = await res.json();
+        showToast(data.archived + ' item(s) archived', 'accepted');
+        window._selectedRefIds.clear();
+        updateBulkBar();
+        loadMyRefs();
+      } catch(e) {
+        showToast('Failed to archive items', 'rejected');
+      }
+    };
+
+    window.bulkDelete = async function() {
+      var ids = Array.from(window._selectedRefIds);
+      if (ids.length === 0) return;
+      if (!confirm('Delete ' + ids.length + ' item(s)? This will archive them.')) return;
+      try {
+        var res = await fetch('/refs/bulk-archive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: ids })
+        });
+        if (!res.ok) throw new Error('Failed');
+        var data = await res.json();
+        showToast(data.archived + ' item(s) deleted', '');
+        window._selectedRefIds.clear();
+        updateBulkBar();
+        loadMyRefs();
+      } catch(e) {
+        showToast('Failed to delete items', 'rejected');
+      }
+    };
+
+    window.archiveRef = async function(refId) {
+      if (!confirm('Archive this ref?')) return;
+      try {
+        var res = await fetch('/refs/' + refId, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed');
+        showToast('Ref archived', 'accepted');
+        loadMyRefs();
+      } catch(e) {
+        showToast('Failed to archive ref', 'rejected');
+      }
+    };
+
+    window.deleteRefWithConfirm = async function(refId) {
+      if (!confirm('Delete this ref? It will be moved to the archive.')) return;
+      try {
+        var res = await fetch('/refs/' + refId, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed');
+        showToast('Ref archived', 'accepted');
+        loadMyRefs();
+      } catch(e) {
+        showToast('Failed to delete ref', 'rejected');
+      }
+    };
 
     async function loadArchivedRefs() {
       const container = document.getElementById('archivedRefs');
@@ -1943,7 +2357,53 @@ Website = https://reffo.ai</pre>
           mediaMap[ref.id] = await mRes.json();
         }));
 
-        if (refLayout === 'row') {
+        if (refLayout === 'table') {
+          var selectedIds = window._selectedRefIds || new Set();
+          var allChecked = refs.length > 0 && refs.every(function(r) { return selectedIds.has(r.id); });
+          container.innerHTML = '<div>' +
+            '<div class="table-header-row">' +
+              '<div class="col-check"><input type="checkbox" ' + (allChecked ? 'checked' : '') + ' onchange="toggleSelectAll(this.checked)"></div>' +
+              '<span style="width:60px;">Image</span>' +
+              '<span style="flex:1;">Name</span>' +
+              '<span style="width:100px;">Status</span>' +
+              '<span style="width:90px;text-align:right;">Price</span>' +
+              '<span class="col-qty" style="width:50px;text-align:center;">Qty</span>' +
+              '<span class="col-date" style="width:90px;text-align:right;">Date</span>' +
+              '<span style="width:80px;text-align:right;">Actions</span>' +
+            '</div>' +
+            refs.map(function(ref) {
+              var refOffers = offerMap[ref.id] || [];
+              var activeOffer = refOffers.find(function(o) { return o.status === 'active'; });
+              var priceStr = activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
+              var photos = (mediaMap[ref.id] || []).filter(function(m) { return m.mediaType === 'photo'; });
+              var firstPhoto = photos[0];
+              var statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
+              var statusLabel = statusLabels[ref.listingStatus] || 'Private';
+              var date = new Date(ref.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              var isSelected = selectedIds.has(ref.id);
+
+              var imgHtml = firstPhoto
+                ? '<div class="col-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
+                : '<div class="col-img"><span style="color:#E6E8EC;font-size:14px;">&#x26A1;</span></div>';
+
+              return '<div class="table-row" onclick="openDetail(\\'' + ref.id + '\\')">' +
+                '<div class="col-check" onclick="event.stopPropagation()"><input type="checkbox" ' + (isSelected ? 'checked' : '') + ' onchange="toggleSelectRef(\\'' + ref.id + '\\', this.checked)"></div>' +
+                imgHtml +
+                '<div class="col-name"><div class="name">' + escapeHtml(ref.name) + '</div><div class="cat">' + escapeHtml([ref.category, ref.subcategory].filter(Boolean).join(' / ')) + '</div></div>' +
+                '<div class="col-status"><span class="badge ' + statusClass + '" style="font-size:10px;padding:0 8px;line-height:22px;">' + statusLabel + '</span></div>' +
+                '<div class="col-price">' + (priceStr ? escapeHtml(priceStr) : '') + '</div>' +
+                '<div class="col-qty">' + ref.quantity + '</div>' +
+                '<div class="col-date">' + date + '</div>' +
+                '<div class="col-actions" onclick="event.stopPropagation()">' +
+                  '<button onclick="openDetail(\\'' + ref.id + '\\')" title="Edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+                  '<button onclick="archiveRef(\\'' + ref.id + '\\')" title="Archive"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></button>' +
+                  '<button class="del" onclick="deleteRefWithConfirm(\\'' + ref.id + '\\')" title="Delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>' +
+                '</div>' +
+              '</div>';
+            }).join('') +
+          '</div>';
+          updateBulkBar();
+        } else if (refLayout === 'row') {
           container.innerHTML = '<div class="rows">' + refs.map(ref => {
             const refOffers = offerMap[ref.id] || [];
             const activeOffer = refOffers.find(o => o.status === 'active');
@@ -3794,11 +4254,13 @@ Website = https://reffo.ai</pre>
     };
 
     // ===== Layout Toggle =====
-    let refLayout = 'card';
+    let refLayout = 'row';
     window.setRefLayout = function(layout) {
       refLayout = layout;
       document.getElementById('layoutCardBtn').classList.toggle('active', layout === 'card');
       document.getElementById('layoutRowBtn').classList.toggle('active', layout === 'row');
+      var tableBtn = document.getElementById('layoutTableBtn');
+      if (tableBtn) tableBtn.classList.toggle('active', layout === 'table');
       loadMyRefs();
     };
 
@@ -4086,7 +4548,8 @@ Website = https://reffo.ai</pre>
       } catch {}
     }
 
-    loadMyRefs();
+    loadDashboard();
+    switchTab('dashboard');
     initOutgoingSnapshot();
 
     // Show "Link to Reffo.ai" header button if no API key is configured

@@ -13,7 +13,7 @@ const router = Router();
 // GET /refs?category=...&subcategory=...&search=...&archived=true
 router.get('/', (req: Request, res: Response) => {
   const refs = new RefQueries();
-  const archived = req.query.archived === 'true';
+  const archived = req.query.archived === 'true' || req.query.status === 'archived';
 
   if (archived) {
     return res.json(refs.listArchived());
@@ -28,6 +28,79 @@ router.get('/', (req: Request, res: Response) => {
   }
 
   res.json(refs.list(category || undefined, subcategory || undefined));
+});
+
+// POST /refs/bulk-archive
+router.post('/bulk-archive', (req: Request, res: Response) => {
+  const refs = new RefQueries();
+  const negotiations = new NegotiationQueries();
+  const { ids } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: 'ids must be a non-empty array' });
+  }
+
+  let archived = 0;
+  for (const id of ids) {
+    const ref = refs.get(String(id));
+    if (!ref) continue;
+
+    // If ref was synced, unsync it
+    if (ref.reffoSynced) {
+      const syncManager = req.app.get('syncManager');
+      if (syncManager) {
+        syncManager.unsyncItem(String(id)).catch(() => {});
+      }
+    }
+
+    // Auto-reject pending negotiations
+    const pendingNegs = negotiations.listForRef(String(id)).filter(
+      (n: { status: string }) => n.status === 'pending' || n.status === 'countered'
+    );
+    for (const neg of pendingNegs) {
+      negotiations.updateStatus(neg.id, 'rejected', undefined, 'Ref is no longer available');
+    }
+
+    refs.archive(String(id), 'deleted');
+    archived++;
+  }
+
+  res.json({ archived });
+});
+
+// POST /refs/bulk-delete
+router.post('/bulk-delete', (req: Request, res: Response) => {
+  const refs = new RefQueries();
+  const media = new MediaQueries();
+  const { ids } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: 'ids must be a non-empty array' });
+  }
+
+  let deleted = 0;
+  for (const id of ids) {
+    const ref = refs.get(String(id));
+    if (!ref) continue;
+    if (ref.listingStatus !== 'archived_sold' && ref.listingStatus !== 'archived_deleted') continue;
+
+    const filePaths = media.deleteAllForRef(String(id));
+    refs.delete(String(id));
+
+    for (const fp of filePaths) {
+      const fullPath = path.join(process.cwd(), fp);
+      try {
+        if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+      } catch {}
+    }
+
+    const refDir = path.join(process.cwd(), 'uploads', String(id));
+    try {
+      if (fs.existsSync(refDir)) fs.rmdirSync(refDir);
+    } catch {}
+
+    deleted++;
+  }
+
+  res.json({ deleted });
 });
 
 // GET /refs/:id
