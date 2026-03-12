@@ -891,14 +891,14 @@ export function renderUI(): string {
           <h2 style="margin:0;border:none;padding:0;">My Refs</h2>
           <div style="display:flex;align-items:center;gap:12px;">
             <div class="layout-toggle">
-              <button id="layoutCardBtn" onclick="setRefLayout('card')" title="Card view">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              <button id="layoutTableBtn" onclick="setRefLayout('table')" title="Table view">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></svg>
               </button>
               <button id="layoutRowBtn" class="active" onclick="setRefLayout('row')" title="Row view">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
               </button>
-              <button id="layoutTableBtn" onclick="setRefLayout('table')" title="Table view">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></svg>
+              <button id="layoutCardBtn" onclick="setRefLayout('card')" title="Card view">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
               </button>
             </div>
             <button class="btn-primary btn-sm" onclick="openListRefModal()">+ New Ref</button>
@@ -941,14 +941,38 @@ export function renderUI(): string {
       <div id="refSubtabArchive" class="hidden">
       <section>
         <h2>Archived Refs</h2>
-        <div id="archivedRefs"><p class="empty">No archived refs</p></div>
+        <div class="refs-with-sidebar">
+          <div class="refs-main-col">
+            <div id="archivedRefs"><p class="empty">No archived refs</p></div>
+          </div>
+          <div class="bulk-action-sidebar" id="archiveBulkSidebar">
+            <div class="bulk-action-sidebar-inner">
+              <div class="bulk-count-label"><span id="archiveBulkCount">0</span> selected</div>
+              <button style="background:#e6f9ed;color:#1a8a42;" onclick="bulkRestoreArchived()">Restore</button>
+              <div class="bulk-divider"></div>
+              <button style="background:#E92222;color:#fff;" onclick="bulkDeleteForeverArchived()">Delete Forever</button>
+              <button class="bulk-cancel" onclick="clearArchiveSelection()">Cancel</button>
+            </div>
+          </div>
+        </div>
       </section>
       </div>
 
       <div id="refSubtabFavorites" class="hidden">
       <section>
         <h2>Favorite Refs</h2>
-        <div id="favoriteRefs"><p class="empty">No favorites yet. Search for items and click the heart to save them.</p></div>
+        <div class="refs-with-sidebar">
+          <div class="refs-main-col">
+            <div id="favoriteRefs"><p class="empty">No favorites yet. Search for items and click the heart to save them.</p></div>
+          </div>
+          <div class="bulk-action-sidebar" id="favBulkSidebar">
+            <div class="bulk-action-sidebar-inner">
+              <div class="bulk-count-label"><span id="favBulkCount">0</span> selected</div>
+              <button style="background:#fce8e6;color:#E92222;" onclick="bulkUnfavorite()">Unfavorite</button>
+              <button class="bulk-cancel" onclick="clearFavSelection()">Cancel</button>
+            </div>
+          </div>
+        </div>
       </section>
       </div>
     </div>
@@ -1955,6 +1979,64 @@ Website = https://reffo.ai</pre>
       }
     };
 
+    // ===== Archive multi-select =====
+    if (!window._selectedArchiveIds) window._selectedArchiveIds = new Set();
+
+    function updateArchiveBulkBar() {
+      var sidebar = document.getElementById('archiveBulkSidebar');
+      var count = window._selectedArchiveIds.size;
+      if (count > 0) { sidebar.classList.add('show'); document.getElementById('archiveBulkCount').textContent = count; }
+      else { sidebar.classList.remove('show'); }
+    }
+
+    window.toggleSelectArchive = function(id, checked) {
+      if (checked) window._selectedArchiveIds.add(id); else window._selectedArchiveIds.delete(id);
+      updateArchiveBulkBar();
+    };
+
+    window.toggleSelectAllArchive = function(checked) {
+      document.querySelectorAll('#archivedRefs .ref-row input[type=checkbox]').forEach(function(cb) {
+        var row = cb.closest('.ref-row');
+        var refId = row ? row.getAttribute('data-refid') : '';
+        if (refId) { cb.checked = checked; if (checked) window._selectedArchiveIds.add(refId); else window._selectedArchiveIds.delete(refId); }
+      });
+      updateArchiveBulkBar();
+    };
+
+    window.clearArchiveSelection = function() {
+      window._selectedArchiveIds.clear();
+      document.querySelectorAll('#archivedRefs input[type=checkbox]').forEach(function(cb) { cb.checked = false; });
+      updateArchiveBulkBar();
+    };
+
+    window.bulkRestoreArchived = async function() {
+      var ids = Array.from(window._selectedArchiveIds);
+      if (ids.length === 0) return;
+      try {
+        for (var i = 0; i < ids.length; i++) {
+          await fetch('/refs/' + ids[i] + '/restore', { method: 'POST' });
+        }
+        showToast(ids.length + ' ref(s) restored', 'accepted');
+        window._selectedArchiveIds.clear();
+        loadArchivedRefs();
+        loadMyRefs();
+      } catch { showToast('Bulk restore failed', 'rejected'); }
+    };
+
+    window.bulkDeleteForeverArchived = async function() {
+      var ids = Array.from(window._selectedArchiveIds);
+      if (ids.length === 0) return;
+      if (!confirm('Permanently delete ' + ids.length + ' ref(s)? This cannot be undone.')) return;
+      try {
+        for (var i = 0; i < ids.length; i++) {
+          await fetch('/refs/' + ids[i] + '/permanent', { method: 'DELETE' });
+        }
+        showToast(ids.length + ' ref(s) permanently deleted', '');
+        window._selectedArchiveIds.clear();
+        loadArchivedRefs();
+      } catch { showToast('Bulk delete failed', 'rejected'); }
+    };
+
     async function loadArchivedRefs() {
       const container = document.getElementById('archivedRefs');
       try {
@@ -1962,39 +2044,41 @@ Website = https://reffo.ai</pre>
         const refs = await res.json();
         if (refs.length === 0) {
           container.innerHTML = '<p class="empty">No archived refs</p>';
+          updateArchiveBulkBar();
           return;
         }
 
-        // Load media for all archived refs
-        const mediaMap = {};
-        await Promise.all(refs.map(async ref => {
-          const mRes = await fetch('/refs/' + ref.id + '/media');
-          mediaMap[ref.id] = await mRes.json();
-        }));
+        var selectedIds = window._selectedArchiveIds || new Set();
+        var allSelected = refs.every(function(r) { return selectedIds.has(r.id); });
 
-        container.innerHTML = '<div class="cards">' + refs.map(ref => {
-          const photos = (mediaMap[ref.id] || []).filter(m => m.mediaType === 'photo');
-          const firstPhoto = photos[0];
-          const statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
-          const statusLabel = ref.listingStatus === 'archived_sold' ? 'Sold' : 'Deleted';
-          const archiveDate = new Date(ref.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        container.innerHTML =
+          '<div style="display:flex;align-items:center;gap:10px;padding:4px 12px 8px;">' +
+            '<input type="checkbox" ' + (allSelected ? 'checked' : '') + ' onchange="toggleSelectAllArchive(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#EC526F;">' +
+            '<span style="font-size:11px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.05em;">' + (selectedIds.size > 0 ? selectedIds.size + ' selected' : 'Select all') + '</span>' +
+          '</div>' +
+          '<div class="rows">' + refs.map(function(ref) {
+            var statusLabel = ref.listingStatus === 'archived_sold' ? 'Sold' : 'Deleted';
+            var statusStyle = ref.listingStatus === 'archived_sold' ? 'background:#e8eaed;color:#1a8a42;' : 'background:#fce8e6;color:#E92222;';
+            var archiveDate = new Date(ref.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            var isSelected = selectedIds.has(ref.id);
 
-          const imgHtml = firstPhoto
-            ? '<div class="card-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
-            : '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#E6E8EC"/></svg></span></div>';
-
-          return '<div class="card" style="cursor:default;">' +
-            imgHtml +
-            '<div class="card-body">' +
-              '<h3>' + escapeHtml(ref.name) + '</h3>' +
-              '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span></div>' +
-              '<div class="archive-reason">Archived ' + archiveDate + '</div>' +
-              '<div class="archive-actions">' +
-                '<button class="btn-secondary btn-sm" onclick="event.stopPropagation(); restoreRef(\\'' + ref.id + '\\')">Restore</button>' +
-                '<button class="btn-danger btn-sm" onclick="event.stopPropagation(); permanentDeleteRef(\\'' + ref.id + '\\')">Delete Forever</button>' +
+            return '<div class="ref-row" data-refid="' + ref.id + '" style="cursor:default;">' +
+              '<div onclick="event.stopPropagation()" style="flex-shrink:0;margin-right:8px;display:flex;align-items:center;">' +
+                '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' onchange="toggleSelectArchive(\\'' + ref.id + '\\', this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#EC526F;">' +
               '</div>' +
-            '</div></div>';
-        }).join('') + '</div>';
+              '<span class="row-name">' + escapeHtml(ref.name) + '</span>' +
+              '<div class="row-meta">' +
+                '<span class="badge" style="font-size:10px;padding:0 8px;line-height:22px;' + statusStyle + '">' + statusLabel + '</span>' +
+                (ref.category ? '<span class="badge badge-cat" style="font-size:10px;padding:0 8px;line-height:22px;">' + escapeHtml(ref.category) + '</span>' : '') +
+                '<span style="font-size:11px;color:#777E90;">' + archiveDate + '</span>' +
+              '</div>' +
+              '<div style="display:flex;gap:6px;flex-shrink:0;margin-left:auto;" onclick="event.stopPropagation()">' +
+                '<button class="btn-secondary btn-sm" style="font-size:11px;" onclick="restoreRef(\\'' + ref.id + '\\')">Restore</button>' +
+                '<button class="btn-danger btn-sm" style="font-size:11px;" onclick="permanentDeleteRef(\\'' + ref.id + '\\')">Delete</button>' +
+              '</div>' +
+            '</div>';
+          }).join('') + '</div>';
+        updateArchiveBulkBar();
       } catch {
         container.innerHTML = '<p class="empty">Failed to load archived refs</p>';
       }
@@ -3493,39 +3577,97 @@ Website = https://reffo.ai</pre>
     // ===== Favorites =====
     let favFilterActive = false;
 
+    // ===== Favorites multi-select =====
+    if (!window._selectedFavIds) window._selectedFavIds = new Set();
+    var _favsList = [];
+
+    function updateFavBulkBar() {
+      var sidebar = document.getElementById('favBulkSidebar');
+      var count = window._selectedFavIds.size;
+      if (count > 0) { sidebar.classList.add('show'); document.getElementById('favBulkCount').textContent = count; }
+      else { sidebar.classList.remove('show'); }
+    }
+
+    window.toggleSelectFav = function(key, checked) {
+      if (checked) window._selectedFavIds.add(key); else window._selectedFavIds.delete(key);
+      updateFavBulkBar();
+    };
+
+    window.toggleSelectAllFav = function(checked) {
+      document.querySelectorAll('#favoriteRefs .ref-row input[type=checkbox]').forEach(function(cb) {
+        var row = cb.closest('.ref-row');
+        var key = row ? row.getAttribute('data-favkey') : '';
+        if (key) { cb.checked = checked; if (checked) window._selectedFavIds.add(key); else window._selectedFavIds.delete(key); }
+      });
+      updateFavBulkBar();
+    };
+
+    window.clearFavSelection = function() {
+      window._selectedFavIds.clear();
+      document.querySelectorAll('#favoriteRefs input[type=checkbox]').forEach(function(cb) { cb.checked = false; });
+      updateFavBulkBar();
+    };
+
+    window.bulkUnfavorite = async function() {
+      var keys = Array.from(window._selectedFavIds);
+      if (keys.length === 0) return;
+      if (!confirm('Remove ' + keys.length + ' favorite(s)?')) return;
+      try {
+        for (var i = 0; i < keys.length; i++) {
+          var parts = keys[i].split('::');
+          await fetch('/favorites', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refId: parts[0], beaconId: parts[1] }) });
+          if (window._favSet) window._favSet.delete(parts[0] + ':' + parts[1]);
+        }
+        showToast(keys.length + ' favorite(s) removed', '');
+        window._selectedFavIds.clear();
+        loadFavorites();
+      } catch { showToast('Bulk unfavorite failed', 'rejected'); }
+    };
+
     async function loadFavorites() {
       const container = document.getElementById('favoriteRefs');
       try {
         const res = await fetch('/favorites');
         const favs = await res.json();
+        _favsList = favs;
         if (favs.length === 0) {
           container.innerHTML = '<p class="empty">No favorites yet. Search for items and click the heart to save them.</p>';
+          updateFavBulkBar();
           return;
         }
         const statusLabelsLocal = { for_sale: 'For Sale', willing_to_sell: 'Open to Offers', for_rent: 'For Rent' };
         const statusBadgeClassLocal = { for_sale: 'badge-for-sale', willing_to_sell: 'badge-willing', for_rent: 'badge-for-rent' };
-        container.innerHTML = '<div class="cards">' + favs.map(function(fav) {
-          const priceStr = fav.offerPrice ? (fav.offerCurrency || 'USD') + ' ' + Number(fav.offerPrice).toFixed(2) : '';
-          const badges = [fav.category, fav.subcategory].filter(Boolean).map(function(b) {
-            return '<span class="badge badge-cat">' + escapeHtml(b) + '</span>';
-          }).join('');
-          const sLabel = statusLabelsLocal[fav.listingStatus] || '';
-          const sClass = statusBadgeClassLocal[fav.listingStatus] || '';
-          const locParts = [fav.locationCity, fav.locationState, fav.locationZip].filter(Boolean);
-          const imgHtml = fav.imageUrl
-            ? '<div class="card-img"><img src="' + escapeHtml(fav.imageUrl) + '" alt=""></div>'
-            : '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#B1B5C3" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></span></div>';
-          return '<div class="card">' +
-            imgHtml +
-            '<div class="card-body">' +
-              '<h3>' + escapeHtml(fav.refName) + '</h3>' +
-              '<div class="card-meta">' + (sLabel ? '<span class="badge ' + sClass + '">' + sLabel + '</span>' : '') + badges + '</div>' +
-              (priceStr ? '<div class="card-price">' + escapeHtml(priceStr) + '</div>' : '') +
-              (locParts.length > 0 ? '<div style="font-size:12px;color:#777E90;margin-top:4px;font-weight:500;">Near ' + escapeHtml(locParts.join(', ')) + '</div>' : '') +
-              '<div class="beacon-id">Beacon: ' + escapeHtml(fav.beaconId.slice(0, 16)) + '...</div>' +
-              '<div style="margin-top:10px;"><button class="btn-danger btn-sm" onclick="event.stopPropagation(); removeFavorite(\\'' + escapeHtml(fav.refId) + '\\', \\'' + escapeHtml(fav.beaconId) + '\\')">Remove</button></div>' +
-            '</div></div>';
-        }).join('') + '</div>';
+        var selectedIds = window._selectedFavIds || new Set();
+        var allSelected = favs.length > 0 && favs.every(function(f) { return selectedIds.has(f.refId + '::' + f.beaconId); });
+
+        container.innerHTML =
+          '<div style="display:flex;align-items:center;gap:10px;padding:4px 12px 8px;">' +
+            '<input type="checkbox" ' + (allSelected ? 'checked' : '') + ' onchange="toggleSelectAllFav(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#EC526F;">' +
+            '<span style="font-size:11px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.05em;">' + (selectedIds.size > 0 ? selectedIds.size + ' selected' : 'Select all') + '</span>' +
+          '</div>' +
+          '<div class="rows">' + favs.map(function(fav) {
+            const sLabel = statusLabelsLocal[fav.listingStatus] || '';
+            const sClass = statusBadgeClassLocal[fav.listingStatus] || '';
+            const locParts = [fav.locationCity, fav.locationState, fav.locationZip].filter(Boolean);
+            const favKey = fav.refId + '::' + fav.beaconId;
+            const isSelected = selectedIds.has(favKey);
+
+            return '<div class="ref-row" data-favkey="' + escapeHtml(favKey) + '" style="cursor:default;">' +
+              '<div onclick="event.stopPropagation()" style="flex-shrink:0;margin-right:8px;display:flex;align-items:center;">' +
+                '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' onchange="toggleSelectFav(\\'' + escapeHtml(favKey) + '\\', this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#EC526F;">' +
+              '</div>' +
+              '<span class="row-name">' + escapeHtml(fav.refName) + '</span>' +
+              '<div class="row-meta">' +
+                (sLabel ? '<span class="badge ' + sClass + '" style="font-size:10px;padding:0 8px;line-height:22px;">' + sLabel + '</span>' : '') +
+                (fav.category ? '<span class="badge badge-cat" style="font-size:10px;padding:0 8px;line-height:22px;">' + escapeHtml(fav.category) + '</span>' : '') +
+                (locParts.length > 0 ? '<span style="font-size:11px;color:#777E90;">Near ' + escapeHtml(locParts.join(', ')) + '</span>' : '') +
+              '</div>' +
+              '<div style="flex-shrink:0;margin-left:auto;" onclick="event.stopPropagation()">' +
+                '<button class="btn-danger btn-sm" style="font-size:11px;" onclick="removeFavorite(\\'' + escapeHtml(fav.refId) + '\\', \\'' + escapeHtml(fav.beaconId) + '\\')">Remove</button>' +
+              '</div>' +
+            '</div>';
+          }).join('') + '</div>';
+        updateFavBulkBar();
       } catch {
         container.innerHTML = '<p class="empty">Failed to load favorites</p>';
       }
