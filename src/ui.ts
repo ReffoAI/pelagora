@@ -521,6 +521,30 @@ export function renderUI(): string {
     /* Dashboard quick actions */
     .quick-actions { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
 
+    /* AI Quick Start */
+    .ai-quickstart-card { background: #FCFCFD; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(15,15,15,0.06); margin-bottom: 24px; border-top: 3px solid; border-image: linear-gradient(90deg, #8101B4, #EA526F) 1; }
+    .ai-quickstart-card h3 { font-size: 16px; font-weight: 700; color: #141416; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+    .ai-quickstart-card .ai-qs-sub { font-size: 13px; color: #777E90; margin-bottom: 16px; }
+    .ai-quickstart-prompt { position: relative; background: #F4F5F6; border-radius: 12px; padding: 16px 48px 16px 16px; margin-bottom: 16px; }
+    .ai-quickstart-prompt pre { margin: 0; font-size: 13px; color: #23262F; white-space: pre-wrap; word-break: break-word; font-family: 'Courier New', monospace; line-height: 1.6; }
+    .ai-quickstart-copy-btn { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 8px; border: 1px solid #E6E8EC; background: #FCFCFD; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #777E90; transition: all 0.2s; }
+    .ai-quickstart-copy-btn:hover { border-color: #141416; color: #141416; }
+    .ai-quickstart-llm-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ai-quickstart-llm-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border-radius: 8px; border: 1px solid #E6E8EC; background: #FCFCFD; font-size: 13px; font-weight: 500; color: #23262F; cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif; }
+    .ai-quickstart-llm-btn:hover { border-color: #EC526F; color: #EC526F; }
+    .ai-quickstart-llm-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .ai-quickstart-sidebar-card { margin: 16px 16px 8px; padding: 12px; border-radius: 12px; border: 1px solid rgba(236,82,111,0.2); background: linear-gradient(135deg, rgba(236,82,111,0.04), rgba(129,1,180,0.04)); cursor: pointer; transition: all 0.2s; }
+    .ai-quickstart-sidebar-card:hover { border-color: rgba(236,82,111,0.4); box-shadow: 0 2px 8px rgba(236,82,111,0.08); }
+    .ai-quickstart-sidebar-card .qs-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #23262F; margin-bottom: 2px; }
+    .ai-quickstart-sidebar-card .qs-sub { font-size: 11px; color: #777E90; }
+    .ai-quickstart-modal { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(20,20,22,0.5); backdrop-filter: blur(2px); justify-content: center; align-items: center; }
+    .ai-quickstart-modal.open { display: flex; }
+    .ai-quickstart-modal-inner { background: #FCFCFD; border-radius: 20px; max-width: 520px; width: calc(100% - 32px); padding: 28px; position: relative; box-shadow: 0 24px 48px rgba(15,15,15,0.16); animation: showModal 0.2s ease; max-height: 90vh; overflow-y: auto; }
+    .ai-quickstart-modal-inner .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid #E6E8EC; background: #FCFCFD; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #777E90; transition: all 0.2s; }
+    .ai-quickstart-modal-inner .modal-close:hover { border-color: #141416; color: #141416; }
+    .ai-quickstart-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #23262F; color: #FCFCFD; font-size: 13px; font-weight: 500; padding: 10px 24px; border-radius: 24px; box-shadow: 0 8px 24px rgba(15,15,15,0.2); z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none; font-family: 'Poppins', sans-serif; }
+    .ai-quickstart-toast.show { opacity: 1; }
+
     /* Dashboard recent list */
     .recent-list { background: #FCFCFD; border-radius: 16px; box-shadow: 0 4px 16px rgba(15,15,15,0.06); overflow: hidden; margin-bottom: 24px; }
     .recent-list-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E6E8EC; }
@@ -703,6 +727,14 @@ export function renderUI(): string {
   <div class="app-content">
   <div class="dashboard-layout">
   <aside class="sidebar" id="sidebar">
+    <div class="ai-quickstart-sidebar-card" onclick="openAiQuickStartModal()">
+      <div class="qs-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        AI Quick Start
+      </div>
+      <div class="qs-sub">Get help from any AI assistant</div>
+    </div>
+    <div class="sidebar-divider"></div>
     <div class="sidebar-section-title">Manage</div>
     <button class="sidebar-nav-item active" data-sidebar="dashboard" onclick="sidebarNav('dashboard')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -860,6 +892,30 @@ export function renderUI(): string {
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <div class="ai-quickstart-card" style="grid-column:1/-1;padding:16px 20px;">
+          <h3 style="font-size:14px;margin-bottom:2px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Get Started with AI
+          </h3>
+          <div class="ai-qs-sub" style="margin-bottom:10px;font-size:12px;">Copy this prompt into any AI assistant to learn about Reffo and get help creating listings.</div>
+          <div class="ai-quickstart-prompt" style="padding:12px 40px 12px 12px;margin-bottom:10px;">
+            <pre id="aiPromptText" style="font-size:12px;line-height:1.5;"></pre>
+            <button class="ai-quickstart-copy-btn" onclick="copyAiPrompt()" title="Copy prompt" style="top:8px;right:8px;width:28px;height:28px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          <div class="ai-quickstart-llm-buttons">
+            <button class="ai-quickstart-llm-btn" style="height:32px;font-size:12px;padding:0 12px;" onclick="openWithLlm('perplexity')">Perplexity</button>
+            <button class="ai-quickstart-llm-btn" style="height:32px;font-size:12px;padding:0 12px;" onclick="openWithLlm('claude')">Claude</button>
+            <button class="ai-quickstart-llm-btn" style="height:32px;font-size:12px;padding:0 12px;" onclick="openWithLlm('chatgpt')">ChatGPT</button>
+            <button class="ai-quickstart-llm-btn" style="height:32px;font-size:12px;padding:0 12px;" onclick="openWithLlm('gemini')">Gemini</button>
+            <button class="ai-quickstart-llm-btn" style="height:32px;font-size:12px;padding:0 12px;" onclick="openWithLlm('grok')">Grok</button>
+            <button class="ai-quickstart-llm-btn" style="height:32px;font-size:12px;padding:0 12px;" onclick="copyAiPrompt()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy prompt
+            </button>
+          </div>
+        </div>
         <div class="recent-list" id="dashboardRecentItems">
           <div class="recent-list-header">
             <h3>Recent Listings</h3>
@@ -1707,10 +1763,100 @@ Website = https://reffo.ai</pre>
     </div>
   </footer>
 
+  <!-- AI Quick Start Modal -->
+  <div class="ai-quickstart-modal" id="aiQuickStartModal" onclick="if(event.target===this)closeAiQuickStartModal()">
+    <div class="ai-quickstart-modal-inner">
+      <button class="modal-close" onclick="closeAiQuickStartModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+      </button>
+      <h3 style="font-size:18px;font-weight:700;color:#141416;margin:0 0 4px;">AI Quick Start</h3>
+      <p style="font-size:13px;color:#777E90;margin-bottom:16px;">Copy this prompt into any AI assistant to learn about Reffo and get help.</p>
+      <div class="ai-quickstart-prompt">
+        <pre id="aiModalPromptText"></pre>
+        <button class="ai-quickstart-copy-btn" onclick="copyAiPrompt()" title="Copy prompt">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+      <div class="ai-quickstart-llm-buttons">
+        <button class="ai-quickstart-llm-btn" onclick="openWithLlm('perplexity')">Perplexity</button>
+        <button class="ai-quickstart-llm-btn" onclick="openWithLlm('claude')">Claude</button>
+        <button class="ai-quickstart-llm-btn" onclick="openWithLlm('chatgpt')">ChatGPT</button>
+        <button class="ai-quickstart-llm-btn" onclick="openWithLlm('gemini')">Gemini</button>
+        <button class="ai-quickstart-llm-btn" onclick="openWithLlm('grok')">Grok</button>
+        <button class="ai-quickstart-llm-btn" onclick="copyAiPrompt()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy prompt
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="ai-quickstart-toast" id="aiToast"></div>
+
   <script>
     const TAXONOMY = ${taxonomyJSON};
     const CATEGORY_SCHEMAS_UI = ${categorySchemaJSON};
     const DEFAULT_SCHEMA_UI = ${JSON.stringify(defaultSchemaForUI)};
+
+    // ===== AI Quick Start =====
+    var AI_QUICKSTART_PROMPT = 'I want to learn about Reffo, a peer-to-peer marketplace for buying and selling items. Please read this page first: https://reffo.ai/for-bots \\u2014 it contains everything you need to know about how Reffo works, including the beacon app, the webapp, listings, offers, and negotiations. Then help me get started with creating listings and finding items.';
+
+    // Populate prompt text elements on load
+    (function() {
+      var els = document.querySelectorAll('#aiPromptText, #aiModalPromptText');
+      for (var i = 0; i < els.length; i++) { els[i].textContent = AI_QUICKSTART_PROMPT; }
+    })();
+
+    var aiToastTimer = null;
+    function showAiToast(msg) {
+      var el = document.getElementById('aiToast');
+      el.textContent = msg;
+      el.classList.add('show');
+      if (aiToastTimer) clearTimeout(aiToastTimer);
+      aiToastTimer = setTimeout(function() { el.classList.remove('show'); }, 2500);
+    }
+
+    function copyAiPrompt() {
+      navigator.clipboard.writeText(AI_QUICKSTART_PROMPT).then(function() {
+        showAiToast('Prompt copied to clipboard!');
+      });
+    }
+
+    var LLM_PROVIDERS = {
+      perplexity: { label: 'Perplexity', url: 'https://www.perplexity.ai/?q=' + encodeURIComponent(AI_QUICKSTART_PROMPT), directFill: true },
+      claude: { label: 'Claude', url: 'https://claude.ai' },
+      chatgpt: { label: 'ChatGPT', url: 'https://chatgpt.com' },
+      gemini: { label: 'Gemini', url: 'https://gemini.google.com' },
+      grok: { label: 'Grok', url: 'https://grok.com' }
+    };
+
+    function openWithLlm(provider) {
+      var p = LLM_PROVIDERS[provider];
+      if (!p) return;
+      if (p.directFill) {
+        window.open(p.url, '_blank', 'noopener,noreferrer');
+      } else {
+        navigator.clipboard.writeText(AI_QUICKSTART_PROMPT).then(function() {
+          window.open(p.url, '_blank', 'noopener,noreferrer');
+          showAiToast('Prompt copied! Paste it in ' + p.label);
+        });
+      }
+    }
+
+    function openAiQuickStartModal() {
+      document.getElementById('aiQuickStartModal').classList.add('open');
+    }
+    window.openAiQuickStartModal = openAiQuickStartModal;
+
+    function closeAiQuickStartModal() {
+      document.getElementById('aiQuickStartModal').classList.remove('open');
+    }
+    window.closeAiQuickStartModal = closeAiQuickStartModal;
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.getElementById('aiQuickStartModal').classList.contains('open')) {
+        closeAiQuickStartModal();
+      }
+    });
 
     // ===== Tab switching =====
     function switchTab(tab) {
