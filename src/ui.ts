@@ -1857,6 +1857,10 @@ Website = https://reffo.ai</pre>
           <a href="https://reffo.ai/agents" target="_blank" rel="noopener noreferrer">AI Agents</a>
           <a href="https://reffo.ai/skills" target="_blank" rel="noopener noreferrer">Skills</a>
           <a href="https://reffo.ai/support?source=beacon" target="_blank" rel="noopener noreferrer">Support</a>
+          <span class="app-footer-col-title" style="margin-top:12px;">Legal</span>
+          <a href="https://reffo.ai/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+          <a href="https://reffo.ai/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+          <a href="https://reffo.ai/acceptable-use" target="_blank" rel="noopener noreferrer">Acceptable Use</a>
         </div>
 
         <!-- Col 3: Contact -->
