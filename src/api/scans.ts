@@ -3,7 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { v4 as uuid } from 'uuid';
-import { RefQueries, ScanQueries, ScanItemQueries, MediaQueries, OfferQueries } from '../db';
+import { RefQueries, ScanQueries, ScanItemQueries, MediaQueries } from '../db';
 import { ReffoClient } from '../sync/reffo-client';
 import { getDb } from '../db/schema';
 import { getAttributeKeys } from '../ref-schemas';
@@ -221,16 +221,8 @@ router.post('/confirm', async (req: Request, res: Response) => {
       attributes: item.attributes || undefined,
     }, beaconId);
 
-    // Set price via offer if priceTypical is available
-    if (item.priceTypical && (status === 'for_sale' || status === 'willing_to_sell')) {
-      const offers = new OfferQueries();
-      offers.create({
-        refId: ref.id,
-        price: item.priceTypical,
-        priceCurrency: 'USD',
-        status: 'active',
-      }, beaconId);
-    }
+    // Price data stays on scan_items for display as a suggestion,
+    // but no offer is auto-created — user must manually set price
 
     // Try to find a product image via Reffo.ai image search
     try {

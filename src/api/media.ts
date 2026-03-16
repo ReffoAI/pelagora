@@ -14,8 +14,8 @@ const ALL_MIMES = [...PHOTO_MIMES, ...VIDEO_MIMES];
 
 const MAX_PHOTO_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
-const MAX_PHOTOS = 4;
-const MAX_FILES = 5; // 4 photos + 1 video
+const MAX_PHOTOS = 30;
+const MAX_FILES = 30;
 
 const storage = multer.diskStorage({
   destination: (req, _file, cb) => {
@@ -33,7 +33,9 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   fileFilter: (_req, file, cb) => {
-    if (ALL_MIMES.includes(file.mimetype)) {
+    if (VIDEO_MIMES.includes(file.mimetype)) {
+      cb(new Error('Video uploads are temporarily disabled'));
+    } else if (PHOTO_MIMES.includes(file.mimetype)) {
       cb(null, true);
     } else {
       cb(new Error(`Unsupported file type: ${file.mimetype}`));

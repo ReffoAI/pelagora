@@ -1689,21 +1689,13 @@ export function renderUI(): string {
           </div>
         </details>
 
-        <label>Photos (up to 4)</label>
+        <label>Photos (up to 30)</label>
         <div class="upload-area" onclick="document.getElementById('refPhotos').click()">
           <div class="upload-icon">+</div>
           <p>Click to upload photos</p>
           <input type="file" id="refPhotos" accept="image/*" multiple>
         </div>
         <div id="photoPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div>
-
-        <label>Video (optional, 1 max)</label>
-        <div class="upload-area" onclick="document.getElementById('refVideo').click()">
-          <div class="upload-icon">+</div>
-          <p>Click to upload a video</p>
-          <input type="file" id="refVideo" accept="video/*">
-        </div>
-        <div id="videoPreview" style="margin-bottom:12px;"></div>
 
         <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;margin-bottom:10px;margin-top:20px;">
           <span style="font-size:13px;font-weight:600;color:#23262F;">Also push to Reffo</span>
@@ -2920,25 +2912,16 @@ Website = https://reffo.ai</pre>
 
     window.removeVideo = function() {
       selectedVideo = null;
-      document.getElementById('refVideo').value = '';
       renderVideoPreview();
     };
 
     document.getElementById('refPhotos').addEventListener('change', function() {
       var files = this.files;
       for (var i = 0; i < files.length; i++) {
-        if (selectedPhotos.length < 4) selectedPhotos.push(files[i]);
+        if (selectedPhotos.length < 30) selectedPhotos.push(files[i]);
       }
       this.value = '';
       renderPhotoPreview();
-    });
-
-    document.getElementById('refVideo').addEventListener('change', function() {
-      if (this.files[0]) {
-        selectedVideo = this.files[0];
-      }
-      this.value = '';
-      renderVideoPreview();
     });
 
     // ===== List Form =====
@@ -3066,7 +3049,6 @@ Website = https://reffo.ai</pre>
         selectedVideo = null;
         window._autofillImageUrl.create = null;
         document.getElementById('photoPreview').innerHTML = '';
-        document.getElementById('videoPreview').innerHTML = '';
         closeListRefModal();
         loadMyRefs();
       } catch (err) {
@@ -3450,7 +3432,7 @@ Website = https://reffo.ai</pre>
         html += '</div>';
         html += '<div class="upload-area" onclick="document.getElementById(\\'detailFileInput\\').click()" style="max-width:200px;">';
         html += '<div class="upload-icon">+</div><p>Upload</p>';
-        html += '<input type="file" id="detailFileInput" accept="image/*,video/*" multiple onchange="uploadDetailMedia(\\'' + ref.id + '\\')">';
+        html += '<input type="file" id="detailFileInput" accept="image/*" multiple onchange="uploadDetailMedia(\\'' + ref.id + '\\')">';
         html += '</div>';
 
         // Negotiations for this ref
@@ -5397,9 +5379,44 @@ Website = https://reffo.ai</pre>
       }
     };
 
+    // Auto-suggest category from title
+    var categorySuggestTimer = null;
+    function triggerCategorySuggest() {
+      if (categorySuggestTimer) clearTimeout(categorySuggestTimer);
+      var nameVal = (document.getElementById('refName').value || '').trim();
+      var catVal = document.getElementById('refCat').value;
+      if (!nameVal || nameVal.length < 3 || catVal) return;
+      categorySuggestTimer = setTimeout(async function() {
+        try {
+          var res = await fetch('/refs/suggest-category', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: nameVal })
+          });
+          if (res.ok) {
+            var data = await res.json();
+            if (data.category && data.confidence === 'high' && !document.getElementById('refCat').value) {
+              document.getElementById('refCat').value = data.category;
+              document.getElementById('refCat').dispatchEvent(new Event('change'));
+              if (data.subcategory) {
+                setTimeout(function() {
+                  var subcatEl = document.getElementById('refSubcat');
+                  if (subcatEl) {
+                    subcatEl.value = data.subcategory;
+                    subcatEl.dispatchEvent(new Event('change'));
+                  }
+                }, 100);
+              }
+            }
+          }
+        } catch {}
+      }, 1000);
+    }
+
     // Wire input listeners on name + category fields to trigger estimate
     document.getElementById('refName').addEventListener('input', function() {
       triggerCreatePriceEstimate();
+      triggerCategorySuggest();
     });
     document.getElementById('refCat').addEventListener('change', function() {
       triggerCreatePriceEstimate();

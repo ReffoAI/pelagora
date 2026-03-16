@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 import { RefQueries, MediaQueries, NegotiationQueries } from '../db';
-import { isValidCategory, isValidSubcategory } from '../taxonomy';
+import { isValidCategory, isValidSubcategory, TAXONOMY } from '../taxonomy';
 import type { ListingStatus } from '@reffo/protocol';
 import { sanitizeObject } from '@reffo/protocol';
 
@@ -324,6 +324,115 @@ router.delete('/:id/permanent', (req: Request, res: Response) => {
   }
 
   res.status(204).send();
+});
+
+// POST /refs/suggest-category — AI-based category suggestion from title
+router.post('/suggest-category', async (req: Request, res: Response) => {
+  const { title } = req.body;
+  if (!title || typeof title !== 'string' || title.trim().length < 2) {
+    return res.status(400).json({ error: 'title is required (min 2 characters)' });
+  }
+
+  const provider = (process.env.AI_PROVIDER || 'reffo').toLowerCase();
+  const taxonomyStr = Object.entries(TAXONOMY)
+    .map(([cat, subs]) => `${cat}: ${subs.join(', ')}`)
+    .join('\n');
+
+  const prompt = `Given this product title, pick the best category and subcategory from the taxonomy below. Return JSON only.
+
+Title: "${title.trim()}"
+
+Taxonomy:
+${taxonomyStr}
+
+Return: {"category": "<exact category name>", "subcategory": "<exact subcategory name or null>", "confidence": "<high|medium|low>"}
+Only return "high" confidence if you are very sure. Return ONLY valid JSON.`;
+
+  try {
+    if (provider === 'reffo') {
+      const apiKey = process.env.REFFO_API_KEY;
+      if (!apiKey) {
+        return res.json({ category: null, subcategory: null, confidence: 'low' });
+      }
+      const reffoUrl = process.env.REFFO_API_URL || 'https://reffo.ai';
+      const upstream = await fetch(`${reffoUrl}/api/category-suggest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({ title: title.trim() }),
+      });
+      if (upstream.ok) {
+        const data = await upstream.json() as Record<string, unknown>;
+        return res.json(data);
+      }
+      return res.json({ category: null, subcategory: null, confidence: 'low' });
+    }
+
+    // Direct AI provider
+    const aiApiKey = process.env.AI_API_KEY;
+    if (!aiApiKey) {
+      return res.json({ category: null, subcategory: null, confidence: 'low' });
+    }
+
+    let result: { category: string | null; subcategory: string | null; confidence: string };
+
+    if (provider === 'anthropic') {
+      const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': aiApiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 128,
+          temperature: 0,
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      });
+      if (!aiRes.ok) return res.json({ category: null, subcategory: null, confidence: 'low' });
+      const data = await aiRes.json() as { content?: { type: string; text: string }[] };
+      const text = data.content?.[0]?.type === 'text' ? data.content[0].text : '';
+      const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+      result = JSON.parse(cleaned);
+    } else {
+      // OpenAI-compatible (openai, xai, google handled similarly)
+      const endpoints: Record<string, { url: string; model: string }> = {
+        openai: { url: 'https://api.openai.com/v1/chat/completions', model: 'gpt-4o-mini' },
+        xai: { url: 'https://api.x.ai/v1/chat/completions', model: 'grok-3-mini-fast' },
+      };
+      const ep = endpoints[provider] || endpoints.openai;
+      const aiRes = await fetch(ep.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${aiApiKey}` },
+        body: JSON.stringify({
+          model: ep.model,
+          temperature: 0,
+          max_tokens: 128,
+          response_format: { type: 'json_object' },
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      });
+      if (!aiRes.ok) return res.json({ category: null, subcategory: null, confidence: 'low' });
+      const data = await aiRes.json() as { choices?: { message?: { content?: string } }[] };
+      const text = data.choices?.[0]?.message?.content ?? '';
+      const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+      result = JSON.parse(cleaned);
+    }
+
+    // Validate category exists
+    if (result.category && !isValidCategory(result.category)) {
+      return res.json({ category: null, subcategory: null, confidence: 'low' });
+    }
+
+    return res.json({
+      category: result.category || null,
+      subcategory: result.subcategory || null,
+      confidence: result.confidence || 'low',
+    });
+  } catch {
+    return res.json({ category: null, subcategory: null, confidence: 'low' });
+  }
 });
 
 export default router;

@@ -45,7 +45,7 @@ ${attrList}
 
 Return this exact JSON format:
 {
-  "description": "<factual 1-2 sentence description, or null if unknown>",
+  "description": "<Start with 1 concise summary sentence. Then 1-2 detailed paragraphs covering key features, specs, and typical use cases. Factual only, not marketing copy. Null if unknown.>",
   "sku": "<manufacturer SKU/part number, or null if unknown>",
   "product_url": "<official manufacturer product page URL, or null if unknown>",
   "image_url": "<official product image URL from manufacturer domain, or null if unknown>",
@@ -57,7 +57,7 @@ Rules:
 - Return null for any field you are uncertain about. Do NOT hallucinate.
 - Only provide URLs from the manufacturer's official domain.
 - Only fill attribute keys from the provided list.
-- Description should be factual, not marketing copy.
+- Description should start with one concise summary sentence, followed by 1-2 detailed paragraphs. Factual only, not marketing copy.
 - All prices in USD as numbers (no $ sign).
 - confidence: "high" if well-known product, "medium" if somewhat familiar, "low" if uncertain.
 - Respond with ONLY valid JSON, no other text.`;
