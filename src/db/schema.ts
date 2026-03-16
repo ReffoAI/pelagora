@@ -457,7 +457,51 @@ function initSchema(database: Database.Database): void {
     );
     CREATE UNIQUE INDEX IF NOT EXISTS idx_product_catalog_lookup
       ON product_catalog (name_normalized, category, subcategory);
+
+    CREATE TABLE IF NOT EXISTS collections (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS scans (
+      id TEXT PRIMARY KEY,
+      image_path TEXT,
+      collection_id TEXT REFERENCES collections(id) ON DELETE SET NULL,
+      status TEXT NOT NULL DEFAULT 'processing',
+      item_count INTEGER DEFAULT 0,
+      ai_model TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS scan_items (
+      id TEXT PRIMARY KEY,
+      scan_id TEXT NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      category TEXT,
+      confidence REAL,
+      description TEXT,
+      condition TEXT,
+      price_low REAL,
+      price_high REAL,
+      price_typical REAL,
+      attributes TEXT DEFAULT '{}',
+      enriched INTEGER DEFAULT 0,
+      ref_id TEXT REFERENCES refs(id) ON DELETE SET NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_scan_items_scan ON scan_items(scan_id);
+    CREATE INDEX IF NOT EXISTS idx_scans_status ON scans(status);
   `);
+
+  // Migration: add collection_id to existing refs
+  const refsColsForCollection = database.pragma('table_info(refs)') as { name: string }[];
+  if (!refsColsForCollection.some(c => c.name === 'collection_id')) {
+    database.exec(`ALTER TABLE refs ADD COLUMN collection_id TEXT REFERENCES collections(id) ON DELETE SET NULL`);
+  }
 
   // Migration: add profile_picture_path to existing beacon_settings
   try {

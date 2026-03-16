@@ -34,6 +34,7 @@ function rowToRef(row: Record<string, unknown>): Ref {
     rentalDeposit: row.rental_deposit as number | undefined,
     rentalDuration: row.rental_duration as number | undefined,
     rentalDurationUnit: row.rental_duration_unit as RentalDurationUnit | undefined,
+    collectionId: row.collection_id as string | undefined,
   };
 }
 
@@ -118,14 +119,14 @@ export class RefQueries {
         location_lat, location_lng, location_address, location_city, location_state, location_zip, location_country,
         selling_scope, selling_radius_miles, attributes, condition,
         rental_terms, rental_deposit, rental_duration, rental_duration_unit,
-        beacon_id, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        collection_id, beacon_id, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(id, data.name, data.description || '', data.category || '', data.subcategory || '', data.image || null, data.sku || null,
       data.listingStatus || 'private', data.quantity || 1,
       locLat, locLng, locAddress, locCity, locState, locZip, locCountry,
       scope || 'global', radiusMiles, JSON.stringify(data.attributes) || null, data.condition || null,
       data.rentalTerms || null, data.rentalDeposit ?? null, data.rentalDuration ?? null, data.rentalDurationUnit || null,
-      beaconId, now, now);
+      data.collectionId || null, beaconId, now, now);
     return this.get(id)!;
   }
 
@@ -159,6 +160,7 @@ export class RefQueries {
     if (data.rentalDeposit !== undefined) { fields.push('rental_deposit = ?'); values.push(data.rentalDeposit); }
     if (data.rentalDuration !== undefined) { fields.push('rental_duration = ?'); values.push(data.rentalDuration); }
     if (data.rentalDurationUnit !== undefined) { fields.push('rental_duration_unit = ?'); values.push(data.rentalDurationUnit); }
+    if (data.collectionId !== undefined) { fields.push('collection_id = ?'); values.push(data.collectionId); }
 
     if (fields.length === 0) return existing;
 
@@ -614,5 +616,278 @@ export class SettingsQueries {
       );
     }
     return this.get()!;
+  }
+}
+
+export interface Collection {
+  id: string;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function rowToCollection(row: Record<string, unknown>): Collection {
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    description: row.description as string | null,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  };
+}
+
+export class CollectionQueries {
+  private db: Database.Database;
+
+  constructor(db?: Database.Database) {
+    this.db = db || getDb();
+  }
+
+  list(): Collection[] {
+    const rows = this.db.prepare('SELECT * FROM collections ORDER BY name ASC').all();
+    return rows.map(r => rowToCollection(r as Record<string, unknown>));
+  }
+
+  get(id: string): Collection | undefined {
+    const row = this.db.prepare('SELECT * FROM collections WHERE id = ?').get(id);
+    return row ? rowToCollection(row as Record<string, unknown>) : undefined;
+  }
+
+  create(data: { name: string; description?: string }): Collection {
+    const id = uuid();
+    const now = new Date().toISOString();
+    this.db.prepare(`
+      INSERT INTO collections (id, name, description, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(id, data.name, data.description || null, now, now);
+    return this.get(id)!;
+  }
+
+  update(id: string, data: { name?: string; description?: string }): Collection | undefined {
+    const existing = this.get(id);
+    if (!existing) return undefined;
+
+    const fields: string[] = [];
+    const values: unknown[] = [];
+
+    if (data.name !== undefined) { fields.push('name = ?'); values.push(data.name); }
+    if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
+
+    if (fields.length === 0) return existing;
+
+    fields.push("updated_at = datetime('now')");
+    values.push(id);
+
+    this.db.prepare(`UPDATE collections SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+    return this.get(id);
+  }
+
+  delete(id: string): boolean {
+    const result = this.db.prepare('DELETE FROM collections WHERE id = ?').run(id);
+    return result.changes > 0;
+  }
+
+  listRefs(collectionId: string): Ref[] {
+    const rows = this.db.prepare(
+      "SELECT * FROM refs WHERE collection_id = ? AND listing_status NOT IN ('archived_sold', 'archived_deleted') ORDER BY created_at DESC"
+    ).all(collectionId);
+    return rows.map(r => rowToRef(r as Record<string, unknown>));
+  }
+
+  countRefs(collectionId: string): number {
+    const row = this.db.prepare(
+      "SELECT COUNT(*) as cnt FROM refs WHERE collection_id = ? AND listing_status NOT IN ('archived_sold', 'archived_deleted')"
+    ).get(collectionId) as { cnt: number };
+    return row.cnt;
+  }
+}
+
+// ── Scan types ──
+
+export interface Scan {
+  id: string;
+  imagePath: string | null;
+  collectionId: string | null;
+  status: string;
+  itemCount: number;
+  aiModel: string | null;
+  createdAt: string;
+}
+
+export interface ScanItem {
+  id: string;
+  scanId: string;
+  name: string;
+  category: string | null;
+  confidence: number | null;
+  description: string | null;
+  condition: string | null;
+  priceLow: number | null;
+  priceHigh: number | null;
+  priceTypical: number | null;
+  attributes: Record<string, unknown>;
+  enriched: boolean;
+  refId: string | null;
+  createdAt: string;
+}
+
+function rowToScan(row: Record<string, unknown>): Scan {
+  return {
+    id: row.id as string,
+    imagePath: row.image_path as string | null,
+    collectionId: row.collection_id as string | null,
+    status: row.status as string,
+    itemCount: (row.item_count as number) || 0,
+    aiModel: row.ai_model as string | null,
+    createdAt: row.created_at as string,
+  };
+}
+
+function rowToScanItem(row: Record<string, unknown>): ScanItem {
+  return {
+    id: row.id as string,
+    scanId: row.scan_id as string,
+    name: row.name as string,
+    category: row.category as string | null,
+    confidence: row.confidence as number | null,
+    description: row.description as string | null,
+    condition: row.condition as string | null,
+    priceLow: row.price_low as number | null,
+    priceHigh: row.price_high as number | null,
+    priceTypical: row.price_typical as number | null,
+    attributes: row.attributes ? JSON.parse(row.attributes as string) : {},
+    enriched: !!(row.enriched as number),
+    refId: row.ref_id as string | null,
+    createdAt: row.created_at as string,
+  };
+}
+
+export class ScanQueries {
+  private db: Database.Database;
+
+  constructor(db?: Database.Database) {
+    this.db = db || getDb();
+  }
+
+  list(): Scan[] {
+    const rows = this.db.prepare('SELECT * FROM scans ORDER BY created_at DESC').all();
+    return rows.map(r => rowToScan(r as Record<string, unknown>));
+  }
+
+  get(id: string): Scan | undefined {
+    const row = this.db.prepare('SELECT * FROM scans WHERE id = ?').get(id);
+    return row ? rowToScan(row as Record<string, unknown>) : undefined;
+  }
+
+  create(data: { id: string; imagePath?: string; collectionId?: string; status?: string; aiModel?: string }): Scan {
+    const now = new Date().toISOString();
+    this.db.prepare(`
+      INSERT INTO scans (id, image_path, collection_id, status, ai_model, created_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(data.id, data.imagePath || null, data.collectionId || null, data.status || 'processing', data.aiModel || null, now);
+    return this.get(data.id)!;
+  }
+
+  updateStatus(id: string, status: string, itemCount?: number): void {
+    if (itemCount !== undefined) {
+      this.db.prepare('UPDATE scans SET status = ?, item_count = ? WHERE id = ?').run(status, itemCount, id);
+    } else {
+      this.db.prepare('UPDATE scans SET status = ? WHERE id = ?').run(status, id);
+    }
+  }
+
+  delete(id: string): boolean {
+    const result = this.db.prepare('DELETE FROM scans WHERE id = ?').run(id);
+    return result.changes > 0;
+  }
+}
+
+export class ScanItemQueries {
+  private db: Database.Database;
+
+  constructor(db?: Database.Database) {
+    this.db = db || getDb();
+  }
+
+  listForScan(scanId: string): ScanItem[] {
+    const rows = this.db.prepare('SELECT * FROM scan_items WHERE scan_id = ? ORDER BY created_at ASC').all(scanId);
+    return rows.map(r => rowToScanItem(r as Record<string, unknown>));
+  }
+
+  get(id: string): ScanItem | undefined {
+    const row = this.db.prepare('SELECT * FROM scan_items WHERE id = ?').get(id);
+    return row ? rowToScanItem(row as Record<string, unknown>) : undefined;
+  }
+
+  create(data: {
+    id: string; scanId: string; name: string; category?: string | null; confidence?: number | null;
+    description?: string | null; condition?: string | null; priceLow?: number | null;
+    priceHigh?: number | null; priceTypical?: number | null; attributes?: Record<string, unknown>;
+  }): ScanItem {
+    const now = new Date().toISOString();
+    this.db.prepare(`
+      INSERT INTO scan_items (id, scan_id, name, category, confidence, description, condition, price_low, price_high, price_typical, attributes, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      data.id, data.scanId, data.name, data.category ?? null, data.confidence ?? null,
+      data.description ?? null, data.condition ?? null, data.priceLow ?? null,
+      data.priceHigh ?? null, data.priceTypical ?? null,
+      JSON.stringify(data.attributes || {}), now,
+    );
+    return this.get(data.id)!;
+  }
+
+  createBatch(items: Array<{
+    id: string; scanId: string; name: string; category?: string | null; confidence?: number | null;
+    description?: string | null; condition?: string | null; priceLow?: number | null;
+    priceHigh?: number | null; priceTypical?: number | null; attributes?: Record<string, unknown>;
+  }>): ScanItem[] {
+    const now = new Date().toISOString();
+    const stmt = this.db.prepare(`
+      INSERT INTO scan_items (id, scan_id, name, category, confidence, description, condition, price_low, price_high, price_typical, attributes, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const insertMany = this.db.transaction((rows: typeof items) => {
+      for (const data of rows) {
+        stmt.run(
+          data.id, data.scanId, data.name, data.category ?? null, data.confidence ?? null,
+          data.description ?? null, data.condition ?? null, data.priceLow ?? null,
+          data.priceHigh ?? null, data.priceTypical ?? null,
+          JSON.stringify(data.attributes || {}), now,
+        );
+      }
+    });
+    insertMany(items);
+    return items.length > 0 ? this.listForScan(items[0].scanId) : [];
+  }
+
+  update(id: string, data: {
+    name?: string; category?: string; condition?: string; description?: string;
+    priceLow?: number; priceHigh?: number; priceTypical?: number;
+  }): ScanItem | undefined {
+    const existing = this.get(id);
+    if (!existing) return undefined;
+
+    const fields: string[] = [];
+    const values: unknown[] = [];
+
+    if (data.name !== undefined) { fields.push('name = ?'); values.push(data.name); }
+    if (data.category !== undefined) { fields.push('category = ?'); values.push(data.category); }
+    if (data.condition !== undefined) { fields.push('condition = ?'); values.push(data.condition); }
+    if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
+    if (data.priceLow !== undefined) { fields.push('price_low = ?'); values.push(data.priceLow); }
+    if (data.priceHigh !== undefined) { fields.push('price_high = ?'); values.push(data.priceHigh); }
+    if (data.priceTypical !== undefined) { fields.push('price_typical = ?'); values.push(data.priceTypical); }
+
+    if (fields.length === 0) return existing;
+
+    values.push(id);
+    this.db.prepare(`UPDATE scan_items SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+    return this.get(id);
+  }
+
+  linkToRef(id: string, refId: string): void {
+    this.db.prepare('UPDATE scan_items SET ref_id = ? WHERE id = ?').run(refId, id);
   }
 }

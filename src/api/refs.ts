@@ -91,6 +91,25 @@ router.post('/bulk-update-status', (req: Request, res: Response) => {
   res.json({ updated });
 });
 
+// POST /refs/bulk-move-collection
+router.post('/bulk-move-collection', (req: Request, res: Response) => {
+  const refs = new RefQueries();
+  const { ids, collectionId } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: 'ids must be a non-empty array' });
+  }
+
+  let updated = 0;
+  for (const id of ids) {
+    const ref = refs.get(String(id));
+    if (!ref) continue;
+    refs.update(String(id), { collectionId: collectionId ?? null });
+    updated++;
+  }
+
+  res.json({ updated });
+});
+
 // POST /refs/bulk-delete
 router.post('/bulk-delete', (req: Request, res: Response) => {
   const refs = new RefQueries();
@@ -185,7 +204,7 @@ router.patch('/:id', (req: Request, res: Response) => {
   const { name, description, category, subcategory, image, sku, listingStatus, quantity,
     locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry,
     sellingScope, sellingRadiusMiles, attributes, condition,
-    rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit } = body;
+    rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit, collectionId } = body;
 
   if (listingStatus !== undefined && !VALID_LISTING_STATUSES.includes(listingStatus)) {
     return res.status(400).json({ error: `Invalid listingStatus: ${listingStatus}. Must be one of: ${VALID_LISTING_STATUSES.join(', ')}` });
@@ -212,6 +231,7 @@ router.patch('/:id', (req: Request, res: Response) => {
     attributes, condition,
     rentalTerms, rentalDeposit: rentalDeposit != null ? Number(rentalDeposit) : rentalDeposit,
     rentalDuration: rentalDuration != null ? Number(rentalDuration) : rentalDuration, rentalDurationUnit,
+    collectionId,
   });
   if (!updated) return res.status(404).json({ error: 'Ref not found' });
 

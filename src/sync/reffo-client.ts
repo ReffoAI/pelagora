@@ -258,6 +258,51 @@ export class ReffoClient {
     }
   }
 
+  async scanImage(
+    imageBase64: string,
+    mediaType: string,
+    collectionId?: string,
+  ): Promise<{ ok: boolean; scanId?: string; items?: Array<Record<string, unknown>>; usage?: Record<string, unknown>; error?: string; status?: number }> {
+    try {
+      const url = `${this.baseUrl}/api/scan`;
+
+      // Build form data with base64 image converted to a blob
+      const buffer = Buffer.from(imageBase64, 'base64');
+      const blob = new Blob([buffer], { type: mediaType });
+
+      const formData = new FormData();
+      formData.append('file', blob, `scan.${mediaType.split('/')[1] || 'jpg'}`);
+      if (collectionId) formData.append('collection_id', collectionId);
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+        },
+        body: formData,
+      });
+
+      const data = await res.json() as Record<string, unknown>;
+
+      if (!res.ok) {
+        return {
+          ok: false,
+          error: (data.error as string) || `HTTP ${res.status}`,
+          status: res.status,
+        };
+      }
+
+      return {
+        ok: true,
+        scanId: data.scan_id as string,
+        items: data.items as Array<Record<string, unknown>>,
+        usage: data.usage as Record<string, unknown>,
+      };
+    } catch (err) {
+      return { ok: false, error: (err as Error).message };
+    }
+  }
+
   async heartbeat(beaconId: string): Promise<{ ok: boolean; latestVersion?: string; error?: string }> {
     try {
       const res = await this.request('/heartbeat', {

@@ -771,6 +771,14 @@ export function renderUI(): string {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
       My Listings
     </button>
+    <button class="sidebar-nav-item" data-sidebar="scan" onclick="sidebarNav('scan')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+      Scan Items
+    </button>
+    <button class="sidebar-nav-item" data-sidebar="collections" onclick="sidebarNav('collections')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+      Collections
+    </button>
     <button class="sidebar-nav-item" data-sidebar="archive" onclick="sidebarNav('archive')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
       Archived
@@ -969,6 +977,10 @@ export function renderUI(): string {
       <!-- Quick Actions -->
       <div class="home-quick-actions" style="padding-top:28px;padding-bottom:8px;">
         <button class="btn-primary" onclick="sidebarNav('list')">+ Create New Listing</button>
+        <button class="btn-secondary" onclick="sidebarNav('scan')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          Scan to List
+        </button>
         <button class="btn-secondary" onclick="sidebarNav('dashboard')">Go to Dashboard</button>
       </div>
 
@@ -1013,6 +1025,7 @@ export function renderUI(): string {
 
       <div class="quick-actions">
         <button class="btn-primary" onclick="sidebarNav('list')">+ Create New Listing</button>
+        <button class="btn-secondary" onclick="sidebarNav('scan')">Scan to List</button>
         <button class="btn-secondary" onclick="sidebarNav('search'); executeHeaderSearch();">Search Network</button>
       </div>
 
@@ -1110,6 +1123,8 @@ export function renderUI(): string {
               <button style="background:#e6f9ed;color:#1a8a42;" onclick="bulkSetStatus('for_sale')">Set For Sale</button>
               <button style="background:#fff8e1;color:#e6a200;" onclick="bulkSetStatus('willing_to_sell')">Set Willing to Sell</button>
               <div class="bulk-divider"></div>
+              <button style="background:#eee8f7;color:#8101B4;" onclick="bulkMoveToCollection()">Move to Collection</button>
+              <div class="bulk-divider"></div>
               <button style="background:#E92222;color:#fff;" onclick="bulkArchive()">Archive</button>
               <button style="background:#E92222;color:#fff;" onclick="bulkDelete()">Delete</button>
               <button class="bulk-cancel" onclick="clearSelection()">Cancel</button>
@@ -1155,6 +1170,174 @@ export function renderUI(): string {
           </div>
         </div>
       </section>
+      </div>
+    </div>
+
+    <!-- Scan Items Tab -->
+    <div id="tab-scan" class="hidden">
+      <section>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h2 style="margin:0;border:none;padding:0;">Scan Items</h2>
+        </div>
+        <p style="color:#777E90;font-size:13px;margin-bottom:20px;">Upload a photo to automatically detect and identify items using AI. Detected items can be reviewed, edited, and confirmed into listings.</p>
+
+        <!-- Upload zone -->
+        <div id="scanUploadZone" style="border:2px dashed #E6E8EC;border-radius:16px;padding:40px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:24px;background:#FCFCFD;" ondragover="event.preventDefault();this.style.borderColor='#EC526F';this.style.background='rgba(236,82,111,0.03)';" ondragleave="this.style.borderColor='#E6E8EC';this.style.background='#FCFCFD';" ondrop="handleScanDrop(event)" onclick="document.getElementById('scanFileInput').click()">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          <div style="font-size:15px;font-weight:600;color:#23262F;margin-bottom:4px;">Drop a photo here or click to upload</div>
+          <div style="font-size:12px;color:#777E90;">JPEG, PNG, or WebP &middot; Max 10MB</div>
+          <input type="file" id="scanFileInput" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="handleScanFileSelect(this)">
+        </div>
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:-12px;margin-bottom:24px;">
+          <button class="btn-secondary btn-sm" onclick="event.stopPropagation();openScanCamera()" style="display:inline-flex;align-items:center;gap:6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Take Photo
+          </button>
+        </div>
+        <div id="scanCameraContainer" class="hidden" style="margin-bottom:24px;text-align:center;">
+          <video id="scanCameraVideo" autoplay playsinline style="width:100%;max-width:500px;border-radius:12px;border:1px solid #E6E8EC;"></video>
+          <canvas id="scanCameraCanvas" style="display:none;"></canvas>
+          <div style="margin-top:12px;display:flex;gap:12px;justify-content:center;">
+            <button class="btn-primary btn-sm" onclick="captureScanPhoto()" style="display:inline-flex;align-items:center;gap:6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+              Capture
+            </button>
+            <button class="btn-secondary btn-sm" onclick="closeScanCamera()">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Processing state -->
+        <div id="scanProcessing" class="hidden" style="text-align:center;padding:40px;">
+          <div style="display:inline-block;width:32px;height:32px;border:3px solid #E6E8EC;border-top-color:#EC526F;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:12px;"></div>
+          <div style="font-size:14px;font-weight:600;color:#23262F;">Analyzing image...</div>
+          <div style="font-size:12px;color:#777E90;margin-top:4px;">This may take a few seconds</div>
+        </div>
+
+        <!-- Scan results -->
+        <div id="scanResults" class="hidden">
+          <!-- Scan Summary Header -->
+          <div id="scanSummaryHeader" style="background:#FCFCFD;border:1px solid #E6E8EC;border-radius:12px;padding:14px 16px;margin-bottom:16px;cursor:pointer;" onclick="toggleScanSummary()">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <img id="scanSummaryThumb" src="" alt="" style="width:40px;height:40px;border-radius:8px;object-fit:cover;display:none;">
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:600;color:#23262F;">Scan Summary</div>
+                <div style="font-size:12px;color:#777E90;"><span id="scanResultCount">0</span> items found &middot; <span id="scanPublishCount">0</span> to publish</div>
+              </div>
+              <svg id="scanSummaryChevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div id="scanSummaryExpanded" class="hidden" style="margin-top:12px;padding-top:12px;border-top:1px solid #E6E8EC;">
+              <div id="scanSummaryList" style="display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto;"></div>
+            </div>
+          </div>
+
+          <!-- Results header -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+            <div style="font-size:16px;font-weight:700;color:#23262F;"><span id="scanResultCountHeader">0</span> items found</div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn-secondary btn-sm" onclick="retryScan()" style="display:inline-flex;align-items:center;gap:4px;font-weight:600;">New Scan</button>
+            </div>
+          </div>
+
+          <!-- Bulk actions bar -->
+          <div style="background:#FCFCFD;border:1px solid #E6E8EC;border-radius:10px;padding:10px 14px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:600;color:#777E90;">
+                <input type="checkbox" id="scanSelectAll" onchange="toggleScanSelectAll(this.checked)" style="width:16px;height:16px;accent-color:#EC526F;">
+                Select all
+              </label>
+              <span style="width:1px;height:20px;background:#E6E8EC;margin:0 4px;"></span>
+              <span style="font-size:11px;color:#777E90;">Set selected to:</span>
+              <button class="scan-bulk-status-btn" onclick="bulkSetScanStatus('for_sale')" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#e6f9ed;color:#1a8a42;">For Sale</button>
+              <button class="scan-bulk-status-btn" onclick="bulkSetScanStatus('willing_to_sell')" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#fff8e1;color:#e6a200;">Willing to Sell</button>
+              <button class="scan-bulk-status-btn" onclick="bulkSetScanStatus('for_rent')" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#e6f0ff;color:#1a6aba;">For Rent</button>
+              <button class="scan-bulk-status-btn" onclick="bulkSetScanStatus('private')" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#E6E8EC;color:#353945;">Private</button>
+              <button onclick="bulkRemoveScanItems()" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#fef2f2;color:#991b1b;">Remove</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:11px;color:#777E90;">Move to folder:</span>
+              <select id="scanCollectionPicker" style="height:28px;padding:0 8px;border-radius:8px;border:1px solid #E6E8EC;font-size:12px;font-family:'Poppins',sans-serif;color:#23262F;">
+                <option value="">No folder</option>
+              </select>
+              <button onclick="openNewCollectionFromScan()" style="font-size:11px;font-weight:600;color:#1a8a42;background:none;border:none;cursor:pointer;">+ New Folder</button>
+            </div>
+          </div>
+
+          <!-- Items list -->
+          <div id="scanItemsGrid" style="display:flex;flex-direction:column;gap:12px;"></div>
+
+          <!-- Publish footer -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding:16px;background:#FCFCFD;border:1px solid #E6E8EC;border-radius:12px;">
+            <div style="font-size:13px;color:#777E90;">
+              <span id="scanPublishFooterCount">0</span> of <span id="scanTotalFooterCount">0</span> items to publish
+              <span id="scanRemovedFooterCount" style="display:none;"> &middot; <span id="scanRemovedNum">0</span> removed</span>
+            </div>
+            <button class="btn-primary" onclick="confirmScanItems()" id="scanPublishBtn" style="font-weight:600;">
+              Create <span id="scanPublishBtnCount">0</span> Listing(s)
+            </button>
+          </div>
+        </div>
+
+        <!-- Barcode Lookup -->
+        <div style="margin-top:32px;padding-top:24px;border-top:1px solid #E6E8EC;">
+          <h3 style="font-size:14px;font-weight:600;color:#23262F;margin-bottom:12px;">Barcode / UPC Lookup</h3>
+          <div style="display:flex;gap:8px;max-width:400px;">
+            <input id="barcodeInput" type="text" placeholder="Enter UPC or barcode number" style="flex:1;height:40px;padding:0 12px;border:1px solid #E6E8EC;border-radius:10px;font-size:14px;font-family:'Poppins',sans-serif;color:#23262F;" onkeydown="if(event.key==='Enter')lookupBarcode()">
+            <button class="btn-primary btn-sm" onclick="lookupBarcode()" style="white-space:nowrap;">Lookup</button>
+          </div>
+          <div style="margin-top:8px;">
+            <button class="btn-secondary btn-sm" id="barcodeCameraBtn" onclick="toggleBarcodeCamera()" style="display:inline-flex;align-items:center;gap:6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Scan with Camera
+            </button>
+          </div>
+          <div id="barcodeCameraContainer" class="hidden" style="margin-top:12px;max-width:400px;">
+            <video id="barcodeVideo" autoplay playsinline style="width:100%;border-radius:12px;border:1px solid #E6E8EC;"></video>
+            <div style="margin-top:8px;text-align:center;">
+              <button class="btn-secondary btn-sm" onclick="toggleBarcodeCamera()">Stop Camera</button>
+            </div>
+          </div>
+          <div id="barcodeResult" style="margin-top:12px;"></div>
+        </div>
+
+        <!-- Scan History -->
+        <div style="margin-top:32px;padding-top:24px;border-top:1px solid #E6E8EC;">
+          <h3 style="font-size:14px;font-weight:600;color:#23262F;margin-bottom:12px;">Scan History</h3>
+          <div id="scanHistory"><p style="color:#777E90;font-size:13px;">No scans yet</p></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Collections Tab -->
+    <div id="tab-collections" class="hidden">
+      <section>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h2 style="margin:0;border:none;padding:0;">Collections</h2>
+          <button class="btn-primary btn-sm" onclick="openNewCollectionModal()">+ New Collection</button>
+        </div>
+        <div id="collectionsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;"></div>
+        <div id="collectionsEmpty" class="hidden" style="text-align:center;padding:40px;color:#777E90;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D2D5DB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+          <div style="font-size:14px;font-weight:500;">No collections yet</div>
+          <div style="font-size:12px;margin-top:4px;">Create a collection to organize your listings</div>
+        </div>
+      </section>
+
+      <!-- Collection detail (shown when a collection is selected) -->
+      <div id="collectionDetail" class="hidden">
+        <section>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <button style="background:none;border:none;cursor:pointer;color:#777E90;font-size:18px;" onclick="loadCollections()" title="Back">&larr;</button>
+            <div style="flex:1;">
+              <h2 style="margin:0;border:none;padding:0;" id="collectionDetailName"></h2>
+              <div style="font-size:12px;color:#777E90;" id="collectionDetailDesc"></div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn-secondary btn-sm" onclick="editCollection()" title="Edit">Edit</button>
+              <button style="background:#fce8e6;color:#E92222;border:none;border-radius:10px;height:32px;padding:0 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;" onclick="deleteCollection()">Delete</button>
+            </div>
+          </div>
+          <div id="collectionRefs"><p class="empty">No items in this collection</p></div>
+        </section>
       </div>
     </div>
 
@@ -1989,7 +2172,7 @@ Website = https://reffo.ai</pre>
 
     // ===== Tab switching =====
     function switchTab(tab) {
-      var tabs = ['home','dashboard','refs','detail','search','negotiations','settings','list','terms','privacy','acceptable-use','for-bots'];
+      var tabs = ['home','dashboard','refs','detail','search','negotiations','settings','list','scan','collections','terms','privacy','acceptable-use','for-bots'];
       tabs.forEach(function(t) {
         var el = document.getElementById('tab-' + t);
         if (el) el.classList.toggle('hidden', tab !== t);
@@ -2001,11 +2184,13 @@ Website = https://reffo.ai</pre>
       if (tab === 'negotiations') loadNegotiations();
       if (tab === 'refs') loadMyRefs();
       if (tab === 'settings') loadSettings();
+      if (tab === 'scan') loadScanHistory();
+      if (tab === 'collections') loadCollections();
       // Update sidebar active state
       document.querySelectorAll('.sidebar-nav-item[data-sidebar]').forEach(function(item) {
         item.classList.remove('active');
       });
-      var sidebarMap = { home: 'home', dashboard: 'dashboard', refs: 'refs', detail: 'refs', search: 'search', negotiations: 'negotiations', settings: 'settings', list: 'list' };
+      var sidebarMap = { home: 'home', dashboard: 'dashboard', refs: 'refs', detail: 'refs', search: 'search', negotiations: 'negotiations', settings: 'settings', list: 'list', scan: 'scan', collections: 'collections' };
       var mappedSidebar = sidebarMap[tab];
       if (mappedSidebar) {
         var activeItem = document.querySelector('.sidebar-nav-item[data-sidebar="' + mappedSidebar + '"]');
@@ -2040,6 +2225,8 @@ Website = https://reffo.ai</pre>
       if (target === 'archive') { switchTab('refs'); switchRefSubTab('archive'); return; }
       if (target === 'favorites') { switchTab('refs'); switchRefSubTab('favorites'); return; }
       if (target === 'negotiations') { switchTab('negotiations'); return; }
+      if (target === 'scan') { switchTab('scan'); return; }
+      if (target === 'collections') { switchTab('collections'); return; }
       if (target === 'list') { switchTab('list'); return; }
       if (target === 'search') { switchTab('search'); return; }
       if (target === 'settings') { switchTab('settings'); return; }
@@ -2311,6 +2498,34 @@ Website = https://reffo.ai</pre>
         loadMyRefs();
       } catch(e) {
         showToast('Failed to update status', 'rejected');
+      }
+    };
+
+    window.bulkMoveToCollection = async function() {
+      var ids = Array.from(window._selectedRefIds);
+      if (ids.length === 0) return;
+      try {
+        var colsRes = await fetch('/collections');
+        var cols = await colsRes.json();
+        var options = ['(none - remove from collection)'].concat(cols.map(function(c) { return c.name; }));
+        var choice = prompt('Move ' + ids.length + ' item(s) to collection:\\n' + options.map(function(o, i) { return i + ': ' + o; }).join('\\n') + '\\n\\nEnter number:');
+        if (choice === null) return;
+        var idx = parseInt(choice, 10);
+        if (isNaN(idx) || idx < 0 || idx > cols.length) { showToast('Invalid choice', 'rejected'); return; }
+        var collectionId = idx === 0 ? null : cols[idx - 1].id;
+        var res = await fetch('/refs/bulk-move-collection', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: ids, collectionId: collectionId })
+        });
+        if (!res.ok) throw new Error('Failed');
+        var data = await res.json();
+        showToast(data.updated + ' item(s) moved', 'accepted');
+        window._selectedRefIds.clear();
+        updateBulkBar();
+        loadMyRefs();
+      } catch(e) {
+        showToast('Failed to move items', 'rejected');
       }
     };
 
@@ -5292,6 +5507,794 @@ Website = https://reffo.ai</pre>
         }
       } catch {}
     }, 10000);
+
+    // ===== Collections =====
+    var currentCollectionId = null;
+
+    async function loadCollections() {
+      var grid = document.getElementById('collectionsGrid');
+      var empty = document.getElementById('collectionsEmpty');
+      var detail = document.getElementById('collectionDetail');
+      detail.classList.add('hidden');
+      grid.parentElement.style.display = '';
+      try {
+        var res = await fetch('/collections');
+        var collections = await res.json();
+        if (collections.length === 0) {
+          grid.innerHTML = '';
+          empty.classList.remove('hidden');
+          return;
+        }
+        empty.classList.add('hidden');
+        grid.innerHTML = collections.map(function(c) {
+          return '<div style="background:#FCFCFD;border:1px solid #E6E8EC;border-radius:12px;padding:20px;cursor:pointer;transition:all 0.15s;box-shadow:0 1px 3px rgba(15,15,15,0.06);" onclick="openCollectionDetail(\\'' + c.id + '\\')" onmouseover="this.style.boxShadow=\\'0 4px 12px rgba(15,15,15,0.12)\\';this.style.transform=\\'translateY(-1px)\\'" onmouseout="this.style.boxShadow=\\'0 1px 3px rgba(15,15,15,0.06)\\';this.style.transform=\\'none\\'">'
+            + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+            + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>'
+            + '<div style="font-size:14px;font-weight:600;color:#23262F;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(c.name) + '</div>'
+            + '</div>'
+            + (c.description ? '<div style="font-size:12px;color:#777E90;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(c.description) + '</div>' : '')
+            + '<div style="font-size:12px;color:#777E90;">' + c.refCount + ' item' + (c.refCount !== 1 ? 's' : '') + '</div>'
+            + '</div>';
+        }).join('');
+      } catch(e) {
+        grid.innerHTML = '<p style="color:#777E90;font-size:13px;">Failed to load collections.</p>';
+      }
+    }
+    window.loadCollections = loadCollections;
+
+    async function openCollectionDetail(id) {
+      currentCollectionId = id;
+      var grid = document.getElementById('collectionsGrid');
+      var empty = document.getElementById('collectionsEmpty');
+      var detail = document.getElementById('collectionDetail');
+      grid.parentElement.style.display = 'none';
+      empty.classList.add('hidden');
+      detail.classList.remove('hidden');
+      try {
+        var res = await fetch('/collections/' + id);
+        var c = await res.json();
+        document.getElementById('collectionDetailName').textContent = c.name;
+        document.getElementById('collectionDetailDesc').textContent = c.description || '';
+        var refsRes = await fetch('/collections/' + id + '/refs');
+        var refs = await refsRes.json();
+        var container = document.getElementById('collectionRefs');
+        if (refs.length === 0) {
+          container.innerHTML = '<p class="empty">No items in this collection</p>';
+          return;
+        }
+        container.innerHTML = '<div class="rows">' + refs.map(function(ref) {
+          var statusLabel = statusLabels[ref.listingStatus] || 'Private';
+          var statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
+          return '<div class="ref-row" onclick="openDetail(\\'' + ref.id + '\\')">'
+            + '<div class="row-img"><div class="placeholder">&#x1F4E6;</div></div>'
+            + '<div class="row-name">' + escapeHtml(ref.name) + '</div>'
+            + '<div class="row-meta"><span class="status-badge ' + statusClass + '">' + statusLabel + '</span></div>'
+            + '</div>';
+        }).join('') + '</div>';
+      } catch(e) {
+        document.getElementById('collectionRefs').innerHTML = '<p style="color:#777E90;font-size:13px;">Failed to load collection.</p>';
+      }
+    }
+    window.openCollectionDetail = openCollectionDetail;
+
+    function openNewCollectionModal() {
+      var name = prompt('Collection name:');
+      if (!name || !name.trim()) return;
+      var desc = prompt('Description (optional):') || '';
+      fetch('/collections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim(), description: desc.trim() }),
+      }).then(function(r) { return r.json(); }).then(function() {
+        loadCollections();
+        showToast('Collection created', 'accepted');
+      }).catch(function() { showToast('Failed to create collection', 'rejected'); });
+    }
+    window.openNewCollectionModal = openNewCollectionModal;
+
+    function editCollection() {
+      if (!currentCollectionId) return;
+      var name = prompt('New name:', document.getElementById('collectionDetailName').textContent);
+      if (!name || !name.trim()) return;
+      var desc = prompt('Description:', document.getElementById('collectionDetailDesc').textContent) || '';
+      fetch('/collections/' + currentCollectionId, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim(), description: desc.trim() }),
+      }).then(function(r) { return r.json(); }).then(function(c) {
+        document.getElementById('collectionDetailName').textContent = c.name;
+        document.getElementById('collectionDetailDesc').textContent = c.description || '';
+        showToast('Collection updated', 'accepted');
+      }).catch(function() { showToast('Failed to update collection', 'rejected'); });
+    }
+    window.editCollection = editCollection;
+
+    function deleteCollection() {
+      if (!currentCollectionId) return;
+      if (!confirm('Delete this collection? Items in it will NOT be deleted.')) return;
+      fetch('/collections/' + currentCollectionId, { method: 'DELETE' })
+        .then(function() { currentCollectionId = null; loadCollections(); showToast('Collection deleted', 'accepted'); })
+        .catch(function() { showToast('Failed to delete collection', 'rejected'); });
+    }
+    window.deleteCollection = deleteCollection;
+
+    // ===== Scan Items =====
+    var currentScanId = null;
+    var currentScanItems = [];
+    var currentScanImageUrl = null;
+
+    function handleScanDrop(event) {
+      event.preventDefault();
+      var zone = document.getElementById('scanUploadZone');
+      zone.style.borderColor = '#E6E8EC';
+      zone.style.background = '#FCFCFD';
+      var files = event.dataTransfer.files;
+      if (files.length > 0) uploadScanFile(files[0]);
+    }
+    window.handleScanDrop = handleScanDrop;
+
+    function handleScanFileSelect(input) {
+      if (input.files.length > 0) uploadScanFile(input.files[0]);
+    }
+    window.handleScanFileSelect = handleScanFileSelect;
+
+    var scanCameraStream = null;
+
+    async function openScanCamera() {
+      var container = document.getElementById('scanCameraContainer');
+      var video = document.getElementById('scanCameraVideo');
+      try {
+        scanCameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+        });
+        video.srcObject = scanCameraStream;
+        container.classList.remove('hidden');
+      } catch(e) {
+        showToast('Could not access camera: ' + e.message, 'rejected');
+      }
+    }
+    window.openScanCamera = openScanCamera;
+
+    function closeScanCamera() {
+      if (scanCameraStream) {
+        scanCameraStream.getTracks().forEach(function(t) { t.stop(); });
+        scanCameraStream = null;
+      }
+      document.getElementById('scanCameraContainer').classList.add('hidden');
+    }
+    window.closeScanCamera = closeScanCamera;
+
+    function captureScanPhoto() {
+      var video = document.getElementById('scanCameraVideo');
+      var canvas = document.getElementById('scanCameraCanvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+      closeScanCamera();
+      canvas.toBlob(function(blob) {
+        if (!blob) { showToast('Failed to capture photo', 'rejected'); return; }
+        var file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+        uploadScanFile(file);
+      }, 'image/jpeg', 0.9);
+    }
+    window.captureScanPhoto = captureScanPhoto;
+
+    async function uploadScanFile(file) {
+      var allowed = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowed.includes(file.type)) {
+        showToast('Only JPEG, PNG, and WebP images are supported', 'rejected');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        showToast('Image must be under 10MB', 'rejected');
+        return;
+      }
+
+      document.getElementById('scanUploadZone').classList.add('hidden');
+      document.getElementById('scanProcessing').classList.remove('hidden');
+      document.getElementById('scanResults').classList.add('hidden');
+
+      var fd = new FormData();
+      fd.append('file', file);
+
+      try {
+        var res = await fetch('/scans', { method: 'POST', body: fd });
+        var data = await res.json();
+        document.getElementById('scanProcessing').classList.add('hidden');
+
+        if (!res.ok) {
+          document.getElementById('scanUploadZone').classList.remove('hidden');
+          showToast(data.error || 'Scan failed', 'rejected');
+          return;
+        }
+
+        currentScanId = data.scanId;
+        currentScanItems = data.items || [];
+        currentScanImageUrl = URL.createObjectURL(file);
+        renderScanResults();
+        loadScanHistory();
+      } catch(e) {
+        document.getElementById('scanProcessing').classList.add('hidden');
+        document.getElementById('scanUploadZone').classList.remove('hidden');
+        showToast('Scan failed: ' + e.message, 'rejected');
+      }
+    }
+
+    // Track per-item state
+    var scanItemStatuses = {};
+    var scanRemovedItems = new Set();
+    var scanEditingItem = null;
+    var scanCollectionsList = [];
+
+    function renderScanResults() {
+      if (currentScanItems.length === 0) {
+        document.getElementById('scanResults').classList.add('hidden');
+        document.getElementById('scanUploadZone').classList.remove('hidden');
+        showToast('No items detected in image', 'rejected');
+        return;
+      }
+
+      scanRemovedItems = new Set();
+      scanEditingItem = null;
+      // Default all items to for_sale
+      currentScanItems.forEach(function(item) {
+        if (!scanItemStatuses[item.id]) scanItemStatuses[item.id] = 'for_sale';
+      });
+
+      document.getElementById('scanResults').classList.remove('hidden');
+      document.getElementById('scanUploadZone').classList.remove('hidden');
+
+      // Set counts
+      updateScanCounts();
+
+      // Show scan thumbnail if available
+      var thumb = document.getElementById('scanSummaryThumb');
+      if (currentScanImageUrl) {
+        thumb.src = currentScanImageUrl;
+        thumb.style.display = 'block';
+      } else {
+        thumb.style.display = 'none';
+      }
+
+      // Load collections for pickers
+      fetch('/collections').then(function(r) { return r.json(); }).then(function(cols) {
+        scanCollectionsList = cols;
+        var picker = document.getElementById('scanCollectionPicker');
+        picker.innerHTML = '<option value="">No folder</option>' + cols.map(function(c) {
+          return '<option value="' + c.id + '">' + escapeHtml(c.name) + '</option>';
+        }).join('');
+      }).catch(function() {});
+
+      renderScanItemCards();
+    }
+
+    function updateScanCounts() {
+      var total = currentScanItems.length;
+      var removed = scanRemovedItems.size;
+      var publishable = total - removed;
+      document.getElementById('scanResultCount').textContent = total;
+      document.getElementById('scanResultCountHeader').textContent = total;
+      document.getElementById('scanPublishCount').textContent = publishable;
+      document.getElementById('scanPublishFooterCount').textContent = publishable;
+      document.getElementById('scanTotalFooterCount').textContent = total;
+      document.getElementById('scanPublishBtnCount').textContent = publishable;
+
+      var removedSpan = document.getElementById('scanRemovedFooterCount');
+      if (removed > 0) {
+        removedSpan.style.display = 'inline';
+        document.getElementById('scanRemovedNum').textContent = removed;
+      } else {
+        removedSpan.style.display = 'none';
+      }
+
+      var pubBtn = document.getElementById('scanPublishBtn');
+      if (pubBtn) pubBtn.disabled = publishable === 0;
+
+      // Update summary list
+      var summaryList = document.getElementById('scanSummaryList');
+      if (summaryList) {
+        summaryList.innerHTML = currentScanItems.map(function(item) {
+          var isRemoved = scanRemovedItems.has(item.id);
+          var price = item.priceTypical ? ' ~$' + Number(item.priceTypical).toFixed(0) : '';
+          var cond = item.condition ? ' · ' + item.condition : '';
+          return '<div style="font-size:12px;color:' + (isRemoved ? '#B1B5C3' : '#23262F') + ';' + (isRemoved ? 'text-decoration:line-through;' : 'font-weight:600;') + '">'
+            + escapeHtml(item.name)
+            + '<span style="color:#777E90;font-weight:400;">' + price + cond + '</span></div>';
+        }).join('');
+      }
+    }
+
+    function renderScanItemCards() {
+      var grid = document.getElementById('scanItemsGrid');
+      var statusColors = {
+        for_sale: { bg: '#e6f9ed', color: '#1a8a42' },
+        willing_to_sell: { bg: '#fff8e1', color: '#e6a200' },
+        for_rent: { bg: '#e6f0ff', color: '#1a6aba' },
+        private: { bg: '#E6E8EC', color: '#353945' },
+      };
+      var statusLabels = { for_sale: 'For Sale', willing_to_sell: 'Willing to Sell', for_rent: 'For Rent', private: 'Private' };
+
+      grid.innerHTML = currentScanItems.map(function(item, idx) {
+        var isRemoved = scanRemovedItems.has(item.id);
+        var isEditing = scanEditingItem === item.id;
+        var isSelected = !isRemoved;
+        var status = scanItemStatuses[item.id] || 'for_sale';
+        var sc = statusColors[status] || statusColors.for_sale;
+
+        // Removed item — compact row
+        if (isRemoved) {
+          return '<div id="scan-card-' + item.id + '" style="background:#FCFCFD;border:1px solid #E6E8EC;border-radius:12px;padding:12px 16px;opacity:0.45;cursor:pointer;" onclick="restoreScanItem(\\'' + item.id + '\\')">'
+            + '<div style="display:flex;align-items:center;gap:8px;">'
+            + '<input type="checkbox" disabled style="width:16px;height:16px;opacity:0.5;">'
+            + '<div style="flex:1;font-size:14px;color:#777E90;text-decoration:line-through;">' + escapeHtml(item.name) + '</div>'
+            + '<span style="font-size:11px;color:#777E90;">Removed — click to restore</span>'
+            + '</div></div>';
+        }
+
+        var conf = item.confidence != null ? Math.round(item.confidence * 100) + '%' : '';
+        var confColor = item.confidence >= 0.85 ? '#1a8a42' : item.confidence >= 0.7 ? '#e6a200' : '#777E90';
+        var confBg = item.confidence >= 0.85 ? '#e6f9ed' : item.confidence >= 0.7 ? '#fff8e1' : '#F4F5F6';
+        var priceRange = (item.priceLow && item.priceHigh) ? '$' + Number(item.priceLow).toFixed(0) + '\\u2013$' + Number(item.priceHigh).toFixed(0) : '';
+        var priceAvg = item.priceTypical ? '(avg $' + Number(item.priceTypical).toFixed(0) + ')' : '';
+
+        var html = '<div id="scan-card-' + item.id + '" style="background:#FCFCFD;border:1px solid #E6E8EC;border-radius:12px;padding:16px;' + (isSelected ? 'box-shadow:0 0 0 2px rgba(236,82,111,0.15);' : '') + '">';
+        html += '<div style="display:flex;gap:12px;">';
+
+        // Left: checkbox
+        html += '<div style="padding-top:2px;"><input type="checkbox" class="scan-item-cb" data-item-id="' + item.id + '" ' + (isSelected ? 'checked' : '') + ' onchange="updateScanCounts()" style="width:16px;height:16px;accent-color:#EC526F;"></div>';
+
+        // Center: content
+        html += '<div style="flex:1;min-width:0;">';
+
+        // Name row + confidence
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">';
+        if (isEditing) {
+          html += '<input type="text" value="' + escapeHtml(item.name) + '" class="scan-item-name" data-idx="' + idx + '" style="flex:1;font-size:14px;font-weight:600;color:#23262F;font-family:\\'Poppins\\',sans-serif;border:1px solid #E6E8EC;border-radius:8px;padding:4px 8px;">';
+        } else {
+          html += '<div style="flex:1;font-size:14px;font-weight:600;color:#23262F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(item.name) + '</div>';
+        }
+        if (conf) html += '<span style="font-size:11px;font-weight:700;color:' + confColor + ';background:' + confBg + ';padding:2px 8px;border-radius:20px;white-space:nowrap;">' + conf + '</span>';
+        html += '</div>';
+
+        // Category/subcategory
+        html += '<div style="font-size:12px;color:#777E90;margin-bottom:4px;">' + escapeHtml(item.category || 'Uncategorized') + '</div>';
+
+        // Description (view mode only, 2-line clamp)
+        if (!isEditing && item.description) {
+          html += '<div style="font-size:13px;color:#353945;margin-bottom:6px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + escapeHtml(item.description) + '</div>';
+        }
+
+        // Price + condition + status row
+        html += '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px;">';
+        if (priceRange) {
+          html += '<span style="font-size:14px;font-weight:600;color:#23262F;">' + priceRange + '</span>';
+          if (priceAvg) html += '<span style="font-size:12px;color:#777E90;">' + priceAvg + '</span>';
+        }
+        if (item.condition) html += '<span style="font-size:12px;color:#777E90;">' + escapeHtml(item.condition.charAt(0).toUpperCase() + item.condition.slice(1).replace(/_/g, ' ')) + '</span>';
+
+        // Status dropdown
+        html += '<select onchange="setScanItemStatus(\\'' + item.id + '\\',this.value)" style="font-size:11px;font-weight:700;padding:3px 24px 3px 10px;border-radius:20px;border:none;cursor:pointer;appearance:none;-webkit-appearance:none;background:' + sc.bg + ' url(\\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22' + encodeURIComponent(sc.color) + '%22 stroke-width=%222%22><polyline points=%226 9 12 15 18 9%22/></svg>\\') no-repeat right 6px center;color:' + sc.color + ';">';
+        ['for_sale','willing_to_sell','for_rent','private'].forEach(function(s) {
+          html += '<option value="' + s + '"' + (status === s ? ' selected' : '') + '>' + statusLabels[s] + '</option>';
+        });
+        html += '</select>';
+        html += '</div>';
+
+        // Edit mode fields
+        if (isEditing) {
+          html += '<div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+          // Description
+          html += '<div style="grid-column:1/-1;"><label style="font-size:10px;font-weight:700;color:#777E90;text-transform:uppercase;display:block;margin-bottom:4px;">Description</label>';
+          html += '<textarea class="scan-edit-desc" data-item-id="' + item.id + '" rows="2" style="width:100%;border:1px solid #E6E8EC;border-radius:8px;padding:8px;font-size:13px;font-family:\\'Poppins\\',sans-serif;color:#23262F;resize:vertical;">' + escapeHtml(item.description || '') + '</textarea></div>';
+          // Category
+          html += '<div><label style="font-size:10px;font-weight:700;color:#777E90;text-transform:uppercase;display:block;margin-bottom:4px;">Category</label>';
+          html += '<input type="text" class="scan-edit-cat" data-item-id="' + item.id + '" value="' + escapeHtml(item.category || '') + '" style="width:100%;border:1px solid #E6E8EC;border-radius:8px;padding:6px 8px;font-size:13px;font-family:\\'Poppins\\',sans-serif;color:#23262F;"></div>';
+          // Condition
+          html += '<div><label style="font-size:10px;font-weight:700;color:#777E90;text-transform:uppercase;display:block;margin-bottom:4px;">Condition</label>';
+          html += '<select class="scan-edit-cond" data-item-id="' + item.id + '" style="width:100%;border:1px solid #E6E8EC;border-radius:8px;padding:6px 8px;font-size:13px;font-family:\\'Poppins\\',sans-serif;color:#23262F;">';
+          ['','new','like_new','good','fair','poor'].forEach(function(c) {
+            var label = c ? c.charAt(0).toUpperCase() + c.slice(1).replace(/_/g, ' ') : 'Select...';
+            html += '<option value="' + c + '"' + ((item.condition || '') === c ? ' selected' : '') + '>' + label + '</option>';
+          });
+          html += '</select></div>';
+          // Price
+          html += '<div><label style="font-size:10px;font-weight:700;color:#777E90;text-transform:uppercase;display:block;margin-bottom:4px;">Price ($)</label>';
+          html += '<input type="number" class="scan-edit-price" data-item-id="' + item.id + '" value="' + (item.priceTypical || '') + '" min="0" step="0.01" style="width:100%;border:1px solid #E6E8EC;border-radius:8px;padding:6px 8px;font-size:13px;font-family:\\'Poppins\\',sans-serif;color:#23262F;"></div>';
+          // Folder
+          html += '<div><label style="font-size:10px;font-weight:700;color:#777E90;text-transform:uppercase;display:block;margin-bottom:4px;">Folder</label>';
+          html += '<select class="scan-edit-folder" data-item-id="' + item.id + '" style="width:100%;border:1px solid #E6E8EC;border-radius:8px;padding:6px 8px;font-size:13px;font-family:\\'Poppins\\',sans-serif;color:#23262F;">';
+          html += '<option value="">No folder</option>';
+          scanCollectionsList.forEach(function(c) {
+            html += '<option value="' + c.id + '">' + escapeHtml(c.name) + '</option>';
+          });
+          html += '</select></div>';
+          html += '</div>';
+        }
+
+        html += '</div>'; // end center
+
+        // Right: actions
+        html += '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:60px;">';
+        // Edit/Done button
+        html += '<button onclick="toggleScanItemEdit(\\'' + item.id + '\\')" style="font-size:12px;color:#777E90;background:none;border:none;cursor:pointer;font-family:\\'Poppins\\',sans-serif;">' + (isEditing ? 'Done' : 'Edit') + '</button>';
+        // Remove
+        html += '<button onclick="removeScanItem(\\'' + item.id + '\\')" style="font-size:10px;color:#777E90;background:none;border:none;cursor:pointer;font-family:\\'Poppins\\',sans-serif;transition:color 0.15s;" onmouseover="this.style.color=\\'#E92222\\'" onmouseout="this.style.color=\\'#777E90\\'">Remove</button>';
+        html += '</div>';
+
+        html += '</div>'; // end flex row
+        html += '</div>'; // end card
+        return html;
+      }).join('');
+    }
+
+    function setScanItemStatus(itemId, status) {
+      scanItemStatuses[itemId] = status;
+      renderScanItemCards();
+    }
+    window.setScanItemStatus = setScanItemStatus;
+
+    function toggleScanItemEdit(itemId) {
+      if (scanEditingItem === itemId) {
+        // Save edits back to currentScanItems
+        var item = currentScanItems.find(function(i) { return i.id === itemId; });
+        if (item) {
+          var nameInput = document.querySelector('.scan-item-name[data-idx]');
+          if (nameInput) item.name = nameInput.value;
+          var descEl = document.querySelector('.scan-edit-desc[data-item-id="' + itemId + '"]');
+          if (descEl) item.description = descEl.value;
+          var catEl = document.querySelector('.scan-edit-cat[data-item-id="' + itemId + '"]');
+          if (catEl) item.category = catEl.value;
+          var condEl = document.querySelector('.scan-edit-cond[data-item-id="' + itemId + '"]');
+          if (condEl) item.condition = condEl.value;
+          var priceEl = document.querySelector('.scan-edit-price[data-item-id="' + itemId + '"]');
+          if (priceEl && priceEl.value) item.priceTypical = parseFloat(priceEl.value);
+
+          // Save to server
+          fetch('/scans/' + currentScanId + '/items/' + itemId, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: item.name, description: item.description, category: item.category, condition: item.condition, priceTypical: item.priceTypical }),
+          }).catch(function() {});
+        }
+        scanEditingItem = null;
+      } else {
+        scanEditingItem = itemId;
+      }
+      renderScanItemCards();
+      updateScanCounts();
+    }
+    window.toggleScanItemEdit = toggleScanItemEdit;
+
+    function removeScanItem(id) {
+      scanRemovedItems.add(id);
+      renderScanItemCards();
+      updateScanCounts();
+    }
+    window.removeScanItem = removeScanItem;
+
+    function restoreScanItem(id) {
+      scanRemovedItems.delete(id);
+      renderScanItemCards();
+      updateScanCounts();
+    }
+    window.restoreScanItem = restoreScanItem;
+
+    function toggleScanSelectAll(checked) {
+      if (checked) {
+        scanRemovedItems.clear();
+      } else {
+        currentScanItems.forEach(function(i) { scanRemovedItems.add(i.id); });
+      }
+      renderScanItemCards();
+      updateScanCounts();
+    }
+    window.toggleScanSelectAll = toggleScanSelectAll;
+
+    function bulkSetScanStatus(status) {
+      currentScanItems.forEach(function(item) {
+        if (!scanRemovedItems.has(item.id)) {
+          scanItemStatuses[item.id] = status;
+        }
+      });
+      renderScanItemCards();
+    }
+    window.bulkSetScanStatus = bulkSetScanStatus;
+
+    function bulkRemoveScanItems() {
+      currentScanItems.forEach(function(item) {
+        if (!scanRemovedItems.has(item.id)) {
+          scanRemovedItems.add(item.id);
+        }
+      });
+      renderScanItemCards();
+      updateScanCounts();
+    }
+    window.bulkRemoveScanItems = bulkRemoveScanItems;
+
+    function toggleScanSummary() {
+      var expanded = document.getElementById('scanSummaryExpanded');
+      var chevron = document.getElementById('scanSummaryChevron');
+      if (expanded.classList.contains('hidden')) {
+        expanded.classList.remove('hidden');
+        chevron.style.transform = 'rotate(180deg)';
+      } else {
+        expanded.classList.add('hidden');
+        chevron.style.transform = '';
+      }
+    }
+    window.toggleScanSummary = toggleScanSummary;
+
+    function openNewCollectionFromScan() {
+      var name = prompt('New folder name:');
+      if (!name || !name.trim()) return;
+      fetch('/collections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim() }),
+      }).then(function(r) { return r.json(); }).then(function(col) {
+        scanCollectionsList.push(col);
+        var picker = document.getElementById('scanCollectionPicker');
+        picker.innerHTML += '<option value="' + col.id + '">' + escapeHtml(col.name) + '</option>';
+        picker.value = col.id;
+        showToast('Folder created: ' + col.name, 'accepted');
+        // Re-render cards to update folder dropdowns in edit mode
+        renderScanItemCards();
+      }).catch(function() { showToast('Failed to create folder', 'rejected'); });
+    }
+    window.openNewCollectionFromScan = openNewCollectionFromScan;
+
+    async function confirmScanItems() {
+      if (!currentScanId) return;
+      // Collect non-removed items
+      var itemIds = [];
+      currentScanItems.forEach(function(item) {
+        if (!scanRemovedItems.has(item.id)) {
+          itemIds.push(item.id);
+        }
+      });
+      if (itemIds.length === 0) {
+        showToast('No items to publish', 'rejected');
+        return;
+      }
+
+      var collectionId = document.getElementById('scanCollectionPicker').value || null;
+
+      // Build per-item listing statuses
+      var listingStatuses = {};
+      itemIds.forEach(function(id) {
+        listingStatuses[id] = scanItemStatuses[id] || 'for_sale';
+      });
+
+      // Show loading state
+      var pubBtn = document.getElementById('scanPublishBtn');
+      var origHtml = pubBtn ? pubBtn.innerHTML : '';
+      if (pubBtn) {
+        pubBtn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;"><span style="display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;"></span>Creating ' + itemIds.length + ' listing(s)...</span>';
+        pubBtn.disabled = true;
+      }
+
+      try {
+        var res = await fetch('/scans/confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scanId: currentScanId, itemIds: itemIds, collectionId: collectionId, listingStatuses: listingStatuses }),
+        });
+        var data = await res.json();
+        if (!res.ok) {
+          showToast(data.error || 'Confirm failed', 'rejected');
+          if (pubBtn) { pubBtn.innerHTML = origHtml; pubBtn.disabled = false; }
+          return;
+        }
+        showToast(data.confirmed + ' listing' + (data.confirmed !== 1 ? 's' : '') + ' created', 'accepted');
+        scanItemStatuses = {};
+        scanRemovedItems = new Set();
+        currentScanId = null;
+        currentScanItems = [];
+        document.getElementById('scanResults').classList.add('hidden');
+        document.getElementById('scanFileInput').value = '';
+      } catch(e) {
+        showToast('Failed to confirm items', 'rejected');
+        if (pubBtn) { pubBtn.innerHTML = origHtml; pubBtn.disabled = false; }
+      }
+    }
+    window.confirmScanItems = confirmScanItems;
+
+    function dismissScanItem(id) {
+      removeScanItem(id);
+    }
+    window.dismissScanItem = dismissScanItem;
+
+    function clearScanResults() {
+      currentScanId = null;
+      currentScanItems = [];
+      currentScanImageUrl = null;
+      scanItemStatuses = {};
+      scanRemovedItems = new Set();
+      scanEditingItem = null;
+      document.getElementById('scanResults').classList.add('hidden');
+      document.getElementById('scanFileInput').value = '';
+    }
+    window.clearScanResults = clearScanResults;
+
+    function retryScan() {
+      clearScanResults();
+      document.getElementById('scanFileInput').click();
+    }
+    window.retryScan = retryScan;
+
+    async function loadScanHistory() {
+      var container = document.getElementById('scanHistory');
+      try {
+        var res = await fetch('/scans');
+        var scans = await res.json();
+        if (scans.length === 0) {
+          container.innerHTML = '<p style="color:#777E90;font-size:13px;">No scans yet</p>';
+          return;
+        }
+        container.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;">' + scans.map(function(s) {
+          var statusColor = s.status === 'completed' ? '#1a8a42' : s.status === 'failed' ? '#E92222' : '#e6a200';
+          var date = new Date(s.createdAt).toLocaleDateString();
+          return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#F4F5F6;border-radius:10px;cursor:pointer;" onclick="viewScan(\\'' + s.id + '\\')">'
+            + '<div style="flex:1;min-width:0;">'
+            + '<div style="font-size:13px;font-weight:500;color:#23262F;">' + date + ' &middot; ' + (s.itemCount || 0) + ' items</div>'
+            + '<div style="font-size:11px;color:' + statusColor + ';font-weight:500;text-transform:capitalize;">' + s.status + '</div>'
+            + '</div>'
+            + '<button style="background:none;border:none;cursor:pointer;color:#777E90;font-size:12px;" onclick="event.stopPropagation();deleteScan(\\'' + s.id + '\\')">&times;</button>'
+            + '</div>';
+        }).join('') + '</div>';
+      } catch(e) {
+        container.innerHTML = '<p style="color:#777E90;font-size:13px;">Failed to load scan history.</p>';
+      }
+    }
+    window.loadScanHistory = loadScanHistory;
+
+    async function viewScan(id) {
+      try {
+        var res = await fetch('/scans/' + id);
+        var data = await res.json();
+        if (!res.ok) { showToast(data.error || 'Failed to load scan', 'rejected'); return; }
+        currentScanId = data.id;
+        currentScanItems = data.items || [];
+        document.getElementById('scanProcessing').classList.add('hidden');
+        renderScanResults();
+      } catch(e) {
+        showToast('Failed to load scan', 'rejected');
+      }
+    }
+    window.viewScan = viewScan;
+
+    async function deleteScan(id) {
+      if (!confirm('Delete this scan?')) return;
+      try {
+        await fetch('/scans/' + id, { method: 'DELETE' });
+        loadScanHistory();
+        showToast('Scan deleted', 'accepted');
+      } catch(e) {
+        showToast('Failed to delete scan', 'rejected');
+      }
+    }
+    window.deleteScan = deleteScan;
+
+    async function lookupBarcode() {
+      var upc = document.getElementById('barcodeInput').value.trim();
+      if (!upc) { showToast('Enter a UPC or barcode number', 'rejected'); return; }
+      var container = document.getElementById('barcodeResult');
+      container.innerHTML = '<div style="color:#777E90;font-size:13px;">Looking up...</div>';
+      try {
+        var res = await fetch('/scans/barcode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ upc: upc }),
+        });
+        var data = await res.json();
+        if (!res.ok) {
+          container.innerHTML = '<div style="color:#E92222;font-size:13px;">' + escapeHtml(data.error || 'Lookup failed') + '</div>';
+          return;
+        }
+        var pe = data.price_estimate || {};
+        container.innerHTML = '<div style="background:#F4F5F6;border-radius:12px;padding:16px;margin-top:8px;">'
+          + '<div style="font-size:14px;font-weight:600;color:#23262F;margin-bottom:4px;">' + escapeHtml(data.description || upc) + '</div>'
+          + (pe.typical ? '<div style="font-size:14px;font-weight:700;color:#1a8a42;">~$' + Number(pe.typical).toFixed(0) + '</div>' : '')
+          + (pe.low && pe.high ? '<div style="font-size:11px;color:#777E90;">Range: $' + Number(pe.low).toFixed(0) + ' - $' + Number(pe.high).toFixed(0) + '</div>' : '')
+          + '<div style="display:flex;gap:8px;margin-top:12px;">'
+          + '<button class="btn-primary btn-sm" onclick="createRefFromBarcode()">Create Listing</button>'
+          + '<button class="btn-secondary btn-sm" onclick="dismissBarcodeResult()">Dismiss</button>'
+          + '<button class="btn-secondary btn-sm" onclick="retryBarcode()" style="display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>Retry</button>'
+          + '</div>'
+          + '</div>';
+        window._barcodeData = data;
+      } catch(e) {
+        container.innerHTML = '<div style="color:#E92222;font-size:13px;">Lookup failed</div>';
+      }
+    }
+    window.lookupBarcode = lookupBarcode;
+
+    var barcodeStream = null;
+    var barcodeDetectionInterval = null;
+
+    async function toggleBarcodeCamera() {
+      var container = document.getElementById('barcodeCameraContainer');
+      var video = document.getElementById('barcodeVideo');
+
+      if (barcodeStream) {
+        // Stop camera
+        barcodeStream.getTracks().forEach(function(t) { t.stop(); });
+        barcodeStream = null;
+        if (barcodeDetectionInterval) clearInterval(barcodeDetectionInterval);
+        barcodeDetectionInterval = null;
+        container.classList.add('hidden');
+        return;
+      }
+
+      // Check for BarcodeDetector support
+      if (!('BarcodeDetector' in window)) {
+        showToast('Barcode scanning not supported in this browser. Enter the UPC manually.', 'rejected');
+        return;
+      }
+
+      try {
+        barcodeStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+        video.srcObject = barcodeStream;
+        container.classList.remove('hidden');
+
+        var detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39'] });
+        barcodeDetectionInterval = setInterval(async function() {
+          try {
+            if (video.readyState < 2) return;
+            var barcodes = await detector.detect(video);
+            if (barcodes.length > 0) {
+              var code = barcodes[0].rawValue;
+              document.getElementById('barcodeInput').value = code;
+              toggleBarcodeCamera();
+              showToast('Barcode detected: ' + code, 'accepted');
+              lookupBarcode();
+            }
+          } catch(e) {}
+        }, 500);
+      } catch(e) {
+        showToast('Could not access camera: ' + e.message, 'rejected');
+      }
+    }
+    window.toggleBarcodeCamera = toggleBarcodeCamera;
+
+    function createRefFromBarcode() {
+      var data = window._barcodeData;
+      if (!data) return;
+      var pe = data.price_estimate || {};
+      var body = {
+        name: data.description || document.getElementById('barcodeInput').value.trim(),
+        description: data.description || '',
+        sku: data.sku || document.getElementById('barcodeInput').value.trim(),
+      };
+      if (data.attributes) body.attributes = data.attributes;
+      if (data.image_url) body.image = data.image_url;
+      fetch('/refs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }).then(function(r) { return r.json(); }).then(function(ref) {
+        showToast('Listing created: ' + ref.name, 'accepted');
+        document.getElementById('barcodeResult').innerHTML = '';
+        document.getElementById('barcodeInput').value = '';
+      }).catch(function() { showToast('Failed to create listing', 'rejected'); });
+    }
+    window.createRefFromBarcode = createRefFromBarcode;
+
+    function dismissBarcodeResult() {
+      document.getElementById('barcodeResult').innerHTML = '';
+      window._barcodeData = null;
+    }
+    window.dismissBarcodeResult = dismissBarcodeResult;
+
+    function retryBarcode() {
+      dismissBarcodeResult();
+      document.getElementById('barcodeInput').value = '';
+      document.getElementById('barcodeInput').focus();
+    }
+    window.retryBarcode = retryBarcode;
+
   </script>
 </body>
 </html>`;
