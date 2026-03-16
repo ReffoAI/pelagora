@@ -3356,10 +3356,8 @@ Website = https://reffo.ai</pre>
         dSubcat.addEventListener('change', function() {
           renderCategoryFields('detailCategoryFields', dCat.value, this.value, {});
         });
-        // Trigger price estimate if currently private
-        if (ref.listingStatus === 'private') {
-          setTimeout(function() { triggerDetailPriceEstimate(); }, 100);
-        }
+        // Trigger AI price estimate on load
+        setTimeout(function() { triggerDetailPriceEstimate(); }, 100);
       } catch (err) {
         container.innerHTML = '<p class="empty">Failed to load ref details</p>';
       }
@@ -3386,21 +3384,12 @@ Website = https://reffo.ai</pre>
       // Toggle rental fields
       const rentalSection = document.getElementById('rentalFieldsDetail');
       if (rentalSection) rentalSection.style.display = status === 'for_rent' ? 'block' : 'none';
-      // Toggle price estimate
-      const estimateSection = document.getElementById('detailPriceEstimate');
-      if (estimateSection) {
-        if (status === 'private') {
-          triggerDetailPriceEstimate();
-        } else {
-          estimateSection.innerHTML = '';
-        }
-      }
+      // Trigger AI price estimate for all statuses
+      triggerDetailPriceEstimate();
     };
 
     window.triggerDetailPriceEstimate = function() {
       if (detailEstimateTimer) clearTimeout(detailEstimateTimer);
-      var status = document.getElementById('dStatus').value;
-      if (status !== 'private') return;
       var nameEl = document.getElementById('dName');
       var catEl = document.getElementById('dCat');
       var nameVal = nameEl ? nameEl.value.trim() : '';
@@ -4953,18 +4942,12 @@ Website = https://reffo.ai</pre>
       // Toggle price estimate: visible when private
       var estimateSection = document.getElementById('createPriceEstimate');
       if (estimateSection) {
-        if (status === 'private') {
-          triggerCreatePriceEstimate();
-        } else {
-          estimateSection.innerHTML = '';
-        }
+        triggerCreatePriceEstimate();
       }
     };
 
     window.triggerCreatePriceEstimate = function() {
       if (createEstimateTimer) clearTimeout(createEstimateTimer);
-      var status = document.getElementById('refListingStatus').value;
-      if (status !== 'private') return;
       var nameVal = (document.getElementById('refName').value || '').trim();
       var catVal = document.getElementById('refCat').value || '';
       if (!nameVal || !catVal) {
@@ -5201,13 +5184,13 @@ Website = https://reffo.ai</pre>
 
     // Wire input listeners on name + category fields to trigger estimate
     document.getElementById('refName').addEventListener('input', function() {
-      if (document.getElementById('refListingStatus').value === 'private') triggerCreatePriceEstimate();
+      triggerCreatePriceEstimate();
     });
     document.getElementById('refCat').addEventListener('change', function() {
-      if (document.getElementById('refListingStatus').value === 'private') triggerCreatePriceEstimate();
+      triggerCreatePriceEstimate();
     });
     document.getElementById('refSubcat').addEventListener('change', function() {
-      if (document.getElementById('refListingStatus').value === 'private') triggerCreatePriceEstimate();
+      triggerCreatePriceEstimate();
     });
 
     // ===== Init =====
