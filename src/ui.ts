@@ -701,7 +701,7 @@ export function renderUI(): string {
   <div class="app-header">
     <div class="app-header-inner">
       <div class="app-header-logo" onclick="sidebarNav('home')">
-        <img class="header-beacon-icon" src="/header-brand.png" alt="Reffo Beacon">
+        <img class="header-beacon-icon" src="/header-brand.png" alt="Beacon">
       </div>
 
       <!-- Header actions: link + bell + avatar -->
@@ -723,7 +723,7 @@ export function renderUI(): string {
           </button>
           <div class="avatar-dropdown" id="avatarDropdown">
             <div class="dd-header">
-              <div class="dd-header-name" id="ddBeaconName">Reffo Beacon</div>
+              <div class="dd-header-name" id="ddBeaconName">My Beacon</div>
               <div class="dd-header-sub" id="ddBeaconSub">Local Node</div>
             </div>
             <button class="dd-item" onclick="closeAvatarDropdown(); switchTab('refs');">My Refs</button>
@@ -892,7 +892,7 @@ export function renderUI(): string {
     <div id="tab-home">
       <!-- Hero -->
       <div class="home-hero">
-        <h2>Your personal marketplace</h2>
+        <h2>Your node on the Pelagora network</h2>
         <p>List items, search the network, and trade directly &mdash; zero fees, your data stays local.</p>
 
         <!-- Desktop search -->
@@ -1609,13 +1609,13 @@ export function renderUI(): string {
       <p style="font-size:13px;color:#777E90;margin-bottom:24px;">Last updated: March 6, 2026</p>
       <div style="font-size:14px;color:#23262F;line-height:1.7;">
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">1. Acceptance of Terms</h3>
-        <p>By accessing or using Reffo.ai (the &ldquo;Service&rdquo;), the protocol, the Reffo Beacon software, or any associated APIs, you agree to be bound by these Terms of Service (&ldquo;Terms&rdquo;). If you do not agree to these Terms, do not use the Service.</p>
+        <p>By accessing or using Reffo.ai (the &ldquo;Service&rdquo;), the protocol, the beacon software, or any associated APIs, you agree to be bound by these Terms of Service (&ldquo;Terms&rdquo;). If you do not agree to these Terms, do not use the Service.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">2. Description of Services</h3>
         <p>Reffo is built on an open protocol for decentralized commerce. The Service consists of:</p>
         <ul style="padding-left:24px;margin:8px 0;">
-          <li><strong>Reffo.ai Webapp</strong> &mdash; A web-based discovery layer and search interface for the Reffo network.</li>
-          <li><strong>Reffo Beacon</strong> &mdash; Open-source, self-hosted inventory server software that runs on your machine.</li>
+          <li><strong>Reffo.ai Webapp</strong> &mdash; A web-based discovery layer and search interface for the Pelagora network.</li>
+          <li><strong>Beacon</strong> &mdash; Open-source, self-hosted inventory server software that runs on your machine.</li>
           <li><strong>Reffo API</strong> &mdash; Programmatic access to search, listings, and network data.</li>
           <li><strong>The Protocol</strong> &mdash; The open specification that enables interoperability between beacons.</li>
         </ul>
@@ -1624,11 +1624,11 @@ export function renderUI(): string {
         <p>You may create an account on Reffo.ai to access certain features. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to provide accurate and complete information when creating your account and to keep it up to date.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">4. User-Generated Content and Listings</h3>
-        <p>You retain ownership of all content you create and list through the Service, including item descriptions, images, and pricing information. By listing content on the Reffo network, you grant Reffo.ai a limited, non-exclusive, royalty-free license to display, index, and make your listings discoverable through the webapp and API.</p>
+        <p>You retain ownership of all content you create and list through the Service, including item descriptions, images, and pricing information. By listing content on the Pelagora network, you grant Reffo.ai a limited, non-exclusive, royalty-free license to display, index, and make your listings discoverable through the webapp and API.</p>
         <p style="margin-top:8px;">You are solely responsible for the accuracy, legality, and appropriateness of your listings and content.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">5. Peer-to-Peer Transactions</h3>
-        <p>Reffo.ai is a discovery and communication layer. All transactions on the Reffo network occur directly between users (peer-to-peer). Reffo.ai is not a party to any transaction, does not provide escrow services, and makes no guarantees regarding the quality, safety, legality, or delivery of items listed on the network.</p>
+        <p>Reffo.ai is a discovery and communication layer. All transactions on the Pelagora network occur directly between users (peer-to-peer). Reffo.ai is not a party to any transaction, does not provide escrow services, and makes no guarantees regarding the quality, safety, legality, or delivery of items listed on the network.</p>
         <p style="margin-top:8px;">You acknowledge that you engage in peer-to-peer transactions at your own risk. Reffo.ai is not responsible for disputes between users.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">6. Prohibited Uses</h3>
@@ -1638,7 +1638,7 @@ export function renderUI(): string {
         <p>Access to the Reffo API is subject to rate limits and usage policies. API keys are personal and non-transferable. You may not use the API to scrape, spam, or otherwise abuse the Service. We reserve the right to revoke API access for violations.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">8. Intellectual Property</h3>
-        <p>The Reffo name, logo, and branding are trademarks of Reffo.ai. The protocol specification is released under a CC0 public domain dedication. The Reffo Beacon software is released under an open-source license (see the respective repository for details). This webapp and its original content are the property of Reffo.ai.</p>
+        <p>The Reffo name, logo, and branding are trademarks of Reffo.ai. The protocol specification is released under a CC0 public domain dedication. The beacon software is released under an open-source license (see the respective repository for details). This webapp and its original content are the property of Reffo.ai.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">9. Disclaimers</h3>
         <p>THE SERVICE IS PROVIDED &ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE&rdquo; WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. REFFO.AI DOES NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, SECURE, OR ERROR-FREE. WE MAKE NO WARRANTIES REGARDING THE RELIABILITY, ACCURACY, OR COMPLETENESS OF ANY LISTINGS, USER CONTENT, OR PEER-TO-PEER TRANSACTIONS ON THE NETWORK.</p>
@@ -1674,7 +1674,7 @@ export function renderUI(): string {
       <h2 style="border-bottom:none;margin-bottom:4px;">Privacy Policy</h2>
       <p style="font-size:13px;color:#777E90;margin-bottom:24px;">Last updated: March 6, 2026</p>
       <div style="font-size:14px;color:#23262F;line-height:1.7;">
-        <p>Reffo.ai (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use the Reffo.ai webapp, the Reffo Beacon software, and associated APIs (collectively, the &ldquo;Service&rdquo;).</p>
+        <p>Reffo.ai (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use the Reffo.ai webapp, the beacon software, and associated APIs (collectively, the &ldquo;Service&rdquo;).</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">1. Information We Collect</h3>
         <p><strong>Account Data:</strong> When you create an account, we collect your email address and store a password hash through our authentication provider (Supabase). You may optionally provide a display name, username, and avatar.</p>
@@ -1744,7 +1744,7 @@ export function renderUI(): string {
       <h2 style="border-bottom:none;margin-bottom:4px;">Acceptable Use Policy</h2>
       <p style="font-size:13px;color:#777E90;margin-bottom:24px;">Last updated: March 6, 2026</p>
       <div style="font-size:14px;color:#23262F;line-height:1.7;">
-        <p>This Acceptable Use Policy (&ldquo;AUP&rdquo;) governs your use of the Reffo.ai webapp, the Reffo network, and associated services. By using the Service, you agree to comply with this policy. Violation may result in listing removal, account suspension, or reporting to law enforcement.</p>
+        <p>This Acceptable Use Policy (&ldquo;AUP&rdquo;) governs your use of the Reffo.ai webapp, the Pelagora network, and associated services. By using the Service, you agree to comply with this policy. Violation may result in listing removal, account suspension, or reporting to law enforcement.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">1. Prohibited Items</h3>
         <p>You may not list, offer, or facilitate the sale or exchange of:</p>
@@ -1784,7 +1784,7 @@ export function renderUI(): string {
           <li>Revoking API access.</li>
           <li>Reporting illegal activity to the appropriate authorities.</li>
         </ul>
-        <p style="margin-top:8px;">Note: Because the Reffo network is decentralized, Reffo.ai can remove listings from its own search index and webapp but cannot control content on individual beacons. Beacon operators are independently responsible for the content they host.</p>
+        <p style="margin-top:8px;">Note: Because the Pelagora network is decentralized, Reffo.ai can remove listings from its own search index and webapp but cannot control content on individual beacons. Beacon operators are independently responsible for the content they host.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">5. Reporting Violations</h3>
         <p>If you encounter a listing or user that violates this policy, please report it to <a href="mailto:help@reffo.ai" style="color:#EA526F;">help@reffo.ai</a> with as much detail as possible, including the listing URL or description and the nature of the violation.</p>
@@ -1806,7 +1806,7 @@ export function renderUI(): string {
       <p style="font-size:13px;color:#777E90;margin-bottom:24px;">Structured info for AI agents, crawlers, and bots. Humans: you probably want <a href="https://reffo.ai/docs" target="_blank" rel="noopener noreferrer" style="color:#EA526F;">Docs</a> or <a href="https://reffo.ai/agents" target="_blank" rel="noopener noreferrer" style="color:#EA526F;">AI Agents</a>.</p>
       <div style="font-size:14px;color:#23262F;line-height:1.7;">
         <p>For full bot-readable documentation, visit <a href="https://reffo.ai/for-bots" target="_blank" rel="noopener noreferrer" style="color:#EA526F;">reffo.ai/for-bots</a></p>
-        <pre style="background:#1a1a2e;color:#e0e0e0;border-radius:12px;padding:20px;overflow-x:auto;font-size:13px;line-height:1.6;margin-top:16px;">Reffo = open-source protocol for decentralized commerce
+        <pre style="background:#1a1a2e;color:#e0e0e0;border-radius:12px;padding:20px;overflow-x:auto;font-size:13px;line-height:1.6;margin-top:16px;">Pelagora = open peer-to-peer commerce network (pelagora.net)
 Beacon = self-hosted marketplace node (Express + SQLite + DHT)
 MCP = @reffo/mcp &mdash; connect AI agents to a beacon
 Skills = plugin system for extending beacons
@@ -1874,7 +1874,7 @@ Website = https://reffo.ai</pre>
         <!-- Col 4: Dynamic CTA (API key / Skills) -->
         <div class="app-footer-col" id="footerCtaCol">
           <span class="app-footer-col-title" id="footerCtaTitle">Connect to Reffo.ai</span>
-          <span class="col-desc" id="footerCtaDesc">Link your beacon to Reffo.ai to sync listings, access the skill marketplace, and join the network.</span>
+          <span class="col-desc" id="footerCtaDesc">Link your beacon to Reffo.ai to sync listings, access the skill marketplace, and join the Pelagora network.</span>
           <a id="footerCtaBtn" href="https://reffo.ai/api" target="_blank" rel="noopener noreferrer" class="footer-download-btn" style="text-decoration:none;"><svg id="footerCtaBtnIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Get API Key</a>
         </div>
       </div>
@@ -1927,7 +1927,7 @@ Website = https://reffo.ai</pre>
     const DEFAULT_SCHEMA_UI = ${JSON.stringify(defaultSchemaForUI)};
 
     // ===== AI Quick Start =====
-    var AI_QUICKSTART_PROMPT = 'I want to learn about Reffo, a peer-to-peer marketplace for buying and selling items. Please read this page first: https://reffo.ai/for-bots \\u2014 it contains everything you need to know about how Reffo works, including the beacon app, the webapp, listings, offers, and negotiations. Then help me get started with creating listings and finding items.';
+    var AI_QUICKSTART_PROMPT = 'I want to learn about the Pelagora network, a peer-to-peer marketplace for buying and selling items. Please read this page first: https://reffo.ai/for-bots \\u2014 it contains everything you need to know about how the Pelagora network works, including the beacon app, the webapp, listings, offers, and negotiations. Then help me get started with creating listings and finding items.';
 
     // Populate prompt text elements on load
     (function() {
@@ -4708,7 +4708,7 @@ Website = https://reffo.ai</pre>
             footerCtaBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> Browse Skills';
           } else {
             footerCtaTitle.textContent = 'Connect to Reffo.ai';
-            footerCtaDesc.textContent = 'Link your beacon to Reffo.ai to sync listings, access the skill marketplace, and join the network.';
+            footerCtaDesc.textContent = 'Link your beacon to Reffo.ai to sync listings, access the skill marketplace, and join the Pelagora network.';
             footerCtaBtn.href = 'https://reffo.ai/api';
             footerCtaBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Get API Key';
           }
@@ -5233,7 +5233,7 @@ Website = https://reffo.ai</pre>
             footerCtaBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> Browse Skills';
           } else {
             footerCtaTitle.textContent = 'Connect to Reffo.ai';
-            footerCtaDesc.textContent = 'Link your beacon to Reffo.ai to sync listings, access the skill marketplace, and join the network.';
+            footerCtaDesc.textContent = 'Link your beacon to Reffo.ai to sync listings, access the skill marketplace, and join the Pelagora network.';
             footerCtaBtn.href = 'https://reffo.ai/api';
             footerCtaBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Get API Key';
           }

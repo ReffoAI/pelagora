@@ -55,7 +55,7 @@ export class DhtDiscovery {
     // Join the Reffo topic so all beacons can discover each other
     const discovery = this.swarm.join(REFFO_TOPIC, { server: true, client: true });
     await discovery.flushed();
-    console.log(`[DHT] Joined Reffo network. Topic: ${b4a.toString(REFFO_TOPIC, 'hex').slice(0, 16)}...`);
+    console.log(`[DHT] Joined Pelagora network. Topic: ${b4a.toString(REFFO_TOPIC, 'hex').slice(0, 16)}...`);
   }
 
   private sendAnnouncement(stream: any): void {
@@ -311,6 +311,6 @@ export class DhtDiscovery {
   async stop(): Promise<void> {
     await this.swarm.destroy();
     this.peers.clear();
-    console.log('[DHT] Disconnected from Reffo network');
+    console.log('[DHT] Disconnected from Pelagora network');
   }
 }

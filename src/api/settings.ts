@@ -196,7 +196,7 @@ router.post('/api-key', async (req: Request, res: Response) => {
 
   // Try to register beacon (non-blocking — key is saved regardless)
   const beaconUrl = process.env.BEACON_URL || `http://localhost:${process.env.PORT || 3000}`;
-  const regResult = await manager.registerBeacon('Reffo Beacon', getVersion(), beaconUrl);
+  const regResult = await manager.registerBeacon('Beacon', getVersion(), beaconUrl);
 
   if (regResult.ok) {
     manager.registered = true;
@@ -232,7 +232,7 @@ router.post('/retry-connection', async (req: Request, res: Response) => {
     req.app.set('syncManager', manager);
   }
 
-  const regResult = await manager.registerBeacon('Reffo Beacon', getVersion(), beaconUrl);
+  const regResult = await manager.registerBeacon('Beacon', getVersion(), beaconUrl);
 
   if (regResult.ok) {
     manager.registered = true;
