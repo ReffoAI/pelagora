@@ -62,6 +62,31 @@ export async function searchReffo(
   return data;
 }
 
+export interface WebappRef {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  subcategory: string | null;
+  listing_status: string;
+  quantity: number | null;
+  price: number | null;
+  currency: string;
+  condition: string | null;
+  attributes: Record<string, string> | null;
+  location_data: { city?: string; state?: string; zip?: string; country?: string; lat?: number; lng?: number } | null;
+  selling_scope: string | null;
+  selling_radius_miles: number | null;
+  rental_terms: string | null;
+  rental_deposit: number | null;
+  rental_duration: number | null;
+  rental_duration_unit: string | null;
+  sku: string | null;
+  photos: Array<{ id: string; url: string; sort_order: number }>;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface WebappOffer {
   id: string;
   item_id: string;
@@ -215,6 +240,18 @@ export class ReffoClient {
         return { ok: false, error: (data.error as string) || `HTTP ${res.status}` };
       }
       return { ok: true };
+    } catch (err) {
+      return { ok: false, error: (err as Error).message };
+    }
+  }
+
+  async fetchRefs(since?: string): Promise<{ ok: boolean; refs?: WebappRef[]; error?: string }> {
+    try {
+      const params = since ? `?since=${encodeURIComponent(since)}` : '';
+      const res = await this.request(`/refs/pull${params}`, { method: 'GET' });
+      const data = await res.json() as Record<string, unknown>;
+      if (!res.ok) return { ok: false, error: (data.error as string) || `HTTP ${res.status}` };
+      return { ok: true, refs: (data.refs as WebappRef[]) || [] };
     } catch (err) {
       return { ok: false, error: (err as Error).message };
     }

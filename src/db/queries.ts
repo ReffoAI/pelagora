@@ -134,6 +134,30 @@ export class RefQueries {
     return this.get(id)!;
   }
 
+  /** Create a ref with a specific ID (used when pulling from webapp to preserve IDs) */
+  createWithId(id: string, data: RefCreate, beaconId: string): Ref {
+    const now = new Date().toISOString();
+
+    this.db.prepare(`
+      INSERT OR IGNORE INTO refs (id, name, description, category, subcategory, image, sku, listing_status, quantity,
+        location_lat, location_lng, location_address, location_city, location_state, location_zip, location_country,
+        selling_scope, selling_radius_miles, attributes, condition,
+        rental_terms, rental_deposit, rental_duration, rental_duration_unit,
+        purchase_date, purchase_price,
+        collection_id, beacon_id, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(id, data.name, data.description || '', data.category || '', data.subcategory || '', data.image || null, data.sku || null,
+      data.listingStatus || 'private', data.quantity || 1,
+      data.locationLat ?? null, data.locationLng ?? null, data.locationAddress ?? null,
+      data.locationCity ?? null, data.locationState ?? null, data.locationZip ?? null, data.locationCountry ?? null,
+      data.sellingScope || 'global', data.sellingRadiusMiles ?? null,
+      JSON.stringify(data.attributes) || null, data.condition || null,
+      data.rentalTerms || null, data.rentalDeposit ?? null, data.rentalDuration ?? null, data.rentalDurationUnit || null,
+      data.purchaseDate || null, data.purchasePrice ?? null,
+      data.collectionId || null, beaconId, now, now);
+    return this.get(id)!;
+  }
+
   update(id: string, data: RefUpdate): Ref | undefined {
     const existing = this.get(id);
     if (!existing) return undefined;

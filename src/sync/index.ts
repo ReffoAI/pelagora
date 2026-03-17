@@ -2,7 +2,7 @@
  * SyncManager: orchestrates syncing beacon refs to Reffo.ai
  */
 
-import { ReffoClient } from './reffo-client';
+import { ReffoClient, type WebappRef } from './reffo-client';
 import { RefQueries, OfferQueries, MediaQueries, NegotiationQueries } from '../db/queries';
 import { getVersion } from '../version';
 import { setUpdateInfo } from '../api/health';
@@ -26,6 +26,7 @@ export class SyncManager {
   private media: MediaQueries;
   private negotiations: NegotiationQueries;
   private lastOfferPoll: string | null = null;
+  private lastRefPull: string | null = null;
   public registered: boolean = false;
   public lastError: string | null = null;
   public latestVersion: string | null = null;
@@ -125,6 +126,112 @@ export class SyncManager {
     return { synced, errors };
   }
 
+  async pullRefs(): Promise<{ pulled: number; updated: number; errors: string[] }> {
+    let pulled = 0;
+    let updated = 0;
+    const errors: string[] = [];
+
+    try {
+      const result = await this.client.fetchRefs(this.lastRefPull || undefined);
+      if (!result.ok || !result.refs) {
+        errors.push(result.error || 'Unknown error fetching refs');
+        return { pulled, updated, errors };
+      }
+
+      for (const webRef of result.refs) {
+        try {
+          const existing = this.refs.get(webRef.id);
+          const loc = webRef.location_data;
+
+          if (existing) {
+            // Update existing local ref
+            this.refs.update(webRef.id, {
+              name: webRef.name,
+              description: webRef.description || '',
+              category: webRef.category || '',
+              subcategory: webRef.subcategory || '',
+              listingStatus: webRef.listing_status as 'private' | 'for_sale' | 'willing_to_sell' | 'for_rent',
+              quantity: webRef.quantity || 1,
+              condition: webRef.condition || undefined,
+              attributes: webRef.attributes || undefined,
+              locationCity: loc?.city || undefined,
+              locationState: loc?.state || undefined,
+              locationZip: loc?.zip || undefined,
+              locationCountry: loc?.country || undefined,
+              locationLat: loc?.lat,
+              locationLng: loc?.lng,
+              sellingScope: webRef.selling_scope as 'global' | 'national' | 'range' | undefined,
+              sellingRadiusMiles: webRef.selling_radius_miles || undefined,
+              rentalTerms: webRef.rental_terms || undefined,
+              rentalDeposit: webRef.rental_deposit || undefined,
+              rentalDuration: webRef.rental_duration || undefined,
+              rentalDurationUnit: webRef.rental_duration_unit as 'hours' | 'days' | 'weeks' | 'months' | undefined,
+            });
+            // Keep it synced
+            this.refs.setSynced(webRef.id, true, webRef.id);
+            updated++;
+          } else {
+            // Create new local ref from webapp data
+            // We use a direct insert with the webapp's ID to maintain the mapping
+            this.refs.createWithId(webRef.id, {
+              name: webRef.name,
+              description: webRef.description || '',
+              category: webRef.category || '',
+              subcategory: webRef.subcategory || '',
+              sku: webRef.sku || undefined,
+              listingStatus: webRef.listing_status as 'private' | 'for_sale' | 'willing_to_sell' | 'for_rent',
+              quantity: webRef.quantity || 1,
+              condition: webRef.condition || undefined,
+              attributes: webRef.attributes || undefined,
+              locationCity: loc?.city || undefined,
+              locationState: loc?.state || undefined,
+              locationZip: loc?.zip || undefined,
+              locationCountry: loc?.country || undefined,
+              locationLat: loc?.lat,
+              locationLng: loc?.lng,
+              sellingScope: webRef.selling_scope as 'global' | 'national' | 'range' | undefined,
+              sellingRadiusMiles: webRef.selling_radius_miles || undefined,
+              rentalTerms: webRef.rental_terms || undefined,
+              rentalDeposit: webRef.rental_deposit || undefined,
+              rentalDuration: webRef.rental_duration || undefined,
+              rentalDurationUnit: webRef.rental_duration_unit as 'hours' | 'days' | 'weeks' | 'months' | undefined,
+            }, this.beaconId);
+            // Mark as synced
+            this.refs.setSynced(webRef.id, true, webRef.id);
+            pulled++;
+          }
+
+          // Handle offer/price: create or update active offer
+          if (webRef.price != null && webRef.price > 0) {
+            const existingOffers = this.offers.list(webRef.id);
+            const activeOffer = existingOffers.find(o => o.status === 'active');
+            if (activeOffer) {
+              this.offers.update(activeOffer.id, { price: webRef.price, priceCurrency: webRef.currency || 'USD' });
+            } else {
+              this.offers.create({
+                refId: webRef.id,
+                price: webRef.price,
+                priceCurrency: webRef.currency || 'USD',
+              }, this.beaconId);
+            }
+          }
+        } catch (err) {
+          errors.push(`Ref ${webRef.id}: ${(err as Error).message}`);
+        }
+      }
+
+      this.lastRefPull = new Date().toISOString();
+    } catch (err) {
+      errors.push((err as Error).message);
+    }
+
+    if (pulled > 0 || updated > 0) {
+      console.log(`[Sync] Pulled ${pulled} new ref(s), updated ${updated} ref(s) from Reffo.ai`);
+    }
+
+    return { pulled, updated, errors };
+  }
+
   async pollOffers(): Promise<{ received: number; errors: string[] }> {
     let received = 0;
     const errors: string[] = [];
@@ -219,11 +326,11 @@ export class SyncManager {
   startHeartbeat(intervalMs = 5 * 60 * 1000): void {
     if (this.heartbeatInterval) return;
 
-    // Initial heartbeat + offer poll
+    // Initial heartbeat + offer poll + ref pull
     this.client.heartbeat(this.beaconId)
       .then((result) => {
         this.handleHeartbeatResult(result);
-        return this.pollOffers();
+        return Promise.all([this.pollOffers(), this.pullRefs()]);
       })
       .catch(() => {});
 
@@ -231,7 +338,7 @@ export class SyncManager {
       this.client.heartbeat(this.beaconId)
         .then((result) => {
           this.handleHeartbeatResult(result);
-          return this.pollOffers();
+          return Promise.all([this.pollOffers(), this.pullRefs()]);
         })
         .catch((err) => {
           console.warn('[Sync] Heartbeat failed:', err.message);
