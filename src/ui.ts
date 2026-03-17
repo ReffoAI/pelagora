@@ -3554,16 +3554,18 @@ Website = https://reffo.ai</pre>
             { label: 'Description', done: !!ref.description },
             { label: 'Photo', done: hasPhoto },
           ];
+          const doneCount = checks.filter(function(c) { return c.done; }).length;
+          const pct = Math.round((doneCount / checks.length) * 100);
           html += '<div style="padding:0 20px 14px;">';
-          html += '<div style="background:#F4F5F6;border-radius:12px;padding:14px 16px;">';
-          html += '<div style="font-size:13px;font-weight:600;color:#23262F;margin-bottom:4px;">Complete your listing</div>';
-          html += '<div style="font-size:12px;color:#777E90;margin-bottom:10px;">Listings with complete details are 82% more likely to sell.</div>';
-          checks.forEach(function(c) {
-            html += '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:' + (c.done ? '#45B36B' : '#777E90') + ';margin-bottom:4px;">';
-            html += c.done ? '<span style="color:#45B36B;">&#10003;</span>' : '<span style="color:#E6E8EC;">&#10007;</span>';
-            html += '<span>' + c.label + '</span></div>';
-          });
-          html += '<button class="button-stroke" onclick="document.getElementById(\\\'editFormSection\\\').style.display=\\\'block\\\';document.getElementById(\\\'editFormSection\\\').scrollIntoView({behavior:\\\'smooth\\\'})" style="margin-top:10px;width:100%;font-size:13px;">Fill in details &#8594;</button>';
+          html += '<div style="background:#F4F5F6;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;">';
+          html += '<div style="flex:1;min-width:0;">';
+          html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">';
+          html += '<span style="font-size:13px;font-weight:700;color:' + (pct === 100 ? '#45B36B' : '#23262F') + ';">' + pct + '%</span>';
+          html += '<span style="font-size:13px;font-weight:600;color:#23262F;">Complete</span>';
+          html += '</div>';
+          html += '<div style="font-size:11px;color:#777E90;">Fill in details to help your listing sell faster.</div>';
+          html += '</div>';
+          html += '<button class="button-stroke" onclick="document.getElementById(\\\'editFormSection\\\').style.display=\\\'block\\\';document.getElementById(\\\'editFormSection\\\').scrollIntoView({behavior:\\\'smooth\\\'})" style="font-size:12px;padding:0 14px;height:34px;white-space:nowrap;">Fill in details</button>';
           html += '</div></div>';
         }
 
