@@ -34,7 +34,7 @@ router.get('/dashboard', (_req: Request, res: Response) => {
     pendingNegotiations: negotiations.countPending(),
     favoritesCount: favorites.count(),
     archivedCount: refs.listArchived().length,
-    recentItems: refs.list().slice(0, 8),
+    recentItems: refs.list().slice(0, 4),
     recentOffers: offers.list().slice(0, 3),
   });
 });

@@ -34,6 +34,8 @@ function rowToRef(row: Record<string, unknown>): Ref {
     rentalDeposit: row.rental_deposit as number | undefined,
     rentalDuration: row.rental_duration as number | undefined,
     rentalDurationUnit: row.rental_duration_unit as RentalDurationUnit | undefined,
+    purchaseDate: row.purchase_date as string | undefined,
+    purchasePrice: row.purchase_price as number | undefined,
     collectionId: row.collection_id as string | undefined,
   };
 }
@@ -119,13 +121,15 @@ export class RefQueries {
         location_lat, location_lng, location_address, location_city, location_state, location_zip, location_country,
         selling_scope, selling_radius_miles, attributes, condition,
         rental_terms, rental_deposit, rental_duration, rental_duration_unit,
+        purchase_date, purchase_price,
         collection_id, beacon_id, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(id, data.name, data.description || '', data.category || '', data.subcategory || '', data.image || null, data.sku || null,
       data.listingStatus || 'private', data.quantity || 1,
       locLat, locLng, locAddress, locCity, locState, locZip, locCountry,
       scope || 'global', radiusMiles, JSON.stringify(data.attributes) || null, data.condition || null,
       data.rentalTerms || null, data.rentalDeposit ?? null, data.rentalDuration ?? null, data.rentalDurationUnit || null,
+      data.purchaseDate || null, data.purchasePrice ?? null,
       data.collectionId || null, beaconId, now, now);
     return this.get(id)!;
   }
@@ -160,6 +164,8 @@ export class RefQueries {
     if (data.rentalDeposit !== undefined) { fields.push('rental_deposit = ?'); values.push(data.rentalDeposit); }
     if (data.rentalDuration !== undefined) { fields.push('rental_duration = ?'); values.push(data.rentalDuration); }
     if (data.rentalDurationUnit !== undefined) { fields.push('rental_duration_unit = ?'); values.push(data.rentalDurationUnit); }
+    if (data.purchaseDate !== undefined) { fields.push('purchase_date = ?'); values.push(data.purchaseDate); }
+    if (data.purchasePrice !== undefined) { fields.push('purchase_price = ?'); values.push(data.purchasePrice); }
     if (data.collectionId !== undefined) { fields.push('collection_id = ?'); values.push(data.collectionId); }
 
     if (fields.length === 0) return existing;

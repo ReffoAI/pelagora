@@ -59,6 +59,10 @@ export interface Ref {
   rentalDuration?: number;
   /** Rental: duration unit */
   rentalDurationUnit?: RentalDurationUnit;
+  /** Purchase: date of purchase (ISO date) */
+  purchaseDate?: string;
+  /** Purchase: price paid */
+  purchasePrice?: number;
   /** Reffo: beacon public key that owns this ref */
   beaconId: string;
   /** Schema.org: dateCreated */

@@ -161,7 +161,8 @@ router.post('/', (req: Request, res: Response) => {
   const { name, description, category, subcategory, image, sku, listingStatus, quantity,
     locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry,
     sellingScope, sellingRadiusMiles, attributes, condition,
-    rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit } = body;
+    rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit,
+    purchaseDate, purchasePrice } = body;
 
   if (!name || typeof name !== 'string') {
     return res.status(400).json({ error: 'name is required' });
@@ -193,6 +194,8 @@ router.post('/', (req: Request, res: Response) => {
     attributes, condition,
     rentalTerms, rentalDeposit: rentalDeposit != null ? Number(rentalDeposit) : undefined,
     rentalDuration: rentalDuration != null ? Number(rentalDuration) : undefined, rentalDurationUnit,
+    purchaseDate: purchaseDate || undefined,
+    purchasePrice: purchasePrice != null ? Number(purchasePrice) : undefined,
   }, beaconId);
   res.status(201).json(ref);
 });
@@ -204,7 +207,8 @@ router.patch('/:id', (req: Request, res: Response) => {
   const { name, description, category, subcategory, image, sku, listingStatus, quantity,
     locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry,
     sellingScope, sellingRadiusMiles, attributes, condition,
-    rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit, collectionId } = body;
+    rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit,
+    purchaseDate, purchasePrice, collectionId } = body;
 
   if (listingStatus !== undefined && !VALID_LISTING_STATUSES.includes(listingStatus)) {
     return res.status(400).json({ error: `Invalid listingStatus: ${listingStatus}. Must be one of: ${VALID_LISTING_STATUSES.join(', ')}` });
@@ -231,6 +235,7 @@ router.patch('/:id', (req: Request, res: Response) => {
     attributes, condition,
     rentalTerms, rentalDeposit: rentalDeposit != null ? Number(rentalDeposit) : rentalDeposit,
     rentalDuration: rentalDuration != null ? Number(rentalDuration) : rentalDuration, rentalDurationUnit,
+    purchaseDate, purchasePrice: purchasePrice != null ? Number(purchasePrice) : purchasePrice,
     collectionId,
   });
   if (!updated) return res.status(404).json({ error: 'Ref not found' });

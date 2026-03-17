@@ -271,7 +271,8 @@ export function renderUI(): string {
     .detail-back svg { flex-shrink: 0; }
     .detail-gallery { display: flex; gap: 12px; margin-bottom: 24px; height: 480px; }
     .detail-main-img { flex: 3; height: 100%; border-radius: 16px; overflow: hidden; background: #F4F5F6; display: flex; align-items: center; justify-content: center; position: relative; }
-    .detail-main-img img { width: 100%; height: 100%; object-fit: cover; }
+    .detail-main-img img.blur-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(24px); transform: scale(1.1); opacity: 0.6; z-index: 0; }
+    .detail-main-img img.main-img { width: 100%; height: 100%; object-fit: contain; position: relative; z-index: 1; }
     .detail-main-img .placeholder { color: #B1B5C3; font-size: 3rem; }
     .detail-side-imgs { flex: 1; display: flex; flex-direction: column; gap: 12px; height: 100%; }
     .detail-side-img { flex: 1; min-height: 0; border-radius: 16px; overflow: hidden; background: #F4F5F6; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 0.2s; position: relative; }
@@ -672,12 +673,12 @@ export function renderUI(): string {
     .lightbox-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
     /* ===== Home / Landing Page ===== */
-    .home-hero { background: linear-gradient(135deg, rgba(129,1,180,0.55), rgba(234,82,111,0.6)); background-color: #7b2d8e; padding: 56px 24px 48px; text-align: center; color: #fff; margin: -24px -24px 0; }
-    @media (max-width: 767px) { .home-hero { margin: -16px -16px 0; } }
-    .home-hero h2 { font-size: 2rem; font-weight: 700; margin: 0 0 8px; color: #fff; }
-    .home-hero p { color: rgba(255,255,255,0.82); font-size: 1rem; margin: 0 0 28px; max-width: 540px; margin-left: auto; margin-right: auto; }
-    .home-hero .search-filter-bar { max-width: 640px; margin: 0 auto; }
-    .home-hero .mobile-search-pill { max-width: 640px; margin: 0 auto; }
+    .home-hero { background: linear-gradient(135deg, rgba(129,1,180,0.55) 0%, rgba(234,82,111,0.6) 100%); background-color: #7b2d8e; padding: 64px 24px 56px; text-align: center; color: #fff; border-radius: 20px; margin: 0 0 8px; position: relative; overflow: hidden; }
+    @media (max-width: 767px) { .home-hero { border-radius: 16px; } }
+    .home-hero h2 { font-size: clamp(1.75rem, 4vw, 3rem); font-weight: 700; margin: 0 0 12px; color: #fff; line-height: 1.15; letter-spacing: -0.01em; text-transform: none; }
+    .home-hero p { color: rgba(255,255,255,0.82); font-size: clamp(0.95rem, 1.5vw, 1.125rem); margin: 0 0 32px; max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+    .home-hero .search-filter-bar { max-width: 660px; margin: 0 auto; }
+    .home-hero .mobile-search-pill { max-width: 660px; margin: 0 auto; }
     .home-section { max-width: 1100px; padding: 40px 24px; }
     .home-section-label { text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; color: #777E90; margin-bottom: 4px; }
     .home-section h3 { font-size: 1.35rem; font-weight: 700; margin: 0 0 24px; }
@@ -692,7 +693,7 @@ export function renderUI(): string {
     .home-recent-card .card-price { font-weight: 600; font-size: 14px; color: #EC526F; margin-top: 6px; }
     .home-recent-empty { text-align: center; padding: 48px 24px; color: #777E90; }
     .home-recent-empty p { margin: 0 0 16px; font-size: 14px; }
-    @media (max-width: 767px) { .home-hero h2 { font-size: 1.5rem; } .home-hero { padding: 40px 16px 36px; } }
+    @media (max-width: 767px) { .home-hero { padding: 48px 16px 40px; } }
 
   </style>
 </head>
@@ -2862,6 +2863,23 @@ Website = https://reffo.ai</pre>
       }, 5000);
     }
 
+    function uploadPhotoForRef(refId) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = function() {
+        const file = input.files[0];
+        if (!file) return;
+        const fd = new FormData();
+        fd.append('photos', file);
+        fetch('/refs/' + refId + '/media', { method: 'POST', body: fd })
+          .then(function(r) { return r.json(); })
+          .then(function() { showToast('Photo uploaded', ''); loadRefDetail(refId); })
+          .catch(function() { showToast('Upload failed', 'error'); });
+      };
+      input.click();
+    }
+
     const statusLabels = { private: 'Private', for_sale: 'For Sale', willing_to_sell: 'Willing to Sell', for_rent: 'For Rent', archived_sold: 'Sold (Archived)', archived_deleted: 'Deleted (Archived)' };
     const statusBadgeClass = { private: 'badge-private', for_sale: 'badge-for-sale', willing_to_sell: 'badge-willing', for_rent: 'badge-for-rent', archived_sold: 'badge-archived-sold', archived_deleted: 'badge-archived-deleted' };
     const negStatusLabels = { pending: 'Pending', accepted: 'Under Contract', rejected: 'Rejected', countered: 'Countered', withdrawn: 'Withdrawn', sold: 'Sold' };
@@ -3279,7 +3297,7 @@ Website = https://reffo.ai</pre>
         let mainImgHtml = mainMedia
           ? (mainMedia.mediaType === 'video'
             ? '<video src="/' + escapeHtml(mainMedia.filePath) + '" controls style="width:100%;height:100%;object-fit:cover;"></video>'
-            : '<img src="/' + escapeHtml(mainMedia.filePath) + '" alt="">')
+            : '<img class="blur-bg" src="/' + escapeHtml(mainMedia.filePath) + '" alt=""><img class="main-img" src="/' + escapeHtml(mainMedia.filePath) + '" alt="">')
           : '<span class="placeholder">No media</span>';
 
         const hasVideo = !!video;
@@ -3292,7 +3310,7 @@ Website = https://reffo.ai</pre>
             const viewAllOverlay = (i === 2 && showViewAll) ? '<div class="detail-view-all" onclick="event.stopPropagation();openLightbox(window._currentPhotos, 0)"><span>View all</span></div>' : '';
             sideImgsHtml += '<div class="detail-side-img" onclick="openLightbox(window._currentPhotos, ' + (i + 1) + ')"><img src="/' + escapeHtml(sm.filePath) + '" alt="">' + viewAllOverlay + '</div>';
           } else {
-            sideImgsHtml += '<div class="detail-side-img"><span class="placeholder">+</span></div>';
+            sideImgsHtml += '<div class="detail-side-img" style="cursor:pointer;" onclick="uploadPhotoForRef(\'' + ref.id + '\')"><span class="placeholder">+</span></div>';
           }
         }
 
@@ -3480,7 +3498,8 @@ Website = https://reffo.ai</pre>
           ];
           html += '<div style="padding:0 20px 14px;">';
           html += '<div style="background:#F4F5F6;border-radius:12px;padding:14px 16px;">';
-          html += '<div style="font-size:13px;font-weight:600;color:#23262F;margin-bottom:10px;">Complete your item info:</div>';
+          html += '<div style="font-size:13px;font-weight:600;color:#23262F;margin-bottom:4px;">Complete your listing</div>';
+          html += '<div style="font-size:12px;color:#777E90;margin-bottom:10px;">Listings with complete details are 82% more likely to sell.</div>';
           checks.forEach(function(c) {
             html += '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:' + (c.done ? '#45B36B' : '#777E90') + ';margin-bottom:4px;">';
             html += c.done ? '<span style="color:#45B36B;">&#10003;</span>' : '<span style="color:#E6E8EC;">&#10007;</span>';
@@ -3667,7 +3686,7 @@ Website = https://reffo.ai</pre>
     };
 
     window.setMainImage = function(src) {
-      document.getElementById('detailMainImg').innerHTML = '<img src="' + src + '" alt="">';
+      document.getElementById('detailMainImg').innerHTML = '<img class="blur-bg" src="' + src + '" alt=""><img class="main-img" src="' + src + '" alt="">';
     };
 
     // Lightbox
@@ -4411,7 +4430,7 @@ Website = https://reffo.ai</pre>
       const thumbSrc = mainPhoto ? mediaUrl(mainPhoto.filePath) : '';
 
       let mainImgHtml = (mainPhoto && (baseUrl || entrySource === 'reffo'))
-        ? '<img src="' + mediaUrl(mainPhoto.filePath) + '" alt="">'
+        ? '<img class="blur-bg" src="' + mediaUrl(mainPhoto.filePath) + '" alt=""><img class="main-img" src="' + mediaUrl(mainPhoto.filePath) + '" alt="">'
         : '<span class="placeholder">No media</span>';
 
       const hasVideo = mediaList.some(m => m.mediaType === 'video');

@@ -126,6 +126,7 @@ router.get('/', (_req: Request, res: Response) => {
     profilePicturePath: locationSettings?.profilePicturePath || null,
     aiProvider,
     aiApiKeySet: !!aiApiKey,
+    reffoApiUrl: process.env.REFFO_API_URL || 'https://reffo.ai',
   });
 });
 
