@@ -29,15 +29,20 @@ export const TAXONOMY: Record<string, string[]> = {
     'Decor',
     'Storage & Organization',
   ],
-  'Clothing': [
+  'Clothing & Accessories': [
     'Mens',
     'Womens',
     'Kids',
     'Shoes',
     'Bags & Wallets',
-    'Jewelry & Watches',
     'Activewear',
     'Vintage',
+  ],
+  'Jewelry & Watches': [
+    'Fine Jewelry',
+    'Fashion Jewelry',
+    'Watches',
+    'Loose Stones & Beads',
   ],
   'Sports': [
     'Cycling',
@@ -69,7 +74,7 @@ export const TAXONOMY: Record<string, string[]> = {
     'Trailers',
     'Electric Vehicles',
   ],
-  'Housing': [
+  'Real Estate': [
     'Apartment',
     'Condo',
     'Townhome',
@@ -83,9 +88,35 @@ export const TAXONOMY: Record<string, string[]> = {
     'Coins & Currency',
     'Trading Cards',
     'Memorabilia',
-    'Toys & Figures',
     'Stamps',
     'Vintage Electronics',
+  ],
+  'Health & Beauty': [
+    'Skincare',
+    'Makeup',
+    'Hair Care',
+    'Fragrances',
+    'Wellness & Supplements',
+  ],
+  'Toys & Hobbies': [
+    'Action Figures & Dolls',
+    'Building Sets',
+    'Board Games & Puzzles',
+    'RC & Models',
+    'Craft Supplies',
+  ],
+  'Baby & Kids': [
+    'Strollers & Car Seats',
+    'Clothing',
+    'Toys',
+    'Furniture & Gear',
+    'Feeding & Nursing',
+  ],
+  'Pet Supplies': [
+    'Dogs',
+    'Cats',
+    'Fish & Aquariums',
+    'Small Animals & Birds',
   ],
   'Other': [
     'General',

@@ -2723,11 +2723,6 @@ Website = https://reffo.ai</pre>
         var exact = CATEGORY_SCHEMAS_UI[category + '|' + subcategory];
         if (exact) return exact;
       }
-      if (category) {
-        for (var key in CATEGORY_SCHEMAS_UI) {
-          if (key.indexOf(category + '|') === 0) return CATEGORY_SCHEMAS_UI[key];
-        }
-      }
       return DEFAULT_SCHEMA_UI;
     }
 
@@ -3321,7 +3316,9 @@ Website = https://reffo.ai</pre>
         html += '<div class="detail-title-row">';
         html += '<h1>' + escapeHtml(ref.name) + '</h1>';
         html += '<div class="detail-title-actions">';
-        html += '<button onclick="navigator.clipboard.writeText(location.origin + \\'/refs/' + ref.id + '\\').then(function(){ showToast(\\'Link copied!\\',\\'\\'); })" title="Share"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>';
+        html += '<button onclick="' + (ref.reffoSynced && ref.reffoRefId
+          ? 'navigator.clipboard.writeText(\\'' + ((typeof window !== 'undefined' && window._reffoUrl) || 'https://reffo.ai') + '/items/' + ref.reffoRefId + '\\').then(function(){ showToast(\\'Link copied!\\',\\'\\'); })'
+          : 'showToast(\\'Sync to Reffo.ai to get a shareable link\\',\\'\\')') + '" title="Share"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>';
         html += '<button title="Save"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
         html += '</div></div>';
         html += '<div class="detail-posted-line">';
@@ -3414,6 +3411,12 @@ Website = https://reffo.ai</pre>
         });
         html += '</select></div></div>';
         html += '</div>';
+        // Purchase info fields
+        html += '<details style="margin-bottom:14px;border:2px solid #E6E8EC;border-radius:12px;padding:14px;" ' + (ref.purchaseDate || ref.purchasePrice ? 'open' : '') + '>';
+        html += '<summary style="cursor:pointer;font-size:12px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.02em;">Purchase Info</summary>';
+        html += '<div class="row"><div><label>Purchase Date</label><input id="dPurchaseDate" type="date" value="' + escapeHtml(ref.purchaseDate || '') + '"></div>';
+        html += '<div><label>Purchase Price</label><input id="dPurchasePrice" type="number" min="0" step="0.01" value="' + (ref.purchasePrice || '') + '"></div></div>';
+        html += '</details>';
         html += '</form>';
         html += '</div>';
 
@@ -3453,12 +3456,39 @@ Website = https://reffo.ai</pre>
         html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>';
         html += '</div>';
 
-        // Header: price + initial-letter avatar
+        // Header: price or "My Item" for private
         html += '<div class="payment-card-header">';
-        html += '<div class="payment-card-amount">' + priceDisplay;
-        html += '</div>';
+        if (ref.listingStatus === 'private') {
+          html += '<div class="payment-card-amount">My Item</div>';
+        } else {
+          html += '<div class="payment-card-amount">' + priceDisplay + '</div>';
+        }
         html += '<div class="payment-card-thumb initial-avatar">Y</div>';
         html += '</div>';
+
+        // Private item: completeness checklist
+        if (ref.listingStatus === 'private') {
+          const hasPhoto = media.filter(m => m.mediaType === 'photo').length > 0;
+          const checks = [
+            { label: 'Name', done: !!ref.name },
+            { label: 'Category', done: !!ref.category },
+            { label: 'Condition', done: !!ref.condition },
+            { label: 'Purchase date', done: !!ref.purchaseDate },
+            { label: 'Purchase price', done: !!ref.purchasePrice },
+            { label: 'Description', done: !!ref.description },
+            { label: 'Photo', done: hasPhoto },
+          ];
+          html += '<div style="padding:0 20px 14px;">';
+          html += '<div style="background:#F4F5F6;border-radius:12px;padding:14px 16px;">';
+          html += '<div style="font-size:13px;font-weight:600;color:#23262F;margin-bottom:10px;">Complete your item info:</div>';
+          checks.forEach(function(c) {
+            html += '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:' + (c.done ? '#45B36B' : '#777E90') + ';margin-bottom:4px;">';
+            html += c.done ? '<span style="color:#45B36B;">&#10003;</span>' : '<span style="color:#E6E8EC;">&#10007;</span>';
+            html += '<span>' + c.label + '</span></div>';
+          });
+          html += '<button class="button-stroke" onclick="document.getElementById(\\\'editFormSection\\\').style.display=\\\'block\\\';document.getElementById(\\\'editFormSection\\\').scrollIntoView({behavior:\\\'smooth\\\'})" style="margin-top:10px;width:100%;font-size:13px;">Fill in details &#8594;</button>';
+          html += '</div></div>';
+        }
 
         // Status segmented control (replaces dropdown)
         html += '<input type="hidden" id="dStatus" value="' + (ref.listingStatus || 'private') + '">';
@@ -3470,11 +3500,22 @@ Website = https://reffo.ai</pre>
         });
         html += '</div>';
         html += '</div>';
-        // Price estimate for private items
-        html += '<div style="padding:0 20px 10px;"><div id="detailPriceEstimate"></div></div>';
+        // Price estimate (hidden for private items)
+        if (ref.listingStatus !== 'private') {
+          html += '<div style="padding:0 20px 10px;"><div id="detailPriceEstimate"></div></div>';
+        } else {
+          html += '<div style="display:none;"><div id="detailPriceEstimate"></div></div>';
+        }
 
-        // Share button — own row, icon only
-        html += '<div style="margin:12px 30px 0;"><button class="button-stroke" onclick="navigator.clipboard.writeText(location.origin + \\'/refs/' + ref.id + '\\').then(function(){ showToast(\\'Link copied!\\',\\'\\'); })" title="Share" style="width:40px;height:40px;padding:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button></div>';
+        // Share button — smart link
+        html += '<div style="margin:12px 30px 0;"><button class="button-stroke" onclick="';
+        if (ref.reffoSynced && ref.reffoRefId) {
+          const reffoUrl = (typeof window !== 'undefined' && window._reffoUrl) || 'https://reffo.ai';
+          html += 'navigator.clipboard.writeText(\\'' + reffoUrl + '/items/' + ref.reffoRefId + '\\').then(function(){ showToast(\\'Link copied!\\',\\'\\'); })';
+        } else {
+          html += 'showToast(\\'Sync to Reffo.ai to get a shareable link\\',\\'\\')';
+        }
+        html += '" title="Share" style="width:40px;height:40px;padding:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button></div>';
         // Action buttons row
         html += '<div class="payment-card-buttons">';
         html += '<button class="button-gradient" onclick="saveDetail(\\'' + ref.id + '\\', \\'' + (activeOffer ? activeOffer.id : '') + '\\')">Save Changes</button>';
@@ -3508,6 +3549,12 @@ Website = https://reffo.ai</pre>
         }
         if (ref.rentalDuration) {
           html += '<div class="invoice-row"><span class="invoice-label">Duration</span><span class="invoice-value">' + ref.rentalDuration + ' ' + (ref.rentalDurationUnit || 'days') + '</span></div>';
+        }
+        if (ref.purchaseDate) {
+          html += '<div class="invoice-row"><span class="invoice-label">Purchased</span><span class="invoice-value">' + new Date(ref.purchaseDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '</span></div>';
+        }
+        if (ref.purchasePrice) {
+          html += '<div class="invoice-row"><span class="invoice-label">Purchase Price</span><span class="invoice-value">$' + Number(ref.purchasePrice).toFixed(2) + '</span></div>';
         }
 
         // Hidden invoice rows (future use)
@@ -3563,6 +3610,8 @@ Website = https://reffo.ai</pre>
 
     // Global: whether AI autofill is available (set by loadSettings)
     window._aiEnabled = false;
+    // Global: Reffo.ai base URL (set by loadSettings)
+    window._reffoUrl = 'https://reffo.ai';
     // Store AI autofill image URLs per context (create / detail)
     window._autofillImageUrl = { create: null, detail: null };
 
@@ -3592,7 +3641,8 @@ Website = https://reffo.ai</pre>
       var nameVal = nameEl ? nameEl.value.trim() : '';
       var catVal = catEl ? catEl.value : '';
       if (!nameVal || !catVal) {
-        renderPriceEstimateUnavailable('detailPriceEstimate', 'Enter a name and category to see price suggestions.');
+        var missing = !nameVal && !catVal ? 'a name and category' : !nameVal ? 'a name' : 'a category';
+        renderPriceEstimateUnavailable('detailPriceEstimate', 'Select ' + missing + ' to see price suggestions.');
         return;
       }
       var container = document.getElementById('detailPriceEstimate');
@@ -3707,6 +3757,8 @@ Website = https://reffo.ai</pre>
             condition: detailCondition,
             attributes: detailAttributes,
             rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit,
+            purchaseDate: document.getElementById('dPurchaseDate') ? (document.getElementById('dPurchaseDate').value || null) : null,
+            purchasePrice: document.getElementById('dPurchasePrice') && document.getElementById('dPurchasePrice').value ? parseFloat(document.getElementById('dPurchasePrice').value) : null,
           })
         });
         if (!res.ok) { const err = await res.json(); throw new Error(err.error); }
@@ -4885,6 +4937,8 @@ Website = https://reffo.ai</pre>
           }
         }
 
+        // Store Reffo.ai base URL
+        window._reffoUrl = data.reffoApiUrl || 'https://reffo.ai';
         // Determine if AI autofill is available (has Reffo key OR has direct AI provider key)
         var aiEnabled = data.hasApiKey || (data.aiProvider !== 'reffo' && data.aiApiKeySet);
         window._aiEnabled = aiEnabled;
@@ -4892,6 +4946,10 @@ Website = https://reffo.ai</pre>
         var createPromo = document.getElementById('createAutofillPromo');
         if (createActive) createActive.style.display = aiEnabled ? '' : 'none';
         if (createPromo) createPromo.style.display = aiEnabled ? 'none' : '';
+        var detailActive = document.getElementById('detailAutofillActive');
+        var detailPromo = document.getElementById('detailAutofillPromo');
+        if (detailActive) detailActive.style.display = aiEnabled ? '' : 'none';
+        if (detailPromo) detailPromo.style.display = aiEnabled ? 'none' : '';
 
         // Update footer CTA based on API key status
         var footerCtaTitle = document.getElementById('footerCtaTitle');
@@ -5148,7 +5206,8 @@ Website = https://reffo.ai</pre>
       var nameVal = (document.getElementById('refName').value || '').trim();
       var catVal = document.getElementById('refCat').value || '';
       if (!nameVal || !catVal) {
-        renderPriceEstimateUnavailable('createPriceEstimate', 'Enter a name and category to see price suggestions.');
+        var missing = !nameVal && !catVal ? 'a name and category' : !nameVal ? 'a name' : 'a category';
+        renderPriceEstimateUnavailable('createPriceEstimate', 'Select ' + missing + ' to see price suggestions.');
         return;
       }
       var container = document.getElementById('createPriceEstimate');
@@ -5262,6 +5321,41 @@ Website = https://reffo.ai</pre>
       if (!nameVal) {
         if (statusEl) statusEl.textContent = 'Enter a product name first.';
         return;
+      }
+
+      // If no category selected, auto-suggest one first
+      if (!catVal) {
+        if (statusEl) statusEl.innerHTML = '<div class="price-estimate-spinner" style="vertical-align:middle;"></div> Detecting category...';
+        try {
+          var suggestRes = await fetch('/refs/suggest-category', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: nameVal })
+          });
+          if (suggestRes.ok) {
+            var suggestion = await suggestRes.json();
+            if (suggestion.category && (suggestion.confidence === 'high' || suggestion.confidence === 'medium')) {
+              catVal = suggestion.category;
+              if (catEl) {
+                catEl.value = catVal;
+                catEl.dispatchEvent(new Event('change'));
+              }
+              if (suggestion.subcategory) {
+                subcatVal = suggestion.subcategory;
+                // Allow subcategory options to populate from the change event above
+                await new Promise(function(r) { setTimeout(r, 50); });
+                if (subcatEl) {
+                  subcatEl.value = subcatVal;
+                  subcatEl.dispatchEvent(new Event('change'));
+                }
+              }
+              var fieldsContainerId = context === 'detail' ? 'detailCategoryFields' : 'createCategoryFields';
+              renderCategoryFields(fieldsContainerId, catVal, subcatVal, {});
+            }
+          }
+        } catch (_e) {
+          // Category suggestion failed — continue with empty category
+        }
       }
 
       if (statusEl) statusEl.innerHTML = '<div class="price-estimate-spinner" style="vertical-align:middle;"></div> Looking up product...';
@@ -5439,6 +5533,8 @@ Website = https://reffo.ai</pre>
     loadHome();
     switchTab('home');
     initOutgoingSnapshot();
+    // Pre-load settings so _aiEnabled is set before any detail view opens
+    loadSettings();
 
     // Show "Link to Reffo.ai" header button if no API key is configured
     async function updateHeaderOnLoad() {

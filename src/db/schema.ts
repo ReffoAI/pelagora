@@ -497,6 +497,24 @@ function initSchema(database: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_scans_status ON scans(status);
   `);
 
+  // Migration: rename categories to match updated taxonomy
+  // Clothing → Clothing & Accessories (except Jewelry & Watches which becomes top-level)
+  database.exec(`UPDATE refs SET category = 'Clothing & Accessories' WHERE category = 'Clothing' AND subcategory != 'Jewelry & Watches'`);
+  database.exec(`UPDATE refs SET category = 'Jewelry & Watches', subcategory = 'Fashion Jewelry' WHERE category = 'Clothing' AND subcategory = 'Jewelry & Watches'`);
+  // Housing → Real Estate
+  database.exec(`UPDATE refs SET category = 'Real Estate' WHERE category = 'Housing'`);
+  // Collectibles|Toys & Figures → Toys & Hobbies|Action Figures & Dolls
+  database.exec(`UPDATE refs SET category = 'Toys & Hobbies', subcategory = 'Action Figures & Dolls' WHERE category = 'Collectibles' AND subcategory = 'Toys & Figures'`);
+
+  // Migration: add purchase_date and purchase_price to existing refs
+  const refsColsForPurchase = database.pragma('table_info(refs)') as { name: string }[];
+  if (!refsColsForPurchase.some(c => c.name === 'purchase_date')) {
+    database.exec(`ALTER TABLE refs ADD COLUMN purchase_date TEXT`);
+  }
+  if (!refsColsForPurchase.some(c => c.name === 'purchase_price')) {
+    database.exec(`ALTER TABLE refs ADD COLUMN purchase_price REAL`);
+  }
+
   // Migration: add collection_id to existing refs
   const refsColsForCollection = database.pragma('table_info(refs)') as { name: string }[];
   if (!refsColsForCollection.some(c => c.name === 'collection_id')) {
