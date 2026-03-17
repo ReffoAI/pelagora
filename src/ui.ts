@@ -2017,6 +2017,21 @@ Website = https://reffo.ai</pre>
     <div class="lightbox-thumbs" id="lightboxThumbs"></div>
   </div>
 
+  <!-- Sync to Reffo modal -->
+  <div id="syncModal" class="modal-overlay hidden" onclick="if(event.target===this)closeSyncModal()">
+    <div class="modal" style="text-align:center;padding:40px 36px 32px;">
+      <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#8101B4 0%,#EA526F 100%);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      </div>
+      <h3 style="font-size:20px;font-weight:700;margin:0 0 8px;">Push to Reffo.ai?</h3>
+      <p style="font-size:14px;color:#777E90;margin:0 0 28px;line-height:1.5;">Your listing was saved locally. Would you also like to share it on Reffo.ai for more visibility?</p>
+      <div class="modal-actions" style="justify-content:center;">
+        <button type="button" class="btn-secondary" onclick="closeSyncModal()" style="min-width:100px;">Not now</button>
+        <button type="button" class="btn-primary" id="syncModalConfirmBtn" style="min-width:140px;">Push to Reffo</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="app-footer">
     <div class="app-footer-inner">
@@ -2265,7 +2280,7 @@ Website = https://reffo.ai</pre>
           var imgHtml = firstPhoto
             ? '<img src="/' + escapeHtml(firstPhoto.filePath) + '" alt="">'
             : '<div style="height:140px;display:flex;align-items:center;justify-content:center;background:var(--bg);color:#D2D5DB;font-size:32px;">&#x1F4F7;</div>';
-          var price = ref.price ? '$' + Number(ref.price).toFixed(2) : '';
+          var price = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : ref.price ? '$' + Number(ref.price).toFixed(2) : '';
           var statusLabel = statusLabels[ref.listingStatus] || 'Private';
           var statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
           return '<div class="home-recent-card" onclick="openDetail(\\'' + ref.id + '\\')">' + imgHtml + '<div class="card-body"><div class="card-name">' + escapeHtml(ref.name) + '</div><div class="card-meta">' + escapeHtml(ref.category || '') + ' <span class="status-badge ' + statusClass + '">' + statusLabel + '</span></div>' + (price ? '<div class="card-price">' + price + '</div>' : '') + '</div></div>';
@@ -2864,6 +2879,39 @@ Website = https://reffo.ai</pre>
       }, 5000);
     }
 
+    function showSyncModal(refId) {
+      var modal = document.getElementById('syncModal');
+      modal.classList.remove('hidden');
+      var btn = document.getElementById('syncModalConfirmBtn');
+      // Clone to remove old listeners
+      var newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.onclick = async function() {
+        newBtn.disabled = true;
+        newBtn.textContent = 'Syncing...';
+        try {
+          var syncRes = await fetch('/settings/sync-item/' + refId, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sync: true })
+          });
+          var syncData = await syncRes.json();
+          if (syncRes.ok) {
+            showToast(syncData.warning ? 'Ref marked for sync (remote pending)' : 'Ref synced to Reffo.ai', 'accepted');
+          } else {
+            showToast('Sync failed: ' + (syncData.error || 'Unknown error'), 'rejected');
+          }
+        } catch(e) {
+          showToast('Sync failed: ' + e.message, 'rejected');
+        }
+        closeSyncModal();
+        openDetail(refId);
+      };
+    }
+    window.closeSyncModal = function() {
+      document.getElementById('syncModal').classList.add('hidden');
+    };
+
     function uploadPhotoForRef(refId) {
       const input = document.createElement('input');
       input.type = 'file';
@@ -3168,7 +3216,7 @@ Website = https://reffo.ai</pre>
             refs.map(function(ref) {
               var refOffers = offerMap[ref.id] || [];
               var activeOffer = refOffers.find(function(o) { return o.status === 'active'; });
-              var priceStr = activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
+              var priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
               var photos = (mediaMap[ref.id] || []).filter(function(m) { return m.mediaType === 'photo'; });
               var firstPhoto = photos[0];
               var statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
@@ -3204,7 +3252,7 @@ Website = https://reffo.ai</pre>
           '<div class="rows">' + refs.map(ref => {
             const refOffers = offerMap[ref.id] || [];
             const activeOffer = refOffers.find(o => o.status === 'active');
-            const priceStr = activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
+            const priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
             const photos = (mediaMap[ref.id] || []).filter(m => m.mediaType === 'photo');
             const firstPhoto = photos[0];
             const statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
@@ -3236,7 +3284,7 @@ Website = https://reffo.ai</pre>
           container.innerHTML = '<div class="cards">' + refs.map(ref => {
             const refOffers = offerMap[ref.id] || [];
             const activeOffer = refOffers.find(o => o.status === 'active');
-            const priceStr = activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
+            const priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
             const photos = (mediaMap[ref.id] || []).filter(m => m.mediaType === 'photo');
             const firstPhoto = photos[0];
             const catBadges = [ref.category, ref.subcategory].filter(Boolean).map(b =>
@@ -3315,7 +3363,7 @@ Website = https://reffo.ai</pre>
           }
         }
 
-        const priceDisplay = activeOffer ? escapeHtml(activeOffer.priceCurrency) + ' ' + activeOffer.price.toFixed(2) : 'No price';
+        const priceDisplay = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? escapeHtml(activeOffer.priceCurrency) + ' ' + activeOffer.price.toFixed(2) : 'No price';
         const locParts = [ref.locationCity, ref.locationState, ref.locationZip].filter(Boolean);
         const scopeLabels = { global: 'Global', national: 'National', range: 'Range' };
         let scopeText = '';
@@ -3621,8 +3669,8 @@ Website = https://reffo.ai</pre>
         html += '<div style="height:3px;background:linear-gradient(90deg,#8101B4,#EA526F);"></div>';
         html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;">';
         html += '<div>';
-        html += '<div style="font-size:14px;font-weight:600;color:#23262F;">&#127760; Share on Pelagora</div>';
-        html += '<div style="font-size:12px;color:#777E90;margin-top:2px;">Reach more buyers on the open network.</div>';
+        html += '<div style="font-size:14px;font-weight:600;color:#23262F;">&#127760; Share on Reffo.ai</div>';
+        html += '<div style="font-size:12px;color:#777E90;margin-top:2px;">Also list on Reffo.ai for more visibility.</div>';
         html += '</div>';
         html += '<label class="sync-toggle"><input type="checkbox" ' + (ref.reffoSynced ? 'checked' : '') + ' onchange="toggleSync(\\'' + ref.id + '\\', this)"><span class="toggle-track"></span></label>';
         html += '</div></div>';
@@ -3727,6 +3775,13 @@ Website = https://reffo.ai</pre>
 
     window.triggerDetailPriceEstimate = function() {
       if (detailEstimateTimer) clearTimeout(detailEstimateTimer);
+      // Skip if price is already set
+      var priceEl = document.getElementById('cardPrice') || document.getElementById('dPrice');
+      if (priceEl && priceEl.value && parseFloat(priceEl.value) > 0) {
+        var container = document.getElementById('detailPriceEstimate');
+        if (container) container.innerHTML = '';
+        return;
+      }
       var nameEl = document.getElementById('dName');
       var catEl = document.getElementById('dCat');
       var nameVal = nameEl ? nameEl.value.trim() : '';
@@ -3878,22 +3933,13 @@ Website = https://reffo.ai</pre>
 
         showMsg('detailMsg', 'Saved!', true);
 
-        // Prompt to push to Reffo
-        if (listingStatus !== 'private' && confirm('Want to push to Reffo as well?')) {
-          const syncRes = await fetch('/settings/sync-item/' + refId, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sync: true })
-          });
-          const syncData = await syncRes.json();
-          if (syncRes.ok) {
-            showToast(syncData.warning ? 'Ref marked for sync (remote pending)' : 'Ref synced to Reffo.ai', 'accepted');
-          } else {
-            showToast('Sync failed: ' + (syncData.error || 'Unknown error'), 'rejected');
-          }
+        // Prompt to push to Reffo — only if not already synced
+        var syncToggle = document.querySelector('.sync-toggle input[type="checkbox"]');
+        if (listingStatus !== 'private' && syncToggle && !syncToggle.checked) {
+          showSyncModal(refId);
+        } else {
+          openDetail(refId);
         }
-
-        openDetail(refId);
       } catch (err) {
         showMsg('detailMsg', err.message, false);
       }
@@ -4068,7 +4114,7 @@ Website = https://reffo.ai</pre>
           const peerHttpPort = entry.peerHttpPort;
           const entrySource = entry.source;
 
-          const priceStr = activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
+          const priceStr = item.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
           const badges = [item.category, item.subcategory].filter(Boolean).map(b =>
             '<span class="badge badge-cat">' + escapeHtml(b) + '</span>'
           ).join('');
@@ -4523,7 +4569,7 @@ Website = https://reffo.ai</pre>
       }
 
       const statusLabel = statusLabels[item.listingStatus] || '';
-      const priceDisplay = offer ? escapeHtml(offer.priceCurrency) + ' ' + offer.price.toFixed(2) : 'Make an offer';
+      const priceDisplay = item.listingStatus === 'willing_to_sell' ? 'Make me sell' : offer ? escapeHtml(offer.priceCurrency) + ' ' + offer.price.toFixed(2) : 'Make an offer';
       const remoteLoc = [item.locationCity, item.locationState, item.locationZip].filter(Boolean);
       const conditionDisplay = item.condition ? item.condition.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }) : '';
 
@@ -5296,6 +5342,13 @@ Website = https://reffo.ai</pre>
 
     window.triggerCreatePriceEstimate = function() {
       if (createEstimateTimer) clearTimeout(createEstimateTimer);
+      // Skip if price is already set
+      var priceEl = document.getElementById('refPrice');
+      if (priceEl && priceEl.value && parseFloat(priceEl.value) > 0) {
+        var container = document.getElementById('createPriceEstimate');
+        if (container) container.innerHTML = '';
+        return;
+      }
       var nameVal = (document.getElementById('refName').value || '').trim();
       var catVal = document.getElementById('refCat').value || '';
       if (!nameVal || !catVal) {
