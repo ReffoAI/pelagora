@@ -39,7 +39,7 @@ echo "Platform: $PLATFORM-$NODE_ARCH (Node: $NODE_OS-$NODE_ARCH)"
 
 # ── Configuration ───────────────────────────────────────
 NODE_VERSION="v20.18.1"
-BUNDLE_NAME="pelagora-v${VERSION}-${PLATFORM}-${NODE_ARCH}"
+BUNDLE_NAME="pelagora-${PLATFORM}-${NODE_ARCH}"
 STAGING="$PROJECT_ROOT/release/staging/$BUNDLE_NAME"
 RELEASE_DIR="$PROJECT_ROOT/release"
 
