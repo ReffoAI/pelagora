@@ -528,6 +528,14 @@ function initSchema(database: Database.Database): void {
       database.exec(`ALTER TABLE beacon_settings ADD COLUMN profile_picture_path TEXT`);
     }
   } catch {}
+
+  // Migration: add archived_at to negotiations
+  try {
+    const negCols = database.pragma('table_info(negotiations)') as { name: string }[];
+    if (!negCols.some(c => c.name === 'archived_at')) {
+      database.exec(`ALTER TABLE negotiations ADD COLUMN archived_at TEXT`);
+    }
+  } catch {}
 }
 
 export function closeDb(): void {

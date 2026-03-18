@@ -47,6 +47,8 @@ export function renderUI(): string {
     .header-settings-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #E6E8EC; background: #FCFCFD; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; position: relative; color: #777E90; }
     .header-settings-btn:hover { border-color: #141416; color: #141416; }
     .header-settings-btn .notif-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: #EC526F; display: none; }
+    .sidebar-nav-item { position: relative; }
+    .sidebar-notif-dot { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; background: #EC526F; display: none; }
     .header-link-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 18px; background: linear-gradient(90deg, #8101B4 0%, #EA526F 100%); border: none; border-radius: 18px; font-size: 13px; font-weight: 500; color: #FCFCFD; cursor: pointer; transition: opacity 0.2s; font-family: 'Poppins', sans-serif; white-space: nowrap; }
     .header-link-btn:hover { opacity: 0.9; }
 
@@ -493,6 +495,13 @@ export function renderUI(): string {
     .neg-card.sold { border-left-color: #1a8a42; }
     .neg-status.sold { background: #e6f9ed; color: #1a8a42; }
 
+    /* Archived negotiation card */
+    .neg-card.archived { border-left-color: #B1B5C3; opacity: 0.75; }
+    .neg-archive-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .btn-icon-sm { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #E6E8EC; background: #FCFCFD; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #777E90; transition: all 0.2s; font-size: 12px; padding: 0; }
+    .btn-icon-sm:hover { border-color: #141416; color: #141416; }
+    .btn-icon-sm.danger:hover { border-color: #E92222; color: #E92222; }
+
     /* Ref sub-tabs */
     .ref-subtabs { display: flex; gap: 0; margin-bottom: 16px; }
     .ref-subtab { padding: 8px 20px; cursor: pointer; font-size: 13px; font-weight: 700; color: #777E90; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.02em; }
@@ -808,6 +817,7 @@ export function renderUI(): string {
     <button class="sidebar-nav-item" data-sidebar="negotiations" onclick="sidebarNav('negotiations')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       Offers & Negotiations
+      <span id="sidebarNotifDot" class="sidebar-notif-dot"></span>
     </button>
     <div class="sidebar-divider"></div>
     <div class="sidebar-section-title">Actions</div>
@@ -1410,9 +1420,13 @@ export function renderUI(): string {
         <div class="tabs">
           <div class="tab active" data-negtab="incoming" onclick="switchNegTab('incoming')">Incoming</div>
           <div class="tab" data-negtab="outgoing" onclick="switchNegTab('outgoing')">Sent</div>
+          <div class="tab" data-negtab="resolved" onclick="switchNegTab('resolved')">Resolved</div>
+          <div class="tab" data-negtab="archived" onclick="switchNegTab('archived')">Archived</div>
         </div>
         <div id="negIncoming"></div>
         <div id="negOutgoing" class="hidden"></div>
+        <div id="negResolved" class="hidden"></div>
+        <div id="negArchived" class="hidden"></div>
       </section>
     </div>
 
@@ -2226,8 +2240,12 @@ Website = https://reffo.ai</pre>
 
     function switchNegTab(tab) {
       document.querySelectorAll('.tab[data-negtab]').forEach(t => t.classList.toggle('active', t.dataset.negtab === tab));
-      document.getElementById('negIncoming').classList.toggle('hidden', tab !== 'incoming');
-      document.getElementById('negOutgoing').classList.toggle('hidden', tab !== 'outgoing');
+      ['negIncoming','negOutgoing','negResolved','negArchived'].forEach(id => {
+        var map = { negIncoming: 'incoming', negOutgoing: 'outgoing', negResolved: 'resolved', negArchived: 'archived' };
+        document.getElementById(id).classList.toggle('hidden', map[id] !== tab);
+      });
+      if (tab === 'resolved') loadResolved();
+      if (tab === 'archived') loadArchived();
     }
 
     function switchRefSubTab(tab) {
@@ -4233,9 +4251,10 @@ Website = https://reffo.ai</pre>
           const firstPhoto = refMedia.find(m => m.mediaType === 'photo');
 
           let actionBtn = '';
-          if (item.listingStatus === 'for_sale' && activeOffer) {
+          const isOwnCard = peer.beaconId === window._myBeaconId;
+          if (!isOwnCard && item.listingStatus === 'for_sale' && activeOffer) {
             actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#EC526F;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + activeOffer.price + ', \\'' + escapeHtml(activeOffer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Buy at ' + escapeHtml(activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2)) + '</a>';
-          } else if (item.listingStatus === 'willing_to_sell') {
+          } else if (!isOwnCard && item.listingStatus === 'willing_to_sell') {
             actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#EC526F;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Make Offer</a>';
           }
 
@@ -4683,13 +4702,14 @@ Website = https://reffo.ai</pre>
       const remoteLoc = [item.locationCity, item.locationState, item.locationZip].filter(Boolean);
       const conditionDisplay = item.condition ? item.condition.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }) : '';
 
-      // Build action buttons for remote detail
+      // Build action buttons for remote detail (skip for own items)
       let purchaseBtn = '';
       let negotiateBtn = '';
-      if (item.listingStatus === 'for_sale' && offer) {
+      const isOwnItem = peer.beaconId === window._myBeaconId;
+      if (!isOwnItem && item.listingStatus === 'for_sale' && offer) {
         purchaseBtn = '<button class="button-gradient" onclick="openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + offer.price + ', \\'' + escapeHtml(offer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Purchase</button>';
         negotiateBtn = '<button class="button-stroke" onclick="openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Negotiate</button>';
-      } else if (item.listingStatus === 'willing_to_sell') {
+      } else if (!isOwnItem && item.listingStatus === 'willing_to_sell') {
         purchaseBtn = '<button class="button-gradient" onclick="openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Make an Offer</button>';
       }
 
@@ -4816,6 +4836,7 @@ Website = https://reffo.ai</pre>
 
     // ===== Proposal Modal =====
     window.openBuyModal = function(refId, refName, sellerBeaconId, price, currency) {
+      if (sellerBeaconId === window._myBeaconId) return;
       document.getElementById('modalRefId').value = refId;
       document.getElementById('modalRefName').value = refName;
       document.getElementById('modalSellerBeaconId').value = sellerBeaconId;
@@ -4829,6 +4850,7 @@ Website = https://reffo.ai</pre>
     };
 
     window.openOfferModal = function(refId, refName, sellerBeaconId) {
+      if (sellerBeaconId === window._myBeaconId) return;
       document.getElementById('modalRefId').value = refId;
       document.getElementById('modalRefName').value = refName;
       document.getElementById('modalSellerBeaconId').value = sellerBeaconId;
@@ -4963,8 +4985,108 @@ Website = https://reffo.ai</pre>
     window.renderNegGroupedView = function(tab) {
       if (tab === 'incoming') {
         document.getElementById('negIncoming').innerHTML = renderGroupedNegotiations(cachedIncoming, true);
-      } else {
+      } else if (tab === 'outgoing') {
         document.getElementById('negOutgoing').innerHTML = renderGroupedNegotiations(cachedOutgoing, false);
+      }
+    };
+
+    function renderResolvedCards(negs) {
+      if (negs.length === 0) return '<p class="empty">No resolved negotiations</p>';
+      return negs.map(n => {
+        const displayStatus = negStatusLabels[n.status] || n.status;
+        let details = '<strong>' + escapeHtml(n.priceCurrency) + ' ' + n.price.toFixed(2) + '</strong>';
+        if (n.message) details += ' &mdash; ' + escapeHtml(n.message);
+        if (n.counterPrice) details += '<br>Counter: <strong>' + escapeHtml(n.priceCurrency) + ' ' + n.counterPrice.toFixed(2) + '</strong>';
+        if (n.responseMessage) details += ' &mdash; ' + escapeHtml(n.responseMessage);
+        const roleLabel = n.role === 'seller' ? 'Incoming' : 'Sent';
+        return '<div class="neg-card ' + n.status + '">' +
+          '<div class="neg-header">' +
+            '<span class="neg-item-name">' + escapeHtml(n.refName || n.refId.slice(0, 8)) + '</span>' +
+            '<span class="neg-status ' + n.status + '">' + displayStatus + '</span>' +
+          '</div>' +
+          '<div class="neg-details">' + details + '</div>' +
+          '<div class="beacon-id">' + roleLabel + ' &middot; ' + (n.role === 'seller' ? 'Buyer' : 'Seller') + ': ' + escapeHtml((n.role === 'seller' ? n.buyerBeaconId : n.sellerBeaconId).slice(0, 16)) + '...</div>' +
+          '<div class="neg-archive-actions">' +
+            '<button class="btn-secondary btn-sm" onclick="archiveNeg(\\'' + n.id + '\\')">Archive</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function renderArchivedCards(negs) {
+      if (negs.length === 0) return '<p class="empty">No archived negotiations</p>';
+      return negs.map(n => {
+        const displayStatus = negStatusLabels[n.status] || n.status;
+        let details = '<strong>' + escapeHtml(n.priceCurrency) + ' ' + n.price.toFixed(2) + '</strong>';
+        if (n.message) details += ' &mdash; ' + escapeHtml(n.message);
+        if (n.counterPrice) details += '<br>Counter: <strong>' + escapeHtml(n.priceCurrency) + ' ' + n.counterPrice.toFixed(2) + '</strong>';
+        if (n.responseMessage) details += ' &mdash; ' + escapeHtml(n.responseMessage);
+        const roleLabel = n.role === 'seller' ? 'Incoming' : 'Sent';
+        return '<div class="neg-card archived">' +
+          '<div class="neg-header">' +
+            '<span class="neg-item-name">' + escapeHtml(n.refName || n.refId.slice(0, 8)) + '</span>' +
+            '<span class="neg-status ' + n.status + '">' + displayStatus + '</span>' +
+          '</div>' +
+          '<div class="neg-details">' + details + '</div>' +
+          '<div class="beacon-id">' + roleLabel + ' &middot; ' + (n.role === 'seller' ? 'Buyer' : 'Seller') + ': ' + escapeHtml((n.role === 'seller' ? n.buyerBeaconId : n.sellerBeaconId).slice(0, 16)) + '...</div>' +
+          '<div class="neg-archive-actions">' +
+            '<button class="btn-secondary btn-sm" onclick="unarchiveNeg(\\'' + n.id + '\\')">Restore</button>' +
+            '<button class="btn-danger btn-sm" onclick="deleteNeg(\\'' + n.id + '\\')">Delete</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    async function loadResolved() {
+      try {
+        const res = await fetch('/negotiations?role=resolved');
+        const negs = await res.json();
+        document.getElementById('negResolved').innerHTML = renderResolvedCards(negs);
+      } catch {
+        document.getElementById('negResolved').innerHTML = '<p class="empty">Failed to load</p>';
+      }
+    }
+
+    async function loadArchived() {
+      try {
+        const res = await fetch('/negotiations?role=archived');
+        const negs = await res.json();
+        document.getElementById('negArchived').innerHTML = renderArchivedCards(negs);
+      } catch {
+        document.getElementById('negArchived').innerHTML = '<p class="empty">Failed to load</p>';
+      }
+    }
+
+    window.archiveNeg = async function(id) {
+      try {
+        const res = await fetch('/negotiations/' + id + '/archive', { method: 'PATCH' });
+        if (!res.ok) throw new Error('Failed to archive');
+        loadResolved();
+        loadNegotiations();
+      } catch (err) {
+        showToast(err.message, '');
+      }
+    };
+
+    window.unarchiveNeg = async function(id) {
+      try {
+        const res = await fetch('/negotiations/' + id + '/unarchive', { method: 'PATCH' });
+        if (!res.ok) throw new Error('Failed to restore');
+        loadArchived();
+        loadNegotiations();
+      } catch (err) {
+        showToast(err.message, '');
+      }
+    };
+
+    window.deleteNeg = async function(id) {
+      if (!confirm('Permanently delete this negotiation?')) return;
+      try {
+        const res = await fetch('/negotiations/' + id, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete');
+        loadArchived();
+      } catch (err) {
+        showToast(err.message, '');
       }
     };
 
@@ -4982,10 +5104,13 @@ Website = https://reffo.ai</pre>
 
         const pendingCount = cachedIncoming.filter(n => n.status === 'pending').length;
         const notifDot = document.getElementById('headerNotifDot');
+        const sidebarDot1 = document.getElementById('sidebarNotifDot');
         if (pendingCount > 0) {
           notifDot.style.display = 'block';
+          if (sidebarDot1) sidebarDot1.style.display = 'block';
         } else {
           notifDot.style.display = 'none';
+          if (sidebarDot1) sidebarDot1.style.display = 'none';
         }
       } catch {
         document.getElementById('negIncoming').innerHTML = '<p class="empty">Failed to load</p>';
@@ -5116,6 +5241,7 @@ Website = https://reffo.ai</pre>
       try {
         const res = await fetch('/settings');
         const data = await res.json();
+        window._myBeaconId = data.beaconId || '';
         document.getElementById('settingsBeaconId').textContent = data.beaconId || '';
         document.getElementById('settingsVersion').textContent = data.version || '';
         const uptime = data.uptime || 0;
@@ -5832,10 +5958,13 @@ Website = https://reffo.ai</pre>
         const incoming = await res.json();
         const pendingCount = incoming.filter(n => n.status === 'pending').length;
         const notifDot = document.getElementById('headerNotifDot');
+        const sidebarDot2 = document.getElementById('sidebarNotifDot');
         if (pendingCount > 0) {
           notifDot.style.display = 'block';
+          if (sidebarDot2) sidebarDot2.style.display = 'block';
         } else {
           notifDot.style.display = 'none';
+          if (sidebarDot2) sidebarDot2.style.display = 'none';
         }
       } catch {}
 

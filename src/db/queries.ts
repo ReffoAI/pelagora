@@ -431,6 +431,7 @@ function rowToNegotiation(row: Record<string, unknown>): Negotiation {
     responseMessage: row.response_message as string | undefined,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
+    archivedAt: row.archived_at as string | undefined,
   };
 }
 
@@ -447,13 +448,38 @@ export class NegotiationQueries {
   }
 
   listIncoming(): Negotiation[] {
-    const rows = this.db.prepare("SELECT * FROM negotiations WHERE role = 'seller' ORDER BY created_at DESC").all();
+    const rows = this.db.prepare("SELECT * FROM negotiations WHERE role = 'seller' AND archived_at IS NULL AND status IN ('pending', 'countered') ORDER BY created_at DESC").all();
     return rows.map(r => rowToNegotiation(r as Record<string, unknown>));
   }
 
   listOutgoing(): Negotiation[] {
-    const rows = this.db.prepare("SELECT * FROM negotiations WHERE role = 'buyer' ORDER BY created_at DESC").all();
+    const rows = this.db.prepare("SELECT * FROM negotiations WHERE role = 'buyer' AND archived_at IS NULL AND status IN ('pending', 'countered') ORDER BY created_at DESC").all();
     return rows.map(r => rowToNegotiation(r as Record<string, unknown>));
+  }
+
+  listResolved(): Negotiation[] {
+    const rows = this.db.prepare("SELECT * FROM negotiations WHERE archived_at IS NULL AND status IN ('accepted', 'rejected', 'withdrawn', 'sold') ORDER BY updated_at DESC").all();
+    return rows.map(r => rowToNegotiation(r as Record<string, unknown>));
+  }
+
+  listArchived(): Negotiation[] {
+    const rows = this.db.prepare("SELECT * FROM negotiations WHERE archived_at IS NOT NULL ORDER BY archived_at DESC").all();
+    return rows.map(r => rowToNegotiation(r as Record<string, unknown>));
+  }
+
+  archive(id: string): Negotiation | undefined {
+    this.db.prepare("UPDATE negotiations SET archived_at = datetime('now') WHERE id = ?").run(id);
+    return this.get(id);
+  }
+
+  unarchive(id: string): Negotiation | undefined {
+    this.db.prepare("UPDATE negotiations SET archived_at = NULL WHERE id = ?").run(id);
+    return this.get(id);
+  }
+
+  delete(id: string): boolean {
+    const result = this.db.prepare("DELETE FROM negotiations WHERE id = ?").run(id);
+    return result.changes > 0;
   }
 
   listForRef(refId: string): Negotiation[] {
@@ -492,7 +518,7 @@ export class NegotiationQueries {
   }
 
   countPending(): number {
-    const row = this.db.prepare("SELECT COUNT(*) as cnt FROM negotiations WHERE status = 'pending' AND role = 'seller'").get() as { cnt: number };
+    const row = this.db.prepare("SELECT COUNT(*) as cnt FROM negotiations WHERE status = 'pending' AND role = 'seller' AND archived_at IS NULL").get() as { cnt: number };
     return row.cnt;
   }
 }

@@ -8,7 +8,7 @@ import { sanitizeObject } from '@reffo/protocol';
 
 const router = Router();
 
-// GET /negotiations?role=buyer|seller
+// GET /negotiations?role=buyer|seller|resolved|archived
 router.get('/', (req: Request, res: Response) => {
   const negotiations = new NegotiationQueries();
   const role = String(req.query.role || '');
@@ -18,6 +18,12 @@ router.get('/', (req: Request, res: Response) => {
   }
   if (role === 'seller') {
     return res.json(negotiations.listIncoming());
+  }
+  if (role === 'resolved') {
+    return res.json(negotiations.listResolved());
+  }
+  if (role === 'archived') {
+    return res.json(negotiations.listArchived());
   }
 
   // Return all if no role filter
@@ -50,6 +56,9 @@ router.post('/', async (req: Request, res: Response) => {
   }
   if (typeof price !== 'number' || price <= 0) {
     return res.status(400).json({ error: 'price must be a positive number' });
+  }
+  if (beaconId === sellerBeaconId) {
+    return res.status(400).json({ error: 'Cannot send a proposal to yourself' });
   }
 
   const negotiationId = uuid();
@@ -235,6 +244,39 @@ router.patch('/:id/withdraw', (req: Request, res: Response) => {
 
   const updated = negotiations.updateStatus(negId, 'withdrawn');
   res.json(updated);
+});
+
+// PATCH /negotiations/:id/archive — move to archive
+router.patch('/:id/archive', (req: Request, res: Response) => {
+  const negotiations = new NegotiationQueries();
+  const negId = String(req.params.id);
+  const negotiation = negotiations.get(negId);
+  if (!negotiation) return res.status(404).json({ error: 'Negotiation not found' });
+
+  const updated = negotiations.archive(negId);
+  res.json(updated);
+});
+
+// PATCH /negotiations/:id/unarchive — restore from archive
+router.patch('/:id/unarchive', (req: Request, res: Response) => {
+  const negotiations = new NegotiationQueries();
+  const negId = String(req.params.id);
+  const negotiation = negotiations.get(negId);
+  if (!negotiation) return res.status(404).json({ error: 'Negotiation not found' });
+
+  const updated = negotiations.unarchive(negId);
+  res.json(updated);
+});
+
+// DELETE /negotiations/:id — permanently delete
+router.delete('/:id', (req: Request, res: Response) => {
+  const negotiations = new NegotiationQueries();
+  const negId = String(req.params.id);
+  const negotiation = negotiations.get(negId);
+  if (!negotiation) return res.status(404).json({ error: 'Negotiation not found' });
+
+  negotiations.delete(negId);
+  res.json({ ok: true });
 });
 
 export default router;
