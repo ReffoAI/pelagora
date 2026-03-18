@@ -5,9 +5,11 @@
  * Separate from SyncManager (which handles user-account-linked sync).
  */
 
-import type { Ref, Offer } from '@pelagora/pim-protocol';
+import type { Ref, Offer, RefMedia } from '@pelagora/pim-protocol';
 import { blurLocation } from '@pelagora/pim-protocol';
-import { RefQueries, OfferQueries, SettingsQueries } from '../db';
+import { RefQueries, OfferQueries, SettingsQueries, MediaQueries } from '../db';
+import fs from 'fs';
+import path from 'path';
 
 const DEFAULT_WEBAPP_URL = 'https://reffo.ai';
 const RECONCILE_INTERVAL = 10 * 60 * 1000; // 10 minutes
@@ -19,6 +21,18 @@ export interface NetworkMessage {
   senderName?: string;
   senderEmail?: string;
   message: string;
+  createdAt: string;
+}
+
+export interface NetworkOffer {
+  id: string;
+  refId: string;
+  refName: string;
+  buyerId: string;
+  amount: number;
+  currency: string;
+  status: string;
+  message: string | null;
   createdAt: string;
 }
 
@@ -49,7 +63,7 @@ export class NetworkPublisher {
     return settings?.networkPublishEnabled !== false;
   }
 
-  async publishItem(ref: Ref, offers: Offer[]): Promise<{ ok: boolean; webappUrl?: string; error?: string }> {
+  async publishItem(ref: Ref, offers: Offer[], { syncMedia = true }: { syncMedia?: boolean } = {}): Promise<{ ok: boolean; webappUrl?: string; error?: string }> {
     if (!this.isEnabled()) return { ok: false, error: 'Network publishing disabled' };
 
     try {
@@ -104,9 +118,62 @@ export class NetworkPublisher {
         this.refs.setShareUrl(ref.id, item.webappUrl);
       }
 
+      // Sync media after publishing (skip during reconcile to avoid duplicates)
+      if (syncMedia) {
+        this.syncMedia(ref.id).catch(err => {
+          console.warn('[Network] Media sync failed for ref', ref.id, (err as Error).message);
+        });
+      }
+
       return { ok: true, webappUrl: item?.webappUrl };
     } catch (err) {
       return { ok: false, error: (err as Error).message };
+    }
+  }
+
+  async pushMedia(refId: string, media: RefMedia): Promise<{ ok: boolean; error?: string }> {
+    try {
+      const fullPath = path.join(process.cwd(), media.filePath);
+      if (!fs.existsSync(fullPath)) {
+        return { ok: false, error: `File not found: ${media.filePath}` };
+      }
+
+      const fileBuffer = fs.readFileSync(fullPath);
+      const blob = new Blob([fileBuffer], { type: media.mimeType });
+      const fileName = path.basename(media.filePath);
+
+      const formData = new FormData();
+      formData.append('file', blob, fileName);
+      formData.append('beaconId', this.beaconId);
+      formData.append('refId', refId);
+      formData.append('sort_order', String(media.sortOrder));
+
+      const res = await fetch(`${this.baseUrl}/api/network/publish/media`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({})) as Record<string, unknown>;
+        return { ok: false, error: (data.error as string) || `HTTP ${res.status}` };
+      }
+
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: (err as Error).message };
+    }
+  }
+
+  async syncMedia(refId: string): Promise<void> {
+    const media = new MediaQueries();
+    const localMedia = media.listForRef(refId);
+    if (localMedia.length === 0) return;
+
+    for (const m of localMedia) {
+      const result = await this.pushMedia(refId, m);
+      if (!result.ok) {
+        console.warn(`[Network] Media push failed for ${m.id}:`, result.error);
+      }
     }
   }
 
@@ -160,14 +227,13 @@ export class NetworkPublisher {
     const discoverableIds = new Set(discoverable.map(r => r.id));
     const publishedIds = new Set(currentlyPublished.map(r => r.id));
 
-    // Publish new/updated discoverable refs
+    // Publish/update all discoverable refs (upsert handles both new and existing)
     for (const ref of discoverable) {
-      if (!publishedIds.has(ref.id)) {
-        const refOffers = this.offers.list(ref.id).filter(o => o.status === 'active');
-        const result = await this.publishItem(ref, refOffers);
-        if (result.ok) published++;
-        else if (result.error) errors.push(`publish ${ref.id}: ${result.error}`);
-      }
+      const isNew = !publishedIds.has(ref.id);
+      const refOffers = this.offers.list(ref.id).filter(o => o.status === 'active');
+      const result = await this.publishItem(ref, refOffers, { syncMedia: isNew });
+      if (result.ok) published++;
+      else if (result.error) errors.push(`publish ${ref.id}: ${result.error}`);
     }
 
     // Unpublish refs that are no longer discoverable
@@ -182,7 +248,7 @@ export class NetworkPublisher {
     return { published, removed, errors };
   }
 
-  async heartbeat(): Promise<NetworkMessage[]> {
+  async heartbeat(): Promise<{ messages: NetworkMessage[]; offers: NetworkOffer[] }> {
     try {
       const res = await fetch(`${this.baseUrl}/api/network/heartbeat`, {
         method: 'POST',
@@ -190,12 +256,12 @@ export class NetworkPublisher {
         body: JSON.stringify({ beaconId: this.beaconId }),
       });
 
-      if (!res.ok) return [];
+      if (!res.ok) return { messages: [], offers: [] };
 
-      const data = await res.json() as { ok: boolean; messages?: NetworkMessage[] };
-      return data.messages || [];
+      const data = await res.json() as { ok: boolean; messages?: NetworkMessage[]; offers?: NetworkOffer[] };
+      return { messages: data.messages || [], offers: data.offers || [] };
     } catch {
-      return [];
+      return { messages: [], offers: [] };
     }
   }
 
@@ -222,10 +288,14 @@ export class NetworkPublisher {
 
   startHeartbeat(intervalMs?: number): void {
     this.heartbeatTimer = setInterval(async () => {
-      const messages = await this.heartbeat();
+      const { messages, offers } = await this.heartbeat();
       if (messages.length > 0) {
         this.storeMessages(messages);
         console.log(`[Network] Received ${messages.length} message(s) from webapp`);
+      }
+      if (offers.length > 0) {
+        this.storeOffers(offers);
+        console.log(`[Network] Received ${offers.length} offer(s) from webapp`);
       }
     }, intervalMs || HEARTBEAT_INTERVAL);
   }
@@ -239,6 +309,29 @@ export class NetworkPublisher {
     `);
     for (const msg of messages) {
       stmt.run(msg.id, msg.refId, msg.senderName || null, msg.senderEmail || null, msg.message, msg.createdAt);
+    }
+  }
+
+  private storeOffers(offers: NetworkOffer[]): void {
+    const { getDb } = require('../db/schema');
+    const db = getDb();
+    const stmt = db.prepare(`
+      INSERT OR IGNORE INTO negotiations (id, ref_id, ref_name, buyer_beacon_id, seller_beacon_id, price, price_currency, message, status, role, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'seller', ?, ?)
+    `);
+    for (const offer of offers) {
+      stmt.run(
+        offer.id,
+        offer.refId,
+        offer.refName || '',
+        offer.buyerId || 'webapp-user',
+        this.beaconId,
+        offer.amount,
+        offer.currency || 'USD',
+        offer.message || '',
+        offer.createdAt,
+        offer.createdAt,
+      );
     }
   }
 

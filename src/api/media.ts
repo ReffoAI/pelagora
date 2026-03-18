@@ -134,6 +134,16 @@ router.post('/', upload.array('files', MAX_FILES), (req: Request, res: Response)
     }
   }
 
+  // If ref is network-published, push media to webapp
+  if (ref.networkPublished && results.length > 0) {
+    const networkPublisher = req.app.get('networkPublisher');
+    if (networkPublisher) {
+      networkPublisher.syncMedia(refId).catch((err: Error) => {
+        console.warn('[Network] Media sync failed for ref', refId, err.message);
+      });
+    }
+  }
+
   res.status(201).json({ uploaded: results, errors });
 });
 
@@ -246,6 +256,9 @@ router.delete('/:mediaId', (req: Request, res: Response) => {
       });
     }
   }
+
+  // Note: network media deletion not handled here — the webapp retains images
+  // and they'll be cleaned up when the ref is unpublished
 
   res.status(204).send();
 });

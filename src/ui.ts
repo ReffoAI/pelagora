@@ -2342,7 +2342,7 @@ Website = https://reffo.ai</pre>
           var imgHtml = firstPhoto
             ? '<img src="/' + escapeHtml(firstPhoto.filePath) + '" alt="">'
             : '<div style="height:140px;display:flex;align-items:center;justify-content:center;background:var(--bg);color:#D2D5DB;font-size:32px;">&#x1F4F7;</div>';
-          var price = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : ref.price ? '$' + Number(ref.price).toFixed(2) : '';
+          var price = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : ref.price ? fmtCurrency(ref.price, 'USD') : '';
           var statusLabel = statusLabels[ref.listingStatus] || 'Private';
           var statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
           return '<div class="home-recent-card" onclick="openDetail(\\'' + ref.id + '\\')">' + imgHtml + '<div class="card-body"><div class="card-name">' + escapeHtml(ref.name) + '</div><div class="card-meta">' + escapeHtml(ref.category || '') + ' <span class="status-badge ' + statusClass + '">' + statusLabel + '</span></div>' + (price ? '<div class="card-price">' + price + '</div>' : '') + '</div></div>';
@@ -2443,7 +2443,7 @@ Website = https://reffo.ai</pre>
             var statusClass = { active: 'badge-for-sale', sold: 'badge-archived-sold', cancelled: 'badge-archived-deleted' }[offer.status] || 'badge-private';
             return '<div class="recent-list-row">' +
               '<div class="row-img"><span style="color:#1a8a42;font-size:14px;">$</span></div>' +
-              '<div class="row-info"><div class="row-name">' + escapeHtml(offer.priceCurrency + ' ' + offer.price.toFixed(2)) + '</div>' +
+              '<div class="row-info"><div class="row-name">' + escapeHtml(fmtCurrency(offer.price, offer.priceCurrency)) + '</div>' +
               '<div class="row-sub">Ref: ' + escapeHtml(offer.refId).substring(0, 8) + '...</div></div>' +
               '<span class="row-badge badge ' + statusClass + '" style="font-size:10px;padding:0 8px;line-height:22px;">' + escapeHtml(offer.status) + '</span>' +
               '<span class="row-date">' + date + '</span></div>';
@@ -2922,6 +2922,15 @@ Website = https://reffo.ai</pre>
       return d.innerHTML;
     }
 
+    function fmtCurrency(amount, currency) {
+      currency = currency || 'USD';
+      try {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(amount);
+      } catch(e) {
+        return currency + ' ' + Number(amount).toFixed(2);
+      }
+    }
+
     function showMsg(elId, text, ok) {
       const el = document.getElementById(elId);
       el.innerHTML = '<div class="msg ' + (ok ? 'ok' : 'err') + '">' + escapeHtml(text) + '</div>';
@@ -3370,7 +3379,7 @@ Website = https://reffo.ai</pre>
             refs.map(function(ref) {
               var refOffers = offerMap[ref.id] || [];
               var activeOffer = refOffers.find(function(o) { return o.status === 'active'; });
-              var priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
+              var priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? fmtCurrency(activeOffer.price, activeOffer.priceCurrency) : '';
               var photos = (mediaMap[ref.id] || []).filter(function(m) { return m.mediaType === 'photo'; });
               var firstPhoto = photos[0];
               var statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
@@ -3406,7 +3415,7 @@ Website = https://reffo.ai</pre>
           '<div class="rows">' + refs.map(ref => {
             const refOffers = offerMap[ref.id] || [];
             const activeOffer = refOffers.find(o => o.status === 'active');
-            const priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
+            const priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? fmtCurrency(activeOffer.price, activeOffer.priceCurrency) : '';
             const photos = (mediaMap[ref.id] || []).filter(m => m.mediaType === 'photo');
             const firstPhoto = photos[0];
             const statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
@@ -3439,7 +3448,7 @@ Website = https://reffo.ai</pre>
           container.innerHTML = '<div class="cards">' + refs.map(ref => {
             const refOffers = offerMap[ref.id] || [];
             const activeOffer = refOffers.find(o => o.status === 'active');
-            const priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
+            const priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? fmtCurrency(activeOffer.price, activeOffer.priceCurrency) : '';
             const photos = (mediaMap[ref.id] || []).filter(m => m.mediaType === 'photo');
             const firstPhoto = photos[0];
             const catBadges = [ref.category, ref.subcategory].filter(Boolean).map(b =>
@@ -3519,7 +3528,7 @@ Website = https://reffo.ai</pre>
           }
         }
 
-        const priceDisplay = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? escapeHtml(activeOffer.priceCurrency) + ' ' + activeOffer.price.toFixed(2) : 'No price';
+        const priceDisplay = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? fmtCurrency(activeOffer.price, activeOffer.priceCurrency) : 'No price';
         const locParts = [ref.locationCity, ref.locationState, ref.locationZip].filter(Boolean);
         const scopeLabels = { global: 'Global', national: 'National', range: 'Range' };
         let scopeText = '';
@@ -3812,7 +3821,7 @@ Website = https://reffo.ai</pre>
           html += '<div class="invoice-row"><span class="invoice-label">Rental Terms</span><span class="invoice-value" style="font-size:12px;max-width:160px;text-align:right;">' + escapeHtml(ref.rentalTerms) + '</span></div>';
         }
         if (ref.rentalDeposit) {
-          html += '<div class="invoice-row"><span class="invoice-label">Deposit</span><span class="invoice-value">$' + Number(ref.rentalDeposit).toFixed(2) + '</span></div>';
+          html += '<div class="invoice-row"><span class="invoice-label">Deposit</span><span class="invoice-value">' + fmtCurrency(ref.rentalDeposit, 'USD') + '</span></div>';
         }
         if (ref.rentalDuration) {
           html += '<div class="invoice-row"><span class="invoice-label">Duration</span><span class="invoice-value">' + ref.rentalDuration + ' ' + (ref.rentalDurationUnit || 'days') + '</span></div>';
@@ -3821,7 +3830,7 @@ Website = https://reffo.ai</pre>
           html += '<div class="invoice-row"><span class="invoice-label">Purchased</span><span class="invoice-value">' + new Date(ref.purchaseDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '</span></div>';
         }
         if (ref.purchasePrice) {
-          html += '<div class="invoice-row"><span class="invoice-label">Purchase Price</span><span class="invoice-value">$' + Number(ref.purchasePrice).toFixed(2) + '</span></div>';
+          html += '<div class="invoice-row"><span class="invoice-label">Purchase Price</span><span class="invoice-value">' + fmtCurrency(ref.purchasePrice, 'USD') + '</span></div>';
         }
 
         // Hidden invoice rows (future use)
@@ -4293,7 +4302,7 @@ Website = https://reffo.ai</pre>
           const peerHttpPort = entry.peerHttpPort;
           const entrySource = entry.source;
 
-          const priceStr = item.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2) : '';
+          const priceStr = item.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? fmtCurrency(activeOffer.price, activeOffer.priceCurrency) : '';
           const badges = [item.category, item.subcategory].filter(Boolean).map(b =>
             '<span class="badge badge-cat">' + escapeHtml(b) + '</span>'
           ).join('');
@@ -4304,7 +4313,7 @@ Website = https://reffo.ai</pre>
           let actionBtn = '';
           const isOwnCard = peer.beaconId === window._myBeaconId;
           if (!isOwnCard && item.listingStatus === 'for_sale' && activeOffer) {
-            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#EC526F;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + activeOffer.price + ', \\'' + escapeHtml(activeOffer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Buy at ' + escapeHtml(activeOffer.priceCurrency + ' ' + activeOffer.price.toFixed(2)) + '</a>';
+            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#EC526F;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + activeOffer.price + ', \\'' + escapeHtml(activeOffer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Buy at ' + escapeHtml(fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) + '</a>';
           } else if (!isOwnCard && item.listingStatus === 'willing_to_sell') {
             actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#EC526F;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Make Offer</a>';
           }
@@ -4749,7 +4758,7 @@ Website = https://reffo.ai</pre>
       }
 
       const statusLabel = statusLabels[item.listingStatus] || '';
-      const priceDisplay = item.listingStatus === 'willing_to_sell' ? 'Make me sell' : offer ? escapeHtml(offer.priceCurrency) + ' ' + offer.price.toFixed(2) : 'Make an offer';
+      const priceDisplay = item.listingStatus === 'willing_to_sell' ? 'Make me sell' : offer ? fmtCurrency(offer.price, offer.priceCurrency) : 'Make an offer';
       const remoteLoc = [item.locationCity, item.locationState, item.locationZip].filter(Boolean);
       const conditionDisplay = item.condition ? item.condition.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }) : '';
 
@@ -4846,13 +4855,30 @@ Website = https://reffo.ai</pre>
       if (purchaseBtn) html += purchaseBtn;
       html += '</div>';
 
+      // Collapsible "Send a Message" section (only for non-own items)
+      if (!isOwnItem) {
+        const msgId = 'detailMsgSection';
+        html += '<div style="margin:0 30px;border-top:1px solid #E6E8EC;padding-top:8px;">';
+        html += '<button class="contact-toggle" onclick="toggleDetailContact()" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;padding:6px 0;font-size:13px;font-weight:600;color:#777E90;width:100%;text-align:left;">';
+        html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+        html += 'Send a Message';
+        html += '<svg id="detailContactChevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:auto;transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>';
+        html += '</button>';
+        html += '<div id="' + msgId + '" style="display:none;padding-bottom:12px;">';
+        html += '<textarea id="detailMsgText" placeholder="Write a message to the seller..." rows="3" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid #E6E8EC;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box;margin-bottom:8px;"></textarea>';
+        html += '<div style="display:flex;align-items:center;gap:8px;">';
+        html += '<button class="button-gradient" onclick="sendDetailMessage(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')" style="height:34px;padding:0 16px;font-size:13px;">Send</button>';
+        html += '<span id="detailMsgStatus" style="font-size:12px;color:#777E90;"></span>';
+        html += '</div></div></div>';
+      }
+
       // Invoice rows — category added
       const remoteCatParts = [item.category, item.subcategory].filter(Boolean);
       if (remoteCatParts.length > 0) {
         html += '<div class="invoice-row"><span class="invoice-label">Category</span><span class="invoice-value">' + escapeHtml(remoteCatParts.join(' / ')) + '</span></div>';
       }
       if (offer) {
-        html += '<div class="invoice-row"><span class="invoice-label">Item Price</span><span class="invoice-value">' + escapeHtml(offer.priceCurrency + ' ' + offer.price.toFixed(2)) + '</span></div>';
+        html += '<div class="invoice-row"><span class="invoice-label">Item Price</span><span class="invoice-value">' + escapeHtml(fmtCurrency(offer.price, offer.priceCurrency)) + '</span></div>';
       }
       if (conditionDisplay) {
         html += '<div class="invoice-row"><span class="invoice-label">Condition</span><span class="invoice-value">' + escapeHtml(conditionDisplay) + '</span></div>';
@@ -4868,7 +4894,7 @@ Website = https://reffo.ai</pre>
 
       // Total row
       if (offer) {
-        html += '<div class="invoice-row invoice-row-bg"><span class="invoice-label" style="font-weight:600;color:#141416;">Total</span><span class="invoice-value" style="font-size:16px;">' + escapeHtml(offer.priceCurrency + ' ' + offer.price.toFixed(2)) + '</span></div>';
+        html += '<div class="invoice-row invoice-row-bg"><span class="invoice-label" style="font-weight:600;color:#141416;">Total</span><span class="invoice-value" style="font-size:16px;">' + escapeHtml(fmtCurrency(offer.price, offer.priceCurrency)) + '</span></div>';
       }
 
       // Footer
@@ -4916,6 +4942,50 @@ Website = https://reffo.ai</pre>
 
     window.closeProposalModal = function() {
       document.getElementById('proposalModal').classList.add('hidden');
+    };
+
+    // Toggle the collapsible contact section on item detail
+    window.toggleDetailContact = function() {
+      var s = document.getElementById('detailMsgSection');
+      var chev = document.getElementById('detailContactChevron');
+      if (!s) return;
+      var show = s.style.display === 'none';
+      s.style.display = show ? 'block' : 'none';
+      if (chev) chev.style.transform = show ? 'rotate(180deg)' : '';
+    };
+
+    // Send a message from the item detail page (creates a proposal with message-only type)
+    window.sendDetailMessage = async function(refId, refName, sellerBeaconId) {
+      var textarea = document.getElementById('detailMsgText');
+      var statusEl = document.getElementById('detailMsgStatus');
+      var msg = textarea.value.trim();
+      if (!msg) { statusEl.textContent = 'Please enter a message'; statusEl.style.color = '#e74c3c'; return; }
+      statusEl.textContent = 'Sending...';
+      statusEl.style.color = '#777E90';
+      try {
+        var res = await fetch('/negotiations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            refId: refId,
+            refName: refName,
+            sellerBeaconId: sellerBeaconId,
+            price: 0,
+            priceCurrency: 'USD',
+            message: msg,
+          })
+        });
+        if (!res.ok) {
+          var err = await res.json();
+          throw new Error(err.error || 'Failed to send');
+        }
+        textarea.value = '';
+        statusEl.textContent = 'Message sent!';
+        statusEl.style.color = '#2E7D32';
+      } catch (err) {
+        statusEl.textContent = err.message;
+        statusEl.style.color = '#e74c3c';
+      }
     };
 
     window.sendProposal = async function() {
@@ -4976,9 +5046,9 @@ Website = https://reffo.ai</pre>
 
         const displayStatus = negStatusLabels[n.status] || n.status;
 
-        let details = '<strong>' + escapeHtml(n.priceCurrency) + ' ' + n.price.toFixed(2) + '</strong>';
+        let details = '<strong>' + escapeHtml(fmtCurrency(n.price, n.priceCurrency)) + '</strong>';
         if (n.message) details += ' &mdash; ' + escapeHtml(n.message);
-        if (n.counterPrice) details += '<br>Counter: <strong>' + escapeHtml(n.priceCurrency) + ' ' + n.counterPrice.toFixed(2) + '</strong>';
+        if (n.counterPrice) details += '<br>Counter: <strong>' + escapeHtml(fmtCurrency(n.counterPrice, n.priceCurrency)) + '</strong>';
         if (n.responseMessage) details += ' &mdash; ' + escapeHtml(n.responseMessage);
 
         return '<div class="neg-card ' + n.status + '">' +
@@ -5017,7 +5087,7 @@ Website = https://reffo.ai</pre>
       // Add incoming negotiations (offers received)
       cachedIncoming.forEach(function(n) {
         var displayStatus = negStatusLabels[n.status] || n.status;
-        var preview = escapeHtml(n.priceCurrency) + ' ' + n.price.toFixed(2);
+        var preview = escapeHtml(fmtCurrency(n.price, n.priceCurrency));
         if (n.message) preview += ' — ' + n.message;
         items.push({
           type: 'offer',
@@ -5041,7 +5111,7 @@ Website = https://reffo.ai</pre>
       // Add outgoing negotiations (offers sent)
       cachedOutgoing.forEach(function(n) {
         var displayStatus = negStatusLabels[n.status] || n.status;
-        var preview = escapeHtml(n.priceCurrency) + ' ' + n.price.toFixed(2);
+        var preview = escapeHtml(fmtCurrency(n.price, n.priceCurrency));
         if (n.message) preview += ' — ' + n.message;
         items.push({
           type: 'offer',
@@ -5105,7 +5175,7 @@ Website = https://reffo.ai</pre>
         }
         container.innerHTML = '<div class="inbox-list">' + cachedResolved.map(function(n) {
           var displayStatus = negStatusLabels[n.status] || n.status;
-          var preview = escapeHtml(n.priceCurrency) + ' ' + n.price.toFixed(2);
+          var preview = escapeHtml(fmtCurrency(n.price, n.priceCurrency));
           if (n.message) preview += ' — ' + n.message;
           var roleLabel = n.role === 'seller' ? 'From buyer' : 'To seller';
           return renderInboxRow({
@@ -5130,7 +5200,7 @@ Website = https://reffo.ai</pre>
         }
         container.innerHTML = '<div class="inbox-list">' + cachedArchivedNegs.map(function(n) {
           var displayStatus = negStatusLabels[n.status] || n.status;
-          var preview = escapeHtml(n.priceCurrency) + ' ' + n.price.toFixed(2);
+          var preview = escapeHtml(fmtCurrency(n.price, n.priceCurrency));
           return renderInboxRow({
             type: 'offer',
             sender: n.role === 'seller' ? 'From buyer' : 'To seller',
@@ -5347,7 +5417,7 @@ Website = https://reffo.ai</pre>
     window.openRespondModal = function(negId, refName, price, currency, message) {
       document.getElementById('respondNegId').value = negId;
       document.getElementById('respondModalTitle').textContent = 'Respond: ' + refName;
-      document.getElementById('respondOfferPrice').textContent = currency + ' ' + parseFloat(price).toFixed(2);
+      document.getElementById('respondOfferPrice').textContent = fmtCurrency(parseFloat(price), currency);
       document.getElementById('respondOfferMessage').textContent = message || '';
       document.getElementById('respondOfferMessage').style.display = message ? 'block' : 'none';
       document.getElementById('respondCounterPrice').value = '';
