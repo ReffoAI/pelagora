@@ -37,7 +37,6 @@ export function renderUI(): string {
 
     /* Header */
     h1 { font-size: 1.25rem; font-weight: 700; color: #141416; margin: 0; }
-    .header-beacon-icon { height: 26px; width: auto; }
 
     /* App Header — sticky bar */
     .app-header { position: sticky; top: 0; z-index: 100; background: #FCFCFD; border-bottom: 1px solid #E6E8EC; padding: 0 24px; }
@@ -726,7 +725,7 @@ export function renderUI(): string {
   <div class="app-header">
     <div class="app-header-inner">
       <div class="app-header-logo" onclick="sidebarNav('home')">
-        <img class="header-beacon-icon" src="/header-brand.png" alt="Beacon">
+        <span style="font-size:1.25rem;font-weight:700;color:#141416;">Pelagora</span>
       </div>
 
       <!-- Header actions: link + bell + avatar -->
