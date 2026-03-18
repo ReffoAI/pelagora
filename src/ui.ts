@@ -2922,6 +2922,11 @@ Website = https://reffo.ai</pre>
       return d.innerHTML;
     }
 
+    function escapeJs(s) {
+      if (!s) return '';
+      return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '');
+    }
+
     function fmtCurrency(amount, currency) {
       currency = currency || 'USD';
       try {
@@ -4313,9 +4318,9 @@ Website = https://reffo.ai</pre>
           let actionBtn = '';
           const isOwnCard = peer.beaconId === window._myBeaconId;
           if (!isOwnCard && item.listingStatus === 'for_sale' && activeOffer) {
-            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#EC526F;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + activeOffer.price + ', \\'' + escapeHtml(activeOffer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Buy at ' + escapeHtml(fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) + '</a>';
+            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#EC526F;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openBuyModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\', ' + activeOffer.price + ', \\'' + escapeJs(activeOffer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Buy at ' + escapeHtml(fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) + '</a>';
           } else if (!isOwnCard && item.listingStatus === 'willing_to_sell') {
-            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#EC526F;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Make Offer</a>';
+            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#EC526F;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openOfferModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Make Offer</a>';
           }
 
           const idx = lastSearchResults.length;
@@ -4767,10 +4772,10 @@ Website = https://reffo.ai</pre>
       let negotiateBtn = '';
       const isOwnItem = peer.beaconId === window._myBeaconId;
       if (!isOwnItem && item.listingStatus === 'for_sale' && offer) {
-        purchaseBtn = '<button class="button-gradient" onclick="openBuyModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\', ' + offer.price + ', \\'' + escapeHtml(offer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Purchase</button>';
-        negotiateBtn = '<button class="button-stroke" onclick="openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Negotiate</button>';
+        purchaseBtn = '<button class="button-gradient" onclick="openBuyModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\', ' + offer.price + ', \\'' + escapeJs(offer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Purchase</button>';
+        negotiateBtn = '<button class="button-stroke" onclick="openOfferModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Negotiate</button>';
       } else if (!isOwnItem && item.listingStatus === 'willing_to_sell') {
-        purchaseBtn = '<button class="button-gradient" onclick="openOfferModal(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Make an Offer</button>';
+        purchaseBtn = '<button class="button-gradient" onclick="openOfferModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Make an Offer</button>';
       }
 
       let html = '';
@@ -4867,7 +4872,7 @@ Website = https://reffo.ai</pre>
         html += '<div id="' + msgId + '" style="display:none;padding-bottom:12px;">';
         html += '<textarea id="detailMsgText" placeholder="Write a message to the seller..." rows="3" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid #E6E8EC;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box;margin-bottom:8px;"></textarea>';
         html += '<div style="display:flex;align-items:center;gap:8px;">';
-        html += '<button class="button-gradient" onclick="sendDetailMessage(\\'' + escapeHtml(item.id) + '\\', \\'' + escapeHtml(item.name) + '\\', \\'' + escapeHtml(peer.beaconId) + '\\')" style="height:34px;padding:0 16px;font-size:13px;">Send</button>';
+        html += '<button class="button-gradient" onclick="sendDetailMessage(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\')" style="height:34px;padding:0 16px;font-size:13px;">Send</button>';
         html += '<span id="detailMsgStatus" style="font-size:12px;color:#777E90;"></span>';
         html += '</div></div></div>';
       }
@@ -5034,7 +5039,7 @@ Website = https://reffo.ai</pre>
         let actions = '';
         if (isSeller && n.role === 'seller' && n.status === 'pending') {
           actions = '<div class="neg-actions">' +
-            '<button class="btn-primary btn-sm" onclick="openRespondModal(\\'' + n.id + '\\', \\'' + escapeHtml(n.refName || n.refId.slice(0,8)) + '\\', ' + n.price + ', \\'' + escapeHtml(n.priceCurrency) + '\\', \\'' + escapeHtml(n.message || '') + '\\')">Respond</button>' +
+            '<button class="btn-primary btn-sm" onclick="openRespondModal(\\'' + n.id + '\\', \\'' + escapeJs(n.refName || n.refId.slice(0,8)) + '\\', ' + n.price + ', \\'' + escapeJs(n.priceCurrency) + '\\', \\'' + escapeJs(n.message || '') + '\\')">Respond</button>' +
             '</div>';
         } else if (isSeller && n.role === 'seller' && n.status === 'accepted') {
           actions = '<div class="neg-actions">' +
