@@ -818,6 +818,11 @@ export function renderUI(): string {
       Offers & Negotiations
       <span id="sidebarNotifDot" class="sidebar-notif-dot"></span>
     </button>
+    <button class="sidebar-nav-item" data-sidebar="messages" onclick="sidebarNav('messages')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Messages
+      <span id="sidebarMsgDot" class="sidebar-notif-dot"></span>
+    </button>
     <div class="sidebar-divider"></div>
     <div class="sidebar-section-title">Actions</div>
     <button class="sidebar-nav-item" data-sidebar="list" onclick="sidebarNav('list')">
@@ -1430,6 +1435,14 @@ export function renderUI(): string {
     </div>
 
     <!-- Settings Tab -->
+    <div id="tab-messages" class="hidden">
+      <section>
+        <h2>Messages</h2>
+        <p class="text-sm" style="color:#777E90;margin-bottom:20px;">Messages from buyers who found your items on Reffo.ai.</p>
+        <div id="messagesContainer"><p class="empty">Loading messages...</p></div>
+      </section>
+    </div>
+
     <div id="tab-settings" class="hidden">
       <h1 style="font-size:24px;font-weight:600;color:#23262F;margin-bottom:32px;">Settings</h1>
       <div id="updateBanner" class="update-banner">
@@ -2209,7 +2222,7 @@ Website = https://reffo.ai</pre>
 
     // ===== Tab switching =====
     function switchTab(tab) {
-      var tabs = ['home','dashboard','refs','detail','search','negotiations','settings','list','scan','collections','terms','privacy','acceptable-use','for-bots'];
+      var tabs = ['home','dashboard','refs','detail','search','negotiations','messages','settings','list','scan','collections','terms','privacy','acceptable-use','for-bots'];
       tabs.forEach(function(t) {
         var el = document.getElementById('tab-' + t);
         if (el) el.classList.toggle('hidden', tab !== t);
@@ -2219,6 +2232,7 @@ Website = https://reffo.ai</pre>
       if (sfbWrap) sfbWrap.style.display = (tab === 'search') ? '' : 'none';
       if (tab === 'home') { homeLoaded = false; loadHome(); }
       if (tab === 'negotiations') loadNegotiations();
+      if (tab === 'messages') loadMessages();
       if (tab === 'refs') loadMyRefs();
       if (tab === 'settings') loadSettings();
       if (tab === 'scan') loadScanHistory();
@@ -2227,7 +2241,7 @@ Website = https://reffo.ai</pre>
       document.querySelectorAll('.sidebar-nav-item[data-sidebar]').forEach(function(item) {
         item.classList.remove('active');
       });
-      var sidebarMap = { home: 'home', dashboard: 'dashboard', refs: 'refs', detail: 'refs', search: 'search', negotiations: 'negotiations', settings: 'settings', list: 'list', scan: 'scan', collections: 'collections' };
+      var sidebarMap = { home: 'home', dashboard: 'dashboard', refs: 'refs', detail: 'refs', search: 'search', negotiations: 'negotiations', messages: 'messages', settings: 'settings', list: 'list', scan: 'scan', collections: 'collections' };
       var mappedSidebar = sidebarMap[tab];
       if (mappedSidebar) {
         var activeItem = document.querySelector('.sidebar-nav-item[data-sidebar="' + mappedSidebar + '"]');
@@ -2266,6 +2280,7 @@ Website = https://reffo.ai</pre>
       if (target === 'archive') { switchTab('refs'); switchRefSubTab('archive'); return; }
       if (target === 'favorites') { switchTab('refs'); switchRefSubTab('favorites'); return; }
       if (target === 'negotiations') { switchTab('negotiations'); return; }
+      if (target === 'messages') { switchTab('messages'); return; }
       if (target === 'scan') { switchTab('scan'); return; }
       if (target === 'collections') { switchTab('collections'); return; }
       if (target === 'list') { switchTab('list'); return; }
@@ -5258,6 +5273,71 @@ Website = https://reffo.ai</pre>
     const userSvgPlaceholder = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
     const previewSvgPlaceholder = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#B1B5C3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
 
+    async function loadMessages() {
+      var container = document.getElementById('messagesContainer');
+      try {
+        var res = await fetch('/settings/network-messages');
+        var messages = await res.json();
+
+        // Update unread dot
+        var unreadCount = messages.filter(function(m) { return !m.read; }).length;
+        var msgDot = document.getElementById('sidebarMsgDot');
+        if (msgDot) msgDot.style.display = unreadCount > 0 ? 'block' : 'none';
+
+        if (messages.length === 0) {
+          container.innerHTML = '<p class="empty">No messages yet. When buyers contact you through Reffo.ai, their messages will appear here.</p>';
+          return;
+        }
+
+        // Fetch refs for linking
+        var refsRes = await fetch('/refs');
+        var refsData = await refsRes.json();
+        var refMap = {};
+        (refsData.refs || []).forEach(function(r) { refMap[r.id] = r; });
+
+        container.innerHTML = messages.map(function(msg) {
+          var ref = refMap[msg.refId];
+          var refName = ref ? escapeHtml(ref.name) : 'Unknown item';
+          var date = new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+          var unreadStyle = msg.read ? '' : 'border-left:3px solid #7C3AED;';
+
+          return '<div style="background:#fff;border:1px solid #E6E8EC;border-radius:12px;padding:16px;margin-bottom:12px;' + unreadStyle + '">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+              '<div style="display:flex;align-items:center;gap:8px;">' +
+                '<div style="width:32px;height:32px;border-radius:50%;background:#EC526F;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;">' +
+                  (msg.senderName ? escapeHtml(msg.senderName.charAt(0).toUpperCase()) : '?') +
+                '</div>' +
+                '<div>' +
+                  '<div style="font-size:14px;font-weight:600;color:#23262F;">' + (msg.senderName ? escapeHtml(msg.senderName) : 'Anonymous') + '</div>' +
+                  '<div style="font-size:11px;color:#777E90;">' + date + '</div>' +
+                '</div>' +
+              '</div>' +
+              (!msg.read ? '<button onclick="markMessageRead(\'' + msg.id + '\', this)" style="font-size:11px;padding:4px 10px;border-radius:12px;border:1px solid #E6E8EC;background:#FCFCFD;cursor:pointer;color:#777E90;font-family:Poppins,sans-serif;">Mark read</button>' : '') +
+            '</div>' +
+            '<div style="font-size:13px;color:#353945;line-height:1.6;white-space:pre-wrap;margin-bottom:10px;">' + escapeHtml(msg.message) + '</div>' +
+            '<div style="font-size:12px;color:#777E90;">' +
+              'Re: <span style="cursor:pointer;color:#7C3AED;font-weight:500;" onclick="openDetail(\'' + msg.refId + '\')">' + refName + '</span>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      } catch (err) {
+        container.innerHTML = '<p class="empty">Failed to load messages.</p>';
+      }
+    }
+
+    window.markMessageRead = async function(id, btn) {
+      try {
+        await fetch('/settings/network-messages/' + id + '/read', { method: 'PATCH' });
+        var card = btn.closest('div[style*="border-radius:12px"]');
+        if (card) card.style.borderLeft = '';
+        btn.remove();
+        // Update dot
+        var msgDot = document.getElementById('sidebarMsgDot');
+        var remaining = document.querySelectorAll('#messagesContainer button[onclick*="markMessageRead"]').length;
+        if (msgDot) msgDot.style.display = remaining > 0 ? 'block' : 'none';
+      } catch {}
+    };
+
     async function loadSettings() {
       try {
         const res = await fetch('/settings');
@@ -5924,6 +6004,12 @@ Website = https://reffo.ai</pre>
     initOutgoingSnapshot();
     // Pre-load settings so _aiEnabled is set before any detail view opens
     loadSettings();
+    // Check for unread messages to show notification dot
+    fetch('/settings/network-messages').then(function(r) { return r.json(); }).then(function(msgs) {
+      var unread = msgs.filter(function(m) { return !m.read; }).length;
+      var dot = document.getElementById('sidebarMsgDot');
+      if (dot) dot.style.display = unread > 0 ? 'block' : 'none';
+    }).catch(function() {});
 
     // Show "Link to Reffo.ai" header button if no API key is configured
     async function updateHeaderOnLoad() {
