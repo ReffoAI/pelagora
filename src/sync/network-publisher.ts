@@ -11,7 +11,7 @@ import { RefQueries, OfferQueries, SettingsQueries } from '../db';
 
 const DEFAULT_WEBAPP_URL = 'https://reffo.ai';
 const RECONCILE_INTERVAL = 10 * 60 * 1000; // 10 minutes
-const HEARTBEAT_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const HEARTBEAT_INTERVAL = 1 * 60 * 1000; // 1 minute (testing)
 
 export interface NetworkMessage {
   id: string;

@@ -537,6 +537,8 @@ router.get('/network-messages', (_req: Request, res: Response) => {
     senderName: row.sender_name as string | null,
     senderEmail: row.sender_email as string | null,
     message: row.message as string,
+    reply: (row.reply as string | null) || null,
+    repliedAt: (row.replied_at as string | null) || null,
     read: !!(row.read as number),
     createdAt: row.created_at as string,
   }));
@@ -548,6 +550,46 @@ router.patch('/network-messages/:id/read', (req: Request, res: Response) => {
   const db = getDb();
   const result = db.prepare('UPDATE network_messages SET read = 1 WHERE id = ?').run(req.params.id);
   if (result.changes === 0) return res.status(404).json({ error: 'Message not found' });
+  res.json({ ok: true });
+});
+
+// POST /settings/network-messages/:id/reply — Reply to a network message
+router.post('/network-messages/:id/reply', async (req: Request, res: Response) => {
+  const { reply } = req.body;
+  if (!reply || typeof reply !== 'string' || !reply.trim()) {
+    return res.status(400).json({ error: 'reply is required' });
+  }
+  if (reply.length > 2000) {
+    return res.status(400).json({ error: 'Reply must be 2000 characters or less' });
+  }
+
+  const db = getDb();
+  const msg = db.prepare('SELECT * FROM network_messages WHERE id = ?').get(req.params.id) as Record<string, unknown> | undefined;
+  if (!msg) return res.status(404).json({ error: 'Message not found' });
+
+  const beaconId = req.app.get('beaconId');
+  const reffoUrl = process.env.REFFO_API_URL || 'https://reffo.ai';
+
+  // Post reply to webapp
+  try {
+    const upstream = await fetch(`${reffoUrl}/api/network/messages/${req.params.id}/reply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ beaconId, reply: reply.trim() }),
+    });
+
+    if (!upstream.ok) {
+      const data = await upstream.json().catch(() => ({})) as Record<string, unknown>;
+      return res.status(upstream.status).json({ error: (data.error as string) || 'Failed to send reply' });
+    }
+  } catch (err) {
+    return res.status(502).json({ error: 'Failed to reach webapp' });
+  }
+
+  // Store reply locally
+  const now = new Date().toISOString();
+  db.prepare('UPDATE network_messages SET reply = ?, replied_at = ?, read = 1 WHERE id = ?').run(reply.trim(), now, req.params.id);
+
   res.json({ ok: true });
 });
 

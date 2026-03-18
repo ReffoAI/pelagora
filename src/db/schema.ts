@@ -562,12 +562,25 @@ function initSchema(database: Database.Database): void {
       sender_name TEXT,
       sender_email TEXT,
       message TEXT NOT NULL,
+      reply TEXT,
+      replied_at TEXT,
       read INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
     CREATE INDEX IF NOT EXISTS idx_network_messages_ref ON network_messages(ref_id);
     CREATE INDEX IF NOT EXISTS idx_network_messages_read ON network_messages(read);
   `);
+
+  // Migration: add reply columns to existing network_messages
+  try {
+    const nmCols = database.pragma('table_info(network_messages)') as { name: string }[];
+    if (!nmCols.some(c => c.name === 'reply')) {
+      database.exec(`ALTER TABLE network_messages ADD COLUMN reply TEXT`);
+    }
+    if (!nmCols.some(c => c.name === 'replied_at')) {
+      database.exec(`ALTER TABLE network_messages ADD COLUMN replied_at TEXT`);
+    }
+  } catch {}
 }
 
 export function closeDb(): void {

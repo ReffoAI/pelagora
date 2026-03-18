@@ -5301,6 +5301,26 @@ Website = https://reffo.ai</pre>
           var date = new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
           var unreadStyle = msg.read ? '' : 'border-left:3px solid #7C3AED;';
 
+          var replySection = '';
+          if (msg.reply) {
+            var replyDate = msg.repliedAt ? new Date(msg.repliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+            replySection = '<div style="margin-top:10px;padding:10px 12px;background:#F4F0FF;border-radius:8px;border-left:3px solid #7C3AED;">' +
+              '<div style="font-size:11px;color:#7C3AED;font-weight:600;margin-bottom:4px;">Your reply' + (replyDate ? ' · ' + replyDate : '') + '</div>' +
+              '<div style="font-size:13px;color:#353945;line-height:1.5;white-space:pre-wrap;">' + escapeHtml(msg.reply) + '</div>' +
+            '</div>';
+          } else {
+            replySection = '<div style="margin-top:10px;" id="replySection_' + msg.id + '">' +
+              '<button onclick="toggleReplyForm(\\'' + msg.id + '\\')" style="font-size:12px;padding:6px 14px;border-radius:16px;border:1px solid #7C3AED;background:none;cursor:pointer;color:#7C3AED;font-weight:500;font-family:Poppins,sans-serif;">Reply</button>' +
+              '<div id="replyForm_' + msg.id + '" style="display:none;margin-top:8px;">' +
+                '<textarea id="replyText_' + msg.id + '" placeholder="Write your reply..." rows="2" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid #E6E8EC;font-size:13px;resize:vertical;font-family:Poppins,sans-serif;margin-bottom:6px;" maxlength="2000"></textarea>' +
+                '<div style="display:flex;gap:8px;">' +
+                  '<button onclick="sendReply(\\'' + msg.id + '\\')" style="font-size:12px;padding:6px 16px;border-radius:16px;border:none;background:#7C3AED;color:#fff;cursor:pointer;font-weight:500;font-family:Poppins,sans-serif;">Send Reply</button>' +
+                  '<button onclick="toggleReplyForm(\\'' + msg.id + '\\')" style="font-size:12px;padding:6px 12px;border-radius:16px;border:1px solid #E6E8EC;background:none;cursor:pointer;color:#777E90;font-family:Poppins,sans-serif;">Cancel</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+          }
+
           return '<div style="background:#fff;border:1px solid #E6E8EC;border-radius:12px;padding:16px;margin-bottom:12px;' + unreadStyle + '">' +
             '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
               '<div style="display:flex;align-items:center;gap:8px;">' +
@@ -5312,11 +5332,12 @@ Website = https://reffo.ai</pre>
                   '<div style="font-size:11px;color:#777E90;">' + date + '</div>' +
                 '</div>' +
               '</div>' +
-              (!msg.read ? '<button onclick="markMessageRead(\'' + msg.id + '\', this)" style="font-size:11px;padding:4px 10px;border-radius:12px;border:1px solid #E6E8EC;background:#FCFCFD;cursor:pointer;color:#777E90;font-family:Poppins,sans-serif;">Mark read</button>' : '') +
+              (!msg.read ? '<button onclick="markMessageRead(\\'' + msg.id + '\\', this)" style="font-size:11px;padding:4px 10px;border-radius:12px;border:1px solid #E6E8EC;background:#FCFCFD;cursor:pointer;color:#777E90;font-family:Poppins,sans-serif;">Mark read</button>' : '') +
             '</div>' +
             '<div style="font-size:13px;color:#353945;line-height:1.6;white-space:pre-wrap;margin-bottom:10px;">' + escapeHtml(msg.message) + '</div>' +
-            '<div style="font-size:12px;color:#777E90;">' +
-              'Re: <span style="cursor:pointer;color:#7C3AED;font-weight:500;" onclick="openDetail(\'' + msg.refId + '\')">' + refName + '</span>' +
+            replySection +
+            '<div style="font-size:12px;color:#777E90;margin-top:8px;">' +
+              'Re: <span style="cursor:pointer;color:#7C3AED;font-weight:500;" onclick="openDetail(\\'' + msg.refId + '\\')">' + refName + '</span>' +
             '</div>' +
           '</div>';
         }).join('');
@@ -5336,6 +5357,40 @@ Website = https://reffo.ai</pre>
         var remaining = document.querySelectorAll('#messagesContainer button[onclick*="markMessageRead"]').length;
         if (msgDot) msgDot.style.display = remaining > 0 ? 'block' : 'none';
       } catch {}
+    };
+
+    window.toggleReplyForm = function(id) {
+      var form = document.getElementById('replyForm_' + id);
+      if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    };
+
+    window.sendReply = async function(id) {
+      var textarea = document.getElementById('replyText_' + id);
+      var reply = textarea ? textarea.value.trim() : '';
+      if (!reply) return;
+      try {
+        var res = await fetch('/settings/network-messages/' + id + '/reply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reply: reply })
+        });
+        if (res.ok) {
+          // Replace the reply section with the sent reply
+          var section = document.getElementById('replySection_' + id);
+          var replyDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+          if (section) {
+            section.innerHTML = '<div style="padding:10px 12px;background:#F4F0FF;border-radius:8px;border-left:3px solid #7C3AED;">' +
+              '<div style="font-size:11px;color:#7C3AED;font-weight:600;margin-bottom:4px;">Your reply · ' + replyDate + '</div>' +
+              '<div style="font-size:13px;color:#353945;line-height:1.5;white-space:pre-wrap;">' + escapeHtml(reply) + '</div>' +
+            '</div>';
+          }
+        } else {
+          var data = await res.json().catch(function() { return {}; });
+          alert(data.error || 'Failed to send reply');
+        }
+      } catch (err) {
+        alert('Failed to send reply');
+      }
     };
 
     async function loadSettings() {
