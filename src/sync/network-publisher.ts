@@ -13,7 +13,7 @@ import path from 'path';
 
 const DEFAULT_WEBAPP_URL = 'https://reffo.ai';
 const RECONCILE_INTERVAL = 10 * 60 * 1000; // 10 minutes
-const HEARTBEAT_INTERVAL = 1 * 60 * 1000; // 1 minute (testing)
+const HEARTBEAT_INTERVAL = 1 * 60 * 1000; // 1 minute
 
 export interface NetworkMessage {
   id: string;
