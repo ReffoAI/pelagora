@@ -536,6 +536,38 @@ function initSchema(database: Database.Database): void {
       database.exec(`ALTER TABLE negotiations ADD COLUMN archived_at TEXT`);
     }
   } catch {}
+
+  // Migration: add network publishing columns to refs
+  const refsColsForNetwork = database.pragma('table_info(refs)') as { name: string }[];
+  if (!refsColsForNetwork.some(c => c.name === 'network_published')) {
+    database.exec(`ALTER TABLE refs ADD COLUMN network_published INTEGER NOT NULL DEFAULT 0`);
+  }
+  if (!refsColsForNetwork.some(c => c.name === 'share_url')) {
+    database.exec(`ALTER TABLE refs ADD COLUMN share_url TEXT`);
+  }
+
+  // Migration: add network_publish_enabled to beacon_settings
+  try {
+    const settingsColsNetwork = database.pragma('table_info(beacon_settings)') as { name: string }[];
+    if (!settingsColsNetwork.some(c => c.name === 'network_publish_enabled')) {
+      database.exec(`ALTER TABLE beacon_settings ADD COLUMN network_publish_enabled INTEGER NOT NULL DEFAULT 1`);
+    }
+  } catch {}
+
+  // Network messages table for buyer inquiries relayed from webapp
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS network_messages (
+      id TEXT PRIMARY KEY,
+      ref_id TEXT NOT NULL,
+      sender_name TEXT,
+      sender_email TEXT,
+      message TEXT NOT NULL,
+      read INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_network_messages_ref ON network_messages(ref_id);
+    CREATE INDEX IF NOT EXISTS idx_network_messages_read ON network_messages(read);
+  `);
 }
 
 export function closeDb(): void {

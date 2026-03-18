@@ -6,6 +6,7 @@ import { setBeaconId, setDhtStatus } from './api/health';
 import { DhtDiscovery } from './dht';
 import { getDb } from './db';
 import { SyncManager } from './sync';
+import { NetworkPublisher } from './sync/network-publisher';
 import { searchReffo } from './sync/reffo-client';
 import { getVersion } from './version';
 import { SkillLoader, createSkillRegistryRouter, createSkillExportRouter } from './skills';
@@ -57,6 +58,14 @@ async function main(): Promise<void> {
   app.set('beaconId', BEACON_ID);
   app.set('startTime', Date.now());
   setBeaconId(BEACON_ID);
+
+  // Initialize network publisher (always — no API key needed)
+  const webappUrl = process.env.REFFO_WEBAPP_URL || process.env.REFFO_API_URL || 'https://reffo.ai';
+  const networkPublisher = new NetworkPublisher(BEACON_ID, webappUrl);
+  app.set('networkPublisher', networkPublisher);
+  networkPublisher.startReconciliation();
+  networkPublisher.startHeartbeat();
+  console.log('[Network] Publisher initialized — public items will be mirrored to', webappUrl);
 
   // Initialize Reffo.ai sync if API key is configured
   const reffoApiKey = process.env.REFFO_API_KEY;
@@ -208,6 +217,7 @@ async function main(): Promise<void> {
   const shutdown = async () => {
     console.log('\n[Pelagora] Shutting down...');
     server.close();
+    networkPublisher.stop();
     // Force exit after 2s if DHT hangs
     const forceExit = setTimeout(() => process.exit(0), 2000);
     try { await dht.stop(); } catch {}

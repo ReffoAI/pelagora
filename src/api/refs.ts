@@ -7,6 +7,7 @@ import type { ListingStatus } from '@pelagora/pim-protocol';
 import { sanitizeObject } from '@pelagora/pim-protocol';
 
 const VALID_LISTING_STATUSES: ListingStatus[] = ['private', 'for_sale', 'willing_to_sell', 'for_rent'];
+const PUBLIC_STATUSES: ListingStatus[] = ['for_sale', 'willing_to_sell', 'for_rent'];
 
 const router = Router();
 
@@ -49,6 +50,14 @@ router.post('/bulk-archive', (req: Request, res: Response) => {
       const syncManager = req.app.get('syncManager');
       if (syncManager) {
         syncManager.unsyncItem(String(id)).catch(() => {});
+      }
+    }
+
+    // Unpublish from network mirror
+    if (ref.networkPublished) {
+      const networkPublisher = req.app.get('networkPublisher');
+      if (networkPublisher) {
+        networkPublisher.unpublishItem(String(id)).catch(() => {});
       }
     }
 
@@ -197,6 +206,19 @@ router.post('/', (req: Request, res: Response) => {
     purchaseDate: purchaseDate || undefined,
     purchasePrice: purchasePrice != null ? Number(purchasePrice) : undefined,
   }, beaconId);
+
+  // Auto-publish to Reffo network if listing is public
+  if (PUBLIC_STATUSES.includes(ref.listingStatus)) {
+    const networkPublisher = req.app.get('networkPublisher');
+    if (networkPublisher) {
+      const { OfferQueries } = require('../db');
+      const refOffers = new OfferQueries().list(ref.id).filter((o: { status: string }) => o.status === 'active');
+      networkPublisher.publishItem(ref, refOffers).catch((err: Error) => {
+        console.warn('[Network] Auto-publish failed for ref', ref.id, err.message);
+      });
+    }
+  }
+
   res.status(201).json(ref);
 });
 
@@ -250,6 +272,23 @@ router.patch('/:id', (req: Request, res: Response) => {
     }
   }
 
+  // Network publish: publish/unpublish based on listing status change
+  const networkPublisher = req.app.get('networkPublisher');
+  if (networkPublisher) {
+    const isPublic = PUBLIC_STATUSES.includes(updated.listingStatus);
+    if (isPublic) {
+      const { OfferQueries } = require('../db');
+      const refOffers = new OfferQueries().list(updated.id).filter((o: { status: string }) => o.status === 'active');
+      networkPublisher.publishItem(updated, refOffers).catch((err: Error) => {
+        console.warn('[Network] Auto-publish failed for ref', updated.id, err.message);
+      });
+    } else if (updated.networkPublished) {
+      networkPublisher.unpublishItem(updated.id).catch((err: Error) => {
+        console.warn('[Network] Auto-unpublish failed for ref', updated.id, err.message);
+      });
+    }
+  }
+
   res.json(updated);
 });
 
@@ -267,6 +306,14 @@ router.delete('/:id', (req: Request, res: Response) => {
     const syncManager = req.app.get('syncManager');
     if (syncManager) {
       syncManager.unsyncItem(refId).catch(() => {});
+    }
+  }
+
+  // Unpublish from network mirror
+  if (ref.networkPublished) {
+    const networkPublisher = req.app.get('networkPublisher');
+    if (networkPublisher) {
+      networkPublisher.unpublishItem(refId).catch(() => {});
     }
   }
 

@@ -505,4 +505,50 @@ router.delete('/profile-picture', (_req: Request, res: Response) => {
   res.json({ ok: true });
 });
 
+// POST /settings/network-publish — Toggle network publishing
+router.post('/network-publish', (req: Request, res: Response) => {
+  const settingsQ = new SettingsQueries();
+  const { enabled } = req.body;
+
+  if (typeof enabled !== 'boolean') {
+    return res.status(400).json({ error: 'enabled must be a boolean' });
+  }
+
+  settingsQ.upsert({ networkPublishEnabled: enabled });
+
+  // If disabling, unpublish all items via reconciliation
+  if (!enabled) {
+    const networkPublisher = req.app.get('networkPublisher');
+    if (networkPublisher) {
+      networkPublisher.reconcile().catch(() => {});
+    }
+  }
+
+  res.json({ ok: true, networkPublishEnabled: enabled });
+});
+
+// GET /settings/network-messages — List received network messages
+router.get('/network-messages', (_req: Request, res: Response) => {
+  const db = getDb();
+  const rows = db.prepare('SELECT * FROM network_messages ORDER BY created_at DESC LIMIT 100').all();
+  const messages = (rows as Record<string, unknown>[]).map(row => ({
+    id: row.id as string,
+    refId: row.ref_id as string,
+    senderName: row.sender_name as string | null,
+    senderEmail: row.sender_email as string | null,
+    message: row.message as string,
+    read: !!(row.read as number),
+    createdAt: row.created_at as string,
+  }));
+  res.json(messages);
+});
+
+// PATCH /settings/network-messages/:id/read — Mark message as read
+router.patch('/network-messages/:id/read', (req: Request, res: Response) => {
+  const db = getDb();
+  const result = db.prepare('UPDATE network_messages SET read = 1 WHERE id = ?').run(req.params.id);
+  if (result.changes === 0) return res.status(404).json({ error: 'Message not found' });
+  res.json({ ok: true });
+});
+
 export default router;

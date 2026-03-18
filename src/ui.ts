@@ -3399,6 +3399,7 @@ Website = https://reffo.ai</pre>
                 (priceStr ? '<span class="row-price">' + escapeHtml(priceStr) + '</span>' : '') +
                 (attrSummary ? '<span class="row-qty">' + escapeHtml(attrSummary) + '</span>' : '') +
                 (ref.quantity > 1 ? '<span class="row-qty">Qty: ' + ref.quantity + '</span>' : '') +
+                (ref.networkPublished ? '<span class="badge" style="font-size:10px;padding:0 8px;line-height:22px;background:#7C3AED;color:#fff;">Published</span>' : '') +
                 (ref.reffoSynced ? '<span class="badge badge-synced" style="font-size:10px;padding:0 8px;line-height:22px;">Synced</span>' : '') +
               '</div>' +
             '</div>';
@@ -3427,6 +3428,7 @@ Website = https://reffo.ai</pre>
               '<div class="card-body">' +
                 '<h3>' + escapeHtml(ref.name) + '</h3>' +
                 '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + catBadges +
+                (ref.networkPublished ? '<span class="badge" style="background:#7C3AED;color:#fff;">Published</span>' : '') +
                 (ref.reffoSynced ? '<span class="badge badge-synced">Synced</span>' : '') + '</div>' +
                 (priceStr ? '<div class="card-price">' + escapeHtml(priceStr) + '</div>' : '') +
                 (cardAttrSummary ? '<div class="card-desc" style="font-size:12px;color:#777E90;margin-top:4px;">' + escapeHtml(cardAttrSummary) + '</div>' : '') +
@@ -3507,14 +3509,19 @@ Website = https://reffo.ai</pre>
         html += '<div class="detail-title-row">';
         html += '<h1>' + escapeHtml(ref.name) + '</h1>';
         html += '<div class="detail-title-actions">';
-        html += '<button onclick="' + (ref.reffoSynced && ref.reffoRefId
-          ? 'navigator.clipboard.writeText(\\'' + ((typeof window !== 'undefined' && window._reffoUrl) || 'https://reffo.ai') + '/items/' + ref.reffoRefId + '\\').then(function(){ showToast(\\'Link copied!\\',\\'\\'); })'
-          : 'showToast(\\'Sync to Reffo.ai to get a shareable link\\',\\'\\')') + '" title="Share"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>';
+        const shareUrl1 = ref.shareUrl
+          || (ref.reffoSynced && ref.reffoRefId ? ((typeof window !== 'undefined' && window._reffoUrl) || 'https://reffo.ai') + '/items/' + ref.reffoRefId : '');
+        html += '<button onclick="' + (shareUrl1
+          ? 'navigator.clipboard.writeText(\\'' + shareUrl1 + '\\').then(function(){ showToast(\\'Link copied!\\',\\'\\'); })'
+          : 'showToast(\\'List publicly to get a shareable link\\',\\'\\')') + '" title="Share"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>';
         html += '<button title="Save"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
         html += '</div></div>';
         html += '<div class="detail-posted-line">';
         html += '<div class="avatar-sm">Y</div>';
         html += '<span class="poster-name">Your Beacon</span>';
+        if (ref.networkPublished) {
+          html += '<span class="badge" style="background:#7C3AED;color:#fff;font-size:11px;">Published</span>';
+        }
         if (locParts.length > 0) {
           html += '<span class="loc-pin"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> ' + escapeHtml(locParts.join(', ')) + '</span>';
         }
@@ -3650,11 +3657,12 @@ Website = https://reffo.ai</pre>
         html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
         html += '</button>';
         html += '<button style="width:32px;height:32px;border-radius:50%;border:1px solid #E6E8EC;background:#FCFCFD;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#777E90;padding:0;" onclick="';
-        if (ref.reffoSynced && ref.reffoRefId) {
-          const reffoUrl = (typeof window !== 'undefined' && window._reffoUrl) || 'https://reffo.ai';
-          html += 'navigator.clipboard.writeText(\\'' + reffoUrl + '/items/' + ref.reffoRefId + '\\').then(function(){ showToast(\\'Link copied!\\',\\'\\'); })';
+        const shareUrl2 = ref.shareUrl
+          || (ref.reffoSynced && ref.reffoRefId ? ((typeof window !== 'undefined' && window._reffoUrl) || 'https://reffo.ai') + '/items/' + ref.reffoRefId : '');
+        if (shareUrl2) {
+          html += 'navigator.clipboard.writeText(\\'' + shareUrl2 + '\\').then(function(){ showToast(\\'Link copied!\\',\\'\\'); })';
         } else {
-          html += 'showToast(\\'Sync to Reffo.ai to get a shareable link\\',\\'\\')';
+          html += 'showToast(\\'List publicly to get a shareable link\\',\\'\\')';
         }
         html += '" title="Share">';
         html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';

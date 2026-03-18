@@ -37,6 +37,8 @@ function rowToRef(row: Record<string, unknown>): Ref {
     purchaseDate: row.purchase_date as string | undefined,
     purchasePrice: row.purchase_price as number | undefined,
     collectionId: row.collection_id as string | undefined,
+    networkPublished: !!(row.network_published as number),
+    shareUrl: row.share_url as string | undefined,
   };
 }
 
@@ -289,6 +291,23 @@ export class RefQueries {
     ).run(id);
     const item = this.get(id);
     return item ? item.quantity : 0;
+  }
+
+  setNetworkPublished(id: string, published: boolean): void {
+    if (published) {
+      this.db.prepare("UPDATE refs SET network_published = 1, updated_at = datetime('now') WHERE id = ?").run(id);
+    } else {
+      this.db.prepare("UPDATE refs SET network_published = 0, share_url = NULL, updated_at = datetime('now') WHERE id = ?").run(id);
+    }
+  }
+
+  listNetworkPublished(): Ref[] {
+    const rows = this.db.prepare('SELECT * FROM refs WHERE network_published = 1 ORDER BY created_at DESC').all();
+    return rows.map(r => rowToRef(r as Record<string, unknown>));
+  }
+
+  setShareUrl(id: string, url: string): void {
+    this.db.prepare("UPDATE refs SET share_url = ?, updated_at = datetime('now') WHERE id = ?").run(url, id);
   }
 }
 
@@ -625,6 +644,7 @@ function rowToSettings(row: Record<string, unknown>): BeaconSettings {
     defaultSellingScope: (row.default_selling_scope as SellingScope) || 'global',
     defaultSellingRadiusMiles: (row.default_selling_radius_miles as number) || 250,
     profilePicturePath: row.profile_picture_path as string | undefined,
+    networkPublishEnabled: row.network_publish_enabled == null ? true : !!(row.network_publish_enabled as number),
   };
 }
 
@@ -655,6 +675,7 @@ export class SettingsQueries {
       if (data.defaultSellingScope !== undefined) { fields.push('default_selling_scope = ?'); values.push(data.defaultSellingScope); }
       if (data.defaultSellingRadiusMiles !== undefined) { fields.push('default_selling_radius_miles = ?'); values.push(data.defaultSellingRadiusMiles); }
       if (data.profilePicturePath !== undefined) { fields.push('profile_picture_path = ?'); values.push(data.profilePicturePath); }
+      if (data.networkPublishEnabled !== undefined) { fields.push('network_publish_enabled = ?'); values.push(data.networkPublishEnabled ? 1 : 0); }
       if (fields.length > 0) {
         fields.push("updated_at = datetime('now')");
         values.push('default');
