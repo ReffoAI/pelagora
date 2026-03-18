@@ -3801,12 +3801,15 @@ Website = https://reffo.ai</pre>
 
         // Network publish status
         if (ref.networkPublished) {
-          html += '<div style="margin:14px 20px;padding:10px 16px;background:#F3F0FF;border:1px solid #D8CCF1;border-radius:12px;display:flex;align-items:center;gap:10px;">';
-          html += '<span style="font-size:16px;">&#127760;</span>';
-          html += '<div>';
-          html += '<div style="font-size:13px;font-weight:600;color:#5B21B6;">Published to Reffo.ai</div>';
-          html += '<div style="font-size:11px;color:#7C3AED;margin-top:1px;">Public items are automatically mirrored for broader discovery.</div>';
+          html += '<div style="margin:14px 20px;padding:10px 16px;background:#F3F0FF;border:1px solid #D8CCF1;border-radius:12px;display:flex;align-items:center;justify-content:space-between;">';
+          html += '<div style="display:flex;align-items:center;gap:8px;">';
+          html += '<span style="font-size:14px;">&#127760;</span>';
+          html += '<span style="font-size:13px;font-weight:600;color:#5B21B6;">Published to Reffo.ai</span>';
           html += '</div>';
+          html += '<span style="position:relative;display:inline-flex;" onmouseenter="this.querySelector(\\'.npt\\').style.display=\\'block\\'" onmouseleave="this.querySelector(\\'.npt\\').style.display=\\'none\\'">';
+          html += '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:help;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+          html += '<div class="npt" style="display:none;position:absolute;right:0;top:24px;width:220px;padding:10px 12px;background:#fff;border:1px solid #D8CCF1;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-size:11px;color:#5B21B6;line-height:1.5;z-index:10;">Public items are automatically mirrored on Reffo.ai for broader discovery by search engines and buyers.</div>';
+          html += '</span>';
           html += '</div>';
         }
 
