@@ -2342,7 +2342,7 @@ Website = https://reffo.ai</pre>
           var imgHtml = firstPhoto
             ? '<img src="/' + escapeHtml(firstPhoto.filePath) + '" alt="">'
             : '<div style="height:140px;display:flex;align-items:center;justify-content:center;background:var(--bg);color:#D2D5DB;font-size:32px;">&#x1F4F7;</div>';
-          var price = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : ref.price ? fmtCurrency(ref.price, 'USD') : '';
+          var price = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : ref.price > 0 ? fmtCurrency(ref.price, 'USD') : (ref.listingStatus !== 'private' ? 'Free' : '');
           var statusLabel = statusLabels[ref.listingStatus] || 'Private';
           var statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
           return '<div class="home-recent-card" onclick="openDetail(\\'' + ref.id + '\\')">' + imgHtml + '<div class="card-body"><div class="card-name">' + escapeHtml(ref.name) + '</div><div class="card-meta">' + escapeHtml(ref.category || '') + ' <span class="status-badge ' + statusClass + '">' + statusLabel + '</span></div>' + (price ? '<div class="card-price">' + price + '</div>' : '') + '</div></div>';
@@ -3169,6 +3169,15 @@ Website = https://reffo.ai</pre>
         const priceVal = document.getElementById('refPrice').value;
         const price = priceVal ? parseFloat(priceVal) : 0;
         const currency = document.getElementById('refCurrency').value;
+
+        // Confirm free listing if for_sale/for_rent with no price
+        if ((listingStatus === 'for_sale' || listingStatus === 'for_rent') && price === 0) {
+          if (!confirm('No price set \\u2014 this item will be listed as Free. Continue?')) {
+            btn.disabled = false;
+            return;
+          }
+        }
+
         const sku = document.getElementById('refSku').value.trim() || undefined;
         const locCity = document.getElementById('refLocCity').value.trim() || undefined;
         const locState = document.getElementById('refLocState').value.trim() || undefined;
@@ -3384,7 +3393,7 @@ Website = https://reffo.ai</pre>
             refs.map(function(ref) {
               var refOffers = offerMap[ref.id] || [];
               var activeOffer = refOffers.find(function(o) { return o.status === 'active'; });
-              var priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? fmtCurrency(activeOffer.price, activeOffer.priceCurrency) : '';
+              var priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : (ref.listingStatus !== 'private' ? 'Free' : '');
               var photos = (mediaMap[ref.id] || []).filter(function(m) { return m.mediaType === 'photo'; });
               var firstPhoto = photos[0];
               var statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
@@ -3420,7 +3429,7 @@ Website = https://reffo.ai</pre>
           '<div class="rows">' + refs.map(ref => {
             const refOffers = offerMap[ref.id] || [];
             const activeOffer = refOffers.find(o => o.status === 'active');
-            const priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? fmtCurrency(activeOffer.price, activeOffer.priceCurrency) : '';
+            const priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : (ref.listingStatus !== 'private' ? 'Free' : '');
             const photos = (mediaMap[ref.id] || []).filter(m => m.mediaType === 'photo');
             const firstPhoto = photos[0];
             const statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
@@ -3453,7 +3462,7 @@ Website = https://reffo.ai</pre>
           container.innerHTML = '<div class="cards">' + refs.map(ref => {
             const refOffers = offerMap[ref.id] || [];
             const activeOffer = refOffers.find(o => o.status === 'active');
-            const priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? fmtCurrency(activeOffer.price, activeOffer.priceCurrency) : '';
+            const priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : (ref.listingStatus !== 'private' ? 'Free' : '');
             const photos = (mediaMap[ref.id] || []).filter(m => m.mediaType === 'photo');
             const firstPhoto = photos[0];
             const catBadges = [ref.category, ref.subcategory].filter(Boolean).map(b =>
@@ -3533,7 +3542,7 @@ Website = https://reffo.ai</pre>
           }
         }
 
-        const priceDisplay = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? fmtCurrency(activeOffer.price, activeOffer.priceCurrency) : 'No price';
+        const priceDisplay = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : 'No price';
         const locParts = [ref.locationCity, ref.locationState, ref.locationZip].filter(Boolean);
         const scopeLabels = { global: 'Global', national: 'National', range: 'Range' };
         let scopeText = '';
@@ -4071,6 +4080,13 @@ Website = https://reffo.ai</pre>
         delete detailCatAttrs._condition;
         const detailAttributes = Object.keys(detailCatAttrs).length > 0 ? detailCatAttrs : null;
         const listingStatus = document.getElementById('dStatus').value;
+
+        // Confirm free listing if for_sale/for_rent with no price
+        var _savePriceEl = document.getElementById('cardPrice');
+        var _savePrice = _savePriceEl ? parseFloat(_savePriceEl.value) : 0;
+        if ((listingStatus === 'for_sale' || listingStatus === 'for_rent') && !_savePrice) {
+          if (!confirm('No price set \\u2014 this item will be listed as Free. Continue?')) return;
+        }
         const rentalTerms = listingStatus === 'for_rent' ? (document.getElementById('dRentalTerms') ? document.getElementById('dRentalTerms').value.trim() || null : null) : null;
         const rentalDeposit = listingStatus === 'for_rent' ? (document.getElementById('dRentalDeposit') && document.getElementById('dRentalDeposit').value ? parseFloat(document.getElementById('dRentalDeposit').value) : null) : null;
         const rentalDuration = listingStatus === 'for_rent' ? (document.getElementById('dRentalDuration') && document.getElementById('dRentalDuration').value ? parseInt(document.getElementById('dRentalDuration').value) : null) : null;
@@ -4307,7 +4323,7 @@ Website = https://reffo.ai</pre>
           const peerHttpPort = entry.peerHttpPort;
           const entrySource = entry.source;
 
-          const priceStr = item.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? fmtCurrency(activeOffer.price, activeOffer.priceCurrency) : '';
+          const priceStr = item.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : 'Free';
           const badges = [item.category, item.subcategory].filter(Boolean).map(b =>
             '<span class="badge badge-cat">' + escapeHtml(b) + '</span>'
           ).join('');
@@ -4763,7 +4779,7 @@ Website = https://reffo.ai</pre>
       }
 
       const statusLabel = statusLabels[item.listingStatus] || '';
-      const priceDisplay = item.listingStatus === 'willing_to_sell' ? 'Make me sell' : offer ? fmtCurrency(offer.price, offer.priceCurrency) : 'Make an offer';
+      const priceDisplay = item.listingStatus === 'willing_to_sell' ? 'Make me sell' : offer ? (offer.price === 0 ? 'Free' : fmtCurrency(offer.price, offer.priceCurrency)) : 'Free';
       const remoteLoc = [item.locationCity, item.locationState, item.locationZip].filter(Boolean);
       const conditionDisplay = item.condition ? item.condition.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }) : '';
 
