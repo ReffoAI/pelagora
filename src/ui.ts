@@ -2924,7 +2924,7 @@ Website = https://reffo.ai</pre>
 
     function escapeJs(s) {
       if (!s) return '';
-      return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '');
+      return String(s).replace(/\\\\/g, '\\\\\\\\').replace(/'/g, "\\\\'").replace(/"/g, '\\\\"').replace(/\\n/g, '\\\\n').replace(/\\r/g, '');
     }
 
     function fmtCurrency(amount, currency) {
