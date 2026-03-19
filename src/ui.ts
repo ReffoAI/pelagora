@@ -679,7 +679,7 @@ export function renderUI(): string {
     .neg-group-back:hover { color: #B8521F; }
 
     /* Footer */
-    .app-footer { border-top: 1px solid #CBD5E0; background: #FFFFFF; padding: 0; }
+    .app-footer { border-top: 1px solid #CBD5E0; background: #FFFFFF; padding: 0; margin-left: 240px; }
     .app-footer-inner { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
     .app-footer-grid { display: grid; grid-template-columns: 140px 1fr 1fr 1fr; gap: 40px; }
     .app-footer-brand { display: flex; flex-direction: column; gap: 16px; }
@@ -704,6 +704,7 @@ export function renderUI(): string {
     .app-footer-social a { color: #4A5568; transition: color 0.2s; display: flex; }
     .app-footer-social a:hover { color: #1A1A2E; }
     @media (max-width: 768px) {
+      .app-footer { margin-left: 0; }
       .app-footer-grid { grid-template-columns: 1fr; gap: 32px; }
       .app-footer-col { border-left: none; padding-left: 0; border-top: 1px solid #CBD5E0; padding-top: 24px; }
       .app-footer-bar-inner { flex-direction: column; text-align: center; gap: 12px; }
@@ -738,7 +739,7 @@ export function renderUI(): string {
     .home-quick-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 0 24px 8px; }
     .home-recent-grid { display: flex; gap: 16px; overflow: hidden; }
     .home-recent-grid .home-recent-card { min-width: 200px; max-width: 260px; flex: 1 1 0; }
-    .home-recent-card { background: var(--surface); border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+    .home-recent-card { background: #FFFFFF; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
     .home-recent-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.10); }
     .home-recent-card img { width: 100%; height: 140px; object-fit: cover; display: block; }
     .home-recent-card .card-body { padding: 12px 14px; }
@@ -2101,7 +2102,7 @@ Website = https://reffo.ai</pre>
       <div class="app-footer-grid">
         <!-- Col 1: Logo -->
         <div class="app-footer-brand">
-          <img src="/footer-brand.png" alt="Reffo" style="height: 40px; width: auto;">
+          <img src="/footer-brand.png" alt="Pelagora" style="height: 40px; width: auto;">
           <button id="footerUpdateBtn" class="button-gradient" style="display:none;height:32px;padding:0 16px;font-size:12px;border-radius:16px;" onclick="switchTab('settings')">&#x2B06; Update</button>
         </div>
 
