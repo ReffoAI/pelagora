@@ -5297,12 +5297,12 @@ Website = https://reffo.ai</pre>
         '</div>';
       } else {
         replyHtml = '<div style="margin-top:16px;" id="replySection_' + msg.id + '">' +
-          '<button onclick="toggleReplyForm(\\'' + msg.id + '\\')" style="font-size:13px;padding:8px 18px;border-radius:20px;border:1px solid #1A8A7D;background:none;cursor:pointer;color:#1A8A7D;font-weight:500;font-family:'DM Sans',sans-serif;">Reply</button>' +
+          '<button onclick="toggleReplyForm(\\'' + msg.id + '\\')" style="font-size:13px;padding:8px 18px;border-radius:20px;border:1px solid #1A8A7D;background:none;cursor:pointer;color:#1A8A7D;font-weight:500;">Reply</button>' +
           '<div id="replyForm_' + msg.id + '" style="display:none;margin-top:10px;">' +
-            '<textarea id="replyText_' + msg.id + '" placeholder="Write your reply..." rows="3" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid #CBD5E0;font-size:14px;resize:vertical;font-family:'DM Sans',sans-serif;margin-bottom:8px;" maxlength="2000"></textarea>' +
+            '<textarea id="replyText_' + msg.id + '" placeholder="Write your reply..." rows="3" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid #CBD5E0;font-size:14px;resize:vertical;margin-bottom:8px;" maxlength="2000"></textarea>' +
             '<div style="display:flex;gap:8px;">' +
-              '<button onclick="sendReply(\\'' + msg.id + '\\')" style="font-size:13px;padding:8px 20px;border-radius:20px;border:none;background:#1A8A7D;color:#fff;cursor:pointer;font-weight:500;font-family:'DM Sans',sans-serif;">Send Reply</button>' +
-              '<button onclick="toggleReplyForm(\\'' + msg.id + '\\')" style="font-size:13px;padding:8px 16px;border-radius:20px;border:1px solid #CBD5E0;background:none;cursor:pointer;color:#4A5568;font-family:'DM Sans',sans-serif;">Cancel</button>' +
+              '<button onclick="sendReply(\\'' + msg.id + '\\')" style="font-size:13px;padding:8px 20px;border-radius:20px;border:none;background:#1A8A7D;color:#fff;cursor:pointer;font-weight:500;">Send Reply</button>' +
+              '<button onclick="toggleReplyForm(\\'' + msg.id + '\\')" style="font-size:13px;padding:8px 16px;border-radius:20px;border:1px solid #CBD5E0;background:none;cursor:pointer;color:#4A5568;">Cancel</button>' +
             '</div>' +
           '</div>' +
         '</div>';
