@@ -1059,22 +1059,22 @@ export function renderUI(): string {
     <!-- Dashboard Tab -->
     <div id="tab-dashboard">
       <div class="stat-cards" id="dashboardStats">
-        <div class="stat-card">
+        <div class="stat-card" onclick="sidebarNav('refs')" style="cursor:pointer;">
           <div class="stat-icon pink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
           <div class="stat-value" id="statTotalListed">--</div>
           <div class="stat-label">Total Listed</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" onclick="sidebarNav('inbox');switchInboxTab('offers');" style="cursor:pointer;">
           <div class="stat-icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8l-8 8"/><path d="M8 8h8v8"/></svg></div>
           <div class="stat-value" id="statActiveOffers">--</div>
           <div class="stat-label">Active Offers</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" onclick="sidebarNav('inbox');" style="cursor:pointer;">
           <div class="stat-icon amber"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
           <div class="stat-value" id="statPendingNegs">--</div>
           <div class="stat-label">Pending Negotiations</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" onclick="sidebarNav('favorites');" style="cursor:pointer;">
           <div class="stat-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
           <div class="stat-value" id="statFavorites">--</div>
           <div class="stat-label">Favorites</div>
