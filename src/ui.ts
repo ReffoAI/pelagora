@@ -538,7 +538,8 @@ export function renderUI(): string {
 
     /* Dashboard layout */
     .dashboard-layout { display: flex; min-height: calc(100dvh - 64px); }
-    .sidebar { width: 240px; background: #FFFFFF; border-right: 1px solid #CBD5E0; position: sticky; top: 64px; height: calc(100dvh - 64px); overflow-y: auto; flex-shrink: 0; transition: transform 0.3s; z-index: 90; padding: 16px 0; }
+    .sidebar { width: 240px; background: #FFFFFF; border-right: 1px solid #CBD5E0; position: sticky; top: 64px; height: calc(100dvh - 64px); overflow-y: auto; flex-shrink: 0; transition: transform 0.3s; z-index: 90; padding: 16px 0; scrollbar-width: none; -ms-overflow-style: none; }
+    .sidebar::-webkit-scrollbar { display: none; }
     .sidebar-section-title { padding: 16px 20px 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #4A5568; }
     .sidebar-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 14px; font-weight: 500; color: #1A1A2E; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; text-decoration: none; font-family: 'DM Sans', sans-serif; border-top: none; border-right: none; border-bottom: none; background: none; width: 100%; text-align: left; }
     .sidebar-nav-item:hover { background: rgba(10,94,138,0.03); color: #0A5E8A; }
