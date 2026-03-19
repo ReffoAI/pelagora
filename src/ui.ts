@@ -758,6 +758,7 @@ export function renderUI(): string {
     <div class="app-header-inner">
       <div class="app-header-logo" onclick="sidebarNav('home')">
         <img src="/header-logo.png" alt="Pelagora" style="height:28px;width:auto;">
+        <span style="font-family:'Josefin Sans',sans-serif;font-size:1.1rem;font-weight:600;color:#FFFFFF;text-transform:uppercase;letter-spacing:0.18em;">Pelagora</span>
       </div>
 
       <!-- Header actions: link + bell + avatar -->
