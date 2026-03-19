@@ -20,14 +20,14 @@ export function renderUI(): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>beacon</title>
+  <title>Pelagora</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fira+Sans:wght@700&family=JetBrains+Mono:wght@400&family=Josefin+Sans:wght@600&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Poppins', sans-serif; background: #F4F5F6; color: #23262F; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
+    body { font-family: 'DM Sans', sans-serif; background: #F5F0EB; color: #1A1A2E; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
     .app-content { flex: 1; min-height: calc(100dvh - 80px); }
     .container { max-width: 1100px; padding: 24px; }
 
@@ -36,34 +36,34 @@ export function renderUI(): string {
     @keyframes fadeIn { 0% { opacity: 0; transform: translateY(3px); } 100% { opacity: 1; transform: translateY(0); } }
 
     /* Header */
-    h1 { font-size: 1.25rem; font-weight: 700; color: #141416; margin: 0; }
+    h1 { font-family: 'Fira Sans', sans-serif; font-size: 1.25rem; font-weight: 700; color: #1A1A2E; margin: 0; }
 
     /* App Header — sticky bar */
-    .app-header { position: sticky; top: 0; z-index: 100; background: #FCFCFD; border-bottom: 1px solid #E6E8EC; padding: 0 24px; }
+    .app-header { position: sticky; top: 0; z-index: 100; background: #1A1A2E; border-bottom: 3px solid #D4602A; padding: 0 24px; }
     .app-header-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
     .app-header-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; flex-shrink: 0; }
     .app-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .header-settings-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #E6E8EC; background: #FCFCFD; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; position: relative; color: #777E90; }
-    .header-settings-btn:hover { border-color: #141416; color: #141416; }
-    .header-settings-btn .notif-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: #EC526F; display: none; }
+    .header-settings-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; position: relative; color: rgba(255,255,255,0.6); }
+    .header-settings-btn:hover { border-color: rgba(255,255,255,0.6); color: #FFFFFF; }
+    .header-settings-btn .notif-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: #D4602A; display: none; }
     .sidebar-nav-item { position: relative; }
-    .sidebar-notif-dot { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; background: #EC526F; display: none; }
-    .header-link-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 18px; background: linear-gradient(90deg, #8101B4 0%, #EA526F 100%); border: none; border-radius: 18px; font-size: 13px; font-weight: 500; color: #FCFCFD; cursor: pointer; transition: opacity 0.2s; font-family: 'Poppins', sans-serif; white-space: nowrap; }
+    .sidebar-notif-dot { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; background: #D4602A; display: none; }
+    .header-link-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 18px; background: #D4602A; border: none; border-radius: 18px; font-size: 13px; font-weight: 500; color: #FFFFFF; cursor: pointer; transition: opacity 0.2s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
     .header-link-btn:hover { opacity: 0.9; }
 
     /* Avatar dropdown */
-    .header-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #E6E8EC; background: #FCFCFD; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s; overflow: hidden; font-size: 14px; font-weight: 700; color: #EC526F; font-family: 'Poppins', sans-serif; }
-    .header-avatar:hover { border-color: #EC526F; }
+    .header-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s; overflow: hidden; font-size: 14px; font-weight: 700; color: #FFFFFF; font-family: 'DM Sans', sans-serif; }
+    .header-avatar:hover { border-color: rgba(255,255,255,0.6); }
     .header-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .avatar-dropdown { position: absolute; right: 0; top: 100%; margin-top: 8px; width: 220px; background: #FCFCFD; border: 1px solid #E6E8EC; border-radius: 16px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); padding: 8px 0; z-index: 200; display: none; }
+    .avatar-dropdown { position: absolute; right: 0; top: 100%; margin-top: 8px; width: 220px; background: #FFFFFF; border: 1px solid #CBD5E0; border-radius: 16px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); padding: 8px 0; z-index: 200; display: none; }
     .avatar-dropdown.open { display: block; }
-    .avatar-dropdown .dd-header { padding: 12px 20px; border-bottom: 1px solid #E6E8EC; }
-    .avatar-dropdown .dd-header-name { font-size: 14px; font-weight: 600; color: #141416; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .avatar-dropdown .dd-header-sub { font-size: 12px; color: #777E90; margin-top: 2px; }
-    .avatar-dropdown .dd-item { display: block; width: 100%; padding: 10px 20px; font-size: 14px; font-weight: 500; color: #23262F; cursor: pointer; transition: background 0.15s; border: none; background: none; text-align: left; font-family: 'Poppins', sans-serif; text-decoration: none; }
-    .avatar-dropdown .dd-item:hover { background: #F4F5F6; }
-    .avatar-dropdown .dd-divider { height: 1px; background: #E6E8EC; margin: 4px 0; }
-    .avatar-dropdown .dd-label { padding: 8px 20px 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #777E90; }
+    .avatar-dropdown .dd-header { padding: 12px 20px; border-bottom: 1px solid #CBD5E0; }
+    .avatar-dropdown .dd-header-name { font-size: 14px; font-weight: 600; color: #1A1A2E; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .avatar-dropdown .dd-header-sub { font-size: 12px; color: #4A5568; margin-top: 2px; }
+    .avatar-dropdown .dd-item { display: block; width: 100%; padding: 10px 20px; font-size: 14px; font-weight: 500; color: #1A1A2E; cursor: pointer; transition: background 0.15s; border: none; background: none; text-align: left; font-family: 'DM Sans', sans-serif; text-decoration: none; }
+    .avatar-dropdown .dd-item:hover { background: #EDE8E3; }
+    .avatar-dropdown .dd-divider { height: 1px; background: #CBD5E0; margin: 4px 0; }
+    .avatar-dropdown .dd-label { padding: 8px 20px 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #4A5568; }
 
     /* Mobile responsive */
     @media (max-width: 768px) {
@@ -74,40 +74,40 @@ export function renderUI(): string {
     }
 
     /* Search Filter Bar — 3 segment pill (matching webapp) */
-    .search-filter-bar { display: flex; align-items: center; background: #FCFCFD; border-radius: 48px; box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px #E6E8EC; overflow: hidden; height: 56px; padding-right: 8px; max-width: 660px; margin: 0 auto; }
+    .search-filter-bar { display: flex; align-items: center; background: #FFFFFF; border-radius: 48px; box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px #CBD5E0; overflow: hidden; height: 56px; padding-right: 8px; max-width: 660px; margin: 0 auto; }
     .search-filter-segment { display: flex; align-items: center; gap: 8px; padding: 0 16px; height: 100%; white-space: nowrap; }
-    .search-filter-segment svg { flex-shrink: 0; color: #777E90; }
-    .search-filter-bar input { border: none; outline: none; background: transparent; height: 100%; font-size: 14px; font-weight: 500; font-family: 'Poppins', sans-serif; color: #23262F; flex: 1; min-width: 0; padding: 0; margin: 0; }
-    .search-filter-bar input::placeholder { color: #777E90; font-weight: 400; }
-    .sfb-divider { width: 1px; height: 24px; background: #E6E8EC; flex-shrink: 0; }
-    .search-filter-bar select { border: none; outline: none; background: transparent; height: 100%; font-size: 14px; font-weight: 500; font-family: 'Poppins', sans-serif; color: #23262F; cursor: pointer; -webkit-appearance: none; appearance: none; padding: 0; margin: 0; }
-    .sfb-search-btn { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: #EC526F; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: 4px; transition: background 0.2s; }
-    .sfb-search-btn:hover { background: #DD436C; }
+    .search-filter-segment svg { flex-shrink: 0; color: #4A5568; }
+    .search-filter-bar input { border: none; outline: none; background: transparent; height: 100%; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; color: #1A1A2E; flex: 1; min-width: 0; padding: 0; margin: 0; }
+    .search-filter-bar input::placeholder { color: #4A5568; font-weight: 400; }
+    .sfb-divider { width: 1px; height: 24px; background: #CBD5E0; flex-shrink: 0; }
+    .search-filter-bar select { border: none; outline: none; background: transparent; height: 100%; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; color: #1A1A2E; cursor: pointer; -webkit-appearance: none; appearance: none; padding: 0; margin: 0; }
+    .sfb-search-btn { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: #D4602A; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: 4px; transition: background 0.2s; }
+    .sfb-search-btn:hover { background: #B8521F; }
 
     /* Mobile search — collapsed pill + expanded panel */
-    .mobile-search-pill { display: none; width: 100%; align-items: center; gap: 12px; height: 48px; padding: 0 16px; border-radius: 24px; background: #FCFCFD; border: 1px solid #E6E8EC; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; font-family: 'Poppins', sans-serif; transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.25s ease; }
+    .mobile-search-pill { display: none; width: 100%; align-items: center; gap: 12px; height: 48px; padding: 0 16px; border-radius: 24px; background: #FFFFFF; border: 1px solid #CBD5E0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.25s ease; }
     .mobile-search-pill .pill-text { flex: 1; min-width: 0; text-align: left; }
-    .mobile-search-pill .pill-title { font-size: 14px; font-weight: 500; color: #141416; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .mobile-search-pill .pill-sub { font-size: 11px; color: #777E90; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; }
-    .mobile-search-pill .pill-btn { width: 32px; height: 32px; border-radius: 50%; background: #EC526F; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .mobile-search-pill .pill-title { font-size: 14px; font-weight: 500; color: #1A1A2E; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mobile-search-pill .pill-sub { font-size: 11px; color: #4A5568; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; }
+    .mobile-search-pill .pill-btn { width: 32px; height: 32px; border-radius: 50%; background: #D4602A; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .mobile-search-expanded { display: none; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 0.25s ease, opacity 0.2s ease; }
     .mobile-search-expanded.open { grid-template-rows: 1fr; opacity: 1; }
     .mobile-search-expanded .expand-inner { overflow: hidden; }
-    .mobile-search-expanded .expand-card { background: #FCFCFD; border-radius: 16px; border: 1px solid #E6E8EC; padding: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); transition: transform 0.25s ease; transform: translateY(-8px); }
+    .mobile-search-expanded .expand-card { background: #FFFFFF; border-radius: 16px; border: 1px solid #CBD5E0; padding: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); transition: transform 0.25s ease; transform: translateY(-8px); }
     .mobile-search-expanded.open .expand-card { transform: translateY(0); }
     .expand-field { margin-bottom: 12px; }
-    .expand-field label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: #777E90; margin-bottom: 4px; }
-    .expand-field-row { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; border-radius: 12px; background: #F4F5F6; }
-    .expand-field-row svg { flex-shrink: 0; color: #777E90; }
-    .expand-field-row input { flex: 1; border: none; outline: none; background: transparent; font-size: 14px; font-weight: 500; font-family: 'Poppins', sans-serif; color: #23262F; min-width: 0; padding: 0; margin: 0; }
-    .expand-field-row input::placeholder { color: #777E90; font-weight: 400; }
-    .expand-field-row select { flex: 1; border: none; outline: none; background: transparent; font-size: 14px; font-weight: 500; font-family: 'Poppins', sans-serif; color: #23262F; cursor: pointer; -webkit-appearance: none; appearance: none; padding: 0; margin: 0; }
+    .expand-field label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: #4A5568; margin-bottom: 4px; }
+    .expand-field-row { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; border-radius: 12px; background: #EDE8E3; }
+    .expand-field-row svg { flex-shrink: 0; color: #4A5568; }
+    .expand-field-row input { flex: 1; border: none; outline: none; background: transparent; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; color: #1A1A2E; min-width: 0; padding: 0; margin: 0; }
+    .expand-field-row input::placeholder { color: #4A5568; font-weight: 400; }
+    .expand-field-row select { flex: 1; border: none; outline: none; background: transparent; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; color: #1A1A2E; cursor: pointer; -webkit-appearance: none; appearance: none; padding: 0; margin: 0; }
     .expand-actions { display: flex; gap: 12px; padding-top: 4px; }
-    .expand-actions button { flex: 1; height: 44px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
-    .expand-cancel { border: 1px solid #E6E8EC; background: #FCFCFD; color: #23262F; }
-    .expand-cancel:hover { background: #F4F5F6; }
-    .expand-submit { border: none; background: #EC526F; color: #FCFCFD; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .expand-submit:hover { background: #DD436C; }
+    .expand-actions button { flex: 1; height: 44px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+    .expand-cancel { border: 1px solid #CBD5E0; background: #FFFFFF; color: #1A1A2E; }
+    .expand-cancel:hover { background: #EDE8E3; }
+    .expand-submit { border: none; background: #D4602A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .expand-submit:hover { background: #B8521F; }
 
     @media (max-width: 639px) {
       .search-filter-bar { display: none !important; }
@@ -118,78 +118,78 @@ export function renderUI(): string {
     @media (min-width: 640px) and (max-width: 768px) { .search-filter-segment { padding: 0 10px; } }
 
     /* Layout toggle */
-    .layout-toggle { display: flex; gap: 0; border: 1px solid #E6E8EC; border-radius: 8px; overflow: hidden; }
-    .layout-toggle button { width: 36px; height: 32px; border: none; background: #FCFCFD; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #777E90; transition: all 0.15s; }
-    .layout-toggle button.active { background: #141416; color: #FCFCFD; }
-    .layout-toggle button:hover:not(.active) { background: #F4F5F6; }
+    .layout-toggle { display: flex; gap: 0; border: 1px solid #CBD5E0; border-radius: 8px; overflow: hidden; }
+    .layout-toggle button { width: 36px; height: 32px; border: none; background: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #4A5568; transition: all 0.15s; }
+    .layout-toggle button.active { background: #1A1A2E; color: #FFFFFF; }
+    .layout-toggle button:hover:not(.active) { background: #EDE8E3; }
 
     /* Row layout */
     .rows { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
-    .ref-row { display: flex; align-items: center; gap: 16px; background: #FCFCFD; border-radius: 12px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(15,15,15,0.08); cursor: pointer; transition: all 0.15s; }
+    .ref-row { display: flex; align-items: center; gap: 16px; background: #FFFFFF; border-radius: 12px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(15,15,15,0.08); cursor: pointer; transition: all 0.15s; }
     .ref-row:hover { box-shadow: 0 4px 12px rgba(15,15,15,0.12); transform: translateY(-1px); }
-    .ref-row .row-img { width: 48px; height: 48px; border-radius: 8px; overflow: hidden; background: #F4F5F6; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .ref-row .row-img { width: 48px; height: 48px; border-radius: 8px; overflow: hidden; background: #EDE8E3; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
     .ref-row .row-img img { width: 100%; height: 100%; object-fit: cover; }
-    .ref-row .row-img .placeholder { color: #E6E8EC; font-size: 1.2rem; }
-    .ref-row .row-name { font-size: 14px; font-weight: 600; color: #141416; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ref-row .row-img .placeholder { color: #CBD5E0; font-size: 1.2rem; }
+    .ref-row .row-name { font-size: 14px; font-weight: 600; color: #1A1A2E; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .ref-row .row-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .ref-row .row-price { font-size: 14px; font-weight: 700; color: #1a8a42; white-space: nowrap; }
-    .ref-row .row-qty { font-size: 12px; color: #777E90; white-space: nowrap; }
+    .ref-row .row-price { font-size: 14px; font-weight: 700; color: #2D8A6E; white-space: nowrap; }
+    .ref-row .row-qty { font-size: 12px; color: #4A5568; white-space: nowrap; }
 
     /* Sections — Card.module.sass shadow depth */
-    section { background: #FCFCFD; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); }
-    h2 { font-size: 16px; font-weight: 700; color: #141416; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #EC526F; text-transform: uppercase; letter-spacing: 0.02em; }
+    section { background: #FFFFFF; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.06); }
+    h2 { font-family: 'Fira Sans', sans-serif; font-size: 16px; font-weight: 700; color: #1A1A2E; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #0A5E8A; text-transform: uppercase; letter-spacing: 0.02em; }
 
     /* Settings cards — scoped overrides to match webapp Account page */
     .settings-card { padding: 32px; margin-bottom: 32px; }
-    .settings-card h2 { font-size: 18px; font-weight: 600; color: #23262F; text-transform: none; letter-spacing: 0; border-bottom: 1px solid #E6E8EC; padding-bottom: 16px; margin-bottom: 24px; }
-    .settings-card .info-row { display: flex; justify-content: space-between; font-size: 14px; padding: 12px 0; border-bottom: 1px solid #F4F5F6; }
+    .settings-card h2 { font-size: 18px; font-weight: 600; color: #1A1A2E; text-transform: none; letter-spacing: 0; border-bottom: 1px solid #CBD5E0; padding-bottom: 16px; margin-bottom: 24px; }
+    .settings-card .info-row { display: flex; justify-content: space-between; font-size: 14px; padding: 12px 0; border-bottom: 1px solid #EDE8E3; }
     .settings-card .info-row:last-child { border-bottom: none; }
-    .settings-card .info-label { color: #777E90; font-weight: 500; }
-    .settings-card .info-value { font-weight: 600; color: #23262F; }
+    .settings-card .info-label { color: #4A5568; font-weight: 500; }
+    .settings-card .info-value { font-weight: 600; color: #1A1A2E; }
 
     /* Favorite heart button — absolute-positioned on search result cards */
     .fav-heart { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.85); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
     .fav-heart:hover { background: #fff; transform: scale(1.1); }
-    .fav-heart.active { background: #FFF0F3; }
-    .fav-heart.active svg { fill: #EA526F; stroke: #EA526F; }
+    .fav-heart.active { background: #FDE8E8; }
+    .fav-heart.active svg { fill: #C94444; stroke: #C94444; }
     /* Favorite filter toggle button in search toolbar */
-    .fav-filter-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; border: 1px solid #E6E8EC; background: #FCFCFD; cursor: pointer; color: #777E90; transition: all 0.2s; flex-shrink: 0; }
-    .fav-filter-btn:hover { border-color: #EA526F; color: #EA526F; }
-    .fav-filter-btn.active { background: #FFF0F3; border-color: #EA526F; color: #EA526F; }
+    .fav-filter-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; border: 1px solid #CBD5E0; background: #FFFFFF; cursor: pointer; color: #4A5568; transition: all 0.2s; flex-shrink: 0; }
+    .fav-filter-btn:hover { border-color: #C94444; color: #C94444; }
+    .fav-filter-btn.active { background: #FDE8E8; border-color: #C94444; color: #C94444; }
 
     .update-banner {
-      background: linear-gradient(90deg, rgba(129,1,180,0.06), rgba(234,82,111,0.06));
-      border: 1px solid rgba(129,1,180,0.15);
+      background: linear-gradient(90deg, rgba(10,94,138,0.06), rgba(26,138,125,0.06));
+      border: 1px solid rgba(10,94,138,0.15);
       border-radius: 12px; padding: 16px 20px;
       margin-bottom: 24px; display: none;
     }
     .update-banner .update-title {
-      font-weight: 600; font-size: 14px; color: #23262F; margin-bottom: 4px;
+      font-weight: 600; font-size: 14px; color: #1A1A2E; margin-bottom: 4px;
     }
     .update-banner .update-cmd {
-      font-size: 13px; color: #777E90; font-family: monospace;
+      font-size: 13px; color: #4A5568; font-family: monospace;
     }
 
     /* Forms — Form.module.sass: 48px height, pill shape, 2px border */
-    label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #777E90; text-transform: uppercase; letter-spacing: 0.02em; }
-    input, select { width: 100%; height: 48px; padding: 0 14px; border: 2px solid #E6E8EC; border-radius: 12px; font-size: 14px; font-family: 'Poppins', sans-serif; font-weight: 500; margin-bottom: 14px; background: #FCFCFD; color: #23262F; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; }
-    textarea { width: 100%; padding: 12px 14px; border: 2px solid #E6E8EC; border-radius: 12px; font-size: 14px; font-family: 'Poppins', sans-serif; font-weight: 500; margin-bottom: 14px; background: #FCFCFD; color: #23262F; transition: border-color 0.2s, box-shadow 0.2s; resize: vertical; min-height: 60px; }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: #777E90; box-shadow: none; background: #fff; }
-    input::placeholder, textarea::placeholder { color: #777E90; font-weight: 400; }
+    label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #4A5568; text-transform: uppercase; letter-spacing: 0.02em; }
+    input, select { width: 100%; height: 48px; padding: 0 14px; border: 2px solid #CBD5E0; border-radius: 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; font-weight: 500; margin-bottom: 14px; background: #FFFFFF; color: #1A1A2E; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; }
+    textarea { width: 100%; padding: 12px 14px; border: 2px solid #CBD5E0; border-radius: 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; font-weight: 500; margin-bottom: 14px; background: #FFFFFF; color: #1A1A2E; transition: border-color 0.2s, box-shadow 0.2s; resize: vertical; min-height: 60px; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #4A5568; box-shadow: none; background: #fff; }
+    input::placeholder, textarea::placeholder { color: #4A5568; font-weight: 400; }
     .row { display: flex; gap: 14px; }
     .row > div { flex: 1; }
 
-    /* Buttons — button.sass: 48px height, pill, Poppins bold 700 */
-    .btn-primary { background: #EC526F; color: #FCFCFD; border: none; height: 48px; padding: 0 24px; border-radius: 24px; font-size: 16px; font-weight: 700; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; user-select: none; }
-    .btn-primary:hover { background: #DD436C; }
+    /* Buttons — 48px height, pill, DM Sans bold 600 */
+    .btn-primary { background: #D4602A; color: #FFFFFF; border: none; height: 48px; padding: 0 24px; border-radius: 24px; font-size: 16px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; user-select: none; }
+    .btn-primary:hover { background: #B8521F; }
     .btn-primary:disabled { opacity: 0.5; pointer-events: none; }
     /* Stroke variant — button.sass buttonStroke: inset box-shadow, transparent bg */
-    .btn-secondary { background: transparent; color: #23262F; border: none; box-shadow: inset 0 0 0 2px #E6E8EC; height: 48px; padding: 0 24px; border-radius: 24px; font-size: 14px; font-weight: 500; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; user-select: none; }
-    .btn-secondary:hover { background: #23262F; box-shadow: inset 0 0 0 2px #23262F; color: #FCFCFD; }
+    .btn-secondary { background: transparent; color: #1A1A2E; border: none; box-shadow: inset 0 0 0 2px #CBD5E0; height: 48px; padding: 0 24px; border-radius: 24px; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; user-select: none; }
+    .btn-secondary:hover { background: #1A1A2E; box-shadow: inset 0 0 0 2px #1A1A2E; color: #FFFFFF; }
     /* Danger — button.sass buttonDanger */
-    .btn-danger { background: #E92222; color: #FCFCFD; border: none; height: 48px; padding: 0 24px; border-radius: 24px; font-size: 14px; font-weight: 500; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.5s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; user-select: none; }
-    .btn-danger:hover { background: #c41c1c; }
-    .btn-danger:disabled { background: #E6E8EC; color: #23262F; pointer-events: none; }
+    .btn-danger { background: #C94444; color: #FFFFFF; border: none; height: 48px; padding: 0 24px; border-radius: 24px; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.5s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; user-select: none; }
+    .btn-danger:hover { background: #A93636; }
+    .btn-danger:disabled { background: #CBD5E0; color: #1A1A2E; pointer-events: none; }
     .btn-sm { height: 40px; padding: 0 16px; font-size: 14px; border-radius: 20px; }
 
     /* Cards grid — DealsList.module.sass: 4→3→2→1 column grid */
@@ -198,269 +198,269 @@ export function renderUI(): string {
     @media (max-width: 639px) { .cards { grid-template-columns: 1fr; } }
 
     /* Ref card — Card.module.sass: 16px radius, deep shadow, image hover scale */
-    .card { background: #FCFCFD; border-radius: 16px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .card { background: #FFFFFF; border-radius: 16px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
     .card:hover { transform: translateY(-3px); box-shadow: 0 16px 40px -8px rgba(15,15,15,0.18); }
-    .card-img { width: 100%; height: 180px; position: relative; overflow: hidden; background: #F4F5F6; display: flex; align-items: center; justify-content: center; }
+    .card-img { width: 100%; height: 180px; position: relative; overflow: hidden; background: #EDE8E3; display: flex; align-items: center; justify-content: center; }
     .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s; }
     .card:hover .card-img img { transform: scale(1.1); }
-    .card-img .placeholder { color: #B1B5C3; font-size: 2.5rem; }
+    .card-img .placeholder { color: #718096; font-size: 2.5rem; }
     .card-body { padding: 20px; }
-    .card-body h3 { font-size: 16px; font-weight: 600; color: #141416; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.2s; }
-    .card:hover .card-body h3 { color: #EC526F; }
+    .card-body h3 { font-size: 16px; font-weight: 600; color: #1A1A2E; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.2s; }
+    .card:hover .card-body h3 { color: #0A5E8A; }
     .card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
     /* Badges — status.sass: inline-block, 12px bold uppercase, 13px radius, 26px line-height */
-    .badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 0 12px; border-radius: 13px; line-height: 26px; text-transform: uppercase; }
-    .badge-cat { background: #F4F5F6; color: #777E90; }
-    .badge-private { background: #E6E8EC; color: #353945; }
-    .badge-for-sale { background: #e6f9ed; color: #1a8a42; }
-    .badge-willing { background: #fff8e1; color: #e6a200; }
-    .badge-for-rent { background: #e6f0ff; color: #1a6aba; }
-    .card-price { font-size: 16px; font-weight: 700; color: #1a8a42; margin-top: 4px; }
-    .card-qty { font-size: 12px; color: #777E90; margin-top: 4px; font-weight: 500; }
-    .card-desc { font-size: 14px; color: #777E90; margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.71; }
+    .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 4px 14px; border-radius: 20px; line-height: 1; text-transform: uppercase; letter-spacing: 0.06em; }
+    .badge-cat { background: #EDE8E3; color: #4A5568; }
+    .badge-private { background: #CBD5E0; color: #2D3748; }
+    .badge-for-sale { background: #E6F4EF; color: #2D8A6E; }
+    .badge-willing { background: #FFF3E0; color: #D4922A; }
+    .badge-for-rent { background: #E8F0FA; color: #4A90D9; }
+    .card-price { font-size: 16px; font-weight: 700; color: #2D8A6E; margin-top: 4px; }
+    .card-qty { font-size: 12px; color: #4A5568; margin-top: 4px; font-weight: 500; }
+    .card-desc { font-size: 14px; color: #4A5568; margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.71; }
 
     /* Status segmented control */
-    .status-segmented { display:flex; border-radius:12px; overflow:hidden; border:1px solid #E6E8EC; margin-bottom:14px; }
-    .status-segmented button { flex:1; padding:8px 12px; border:none; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; background:transparent; color:#777E90; text-align:center; white-space:nowrap; font-family:'Poppins',sans-serif; }
-    .seg-active-private { background:#777E90 !important; color:#fff !important; }
-    .seg-active-for_sale { background:#45B36B !important; color:#fff !important; }
-    .seg-active-willing_to_sell { background:#3B82F6 !important; color:#fff !important; }
-    .seg-active-for_rent { background:#F59E0B !important; color:#fff !important; }
+    .status-segmented { display:flex; border-radius:12px; overflow:hidden; border:1px solid #CBD5E0; margin-bottom:14px; }
+    .status-segmented button { flex:1; padding:8px 12px; border:none; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; background:transparent; color:#4A5568; text-align:center; white-space:nowrap; font-family:'DM Sans',sans-serif; }
+    .seg-active-private { background:#4A5568 !important; color:#fff !important; }
+    .seg-active-for_sale { background:#2D8A6E !important; color:#fff !important; }
+    .seg-active-willing_to_sell { background:#4A90D9 !important; color:#fff !important; }
+    .seg-active-for_rent { background:#D4922A !important; color:#fff !important; }
 
     /* Price estimate card */
-    .price-estimate-card { background: linear-gradient(135deg, #f0f2ff 0%, #e8eeff 100%); border: 1px solid #d4dbf5; border-left: 3px solid #7B61FF; border-radius: 12px; padding: 14px 14px 14px 16px; margin-bottom: 14px; }
+    .price-estimate-card { background: linear-gradient(135deg, #E6F5F3 0%, #E6F5F3 100%); border: 1px solid #B2DFD8; border-left: 3px solid #1A8A7D; border-radius: 12px; padding: 14px 14px 14px 16px; margin-bottom: 14px; }
     .price-estimate-card .est-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-    .price-estimate-card .est-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em; color: #5B4FC7; }
+    .price-estimate-card .est-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em; color: #1A8A7D; }
     .price-estimate-card .est-badge { font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 10px; }
-    .price-estimate-card .est-badge-high { background: #e6f9ed; color: #1a8a42; }
-    .price-estimate-card .est-badge-medium { background: #fff8e1; color: #e6a200; }
-    .price-estimate-card .est-badge-low { background: #F4F5F6; color: #777E90; }
-    .price-estimate-card .est-text { font-size: 15px; color: #23262F; }
+    .price-estimate-card .est-badge-high { background: #E6F4EF; color: #2D8A6E; }
+    .price-estimate-card .est-badge-medium { background: #FFF3E0; color: #D4922A; }
+    .price-estimate-card .est-badge-low { background: #EDE8E3; color: #4A5568; }
+    .price-estimate-card .est-text { font-size: 15px; color: #1A1A2E; }
     .price-estimate-card .est-text strong { font-weight: 700; }
-    .price-estimate-card .est-muted { font-size: 14px; color: #777E90; }
-    .price-estimate-spinner { width: 16px; height: 16px; border: 2px solid #92A5EF; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
+    .price-estimate-card .est-muted { font-size: 14px; color: #4A5568; }
+    .price-estimate-spinner { width: 16px; height: 16px; border: 2px solid #1A8A7D; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
     /* AI autofill badge */
-    .autofill-badge { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 1px 6px; border-radius: 8px; background: #f0f2ff; color: #7B61FF; margin-left: 6px; vertical-align: middle; }
-    .autofill-card { background: linear-gradient(135deg, #f0f2ff 0%, #e8eeff 100%); border: 1px solid #d4dbf5; border-left: 3px solid #7B61FF; border-radius: 12px; padding: 14px 14px 14px 16px; margin-bottom: 14px; }
+    .autofill-badge { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 1px 6px; border-radius: 8px; background: #E6F5F3; color: #1A8A7D; margin-left: 6px; vertical-align: middle; }
+    .autofill-card { background: linear-gradient(135deg, #E6F5F3 0%, #E6F5F3 100%); border: 1px solid #B2DFD8; border-left: 3px solid #1A8A7D; border-radius: 12px; padding: 14px 14px 14px 16px; margin-bottom: 14px; }
     .autofill-card .autofill-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-    .autofill-card .autofill-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em; color: #5B4FC7; }
-    .autofill-card .autofill-fields { font-size: 13px; color: #777E90; }
-    .autofill-img-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid #E6E8EC; }
-    .autofill-link { font-size: 12px; color: #7B61FF; text-decoration: none; }
+    .autofill-card .autofill-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em; color: #1A8A7D; }
+    .autofill-card .autofill-fields { font-size: 13px; color: #4A5568; }
+    .autofill-img-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid #CBD5E0; }
+    .autofill-link { font-size: 12px; color: #1A8A7D; text-decoration: none; }
     .autofill-link:hover { text-decoration: underline; }
 
     /* AI suggested image card (near photos) */
-    .ai-suggested-img { background: linear-gradient(135deg, #f0f2ff 0%, #e8eeff 100%); border: 1px solid #d4dbf5; border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
-    .ai-suggested-img .ai-img-preview { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; border: 1px solid #E6E8EC; cursor: pointer; flex-shrink: 0; transition: transform 0.15s; }
+    .ai-suggested-img { background: linear-gradient(135deg, #E6F5F3 0%, #E6F5F3 100%); border: 1px solid #B2DFD8; border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
+    .ai-suggested-img .ai-img-preview { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; border: 1px solid #CBD5E0; cursor: pointer; flex-shrink: 0; transition: transform 0.15s; }
     .ai-suggested-img .ai-img-preview:hover { transform: scale(1.05); }
     .ai-suggested-img .ai-img-info { flex: 1; min-width: 0; }
-    .ai-suggested-img .ai-img-label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #23262F; margin-bottom: 4px; }
-    .ai-suggested-img .ai-img-hint { font-size: 12px; color: #777E90; line-height: 1.4; }
+    .ai-suggested-img .ai-img-label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #1A1A2E; margin-bottom: 4px; }
+    .ai-suggested-img .ai-img-hint { font-size: 12px; color: #4A5568; line-height: 1.4; }
     .ai-suggested-img .ai-img-actions { display: flex; gap: 8px; margin-top: 8px; }
-    .ai-suggested-img .ai-use-btn { display: flex; align-items: center; gap: 5px; background: #7B61FF; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-    .ai-suggested-img .ai-use-btn:hover { background: #6B51EF; }
-    .ai-suggested-img .ai-dismiss-btn { background: none; border: 1px solid #E6E8EC; border-radius: 8px; padding: 6px 10px; font-size: 12px; color: #777E90; cursor: pointer; transition: background 0.15s; }
-    .ai-suggested-img .ai-dismiss-btn:hover { background: #F4F5F6; }
-    .ai-suggested-img .ai-img-expanded { margin-top: 10px; border-radius: 10px; max-width: 100%; max-height: 220px; object-fit: contain; border: 1px solid #E6E8EC; background: #fff; }
+    .ai-suggested-img .ai-use-btn { display: flex; align-items: center; gap: 5px; background: #1A8A7D; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+    .ai-suggested-img .ai-use-btn:hover { background: #1A8A7D; }
+    .ai-suggested-img .ai-dismiss-btn { background: none; border: 1px solid #CBD5E0; border-radius: 8px; padding: 6px 10px; font-size: 12px; color: #4A5568; cursor: pointer; transition: background 0.15s; }
+    .ai-suggested-img .ai-dismiss-btn:hover { background: #EDE8E3; }
+    .ai-suggested-img .ai-img-expanded { margin-top: 10px; border-radius: 10px; max-width: 100%; max-height: 220px; object-fit: contain; border: 1px solid #CBD5E0; background: #fff; }
 
     /* Upload area */
-    .upload-area { border: 2px dashed #E6E8EC; border-radius: 16px; padding: 24px; text-align: center; color: #B1B5C3; cursor: pointer; transition: border-color 0.2s, background 0.2s; margin-bottom: 14px; }
-    .upload-area:hover { border-color: #EC526F; background: rgba(236,82,111,0.03); }
+    .upload-area { border: 2px dashed #CBD5E0; border-radius: 16px; padding: 24px; text-align: center; color: #718096; cursor: pointer; transition: border-color 0.2s, background 0.2s; margin-bottom: 14px; }
+    .upload-area:hover { border-color: #0A5E8A; background: rgba(10,94,138,0.03); }
     .upload-area input[type=file] { display: none; }
     .upload-area p { font-size: 14px; margin-top: 4px; font-weight: 500; }
-    .upload-area .upload-icon { font-size: 1.8rem; color: #B1B5C3; }
+    .upload-area .upload-icon { font-size: 1.8rem; color: #718096; }
 
     /* Tabs */
-    .tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid #E6E8EC; }
-    .tab { padding: 10px 24px; cursor: pointer; font-size: 14px; font-weight: 700; color: #777E90; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.02em; }
-    .tab.active { color: #EC526F; border-bottom-color: #EC526F; }
-    .tab:hover { color: #EC526F; }
+    .tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid #CBD5E0; }
+    .tab { padding: 10px 24px; cursor: pointer; font-size: 14px; font-weight: 700; color: #4A5568; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.02em; }
+    .tab.active { color: #0A5E8A; border-bottom-color: #0A5E8A; }
+    .tab:hover { color: #0A5E8A; }
 
     /* (nav-tabs removed — navigation is in app-header) */
 
     /* Detail view — ImageCarousel.module.sass: flex 3/1, 16px radius */
-    .detail-back { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: #EC526F; cursor: pointer; margin-bottom: 16px; font-weight: 600; transition: color 0.2s; }
-    .detail-back:hover { color: #DD436C; }
+    .detail-back { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: #0A5E8A; cursor: pointer; margin-bottom: 16px; font-weight: 600; transition: color 0.2s; }
+    .detail-back:hover { color: #B8521F; }
     .detail-back svg { flex-shrink: 0; }
     .detail-gallery { display: flex; gap: 12px; margin-bottom: 24px; height: 480px; }
-    .detail-main-img { flex: 3; height: 100%; border-radius: 16px; overflow: hidden; background: #F4F5F6; display: flex; align-items: center; justify-content: center; position: relative; }
+    .detail-main-img { flex: 3; height: 100%; border-radius: 16px; overflow: hidden; background: #EDE8E3; display: flex; align-items: center; justify-content: center; position: relative; }
     .detail-main-img img.blur-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(24px); transform: scale(1.1); opacity: 0.6; z-index: 0; }
     .detail-main-img img.main-img { width: 100%; height: 100%; object-fit: contain; position: relative; z-index: 1; }
-    .detail-main-img .placeholder { color: #B1B5C3; font-size: 3rem; }
+    .detail-main-img .placeholder { color: #718096; font-size: 3rem; }
     .detail-side-imgs { flex: 1; display: flex; flex-direction: column; gap: 12px; height: 100%; }
-    .detail-side-img { flex: 1; min-height: 0; border-radius: 16px; overflow: hidden; background: #F4F5F6; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 0.2s; position: relative; }
+    .detail-side-img { flex: 1; min-height: 0; border-radius: 16px; overflow: hidden; background: #EDE8E3; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 0.2s; position: relative; }
     .detail-side-img:hover { opacity: 0.85; }
     .detail-side-img img { width: 100%; height: 100%; object-fit: cover; }
-    .detail-side-img .placeholder { color: #E6E8EC; font-size: 1.5rem; }
+    .detail-side-img .placeholder { color: #CBD5E0; font-size: 1.5rem; }
     .detail-view-all { position: absolute; inset: 0; background: rgba(20,20,22,0.55); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; border-radius: 16px; }
     .detail-view-all:hover { background: rgba(20,20,22,0.7); }
-    .detail-view-all span { color: #FCFCFD; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .detail-view-all span { color: #FFFFFF; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
     .detail-columns { display: flex; gap: 24px; }
     .detail-left { flex: 1; }
     .detail-right { flex: 0 0 320px; }
     /* Action card — PaymentCard.module.sass: sticky, 15px radius, deep shadow */
-    .action-card { background: #FCFCFD; border-radius: 16px; padding: 24px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); position: sticky; top: 24px; }
-    .action-card .action-price { font-size: 32px; font-weight: 700; color: #141416; margin-bottom: 16px; }
-    .action-card .action-row { display: flex; justify-content: space-between; font-size: 14px; padding: 10px 0; border-bottom: 1px solid #F4F5F6; }
+    .action-card { background: #FFFFFF; border-radius: 16px; padding: 24px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); position: sticky; top: 24px; }
+    .action-card .action-price { font-size: 32px; font-weight: 700; color: #1A1A2E; margin-bottom: 16px; }
+    .action-card .action-row { display: flex; justify-content: space-between; font-size: 14px; padding: 10px 0; border-bottom: 1px solid #EDE8E3; }
     .action-card .action-row:last-of-type { border-bottom: none; }
-    .action-card .action-label { color: #777E90; font-weight: 500; }
-    .action-card .action-value { font-weight: 600; color: #23262F; }
+    .action-card .action-label { color: #4A5568; font-weight: 500; }
+    .action-card .action-value { font-weight: 600; color: #1A1A2E; }
     @media (max-width: 767px) { .detail-columns { flex-direction: column; } .detail-right { flex: none; } .detail-gallery { flex-direction: column; height: auto; } .detail-main-img { flex: none; height: 240px; } .detail-side-imgs { flex-direction: row; height: auto; } .detail-side-img { height: 100px; } }
 
     /* Media management */
     .media-thumbs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
-    .media-thumb { position: relative; width: 90px; height: 90px; border-radius: 16px; overflow: hidden; background: #F4F5F6; }
+    .media-thumb { position: relative; width: 90px; height: 90px; border-radius: 16px; overflow: hidden; background: #EDE8E3; }
     .media-thumb img, .media-thumb video { width: 100%; height: 100%; object-fit: cover; }
-    .media-thumb .del-btn { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; background: rgba(233,34,34,0.9); color: #FCFCFD; border: none; border-radius: 50%; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; transition: transform 0.15s; }
+    .media-thumb .del-btn { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; background: rgba(233,34,34,0.9); color: #FFFFFF; border: none; border-radius: 50%; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; transition: transform 0.15s; }
     .media-thumb .del-btn:hover { transform: scale(1.1); }
 
     /* Negotiation cards */
-    .neg-card { background: #FCFCFD; border-radius: 16px; padding: 20px 24px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); margin-bottom: 16px; border-left: 4px solid #E6E8EC; transition: transform 0.2s; }
+    .neg-card { background: #FFFFFF; border-radius: 16px; padding: 20px 24px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); margin-bottom: 16px; border-left: 4px solid #CBD5E0; transition: transform 0.2s; }
     .neg-card:hover { transform: translateY(-1px); }
-    .neg-card.pending { border-left-color: #FFB900; }
-    .neg-card.accepted { border-left-color: #28a745; }
-    .neg-card.rejected { border-left-color: #E92222; }
+    .neg-card.pending { border-left-color: #D4922A; }
+    .neg-card.accepted { border-left-color: #2D8A6E; }
+    .neg-card.rejected { border-left-color: #C94444; }
     .neg-card.countered { border-left-color: #A4CDE3; }
-    .neg-card.withdrawn { border-left-color: #777E90; }
+    .neg-card.withdrawn { border-left-color: #4A5568; }
     .neg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 
     /* Inbox email-style rows */
-    .inbox-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #F4F5F6; cursor: pointer; transition: background 0.15s; }
-    .inbox-row:hover { background: #F4F5F6; }
-    .inbox-row.unread { font-weight: 600; background: #FAFAFA; }
+    .inbox-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #EDE8E3; cursor: pointer; transition: background 0.15s; }
+    .inbox-row:hover { background: #EDE8E3; }
+    .inbox-row.unread { font-weight: 600; background: #F5F0EB; }
     .inbox-row .inbox-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; }
-    .inbox-row .inbox-icon.offer { background: #fff8e1; color: #e6a200; }
-    .inbox-row .inbox-icon.message { background: #F4F0FF; color: #7C3AED; }
-    .inbox-row .inbox-icon.accepted { background: #e6f9ed; color: #1a8a42; }
-    .inbox-row .inbox-icon.sold { background: #e6f9ed; color: #1a8a42; }
+    .inbox-row .inbox-icon.offer { background: #FFF3E0; color: #D4922A; }
+    .inbox-row .inbox-icon.message { background: #E6F5F3; color: #1A8A7D; }
+    .inbox-row .inbox-icon.accepted { background: #E6F4EF; color: #2D8A6E; }
+    .inbox-row .inbox-icon.sold { background: #E6F4EF; color: #2D8A6E; }
     .inbox-row .inbox-body { flex: 1; min-width: 0; }
-    .inbox-row .inbox-sender { font-size: 13px; color: #23262F; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .inbox-row .inbox-preview { font-size: 12px; color: #777E90; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 400; }
+    .inbox-row .inbox-sender { font-size: 13px; color: #1A1A2E; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .inbox-row .inbox-preview { font-size: 12px; color: #4A5568; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 400; }
     .inbox-row .inbox-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
-    .inbox-row .inbox-date { font-size: 11px; color: #777E90; white-space: nowrap; font-weight: 400; }
+    .inbox-row .inbox-date { font-size: 11px; color: #4A5568; white-space: nowrap; font-weight: 400; }
     .inbox-row .inbox-badge { font-size: 10px; font-weight: 700; padding: 1px 8px; border-radius: 10px; text-transform: uppercase; white-space: nowrap; }
-    .inbox-badge.pending { background: #fff8e1; color: #e6a200; }
-    .inbox-badge.accepted { background: #e6f9ed; color: #1a8a42; }
-    .inbox-badge.rejected { background: #fce8e6; color: #E92222; }
-    .inbox-badge.countered { background: #e1f5fe; color: #0277bd; }
-    .inbox-badge.withdrawn { background: #F4F5F6; color: #777E90; }
-    .inbox-badge.sold { background: #e6f9ed; color: #1a8a42; }
-    .inbox-badge.new-msg { background: #F4F0FF; color: #7C3AED; }
-    .inbox-badge.replied { background: #F4F5F6; color: #777E90; }
-    .inbox-list { background: #fff; border: 1px solid #E6E8EC; border-radius: 12px; overflow: hidden; }
+    .inbox-badge.pending { background: #FFF3E0; color: #D4922A; }
+    .inbox-badge.accepted { background: #E6F4EF; color: #2D8A6E; }
+    .inbox-badge.rejected { background: #FDE8E8; color: #C94444; }
+    .inbox-badge.countered { background: #E8F0FA; color: #4A90D9; }
+    .inbox-badge.withdrawn { background: #EDE8E3; color: #4A5568; }
+    .inbox-badge.sold { background: #E6F4EF; color: #2D8A6E; }
+    .inbox-badge.new-msg { background: #E6F5F3; color: #1A8A7D; }
+    .inbox-badge.replied { background: #EDE8E3; color: #4A5568; }
+    .inbox-list { background: #fff; border: 1px solid #CBD5E0; border-radius: 12px; overflow: hidden; }
     .inbox-list .inbox-row:last-child { border-bottom: none; }
-    .inbox-thread { background: #fff; border: 1px solid #E6E8EC; border-radius: 12px; padding: 20px; }
-    .inbox-thread-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #EC526F; cursor: pointer; margin-bottom: 16px; font-weight: 600; }
-    .inbox-thread-back:hover { color: #DD436C; }
-    .neg-item-name { font-weight: 700; font-size: 16px; color: #141416; }
+    .inbox-thread { background: #fff; border: 1px solid #CBD5E0; border-radius: 12px; padding: 20px; }
+    .inbox-thread-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #0A5E8A; cursor: pointer; margin-bottom: 16px; font-weight: 600; }
+    .inbox-thread-back:hover { color: #B8521F; }
+    .neg-item-name { font-weight: 700; font-size: 16px; color: #1A1A2E; }
     /* Status badge — status.sass */
     .neg-status { font-size: 12px; font-weight: 700; padding: 0 12px; border-radius: 13px; line-height: 26px; text-transform: uppercase; }
-    .neg-status.pending { background: #fff8e1; color: #e6a200; }
-    .neg-status.accepted { background: #e6f9ed; color: #1a8a42; }
-    .neg-status.rejected { background: #fce8e6; color: #E92222; }
-    .neg-status.countered { background: #e1f5fe; color: #0277bd; }
-    .neg-status.withdrawn { background: #F4F5F6; color: #777E90; }
-    .neg-details { font-size: 14px; color: #777E90; margin-bottom: 10px; line-height: 1.71; }
+    .neg-status.pending { background: #FFF3E0; color: #D4922A; }
+    .neg-status.accepted { background: #E6F4EF; color: #2D8A6E; }
+    .neg-status.rejected { background: #FDE8E8; color: #C94444; }
+    .neg-status.countered { background: #E8F0FA; color: #4A90D9; }
+    .neg-status.withdrawn { background: #EDE8E3; color: #4A5568; }
+    .neg-details { font-size: 14px; color: #4A5568; margin-bottom: 10px; line-height: 1.71; }
     .neg-actions { display: flex; gap: 8px; margin-top: 12px; }
 
     /* Modal — Modal.module.sass: rgba($n1, 0.3), 16px radius, deep shadow, 0.4s animation */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20,20,22,0.3); display: flex; align-items: center; justify-content: center; z-index: 999; overflow: auto; padding: 48px; animation: showModal 0.4s forwards; }
     @media (max-width: 767px) { .modal-overlay { padding: 32px 16px; } }
-    .modal { background: #FCFCFD; border-radius: 16px; padding: 50px 40px; width: 544px; max-width: 100%; box-shadow: 0px 64px 64px -48px rgba(15,15,15,0.08); position: relative; z-index: 2; animation: fadeIn 0.4s forwards; }
+    .modal { background: #FFFFFF; border-radius: 16px; padding: 50px 40px; width: 544px; max-width: 100%; box-shadow: 0px 64px 64px -48px rgba(15,15,15,0.08); position: relative; z-index: 2; animation: fadeIn 0.4s forwards; }
     @media (max-width: 767px) { .modal { padding: 32px 24px; } }
-    .modal h3 { font-size: 24px; font-weight: 600; margin-bottom: 20px; color: #141416; }
+    .modal h3 { font-size: 24px; font-weight: 600; margin-bottom: 20px; color: #1A1A2E; }
     .modal .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; flex-wrap: wrap; }
 
     /* Messages */
     .msg { padding: 12px 16px; border-radius: 12px; margin-bottom: 14px; font-size: 14px; font-weight: 500; }
-    .msg.ok { background: #e6f9ed; color: #1a8a42; }
-    .msg.err { background: #fce8e6; color: #E92222; }
-    .empty { color: #B1B5C3; font-style: italic; margin-top: 8px; font-size: 14px; }
-    .beacon-id { font-size: 12px; color: #B1B5C3; word-break: break-all; margin-top: 4px; font-weight: 500; }
+    .msg.ok { background: #E6F4EF; color: #2D8A6E; }
+    .msg.err { background: #FDE8E8; color: #C94444; }
+    .empty { color: #718096; font-style: italic; margin-top: 8px; font-size: 14px; }
+    .beacon-id { font-size: 12px; color: #718096; word-break: break-all; margin-top: 4px; font-weight: 500; }
 
     .hidden { display: none !important; }
 
     /* Sync toggle */
     .sync-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
     .sync-toggle input { display: none; }
-    .sync-toggle .toggle-track { width: 36px; height: 20px; border-radius: 10px; background: #E6E8EC; position: relative; transition: background 0.2s; flex-shrink: 0; }
-    .sync-toggle input:checked + .toggle-track { background: #EC526F; }
+    .sync-toggle .toggle-track { width: 36px; height: 20px; border-radius: 10px; background: #CBD5E0; position: relative; transition: background 0.2s; flex-shrink: 0; }
+    .sync-toggle input:checked + .toggle-track { background: #D4602A; }
     .sync-toggle .toggle-track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform 0.2s; }
     .sync-toggle input:checked + .toggle-track::after { transform: translateX(16px); }
-    .sync-toggle .toggle-label { font-size: 12px; font-weight: 600; color: #777E90; }
-    .badge-synced { background: #e8f0fe; color: #1967d2; }
+    .sync-toggle .toggle-label { font-size: 12px; font-weight: 600; color: #4A5568; }
+    .badge-synced { background: #E8F0FA; color: #4A90D9; }
 
     /* Toast notifications */
     #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
-    .toast { background: #141416; color: #fff; border-radius: 12px; padding: 14px 20px; font-size: 14px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.2); opacity: 0; transform: translateY(-8px); transition: opacity 0.2s, transform 0.2s; min-width: 260px; max-width: 360px; }
+    .toast { background: #1A1A2E; color: #fff; border-radius: 12px; padding: 14px 20px; font-size: 14px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.2); opacity: 0; transform: translateY(-8px); transition: opacity 0.2s, transform 0.2s; min-width: 260px; max-width: 360px; }
     .toast.show { opacity: 1; transform: translateY(0); }
-    .toast-accepted { border-left: 4px solid #2ecc71; }
-    .toast-rejected  { border-left: 4px solid #e74c3c; }
-    .toast-countered { border-left: 4px solid #EC526F; }
-    .toast-sold { border-left: 4px solid #1a8a42; }
+    .toast-accepted { border-left: 4px solid #2D8A6E; }
+    .toast-rejected  { border-left: 4px solid #C94444; }
+    .toast-countered { border-left: 4px solid #0A5E8A; }
+    .toast-sold { border-left: 4px solid #2D8A6E; }
 
     /* Archive badges */
-    .badge-archived-sold { background: #e8eaed; color: #1a8a42; }
-    .badge-archived-deleted { background: #fce8e6; color: #E92222; }
+    .badge-archived-sold { background: #e8eaed; color: #2D8A6E; }
+    .badge-archived-deleted { background: #FDE8E8; color: #C94444; }
 
     /* PaymentCard — Old Reffo: sticky, 15px radius, soft shadow */
-    .payment-card { background: #fff; border-radius: 15px; box-shadow: 0px 35px 46px 0px rgba(0,0,0,0.05); border: 1px solid #E6E8EC; position: sticky; top: 100px; overflow: hidden; }
+    .payment-card { background: #fff; border-radius: 15px; box-shadow: 0px 35px 46px 0px rgba(0,0,0,0.05); border: 1px solid #CBD5E0; position: sticky; top: 100px; overflow: hidden; }
     .payment-card-header { display: flex; justify-content: space-between; align-items: center; padding: 30px 30px 0; }
-    .payment-card-amount { font-size: 24px; font-weight: 700; color: #141416; line-height: 1.2; }
-    .payment-card-amount small { font-size: 14px; font-weight: 500; color: #777E90; display: block; margin-top: 4px; }
-    .payment-card-thumb { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: #F4F5F6; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .payment-card-amount { font-size: 24px; font-weight: 700; color: #1A1A2E; line-height: 1.2; }
+    .payment-card-amount small { font-size: 14px; font-weight: 500; color: #4A5568; display: block; margin-top: 4px; }
+    .payment-card-thumb { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: #EDE8E3; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
     .payment-card-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .payment-card-details { background: #F4F5F6; border-radius: 15px; padding: 20px; margin: 20px 30px; }
+    .payment-card-details { background: #EDE8E3; border-radius: 15px; padding: 20px; margin: 20px 30px; }
     .payment-card-detail-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
-    .payment-card-detail-row .label { font-size: 10px; text-transform: uppercase; color: #777E90; letter-spacing: 0.02em; }
-    .payment-card-detail-row .value { font-size: 14px; font-weight: 600; color: #23262F; }
+    .payment-card-detail-row .label { font-size: 10px; text-transform: uppercase; color: #4A5568; letter-spacing: 0.02em; }
+    .payment-card-detail-row .value { font-size: 14px; font-weight: 600; color: #1A1A2E; }
     .payment-card-buttons { display: flex; gap: 10px; margin: 20px 30px; }
-    .invoice-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; margin: 0 30px; font-size: 14px; color: #23262F; }
-    .invoice-row .invoice-label { color: #777E90; }
+    .invoice-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; margin: 0 30px; font-size: 14px; color: #1A1A2E; }
+    .invoice-row .invoice-label { color: #4A5568; }
     .invoice-row .invoice-value { font-weight: 600; }
-    .invoice-row-bg { background: #F4F5F6; border-radius: 10px; }
-    .payment-card-footer { text-align: center; padding: 15px; margin: 0 30px; color: #777E90; font-size: 12px; }
+    .invoice-row-bg { background: #EDE8E3; border-radius: 10px; }
+    .payment-card-footer { text-align: center; padding: 15px; margin: 0 30px; color: #4A5568; font-size: 12px; }
 
     /* DealBody — Old Reffo: title, posted by, content, info section */
     .deal-body { max-width: 640px; padding-right: 50px; }
-    .deal-title { font-size: 24px; font-weight: 700; color: #141416; margin-bottom: 8px; }
+    .deal-title { font-size: 24px; font-weight: 700; color: #1A1A2E; margin-bottom: 8px; }
     .deal-posted-by { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #E0E0E0; margin-bottom: 16px; }
-    .deal-posted-by .avatar { width: 36px; height: 36px; border-radius: 50%; background: #F4F5F6; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .deal-posted-by .avatar { width: 36px; height: 36px; border-radius: 50%; background: #EDE8E3; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .deal-posted-by .avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .deal-posted-by .poster-name { font-size: 14px; font-weight: 600; color: #23262F; }
-    .deal-posted-by .poster-label { font-size: 12px; color: #777E90; }
-    .deal-content { padding: 20px 0; font-size: 16px; color: #353945; line-height: 1.71; white-space: pre-line; }
-    .deal-heading { font-weight: 700; font-size: 16px; color: #141416; padding: 40px 0 16px; }
+    .deal-posted-by .poster-name { font-size: 14px; font-weight: 600; color: #1A1A2E; }
+    .deal-posted-by .poster-label { font-size: 12px; color: #4A5568; }
+    .deal-content { padding: 20px 0; font-size: 16px; color: #2D3748; line-height: 1.71; white-space: pre-line; }
+    .deal-heading { font-weight: 700; font-size: 16px; color: #1A1A2E; padding: 40px 0 16px; }
     .info-grid { display: flex; flex-wrap: wrap; gap: 16px; padding: 10px 0; }
     .info-item { display: flex; align-items: center; gap: 12px; width: calc(50% - 8px); cursor: pointer; }
     .info-icon { width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s; }
-    .info-icon.blue { border: 2px solid #92A5EF; }
+    .info-icon.blue { border: 2px solid #1A8A7D; }
     .info-icon.teal { border: 2px solid #8BC5E5; }
     .info-icon.orange { border: 2px solid #FA8F54; }
     .info-icon.green { border: 2px solid #58C27D; }
-    .info-item:hover .info-icon { background: #E6E8EC; }
-    .info-type { font-size: 14px; font-weight: 500; color: #23262F; }
+    .info-item:hover .info-icon { background: #CBD5E0; }
+    .info-type { font-size: 14px; font-weight: 500; color: #1A1A2E; }
 
     /* Old Reffo gradient button */
-    .button-gradient { display: inline-flex; justify-content: center; align-items: center; height: 40px; padding: 0 20px; background: linear-gradient(90deg, #8101B4 0%, #EA526F 100%); border-radius: 20px; font-size: 13px; font-weight: 500; color: #FCFCFD; border: none; cursor: pointer; transition: all 0.2s; flex: 1; gap: 6px; font-family: 'Poppins', sans-serif; }
+    .button-gradient { display: inline-flex; justify-content: center; align-items: center; height: 40px; padding: 0 20px; background: #D4602A; border-radius: 20px; font-size: 13px; font-weight: 500; color: #FFFFFF; border: none; cursor: pointer; transition: all 0.2s; flex: 1; gap: 6px; font-family: 'DM Sans', sans-serif; }
     .button-gradient:hover { background: linear-gradient(90deg, #6e019a 0%, #d44560 100%); }
     /* Old Reffo stroke button */
-    .button-stroke { display: inline-flex; justify-content: center; align-items: center; height: 40px; padding: 0 20px; background: none; border-radius: 20px; font-size: 13px; font-weight: 500; color: #23262F; box-shadow: 0 0 0 2px #E6E8EC inset; border: none; cursor: pointer; transition: all 0.2s; gap: 6px; font-family: 'Poppins', sans-serif; }
-    .button-stroke:hover { background: #23262F; box-shadow: 0 0 0 2px #23262F inset; color: #FCFCFD; }
+    .button-stroke { display: inline-flex; justify-content: center; align-items: center; height: 40px; padding: 0 20px; background: none; border-radius: 20px; font-size: 13px; font-weight: 500; color: #1A1A2E; box-shadow: 0 0 0 2px #CBD5E0 inset; border: none; cursor: pointer; transition: all 0.2s; gap: 6px; font-family: 'DM Sans', sans-serif; }
+    .button-stroke:hover { background: #1A1A2E; box-shadow: 0 0 0 2px #1A1A2E inset; color: #FFFFFF; }
 
     /* Detail header — above gallery */
     .detail-header { margin-bottom: 24px; }
     .detail-header-back {
       display: inline-flex; align-items: center; gap: 6px;
-      font-size: 14px; font-weight: 600; color: #23262F;
-      background: #F4F5F6; border: 1px solid #E6E8EC;
+      font-size: 14px; font-weight: 600; color: #1A1A2E;
+      background: #EDE8E3; border: 1px solid #CBD5E0;
       border-radius: 24px; padding: 8px 16px;
       cursor: pointer; transition: all 0.2s;
       text-decoration: none;
     }
-    .detail-header-back:hover { background: #E6E8EC; }
+    .detail-header-back:hover { background: #CBD5E0; }
     .detail-header-back svg { flex-shrink: 0; }
 
     .detail-title-row {
@@ -468,35 +468,35 @@ export function renderUI(): string {
       gap: 16px; margin-top: 16px;
     }
     .detail-title-row h1 {
-      font-size: 32px; font-weight: 700; color: #141416; margin: 0; flex: 1;
+      font-size: 32px; font-weight: 700; color: #1A1A2E; margin: 0; flex: 1;
     }
     .detail-title-actions { display: flex; align-items: center; gap: 8px; }
     .detail-title-actions button {
       width: 40px; height: 40px; border-radius: 50%;
-      border: 1px solid #E6E8EC; background: #FCFCFD;
+      border: 1px solid #CBD5E0; background: #FFFFFF;
       cursor: pointer; display: flex; align-items: center;
-      justify-content: center; color: #777E90; transition: all 0.2s;
+      justify-content: center; color: #4A5568; transition: all 0.2s;
     }
-    .detail-title-actions button:hover { border-color: #141416; color: #141416; }
+    .detail-title-actions button:hover { border-color: #1A1A2E; color: #1A1A2E; }
 
     .detail-posted-line {
       display: flex; align-items: center; gap: 10px;
-      margin-top: 8px; font-size: 14px; color: #777E90;
+      margin-top: 8px; font-size: 14px; color: #4A5568;
     }
     .detail-posted-line .avatar-sm {
       width: 28px; height: 28px; border-radius: 50%;
-      background: #EC526F; color: #fff; font-size: 12px;
+      background: #0A5E8A; color: #fff; font-size: 12px;
       font-weight: 700; display: flex; align-items: center;
       justify-content: center; flex-shrink: 0;
     }
-    .detail-posted-line .poster-name { font-weight: 600; color: #23262F; }
+    .detail-posted-line .poster-name { font-weight: 600; color: #1A1A2E; }
     .detail-posted-line .loc-pin { display: flex; align-items: center; gap: 4px; }
 
     /* PaymentCard initial-letter avatar */
     .payment-card-thumb.initial-avatar {
-      background: #EC526F; color: #fff;
+      background: #0A5E8A; color: #fff;
       font-size: 13px; font-weight: 700;
-      font-family: 'Poppins', sans-serif;
+      font-family: 'DM Sans', sans-serif;
     }
 
     /* Edit button at top of payment card */
@@ -505,9 +505,9 @@ export function renderUI(): string {
     }
     .payment-card-edit button {
       display: inline-flex; align-items: center; gap: 4px;
-      font-size: 13px; font-weight: 600; color: #EC526F;
+      font-size: 13px; font-weight: 600; color: #0A5E8A;
       background: none; border: none; cursor: pointer;
-      font-family: 'Poppins', sans-serif;
+      font-family: 'DM Sans', sans-serif;
     }
     .payment-card-edit button:hover { text-decoration: underline; }
 
@@ -520,35 +520,35 @@ export function renderUI(): string {
     }
 
     /* Sold negotiation status */
-    .neg-card.sold { border-left-color: #1a8a42; }
-    .neg-status.sold { background: #e6f9ed; color: #1a8a42; }
+    .neg-card.sold { border-left-color: #2D8A6E; }
+    .neg-status.sold { background: #E6F4EF; color: #2D8A6E; }
 
     /* Archived negotiation card */
-    .neg-card.archived { border-left-color: #B1B5C3; opacity: 0.75; }
+    .neg-card.archived { border-left-color: #718096; opacity: 0.75; }
     .neg-archive-actions { display: flex; gap: 8px; margin-top: 12px; }
-    .btn-icon-sm { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #E6E8EC; background: #FCFCFD; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #777E90; transition: all 0.2s; font-size: 12px; padding: 0; }
-    .btn-icon-sm:hover { border-color: #141416; color: #141416; }
-    .btn-icon-sm.danger:hover { border-color: #E92222; color: #E92222; }
+    .btn-icon-sm { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #CBD5E0; background: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #4A5568; transition: all 0.2s; font-size: 12px; padding: 0; }
+    .btn-icon-sm:hover { border-color: #1A1A2E; color: #1A1A2E; }
+    .btn-icon-sm.danger:hover { border-color: #C94444; color: #C94444; }
 
     /* Ref sub-tabs */
     .ref-subtabs { display: flex; gap: 0; margin-bottom: 16px; }
-    .ref-subtab { padding: 8px 20px; cursor: pointer; font-size: 13px; font-weight: 700; color: #777E90; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.02em; }
-    .ref-subtab.active { color: #EC526F; border-bottom-color: #EC526F; }
-    .ref-subtab:hover { color: #EC526F; }
+    .ref-subtab { padding: 8px 20px; cursor: pointer; font-size: 13px; font-weight: 700; color: #4A5568; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.02em; }
+    .ref-subtab.active { color: #0A5E8A; border-bottom-color: #0A5E8A; }
+    .ref-subtab:hover { color: #0A5E8A; }
 
     /* Dashboard layout */
     .dashboard-layout { display: flex; min-height: calc(100dvh - 64px); }
-    .sidebar { width: 240px; background: #FCFCFD; border-right: 1px solid #E6E8EC; position: sticky; top: 64px; height: calc(100dvh - 64px); overflow-y: auto; flex-shrink: 0; transition: transform 0.3s; z-index: 90; padding: 16px 0; }
-    .sidebar-section-title { padding: 16px 20px 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #777E90; }
-    .sidebar-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 14px; font-weight: 500; color: #23262F; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; text-decoration: none; font-family: 'Poppins', sans-serif; border-top: none; border-right: none; border-bottom: none; background: none; width: 100%; text-align: left; }
-    .sidebar-nav-item:hover { background: rgba(236,82,111,0.03); color: #EC526F; }
-    .sidebar-nav-item.active { border-left-color: #EC526F; background: rgba(236,82,111,0.05); color: #EC526F; font-weight: 600; }
+    .sidebar { width: 240px; background: #FFFFFF; border-right: 1px solid #CBD5E0; position: sticky; top: 64px; height: calc(100dvh - 64px); overflow-y: auto; flex-shrink: 0; transition: transform 0.3s; z-index: 90; padding: 16px 0; }
+    .sidebar-section-title { padding: 16px 20px 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #4A5568; }
+    .sidebar-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 14px; font-weight: 500; color: #1A1A2E; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; text-decoration: none; font-family: 'DM Sans', sans-serif; border-top: none; border-right: none; border-bottom: none; background: none; width: 100%; text-align: left; }
+    .sidebar-nav-item:hover { background: rgba(10,94,138,0.03); color: #0A5E8A; }
+    .sidebar-nav-item.active { border-left-color: #0A5E8A; background: rgba(10,94,138,0.05); color: #0A5E8A; font-weight: 600; }
     .sidebar-nav-item svg { flex-shrink: 0; width: 18px; height: 18px; }
-    .sidebar-divider { height: 1px; background: #E6E8EC; margin: 8px 20px; }
+    .sidebar-divider { height: 1px; background: #CBD5E0; margin: 8px 20px; }
     .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(20,20,22,0.3); z-index: 89; }
     .dashboard-main { flex: 1; min-width: 0; }
-    .sidebar-toggle { display: none; width: 40px; height: 40px; border-radius: 50%; border: 1px solid #E6E8EC; background: #FCFCFD; cursor: pointer; align-items: center; justify-content: center; color: #777E90; transition: all 0.2s; }
-    .sidebar-toggle:hover { border-color: #141416; color: #141416; }
+    .sidebar-toggle { display: none; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); background: transparent; cursor: pointer; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); transition: all 0.2s; }
+    .sidebar-toggle:hover { border-color: rgba(255,255,255,0.6); color: #FFFFFF; }
     @media (max-width: 768px) {
       .sidebar { position: fixed; top: 64px; left: 0; transform: translateX(-100%); z-index: 91; height: calc(100dvh - 64px); box-shadow: 4px 0 16px rgba(0,0,0,0.1); }
       .sidebar.open { transform: translateX(0); }
@@ -558,15 +558,15 @@ export function renderUI(): string {
 
     /* Dashboard stat cards */
     .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: #FCFCFD; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(15,15,15,0.06); transition: transform 0.2s; }
+    .stat-card { background: #FFFFFF; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(15,15,15,0.06); transition: transform 0.2s; }
     .stat-card:hover { transform: translateY(-2px); }
     .stat-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
-    .stat-icon.pink { background: rgba(236,82,111,0.1); color: #EC526F; }
-    .stat-icon.green { background: rgba(26,138,66,0.1); color: #1a8a42; }
-    .stat-icon.amber { background: rgba(230,162,0,0.1); color: #e6a200; }
-    .stat-icon.blue { background: rgba(26,106,186,0.1); color: #1a6aba; }
-    .stat-value { font-size: 28px; font-weight: 700; color: #23262F; line-height: 1.2; }
-    .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #777E90; margin-top: 4px; }
+    .stat-icon.pink { background: rgba(10,94,138,0.1); color: #0A5E8A; }
+    .stat-icon.green { background: rgba(26,138,66,0.1); color: #2D8A6E; }
+    .stat-icon.amber { background: rgba(230,162,0,0.1); color: #D4922A; }
+    .stat-icon.blue { background: rgba(26,106,186,0.1); color: #4A90D9; }
+    .stat-value { font-size: 28px; font-weight: 700; color: #1A1A2E; line-height: 1.2; }
+    .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #4A5568; margin-top: 4px; }
     @media (max-width: 768px) { .stat-cards { grid-template-columns: repeat(2, 1fr); } #tab-dashboard > div:last-child { grid-template-columns: 1fr !important; } }
     @media (max-width: 480px) { .stat-cards { grid-template-columns: 1fr; } }
 
@@ -574,68 +574,68 @@ export function renderUI(): string {
     .quick-actions { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
 
     /* AI Quick Start */
-    .ai-quickstart-card { background: #FCFCFD; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(15,15,15,0.06); margin-bottom: 24px; border-top: 3px solid; border-image: linear-gradient(90deg, #8101B4, #EA526F) 1; }
-    .ai-quickstart-card h3 { font-size: 16px; font-weight: 700; color: #141416; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
-    .ai-quickstart-card .ai-qs-sub { font-size: 13px; color: #777E90; margin-bottom: 16px; }
-    .ai-quickstart-prompt { position: relative; background: #F4F5F6; border-radius: 12px; padding: 16px 48px 16px 16px; margin-bottom: 16px; }
-    .ai-quickstart-prompt pre { margin: 0; font-size: 13px; color: #23262F; white-space: pre-wrap; word-break: break-word; font-family: 'Courier New', monospace; line-height: 1.6; }
-    .ai-quickstart-copy-btn { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 8px; border: 1px solid #E6E8EC; background: #FCFCFD; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #777E90; transition: all 0.2s; }
-    .ai-quickstart-copy-btn:hover { border-color: #141416; color: #141416; }
+    .ai-quickstart-card { background: #FFFFFF; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(15,15,15,0.06); margin-bottom: 24px; border-top: 3px solid #1A8A7D; }
+    .ai-quickstart-card h3 { font-size: 16px; font-weight: 700; color: #1A1A2E; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+    .ai-quickstart-card .ai-qs-sub { font-size: 13px; color: #4A5568; margin-bottom: 16px; }
+    .ai-quickstart-prompt { position: relative; background: #EDE8E3; border-radius: 12px; padding: 16px 48px 16px 16px; margin-bottom: 16px; }
+    .ai-quickstart-prompt pre { margin: 0; font-size: 13px; color: #1A1A2E; white-space: pre-wrap; word-break: break-word; font-family: 'JetBrains Mono', monospace; line-height: 1.6; }
+    .ai-quickstart-copy-btn { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 8px; border: 1px solid #CBD5E0; background: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #4A5568; transition: all 0.2s; }
+    .ai-quickstart-copy-btn:hover { border-color: #1A1A2E; color: #1A1A2E; }
     .ai-quickstart-llm-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
-    .ai-quickstart-llm-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border-radius: 8px; border: 1px solid #E6E8EC; background: #FCFCFD; font-size: 13px; font-weight: 500; color: #23262F; cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif; }
-    .ai-quickstart-llm-btn:hover { border-color: #EC526F; color: #EC526F; }
+    .ai-quickstart-llm-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border-radius: 8px; border: 1px solid #CBD5E0; background: #FFFFFF; font-size: 13px; font-weight: 500; color: #1A1A2E; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .ai-quickstart-llm-btn:hover { border-color: #0A5E8A; color: #0A5E8A; }
     .ai-quickstart-llm-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
-    .ai-quickstart-sidebar-card { margin: 16px 16px 8px; padding: 12px; border-radius: 12px; border: 1px solid rgba(236,82,111,0.2); background: linear-gradient(135deg, rgba(236,82,111,0.04), rgba(129,1,180,0.04)); cursor: pointer; transition: all 0.2s; }
-    .ai-quickstart-sidebar-card:hover { border-color: rgba(236,82,111,0.4); box-shadow: 0 2px 8px rgba(236,82,111,0.08); }
-    .ai-quickstart-sidebar-card .qs-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #23262F; margin-bottom: 2px; }
-    .ai-quickstart-sidebar-card .qs-sub { font-size: 11px; color: #777E90; }
+    .ai-quickstart-sidebar-card { margin: 16px 16px 8px; padding: 12px; border-radius: 12px; border: 1px solid rgba(10,94,138,0.2); background: linear-gradient(135deg, rgba(10,94,138,0.04), rgba(10,94,138,0.04)); cursor: pointer; transition: all 0.2s; }
+    .ai-quickstart-sidebar-card:hover { border-color: rgba(10,94,138,0.4); box-shadow: 0 2px 8px rgba(10,94,138,0.08); }
+    .ai-quickstart-sidebar-card .qs-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #1A1A2E; margin-bottom: 2px; }
+    .ai-quickstart-sidebar-card .qs-sub { font-size: 11px; color: #4A5568; }
     .ai-quickstart-modal { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(20,20,22,0.5); backdrop-filter: blur(2px); justify-content: center; align-items: center; }
     .ai-quickstart-modal.open { display: flex; }
-    .ai-quickstart-modal-inner { background: #FCFCFD; border-radius: 20px; max-width: 520px; width: calc(100% - 32px); padding: 28px; position: relative; box-shadow: 0 24px 48px rgba(15,15,15,0.16); animation: showModal 0.2s ease; max-height: 90vh; overflow-y: auto; }
-    .ai-quickstart-modal-inner .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid #E6E8EC; background: #FCFCFD; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #777E90; transition: all 0.2s; }
-    .ai-quickstart-modal-inner .modal-close:hover { border-color: #141416; color: #141416; }
-    .ai-quickstart-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #23262F; color: #FCFCFD; font-size: 13px; font-weight: 500; padding: 10px 24px; border-radius: 24px; box-shadow: 0 8px 24px rgba(15,15,15,0.2); z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none; font-family: 'Poppins', sans-serif; }
+    .ai-quickstart-modal-inner { background: #FFFFFF; border-radius: 20px; max-width: 520px; width: calc(100% - 32px); padding: 28px; position: relative; box-shadow: 0 24px 48px rgba(15,15,15,0.16); animation: showModal 0.2s ease; max-height: 90vh; overflow-y: auto; }
+    .ai-quickstart-modal-inner .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid #CBD5E0; background: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #4A5568; transition: all 0.2s; }
+    .ai-quickstart-modal-inner .modal-close:hover { border-color: #1A1A2E; color: #1A1A2E; }
+    .ai-quickstart-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1A1A2E; color: #FFFFFF; font-size: 13px; font-weight: 500; padding: 10px 24px; border-radius: 24px; box-shadow: 0 8px 24px rgba(15,15,15,0.2); z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none; font-family: 'DM Sans', sans-serif; }
     .ai-quickstart-toast.show { opacity: 1; }
 
     /* Dashboard recent list */
-    .recent-list { background: #FCFCFD; border-radius: 16px; box-shadow: 0 4px 16px rgba(15,15,15,0.06); overflow: hidden; margin-bottom: 24px; }
-    .recent-list-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E6E8EC; }
-    .recent-list-header h3 { font-size: 14px; font-weight: 700; color: #141416; margin: 0; }
-    .recent-list-header a { font-size: 12px; font-weight: 600; color: #EC526F; cursor: pointer; text-decoration: none; }
-    .recent-list-row { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid #F4F5F6; transition: background 0.15s; cursor: pointer; }
+    .recent-list { background: #FFFFFF; border-radius: 16px; box-shadow: 0 4px 16px rgba(15,15,15,0.06); overflow: hidden; margin-bottom: 24px; }
+    .recent-list-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #CBD5E0; }
+    .recent-list-header h3 { font-size: 14px; font-weight: 700; color: #1A1A2E; margin: 0; }
+    .recent-list-header a { font-size: 12px; font-weight: 600; color: #1A8A7D; cursor: pointer; text-decoration: none; }
+    .recent-list-row { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid #EDE8E3; transition: background 0.15s; cursor: pointer; }
     .recent-list-row:last-child { border-bottom: none; }
-    .recent-list-row:hover { background: rgba(236,82,111,0.02); }
-    .recent-list-row .row-img { width: 40px; height: 40px; border-radius: 8px; overflow: hidden; background: #F4F5F6; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .recent-list-row:hover { background: rgba(10,94,138,0.02); }
+    .recent-list-row .row-img { width: 40px; height: 40px; border-radius: 8px; overflow: hidden; background: #EDE8E3; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
     .recent-list-row .row-img img { width: 100%; height: 100%; object-fit: cover; }
     .recent-list-row .row-info { flex: 1; min-width: 0; }
-    .recent-list-row .row-info .row-name { font-size: 13px; font-weight: 600; color: #141416; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .recent-list-row .row-info .row-sub { font-size: 11px; color: #777E90; }
+    .recent-list-row .row-info .row-name { font-size: 13px; font-weight: 600; color: #1A1A2E; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .recent-list-row .row-info .row-sub { font-size: 11px; color: #4A5568; }
     .recent-list-row .row-badge { flex-shrink: 0; }
-    .recent-list-row .row-date { font-size: 11px; color: #777E90; flex-shrink: 0; }
+    .recent-list-row .row-date { font-size: 11px; color: #4A5568; flex-shrink: 0; }
 
     /* Table layout for refs */
-    .table-header-row { display: flex; align-items: center; padding: 8px 16px; background: #F4F5F6; border-radius: 12px 12px 0 0; border-bottom: 1px solid #E6E8EC; position: sticky; top: 0; z-index: 1; }
-    .table-header-row span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #777E90; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-    .table-header-row span:hover { color: #23262F; }
-    .table-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #E6E8EC; background: #FCFCFD; transition: background 0.15s; cursor: pointer; }
+    .table-header-row { display: flex; align-items: center; padding: 8px 16px; background: #EDE8E3; border-radius: 12px 12px 0 0; border-bottom: 1px solid #CBD5E0; position: sticky; top: 0; z-index: 1; }
+    .table-header-row span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #4A5568; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .table-header-row span:hover { color: #1A1A2E; }
+    .table-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #CBD5E0; background: #FFFFFF; transition: background 0.15s; cursor: pointer; }
     .table-row:nth-child(even) { background: #F9FAFB; }
-    .table-row:hover { background: rgba(236,82,111,0.03); }
+    .table-row:hover { background: rgba(10,94,138,0.03); }
     .table-row .col-check { width: 32px; flex-shrink: 0; display: flex; align-items: center; }
-    .table-row .col-check input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: #EC526F; margin: 0; padding: 0; border-radius: 4px; }
+    .table-row .col-check input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: #D4602A; margin: 0; padding: 0; border-radius: 4px; }
     .table-header-row .col-check { width: 32px; flex-shrink: 0; }
-    .table-row .col-img { width: 48px; height: 48px; border-radius: 8px; overflow: hidden; background: #F4F5F6; flex-shrink: 0; margin-right: 12px; display: flex; align-items: center; justify-content: center; }
+    .table-row .col-img { width: 48px; height: 48px; border-radius: 8px; overflow: hidden; background: #EDE8E3; flex-shrink: 0; margin-right: 12px; display: flex; align-items: center; justify-content: center; }
     .table-row .col-img img { width: 100%; height: 100%; object-fit: cover; }
     .table-row .col-name { flex: 1; min-width: 0; }
-    .table-row .col-name .name { font-size: 14px; font-weight: 600; color: #141416; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .table-row .col-name .cat { font-size: 12px; color: #777E90; }
+    .table-row .col-name .name { font-size: 14px; font-weight: 600; color: #1A1A2E; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .table-row .col-name .cat { font-size: 12px; color: #4A5568; }
     .table-row .col-status { width: 100px; flex-shrink: 0; }
-    .table-row .col-price { width: 90px; flex-shrink: 0; text-align: right; font-size: 14px; font-weight: 700; color: #1a8a42; }
-    .table-row .col-qty { width: 50px; flex-shrink: 0; text-align: center; font-size: 12px; color: #777E90; }
-    .table-row .col-date { width: 90px; flex-shrink: 0; font-size: 12px; color: #777E90; text-align: right; }
+    .table-row .col-price { width: 90px; flex-shrink: 0; text-align: right; font-size: 14px; font-weight: 700; color: #2D8A6E; }
+    .table-row .col-qty { width: 50px; flex-shrink: 0; text-align: center; font-size: 12px; color: #4A5568; }
+    .table-row .col-date { width: 90px; flex-shrink: 0; font-size: 12px; color: #4A5568; text-align: right; }
     .table-row .col-actions { width: 80px; flex-shrink: 0; display: flex; gap: 4px; justify-content: flex-end; }
-    .table-row .col-actions button { width: 28px; height: 28px; border: none; background: none; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #777E90; transition: all 0.15s; }
-    .table-row .col-actions button:hover { background: #F4F5F6; color: #23262F; }
-    .table-row .col-actions button.del:hover { background: #fce8e6; color: #E92222; }
+    .table-row .col-actions button { width: 28px; height: 28px; border: none; background: none; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #4A5568; transition: all 0.15s; }
+    .table-row .col-actions button:hover { background: #EDE8E3; color: #1A1A2E; }
+    .table-row .col-actions button.del:hover { background: #FDE8E8; color: #C94444; }
     @media (max-width: 768px) { .table-row .col-qty, .table-row .col-date, .table-header-row .col-qty, .table-header-row .col-date { display: none; } }
 
     /* Bulk action sidebar */
@@ -643,67 +643,67 @@ export function renderUI(): string {
     .refs-main-col { flex: 1; min-width: 0; }
     .bulk-action-sidebar { width: 200px; flex-shrink: 0; display: none; }
     .bulk-action-sidebar.show { display: block; }
-    .bulk-action-sidebar-inner { position: sticky; top: 88px; background: #FCFCFD; border-radius: 16px; padding: 20px; box-shadow: 0 4px 16px rgba(15,15,15,0.06); }
-    .bulk-action-sidebar-inner .bulk-count-label { font-size: 14px; font-weight: 700; color: #23262F; margin-bottom: 16px; }
-    .bulk-action-sidebar-inner .bulk-divider { height: 1px; background: #E6E8EC; margin: 8px 0; }
-    .bulk-action-sidebar-inner button { display: block; width: 100%; height: 36px; padding: 0 14px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; border: none; margin-bottom: 6px; text-align: left; transition: opacity 0.15s; }
+    .bulk-action-sidebar-inner { position: sticky; top: 88px; background: #FFFFFF; border-radius: 16px; padding: 20px; box-shadow: 0 4px 16px rgba(15,15,15,0.06); }
+    .bulk-action-sidebar-inner .bulk-count-label { font-size: 14px; font-weight: 700; color: #1A1A2E; margin-bottom: 16px; }
+    .bulk-action-sidebar-inner .bulk-divider { height: 1px; background: #CBD5E0; margin: 8px 0; }
+    .bulk-action-sidebar-inner button { display: block; width: 100%; height: 36px; padding: 0 14px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; border: none; margin-bottom: 6px; text-align: left; transition: opacity 0.15s; }
     .bulk-action-sidebar-inner button:hover { opacity: 0.85; }
-    .bulk-action-sidebar-inner .bulk-cancel { background: transparent; color: #777E90; border: 1px solid #E6E8EC; text-align: center; }
+    .bulk-action-sidebar-inner .bulk-cancel { background: transparent; color: #4A5568; border: 1px solid #CBD5E0; text-align: center; }
     @media (max-width: 1024px) {
       .refs-with-sidebar { flex-direction: column; }
       .bulk-action-sidebar { width: 100%; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; }
-      .bulk-action-sidebar-inner { position: static; border-radius: 0; border-top: 1px solid #E6E8EC; box-shadow: 0 -4px 24px rgba(15,15,15,0.10); display: flex; align-items: center; gap: 10px; padding: 12px 20px; flex-wrap: wrap; }
+      .bulk-action-sidebar-inner { position: static; border-radius: 0; border-top: 1px solid #CBD5E0; box-shadow: 0 -4px 24px rgba(15,15,15,0.10); display: flex; align-items: center; gap: 10px; padding: 12px 20px; flex-wrap: wrap; }
       .bulk-action-sidebar-inner .bulk-count-label { margin-bottom: 0; margin-right: 4px; white-space: nowrap; }
       .bulk-action-sidebar-inner .bulk-divider { display: none; }
       .bulk-action-sidebar-inner button { display: inline-block; width: auto; margin-bottom: 0; text-align: center; }
     }
     /* Checkbox normalization */
-    input[type="checkbox"] { -webkit-appearance: checkbox; appearance: checkbox; width: 16px; height: 16px; cursor: pointer; accent-color: #EC526F; border-radius: 3px; }
+    input[type="checkbox"] { -webkit-appearance: checkbox; appearance: checkbox; width: 16px; height: 16px; cursor: pointer; accent-color: #D4602A; border-radius: 3px; }
 
     /* Archive card actions */
     .archive-actions { display: flex; gap: 8px; margin-top: 12px; }
-    .archive-reason { font-size: 12px; color: #777E90; font-weight: 500; margin-top: 4px; }
+    .archive-reason { font-size: 12px; color: #4A5568; font-weight: 500; margin-top: 4px; }
 
     /* Ref group rows */
-    .neg-group-row { background: #FCFCFD; border-radius: 16px; padding: 16px 24px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .neg-group-row { background: #FFFFFF; border-radius: 16px; padding: 16px 24px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
     .neg-group-row:hover { transform: translateY(-1px); box-shadow: 0 16px 40px -8px rgba(15,15,15,0.18); }
     .neg-group-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
-    .neg-group-name { font-weight: 700; font-size: 16px; color: #141416; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .neg-group-count { display: inline-block; background: #E6E8EC; color: #353945; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 10px; flex-shrink: 0; }
-    .neg-group-count.has-pending { background: #fff8e1; color: #e6a200; }
+    .neg-group-name { font-weight: 700; font-size: 16px; color: #1A1A2E; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .neg-group-count { display: inline-block; background: #CBD5E0; color: #2D3748; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 10px; flex-shrink: 0; }
+    .neg-group-count.has-pending { background: #FFF3E0; color: #D4922A; }
     .neg-group-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-    .neg-group-date { font-size: 12px; color: #777E90; font-weight: 500; }
-    .neg-group-back { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: #EC526F; cursor: pointer; margin-bottom: 16px; font-weight: 600; transition: color 0.2s; }
-    .neg-group-back:hover { color: #DD436C; }
+    .neg-group-date { font-size: 12px; color: #4A5568; font-weight: 500; }
+    .neg-group-back { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: #0A5E8A; cursor: pointer; margin-bottom: 16px; font-weight: 600; transition: color 0.2s; }
+    .neg-group-back:hover { color: #B8521F; }
 
     /* Footer */
-    .app-footer { border-top: 1px solid #E6E8EC; background: #FCFCFD; padding: 0; }
+    .app-footer { border-top: 1px solid #CBD5E0; background: #FFFFFF; padding: 0; }
     .app-footer-inner { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
     .app-footer-grid { display: grid; grid-template-columns: 140px 1fr 1fr 1fr; gap: 40px; }
     .app-footer-brand { display: flex; flex-direction: column; gap: 16px; }
     .app-footer-brand img { height: 40px; width: auto; object-fit: contain; }
     .app-footer-nav { display: flex; flex-direction: column; gap: 16px; }
-    .app-footer-nav a { color: #EA526F; text-decoration: none; font-size: 14px; font-weight: 500; transition: opacity 0.2s; }
+    .app-footer-nav a { color: #1A8A7D; text-decoration: none; font-size: 14px; font-weight: 500; transition: opacity 0.2s; }
     .app-footer-nav a:hover { opacity: 0.8; }
-    .app-footer-col { border-left: 1px solid #E6E8EC; padding-left: 32px; display: flex; flex-direction: column; gap: 12px; }
-    .app-footer-col-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #141416; }
-    .app-footer-col a { color: #EA526F; text-decoration: none; font-size: 14px; transition: opacity 0.2s; }
+    .app-footer-col { border-left: 1px solid #CBD5E0; padding-left: 32px; display: flex; flex-direction: column; gap: 12px; }
+    .app-footer-col-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #1A1A2E; }
+    .app-footer-col a { color: #1A8A7D; text-decoration: none; font-size: 14px; transition: opacity 0.2s; }
     .app-footer-col a:hover { opacity: 0.8; }
-    .app-footer-col .col-text { font-size: 14px; color: #23262F; }
-    .app-footer-col .col-desc { font-size: 14px; color: #777E90; line-height: 1.5; }
-    .app-footer-col input { height: 44px; padding: 0 16px; border: 1px solid #E6E8EC; border-radius: 22px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 500; color: #23262F; background: #FCFCFD; outline: none; width: 100%; margin-bottom: 0; }
-    .app-footer-col input:focus { border-color: #EA526F; }
-    .footer-download-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 20px; background: linear-gradient(90deg, #8101B4 0%, #EA526F 100%); border: none; border-radius: 20px; font-size: 13px; font-weight: 500; color: #FCFCFD !important; cursor: pointer; font-family: 'Poppins', sans-serif; transition: opacity 0.2s; align-self: flex-start; }
-    .footer-download-btn:hover { opacity: 0.9; color: #FCFCFD !important; }
-    .app-footer-bar { border-top: 1px solid #E6E8EC; }
+    .app-footer-col .col-text { font-size: 14px; color: #1A1A2E; }
+    .app-footer-col .col-desc { font-size: 14px; color: #4A5568; line-height: 1.5; }
+    .app-footer-col input { height: 44px; padding: 0 16px; border: 1px solid #CBD5E0; border-radius: 22px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; color: #1A1A2E; background: #FFFFFF; outline: none; width: 100%; margin-bottom: 0; }
+    .app-footer-col input:focus { border-color: #1A8A7D; }
+    .footer-download-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 20px; background: #D4602A; border: none; border-radius: 20px; font-size: 13px; font-weight: 500; color: #FFFFFF !important; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; align-self: flex-start; }
+    .footer-download-btn:hover { opacity: 0.9; color: #FFFFFF !important; }
+    .app-footer-bar { border-top: 1px solid #CBD5E0; }
     .app-footer-bar-inner { max-width: 1100px; margin: 0 auto; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
-    .app-footer-copy { font-size: 12px; color: #777E90; }
+    .app-footer-copy { font-size: 12px; color: #4A5568; }
     .app-footer-social { display: flex; align-items: center; gap: 20px; }
-    .app-footer-social a { color: #777E90; transition: color 0.2s; display: flex; }
-    .app-footer-social a:hover { color: #141416; }
+    .app-footer-social a { color: #4A5568; transition: color 0.2s; display: flex; }
+    .app-footer-social a:hover { color: #1A1A2E; }
     @media (max-width: 768px) {
       .app-footer-grid { grid-template-columns: 1fr; gap: 32px; }
-      .app-footer-col { border-left: none; padding-left: 0; border-top: 1px solid #E6E8EC; padding-top: 24px; }
+      .app-footer-col { border-left: none; padding-left: 0; border-top: 1px solid #CBD5E0; padding-top: 24px; }
       .app-footer-bar-inner { flex-direction: column; text-align: center; gap: 12px; }
     }
     /* Lightbox */
@@ -724,14 +724,14 @@ export function renderUI(): string {
     .lightbox-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
     /* ===== Home / Landing Page ===== */
-    .home-hero { background: linear-gradient(135deg, rgba(129,1,180,0.55) 0%, rgba(234,82,111,0.6) 100%); background-color: #7b2d8e; padding: 64px 24px 56px; text-align: center; color: #fff; border-radius: 20px; margin: 0 0 8px; position: relative; overflow: hidden; }
+    .home-hero { background: linear-gradient(135deg, rgba(10,94,138,0.55) 0%, rgba(26,138,125,0.6) 100%); background-color: #7b2d8e; padding: 64px 24px 56px; text-align: center; color: #fff; border-radius: 20px; margin: 0 0 8px; position: relative; overflow: hidden; }
     @media (max-width: 767px) { .home-hero { border-radius: 16px; } }
     .home-hero h2 { font-size: clamp(1.75rem, 4vw, 3rem); font-weight: 700; margin: 0 0 12px; color: #fff; line-height: 1.15; letter-spacing: -0.01em; text-transform: none; }
     .home-hero p { color: rgba(255,255,255,0.82); font-size: clamp(0.95rem, 1.5vw, 1.125rem); margin: 0 0 32px; max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.6; }
     .home-hero .search-filter-bar { max-width: 660px; margin: 0 auto; }
     .home-hero .mobile-search-pill { max-width: 660px; margin: 0 auto; }
     .home-section { max-width: 1100px; padding: 40px 24px; }
-    .home-section-label { text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; color: #777E90; margin-bottom: 4px; }
+    .home-section-label { text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; color: #4A5568; margin-bottom: 4px; }
     .home-section h3 { font-size: 1.35rem; font-weight: 700; margin: 0 0 24px; }
     .home-quick-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 0 24px 8px; }
     .home-recent-grid { display: flex; gap: 16px; overflow: hidden; }
@@ -741,9 +741,9 @@ export function renderUI(): string {
     .home-recent-card img { width: 100%; height: 140px; object-fit: cover; display: block; }
     .home-recent-card .card-body { padding: 12px 14px; }
     .home-recent-card .card-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .home-recent-card .card-meta { font-size: 12px; color: #777E90; margin-top: 4px; }
-    .home-recent-card .card-price { font-weight: 600; font-size: 14px; color: #EC526F; margin-top: 6px; }
-    .home-recent-empty { text-align: center; padding: 48px 24px; color: #777E90; }
+    .home-recent-card .card-meta { font-size: 12px; color: #4A5568; margin-top: 4px; }
+    .home-recent-card .card-price { font-weight: 600; font-size: 14px; color: #0A5E8A; margin-top: 6px; }
+    .home-recent-empty { text-align: center; padding: 48px 24px; color: #4A5568; }
     .home-recent-empty p { margin: 0 0 16px; font-size: 14px; }
     @media (max-width: 767px) { .home-hero { padding: 48px 16px 40px; } }
 
@@ -754,7 +754,7 @@ export function renderUI(): string {
   <div class="app-header">
     <div class="app-header-inner">
       <div class="app-header-logo" onclick="sidebarNav('home')">
-        <span style="font-size:1.25rem;font-weight:700;color:#141416;">Pelagora</span>
+        <span style="font-family:'Josefin Sans',sans-serif;font-size:1.1rem;font-weight:600;color:#FFFFFF;text-transform:uppercase;letter-spacing:0.18em;">Pelagora</span>
       </div>
 
       <!-- Header actions: link + bell + avatar -->
@@ -805,7 +805,7 @@ export function renderUI(): string {
   <aside class="sidebar" id="sidebar">
     <div class="ai-quickstart-sidebar-card" onclick="openAiQuickStartModal()">
       <div class="qs-title">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A5E8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         AI Quick Start
       </div>
       <div class="qs-sub">Get help from any AI assistant</div>
@@ -902,7 +902,7 @@ export function renderUI(): string {
 
       <!-- Mobile: collapsed pill -->
       <div class="mobile-search-pill" id="mobileSearchPill" onclick="expandMobileSearch()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         <div class="pill-text">
           <div class="pill-title" id="mobileSearchTitle">Search items...</div>
           <div class="pill-sub" id="mobileSearchSub">All categories &middot; Anywhere</div>
@@ -928,7 +928,7 @@ export function renderUI(): string {
               <div class="expand-field-row">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
                 <select id="mobileSearchCat"><option value="">All Categories</option></select>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
             </div>
             <div class="expand-field">
@@ -980,7 +980,7 @@ export function renderUI(): string {
 
         <!-- Mobile search pill -->
         <div class="mobile-search-pill" id="homeSearchPillMobile" onclick="expandHomeMobileSearch()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <div class="pill-text">
             <div class="pill-title">Search items...</div>
             <div class="pill-sub">All categories &middot; Anywhere</div>
@@ -1006,7 +1006,7 @@ export function renderUI(): string {
                 <div class="expand-field-row">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
                   <select id="homeSearchCatMobile"><option value="">All Categories</option></select>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                 </div>
               </div>
               <div class="expand-field">
@@ -1042,10 +1042,10 @@ export function renderUI(): string {
       <div class="home-section">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
           <h3 style="margin:0;">Your Listings</h3>
-          <a style="font-size:13px;color:#EC526F;cursor:pointer;font-weight:500;" onclick="sidebarNav('refs')">View all &rarr;</a>
+          <a style="font-size:13px;color:#1A8A7D;cursor:pointer;font-weight:500;" onclick="sidebarNav('refs')">View all &rarr;</a>
         </div>
         <div id="homeRecentItems">
-          <div style="padding:20px;color:#777E90;font-size:13px;">Loading...</div>
+          <div style="padding:20px;color:#4A5568;font-size:13px;">Loading...</div>
         </div>
       </div>
 
@@ -1086,7 +1086,7 @@ export function renderUI(): string {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
         <div class="ai-quickstart-card" style="grid-column:1/-1;padding:16px 20px;">
           <h3 style="font-size:14px;margin-bottom:2px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A5E8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             Get Started with AI
           </h3>
           <div class="ai-qs-sub" style="margin-bottom:10px;font-size:12px;">Copy this prompt into any AI assistant to learn about Reffo and get help creating listings.</div>
@@ -1113,14 +1113,14 @@ export function renderUI(): string {
             <h3>Recent Listings</h3>
             <a onclick="sidebarNav('refs')">View all</a>
           </div>
-          <div id="recentItemsList"><div style="padding:20px;color:#777E90;font-size:13px;">Loading...</div></div>
+          <div id="recentItemsList"><div style="padding:20px;color:#4A5568;font-size:13px;">Loading...</div></div>
         </div>
         <div class="recent-list" id="dashboardRecentOffers">
           <div class="recent-list-header">
             <h3>Recent Offers</h3>
             <a onclick="sidebarNav('inbox')">View all</a>
           </div>
-          <div id="recentOffersList"><div style="padding:20px;color:#777E90;font-size:13px;">Loading...</div></div>
+          <div id="recentOffersList"><div style="padding:20px;color:#4A5568;font-size:13px;">Loading...</div></div>
         </div>
       </div>
     </div>
@@ -1153,14 +1153,14 @@ export function renderUI(): string {
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-          <div style="display:flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:24px;background:#fff;border:1px solid #E6E8EC;flex:0 0 240px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="refLocalSearch" type="text" placeholder="Search my items..." oninput="applyRefLocalFilter()" style="border:none;outline:none;background:transparent;font-size:14px;font-family:'Poppins',sans-serif;color:#23262F;flex:1;min-width:0;line-height:44px;padding:0;margin:0;">
+          <div style="display:flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:24px;background:#fff;border:1px solid #CBD5E0;flex:0 0 240px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="refLocalSearch" type="text" placeholder="Search my items..." oninput="applyRefLocalFilter()" style="border:none;outline:none;background:transparent;font-size:14px;font-family:'DM Sans',sans-serif;color:#1A1A2E;flex:1;min-width:0;line-height:44px;padding:0;margin:0;">
           </div>
-          <select id="refLocalCategory" onchange="applyRefLocalFilter()" style="height:44px;padding:0 14px;border-radius:24px;background:#fff;border:1px solid #E6E8EC;font-size:14px;font-family:'Poppins',sans-serif;color:#23262F;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04);-webkit-appearance:none;appearance:none;padding-right:32px;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23777E90%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22/></svg>');background-repeat:no-repeat;background-position:right 12px center;">
+          <select id="refLocalCategory" onchange="applyRefLocalFilter()" style="height:44px;padding:0 14px;border-radius:24px;background:#fff;border:1px solid #CBD5E0;font-size:14px;font-family:'DM Sans',sans-serif;color:#1A1A2E;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04);-webkit-appearance:none;appearance:none;padding-right:32px;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23777E90%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22/></svg>');background-repeat:no-repeat;background-position:right 12px center;">
             <option value="">All Categories</option>
           </select>
-          <select id="refLocalSort" onchange="applyRefLocalFilter()" style="height:44px;padding:0 14px;border-radius:24px;background:#fff;border:1px solid #E6E8EC;font-size:14px;font-family:'Poppins',sans-serif;color:#23262F;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04);-webkit-appearance:none;appearance:none;padding-right:32px;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23777E90%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22/></svg>');background-repeat:no-repeat;background-position:right 12px center;">
+          <select id="refLocalSort" onchange="applyRefLocalFilter()" style="height:44px;padding:0 14px;border-radius:24px;background:#fff;border:1px solid #CBD5E0;font-size:14px;font-family:'DM Sans',sans-serif;color:#1A1A2E;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04);-webkit-appearance:none;appearance:none;padding-right:32px;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23777E90%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22/></svg>');background-repeat:no-repeat;background-position:right 12px center;">
             <option value="newest">Newest First</option>
             <option value="price_asc">Price: Low → High</option>
             <option value="price_desc">Price: High → Low</option>
@@ -1173,14 +1173,14 @@ export function renderUI(): string {
           <div class="bulk-action-sidebar" id="bulkActionSidebar">
             <div class="bulk-action-sidebar-inner">
               <div class="bulk-count-label"><span id="bulkCount">0</span> selected</div>
-              <button style="background:#E6E8EC;color:#353945;" onclick="bulkSetStatus('private')">Set Private</button>
-              <button style="background:#e6f9ed;color:#1a8a42;" onclick="bulkSetStatus('for_sale')">Set For Sale</button>
-              <button style="background:#fff8e1;color:#e6a200;" onclick="bulkSetStatus('willing_to_sell')">Set Willing to Sell</button>
+              <button style="background:#CBD5E0;color:#2D3748;" onclick="bulkSetStatus('private')">Set Private</button>
+              <button style="background:#E6F4EF;color:#2D8A6E;" onclick="bulkSetStatus('for_sale')">Set For Sale</button>
+              <button style="background:#FFF3E0;color:#D4922A;" onclick="bulkSetStatus('willing_to_sell')">Set Willing to Sell</button>
               <div class="bulk-divider"></div>
-              <button style="background:#eee8f7;color:#8101B4;" onclick="bulkMoveToCollection()">Move to Collection</button>
+              <button style="background:#E6F5F3;color:#1A8A7D;" onclick="bulkMoveToCollection()">Move to Collection</button>
               <div class="bulk-divider"></div>
-              <button style="background:#E92222;color:#fff;" onclick="bulkArchive()">Archive</button>
-              <button style="background:#E92222;color:#fff;" onclick="bulkDelete()">Delete</button>
+              <button style="background:#C94444;color:#fff;" onclick="bulkArchive()">Archive</button>
+              <button style="background:#C94444;color:#fff;" onclick="bulkDelete()">Delete</button>
               <button class="bulk-cancel" onclick="clearSelection()">Cancel</button>
             </div>
           </div>
@@ -1198,9 +1198,9 @@ export function renderUI(): string {
           <div class="bulk-action-sidebar" id="archiveBulkSidebar">
             <div class="bulk-action-sidebar-inner">
               <div class="bulk-count-label"><span id="archiveBulkCount">0</span> selected</div>
-              <button style="background:#e6f9ed;color:#1a8a42;" onclick="bulkRestoreArchived()">Restore</button>
+              <button style="background:#E6F4EF;color:#2D8A6E;" onclick="bulkRestoreArchived()">Restore</button>
               <div class="bulk-divider"></div>
-              <button style="background:#E92222;color:#fff;" onclick="bulkDeleteForeverArchived()">Delete Forever</button>
+              <button style="background:#C94444;color:#fff;" onclick="bulkDeleteForeverArchived()">Delete Forever</button>
               <button class="bulk-cancel" onclick="clearArchiveSelection()">Cancel</button>
             </div>
           </div>
@@ -1218,7 +1218,7 @@ export function renderUI(): string {
           <div class="bulk-action-sidebar" id="favBulkSidebar">
             <div class="bulk-action-sidebar-inner">
               <div class="bulk-count-label"><span id="favBulkCount">0</span> selected</div>
-              <button style="background:#fce8e6;color:#E92222;" onclick="bulkUnfavorite()">Unfavorite</button>
+              <button style="background:#FDE8E8;color:#C94444;" onclick="bulkUnfavorite()">Unfavorite</button>
               <button class="bulk-cancel" onclick="clearFavSelection()">Cancel</button>
             </div>
           </div>
@@ -1233,13 +1233,13 @@ export function renderUI(): string {
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
           <h2 style="margin:0;border:none;padding:0;">Scan Items</h2>
         </div>
-        <p style="color:#777E90;font-size:13px;margin-bottom:20px;">Upload a photo to automatically detect and identify items using AI. Detected items can be reviewed, edited, and confirmed into listings.</p>
+        <p style="color:#4A5568;font-size:13px;margin-bottom:20px;">Upload a photo to automatically detect and identify items using AI. Detected items can be reviewed, edited, and confirmed into listings.</p>
 
         <!-- Upload zone -->
-        <div id="scanUploadZone" style="border:2px dashed #E6E8EC;border-radius:16px;padding:40px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:24px;background:#FCFCFD;" ondragover="event.preventDefault();this.style.borderColor='#EC526F';this.style.background='rgba(236,82,111,0.03)';" ondragleave="this.style.borderColor='#E6E8EC';this.style.background='#FCFCFD';" ondrop="handleScanDrop(event)" onclick="document.getElementById('scanFileInput').click()">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-          <div style="font-size:15px;font-weight:600;color:#23262F;margin-bottom:4px;">Drop a photo here or click to upload</div>
-          <div style="font-size:12px;color:#777E90;">JPEG, PNG, or WebP &middot; Max 10MB</div>
+        <div id="scanUploadZone" style="border:2px dashed #CBD5E0;border-radius:16px;padding:40px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:24px;background:#FFFFFF;" ondragover="event.preventDefault();this.style.borderColor='#0A5E8A';this.style.background='rgba(10,94,138,0.03)';" ondragleave="this.style.borderColor='#CBD5E0';this.style.background='#FFFFFF';" ondrop="handleScanDrop(event)" onclick="document.getElementById('scanFileInput').click()">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          <div style="font-size:15px;font-weight:600;color:#1A1A2E;margin-bottom:4px;">Drop a photo here or click to upload</div>
+          <div style="font-size:12px;color:#4A5568;">JPEG, PNG, or WebP &middot; Max 10MB</div>
           <input type="file" id="scanFileInput" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="handleScanFileSelect(this)">
         </div>
         <div style="display:flex;gap:12px;justify-content:center;margin-top:-12px;margin-bottom:24px;">
@@ -1249,7 +1249,7 @@ export function renderUI(): string {
           </button>
         </div>
         <div id="scanCameraContainer" class="hidden" style="margin-bottom:24px;text-align:center;">
-          <video id="scanCameraVideo" autoplay playsinline style="width:100%;max-width:500px;border-radius:12px;border:1px solid #E6E8EC;"></video>
+          <video id="scanCameraVideo" autoplay playsinline style="width:100%;max-width:500px;border-radius:12px;border:1px solid #CBD5E0;"></video>
           <canvas id="scanCameraCanvas" style="display:none;"></canvas>
           <div style="margin-top:12px;display:flex;gap:12px;justify-content:center;">
             <button class="btn-primary btn-sm" onclick="captureScanPhoto()" style="display:inline-flex;align-items:center;gap:6px;">
@@ -1262,57 +1262,57 @@ export function renderUI(): string {
 
         <!-- Processing state -->
         <div id="scanProcessing" class="hidden" style="text-align:center;padding:40px;">
-          <div style="display:inline-block;width:32px;height:32px;border:3px solid #E6E8EC;border-top-color:#EC526F;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:12px;"></div>
-          <div style="font-size:14px;font-weight:600;color:#23262F;">Analyzing image...</div>
-          <div style="font-size:12px;color:#777E90;margin-top:4px;">This may take a few seconds</div>
+          <div style="display:inline-block;width:32px;height:32px;border:3px solid #CBD5E0;border-top-color:#D4602A;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:12px;"></div>
+          <div style="font-size:14px;font-weight:600;color:#1A1A2E;">Analyzing image...</div>
+          <div style="font-size:12px;color:#4A5568;margin-top:4px;">This may take a few seconds</div>
         </div>
 
         <!-- Scan results -->
         <div id="scanResults" class="hidden">
           <!-- Scan Summary Header -->
-          <div id="scanSummaryHeader" style="background:#FCFCFD;border:1px solid #E6E8EC;border-radius:12px;padding:14px 16px;margin-bottom:16px;cursor:pointer;" onclick="toggleScanSummary()">
+          <div id="scanSummaryHeader" style="background:#FFFFFF;border:1px solid #CBD5E0;border-radius:12px;padding:14px 16px;margin-bottom:16px;cursor:pointer;" onclick="toggleScanSummary()">
             <div style="display:flex;align-items:center;gap:12px;">
               <img id="scanSummaryThumb" src="" alt="" style="width:40px;height:40px;border-radius:8px;object-fit:cover;display:none;">
               <div style="flex:1;min-width:0;">
-                <div style="font-size:14px;font-weight:600;color:#23262F;">Scan Summary</div>
-                <div style="font-size:12px;color:#777E90;"><span id="scanResultCount">0</span> items found &middot; <span id="scanPublishCount">0</span> to publish</div>
+                <div style="font-size:14px;font-weight:600;color:#1A1A2E;">Scan Summary</div>
+                <div style="font-size:12px;color:#4A5568;"><span id="scanResultCount">0</span> items found &middot; <span id="scanPublishCount">0</span> to publish</div>
               </div>
-              <svg id="scanSummaryChevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>
+              <svg id="scanSummaryChevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div id="scanSummaryExpanded" class="hidden" style="margin-top:12px;padding-top:12px;border-top:1px solid #E6E8EC;">
+            <div id="scanSummaryExpanded" class="hidden" style="margin-top:12px;padding-top:12px;border-top:1px solid #CBD5E0;">
               <div id="scanSummaryList" style="display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto;"></div>
             </div>
           </div>
 
           <!-- Results header -->
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-            <div style="font-size:16px;font-weight:700;color:#23262F;"><span id="scanResultCountHeader">0</span> items found</div>
+            <div style="font-size:16px;font-weight:700;color:#1A1A2E;"><span id="scanResultCountHeader">0</span> items found</div>
             <div style="display:flex;gap:8px;">
               <button class="btn-secondary btn-sm" onclick="retryScan()" style="display:inline-flex;align-items:center;gap:4px;font-weight:600;">New Scan</button>
             </div>
           </div>
 
           <!-- Bulk actions bar -->
-          <div style="background:#FCFCFD;border:1px solid #E6E8EC;border-radius:10px;padding:10px 14px;margin-bottom:16px;">
+          <div style="background:#FFFFFF;border:1px solid #CBD5E0;border-radius:10px;padding:10px 14px;margin-bottom:16px;">
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:600;color:#777E90;">
-                <input type="checkbox" id="scanSelectAll" onchange="toggleScanSelectAll(this.checked)" style="width:16px;height:16px;accent-color:#EC526F;">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:600;color:#4A5568;">
+                <input type="checkbox" id="scanSelectAll" onchange="toggleScanSelectAll(this.checked)" style="width:16px;height:16px;accent-color:#D4602A;">
                 Select all
               </label>
-              <span style="width:1px;height:20px;background:#E6E8EC;margin:0 4px;"></span>
-              <span style="font-size:11px;color:#777E90;">Set selected to:</span>
-              <button class="scan-bulk-status-btn" onclick="bulkSetScanStatus('for_sale')" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#e6f9ed;color:#1a8a42;">For Sale</button>
-              <button class="scan-bulk-status-btn" onclick="bulkSetScanStatus('willing_to_sell')" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#fff8e1;color:#e6a200;">Willing to Sell</button>
-              <button class="scan-bulk-status-btn" onclick="bulkSetScanStatus('for_rent')" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#e6f0ff;color:#1a6aba;">For Rent</button>
-              <button class="scan-bulk-status-btn" onclick="bulkSetScanStatus('private')" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#E6E8EC;color:#353945;">Private</button>
-              <button onclick="bulkRemoveScanItems()" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#fef2f2;color:#991b1b;">Remove</button>
+              <span style="width:1px;height:20px;background:#CBD5E0;margin:0 4px;"></span>
+              <span style="font-size:11px;color:#4A5568;">Set selected to:</span>
+              <button class="scan-bulk-status-btn" onclick="bulkSetScanStatus('for_sale')" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#E6F4EF;color:#2D8A6E;">For Sale</button>
+              <button class="scan-bulk-status-btn" onclick="bulkSetScanStatus('willing_to_sell')" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#FFF3E0;color:#D4922A;">Willing to Sell</button>
+              <button class="scan-bulk-status-btn" onclick="bulkSetScanStatus('for_rent')" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#E8F0FA;color:#4A90D9;">For Rent</button>
+              <button class="scan-bulk-status-btn" onclick="bulkSetScanStatus('private')" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#CBD5E0;color:#2D3748;">Private</button>
+              <button onclick="bulkRemoveScanItems()" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;background:#FDE8E8;color:#A93636;">Remove</button>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <span style="font-size:11px;color:#777E90;">Move to folder:</span>
-              <select id="scanCollectionPicker" style="height:28px;padding:0 8px;border-radius:8px;border:1px solid #E6E8EC;font-size:12px;font-family:'Poppins',sans-serif;color:#23262F;">
+              <span style="font-size:11px;color:#4A5568;">Move to folder:</span>
+              <select id="scanCollectionPicker" style="height:28px;padding:0 8px;border-radius:8px;border:1px solid #CBD5E0;font-size:12px;font-family:'DM Sans',sans-serif;color:#1A1A2E;">
                 <option value="">No folder</option>
               </select>
-              <button onclick="openNewCollectionFromScan()" style="font-size:11px;font-weight:600;color:#1a8a42;background:none;border:none;cursor:pointer;">+ New Folder</button>
+              <button onclick="openNewCollectionFromScan()" style="font-size:11px;font-weight:600;color:#2D8A6E;background:none;border:none;cursor:pointer;">+ New Folder</button>
             </div>
           </div>
 
@@ -1320,8 +1320,8 @@ export function renderUI(): string {
           <div id="scanItemsGrid" style="display:flex;flex-direction:column;gap:12px;"></div>
 
           <!-- Publish footer -->
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding:16px;background:#FCFCFD;border:1px solid #E6E8EC;border-radius:12px;">
-            <div style="font-size:13px;color:#777E90;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding:16px;background:#FFFFFF;border:1px solid #CBD5E0;border-radius:12px;">
+            <div style="font-size:13px;color:#4A5568;">
               <span id="scanPublishFooterCount">0</span> of <span id="scanTotalFooterCount">0</span> items to publish
               <span id="scanRemovedFooterCount" style="display:none;"> &middot; <span id="scanRemovedNum">0</span> removed</span>
             </div>
@@ -1332,10 +1332,10 @@ export function renderUI(): string {
         </div>
 
         <!-- Barcode Lookup -->
-        <div style="margin-top:32px;padding-top:24px;border-top:1px solid #E6E8EC;">
-          <h3 style="font-size:14px;font-weight:600;color:#23262F;margin-bottom:12px;">Barcode / UPC Lookup</h3>
+        <div style="margin-top:32px;padding-top:24px;border-top:1px solid #CBD5E0;">
+          <h3 style="font-size:14px;font-weight:600;color:#1A1A2E;margin-bottom:12px;">Barcode / UPC Lookup</h3>
           <div style="display:flex;gap:8px;max-width:400px;">
-            <input id="barcodeInput" type="text" placeholder="Enter UPC or barcode number" style="flex:1;height:40px;padding:0 12px;border:1px solid #E6E8EC;border-radius:10px;font-size:14px;font-family:'Poppins',sans-serif;color:#23262F;" onkeydown="if(event.key==='Enter')lookupBarcode()">
+            <input id="barcodeInput" type="text" placeholder="Enter UPC or barcode number" style="flex:1;height:40px;padding:0 12px;border:1px solid #CBD5E0;border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;color:#1A1A2E;" onkeydown="if(event.key==='Enter')lookupBarcode()">
             <button class="btn-primary btn-sm" onclick="lookupBarcode()" style="white-space:nowrap;">Lookup</button>
           </div>
           <div style="margin-top:8px;">
@@ -1345,7 +1345,7 @@ export function renderUI(): string {
             </button>
           </div>
           <div id="barcodeCameraContainer" class="hidden" style="margin-top:12px;max-width:400px;">
-            <video id="barcodeVideo" autoplay playsinline style="width:100%;border-radius:12px;border:1px solid #E6E8EC;"></video>
+            <video id="barcodeVideo" autoplay playsinline style="width:100%;border-radius:12px;border:1px solid #CBD5E0;"></video>
             <div style="margin-top:8px;text-align:center;">
               <button class="btn-secondary btn-sm" onclick="toggleBarcodeCamera()">Stop Camera</button>
             </div>
@@ -1354,9 +1354,9 @@ export function renderUI(): string {
         </div>
 
         <!-- Scan History -->
-        <div style="margin-top:32px;padding-top:24px;border-top:1px solid #E6E8EC;">
-          <h3 style="font-size:14px;font-weight:600;color:#23262F;margin-bottom:12px;">Scan History</h3>
-          <div id="scanHistory"><p style="color:#777E90;font-size:13px;">No scans yet</p></div>
+        <div style="margin-top:32px;padding-top:24px;border-top:1px solid #CBD5E0;">
+          <h3 style="font-size:14px;font-weight:600;color:#1A1A2E;margin-bottom:12px;">Scan History</h3>
+          <div id="scanHistory"><p style="color:#4A5568;font-size:13px;">No scans yet</p></div>
         </div>
       </section>
     </div>
@@ -1369,7 +1369,7 @@ export function renderUI(): string {
           <button class="btn-primary btn-sm" onclick="openNewCollectionModal()">+ New Collection</button>
         </div>
         <div id="collectionsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;"></div>
-        <div id="collectionsEmpty" class="hidden" style="text-align:center;padding:40px;color:#777E90;">
+        <div id="collectionsEmpty" class="hidden" style="text-align:center;padding:40px;color:#4A5568;">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D2D5DB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
           <div style="font-size:14px;font-weight:500;">No collections yet</div>
           <div style="font-size:12px;margin-top:4px;">Create a collection to organize your listings</div>
@@ -1380,14 +1380,14 @@ export function renderUI(): string {
       <div id="collectionDetail" class="hidden">
         <section>
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-            <button style="background:none;border:none;cursor:pointer;color:#777E90;font-size:18px;" onclick="loadCollections()" title="Back">&larr;</button>
+            <button style="background:none;border:none;cursor:pointer;color:#4A5568;font-size:18px;" onclick="loadCollections()" title="Back">&larr;</button>
             <div style="flex:1;">
               <h2 style="margin:0;border:none;padding:0;" id="collectionDetailName"></h2>
-              <div style="font-size:12px;color:#777E90;" id="collectionDetailDesc"></div>
+              <div style="font-size:12px;color:#4A5568;" id="collectionDetailDesc"></div>
             </div>
             <div style="display:flex;gap:8px;">
               <button class="btn-secondary btn-sm" onclick="editCollection()" title="Edit">Edit</button>
-              <button style="background:#fce8e6;color:#E92222;border:none;border-radius:10px;height:32px;padding:0 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;" onclick="deleteCollection()">Delete</button>
+              <button style="background:#FDE8E8;color:#C94444;border:none;border-radius:10px;height:32px;padding:0 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;" onclick="deleteCollection()">Delete</button>
             </div>
           </div>
           <div id="collectionRefs"><p class="empty">No items in this collection</p></div>
@@ -1406,7 +1406,7 @@ export function renderUI(): string {
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
           <h2 style="margin:0;border:none;padding:0;line-height:32px;">Search Results</h2>
           <div style="display:flex;align-items:center;gap:10px;">
-            <select id="searchRadiusSelect" style="font-size:13px;border:1px solid #E6E8EC;border-radius:8px;padding:4px 8px;font-family:'Poppins',sans-serif;height:32px;margin-bottom:0;width:auto;display:none;" onchange="executeHeaderSearch()">
+            <select id="searchRadiusSelect" style="font-size:13px;border:1px solid #CBD5E0;border-radius:8px;padding:4px 8px;font-family:'DM Sans',sans-serif;height:32px;margin-bottom:0;width:auto;display:none;" onchange="executeHeaderSearch()">
               <option value="10">10 miles</option>
               <option value="25">25 miles</option>
               <option value="50" selected>50 miles</option>
@@ -1414,7 +1414,7 @@ export function renderUI(): string {
               <option value="200">200 miles</option>
               <option value="500">500 miles</option>
             </select>
-            <select id="searchSortSelect" style="font-size:13px;border:1px solid #E6E8EC;border-radius:8px;padding:4px 8px;font-family:'Poppins',sans-serif;height:32px;margin-bottom:0;width:auto;">
+            <select id="searchSortSelect" style="font-size:13px;border:1px solid #CBD5E0;border-radius:8px;padding:4px 8px;font-family:'DM Sans',sans-serif;height:32px;margin-bottom:0;width:auto;">
               <option value="newest">Newest First</option>
               <option value="price_asc">Price: Low to High</option>
               <option value="price_desc">Price: High to Low</option>
@@ -1464,7 +1464,7 @@ export function renderUI(): string {
     <div id="negArchived" class="hidden"></div>
 
     <div id="tab-settings" class="hidden">
-      <h1 style="font-size:24px;font-weight:600;color:#23262F;margin-bottom:32px;">Settings</h1>
+      <h1 style="font-size:24px;font-weight:600;color:#1A1A2E;margin-bottom:32px;">Settings</h1>
       <div id="updateBanner" class="update-banner">
         <div class="update-title">&#x2B06; Update available: <span id="updateVersionLabel"></span></div>
         <div class="update-cmd">Run: npx pelagora-cli-installer@latest</div>
@@ -1472,14 +1472,14 @@ export function renderUI(): string {
       <section class="settings-card">
         <h2>Profile Picture</h2>
         <div style="display:flex;align-items:center;gap:20px;">
-          <div id="profilePicPreview" style="width:80px;height:80px;border-radius:50%;border:2px solid #E6E8EC;background:#FCFCFD;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex-shrink:0;" onclick="document.getElementById('profilePicInput').click()">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#B1B5C3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <div id="profilePicPreview" style="width:80px;height:80px;border-radius:50%;border:2px solid #CBD5E0;background:#FFFFFF;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex-shrink:0;" onclick="document.getElementById('profilePicInput').click()">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </div>
           <div>
             <button class="btn-secondary btn-sm" onclick="document.getElementById('profilePicInput').click()">Upload Photo</button>
             <button class="btn-danger btn-sm" id="removeProfilePicBtn" style="display:none;margin-left:8px;" onclick="removeProfilePicture()">Remove</button>
             <input type="file" id="profilePicInput" accept="image/*" style="display:none;" onchange="uploadProfilePicture(this)">
-            <p style="font-size:12px;color:#B1B5C3;margin-top:6px;margin-bottom:0;">Click the circle or button to upload. Max 10 MB.</p>
+            <p style="font-size:12px;color:#718096;margin-top:6px;margin-bottom:0;">Click the circle or button to upload. Max 10 MB.</p>
           </div>
         </div>
       </section>
@@ -1489,14 +1489,14 @@ export function renderUI(): string {
         <div id="settingsMsg"></div>
 
         <!-- Promo card: shown when no API key -->
-        <div id="connectionPromo" style="display:none; border-radius:16px; overflow:hidden; background:linear-gradient(135deg, #f8f0fc 0%, #fdedf0 100%); padding:24px; margin-bottom:16px;">
+        <div id="connectionPromo" style="display:none; border-radius:16px; overflow:hidden; background:linear-gradient(135deg, #E6F5F3 0%, #fdedf0 100%); padding:24px; margin-bottom:16px;">
           <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-            <div style="width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(135deg, #8101B4 0%, #EA526F 100%);">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FCFCFD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            <div style="width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:#D4602A;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
             </div>
             <div style="flex:1; min-width:0;">
-              <div style="font-size:15px; font-weight:600; color:#141416; margin-bottom:4px;">Connect to Reffo.ai</div>
-              <div style="font-size:13px; color:#777E90; line-height:1.5;">Sync your inventory with the Reffo.ai marketplace. Get an API key from your account, paste it below, and your listed items will appear on reffo.ai.</div>
+              <div style="font-size:15px; font-weight:600; color:#1A1A2E; margin-bottom:4px;">Connect to Reffo.ai</div>
+              <div style="font-size:13px; color:#4A5568; line-height:1.5;">Sync your inventory with the Reffo.ai marketplace. Get an API key from your account, paste it below, and your listed items will appear on reffo.ai.</div>
             </div>
           </div>
           <div style="display:flex; gap:10px; align-items:flex-end; margin-top:16px;">
@@ -1506,24 +1506,24 @@ export function renderUI(): string {
             </div>
             <button class="btn-primary" style="margin-bottom:14px;" onclick="saveApiKey()">Save</button>
           </div>
-          <p style="font-size:12px; color:#B1B5C3; margin-top:-6px;">Get your API key at <a href="https://reffo.ai/account" target="_blank" style="color:#EC526F;">reffo.ai/account</a></p>
+          <p style="font-size:12px; color:#718096; margin-top:-6px;">Get your API key at <a href="https://reffo.ai/account" target="_blank" style="color:#1A8A7D;">reffo.ai/account</a></p>
         </div>
 
         <!-- Connected state: shown when API key exists -->
         <div id="connectionConnected" style="display:none;">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
-            <div id="syncStatusDot" style="width:12px;height:12px;border-radius:50%;background:#E6E8EC;flex-shrink:0;"></div>
-            <span id="syncStatusText" style="font-size:14px;font-weight:500;color:#777E90;">Not connected</span>
+            <div id="syncStatusDot" style="width:12px;height:12px;border-radius:50%;background:#CBD5E0;flex-shrink:0;"></div>
+            <span id="syncStatusText" style="font-size:14px;font-weight:500;color:#4A5568;">Not connected</span>
             <button id="retryConnectionBtn" class="btn-primary btn-sm" style="display:none;font-size:12px;padding:4px 12px;" onclick="retryConnection()">Retry</button>
           </div>
-          <div id="syncErrorDetail" style="font-size:12px;color:#F5A623;margin-bottom:16px;display:none;"></div>
+          <div id="syncErrorDetail" style="font-size:12px;color:#D4922A;margin-bottom:16px;display:none;"></div>
           <div style="display:flex;gap:10px;align-items:center;margin-top:12px;">
-            <span style="font-size:13px;color:#777E90;" id="connectedKeyPrefix"></span>
+            <span style="font-size:13px;color:#4A5568;" id="connectedKeyPrefix"></span>
             <button class="btn-danger btn-sm" id="removeKeyBtn" onclick="removeApiKey()">Remove</button>
           </div>
-          <div style="margin-top:16px;padding-top:16px;border-top:1px solid #E6E8EC;display:flex;align-items:center;gap:8px;">
-            <span style="font-size:13px;font-weight:500;color:#777E90;">Synced Refs:</span>
-            <span id="syncedCount" style="font-size:15px;font-weight:700;color:#141416;">0</span>
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid #CBD5E0;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:13px;font-weight:500;color:#4A5568;">Synced Refs:</span>
+            <span id="syncedCount" style="font-size:15px;font-weight:700;color:#1A1A2E;">0</span>
           </div>
         </div>
       </section>
@@ -1531,7 +1531,7 @@ export function renderUI(): string {
       <section class="settings-card">
         <h2>AI Provider</h2>
         <div id="aiProviderMsg"></div>
-        <p style="font-size:12px;color:#B1B5C3;margin-bottom:12px;">Choose how Smart Autofill gets product data. Default uses your Reffo API key.</p>
+        <p style="font-size:12px;color:#718096;margin-bottom:12px;">Choose how Smart Autofill gets product data. Default uses your Reffo API key.</p>
         <label for="aiProviderSelect">Provider</label>
         <select id="aiProviderSelect" onchange="toggleAiKeyField()">
           <option value="reffo">Reffo (default)</option>
@@ -1544,7 +1544,7 @@ export function renderUI(): string {
           <label for="aiApiKeyInput">API Key</label>
           <input id="aiApiKeyInput" type="password" placeholder="Enter your API key">
         </div>
-        <div id="aiReffoNote" style="font-size:12px;color:#B1B5C3;margin-top:8px;">Uses your Reffo API key — no extra configuration needed.</div>
+        <div id="aiReffoNote" style="font-size:12px;color:#718096;margin-top:8px;">Uses your Reffo API key — no extra configuration needed.</div>
         <div style="display:flex;gap:8px;margin-top:12px;">
           <button class="btn-primary btn-sm" onclick="saveAiProvider()">Save</button>
           <button class="btn-danger btn-sm" id="removeAiProviderBtn" style="display:none;" onclick="removeAiProvider()">Remove</button>
@@ -1554,7 +1554,7 @@ export function renderUI(): string {
       <section class="settings-card">
         <h2>Default Location</h2>
         <div id="locationMsg"></div>
-        <p style="font-size:12px;color:#B1B5C3;margin-bottom:12px;">Set your default location. New refs will inherit these values. Street address is stored locally and never shared.</p>
+        <p style="font-size:12px;color:#718096;margin-bottom:12px;">Set your default location. New refs will inherit these values. Street address is stored locally and never shared.</p>
         <label for="locAddress">Address (private)</label>
         <input id="locAddress" placeholder="123 Main St (never shared)">
         <div class="row">
@@ -1610,7 +1610,7 @@ export function renderUI(): string {
   <div id="tab-list" class="hidden">
     <div style="max-width:1100px;margin:0 auto;padding:0 24px;">
       <div style="margin-bottom:8px;">
-        <a onclick="switchTab('refs')" style="cursor:pointer;color:#EC526F;font-size:14px;font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+        <a onclick="switchTab('refs')" style="cursor:pointer;color:#1A8A7D;font-size:14px;font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           Back to Refs
         </a>
@@ -1648,21 +1648,21 @@ export function renderUI(): string {
         <div id="createAutofillSection">
           <div id="createAutofillActive" style="display:none;">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-              <button type="button" id="createAutofillBtn" onclick="triggerProductLookup('create')" style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#8101B4 0%,#EA526F 100%);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;">
+              <button type="button" id="createAutofillBtn" onclick="triggerProductLookup('create')" style="display:flex;align-items:center;gap:6px;background:#D4602A;color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
                 Smart Autofill
               </button>
-              <span id="createAutofillStatus" style="font-size:12px;color:#777E90;"></span>
+              <span id="createAutofillStatus" style="font-size:12px;color:#4A5568;"></span>
             </div>
           </div>
-          <div id="createAutofillPromo" style="display:none;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#f8f0fc 0%,#fdedf0 100%);padding:14px 16px;margin-bottom:14px;">
+          <div id="createAutofillPromo" style="display:none;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#E6F5F3 0%,#fdedf0 100%);padding:14px 16px;margin-bottom:14px;">
             <div style="display:flex;align-items:center;gap:12px;">
-              <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:linear-gradient(135deg,#8101B4 0%,#EA526F 100%);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FCFCFD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+              <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#D4602A;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
               </div>
               <div style="flex:1;min-width:0;">
-                <div style="font-size:13px;font-weight:600;color:#141416;margin-bottom:2px;">Smart Autofill with AI</div>
-                <div style="font-size:12px;color:#777E90;line-height:1.4;">Link a <a href="https://reffo.ai/api" target="_blank" style="color:#EC526F;font-weight:600;text-decoration:none;">Reffo.ai</a> account to auto-fill descriptions, attributes, images, and price estimates when you list items.</div>
+                <div style="font-size:13px;font-weight:600;color:#1A1A2E;margin-bottom:2px;">Smart Autofill with AI</div>
+                <div style="font-size:12px;color:#4A5568;line-height:1.4;">Link a <a href="https://reffo.ai/api" target="_blank" style="color:#1A8A7D;font-weight:600;text-decoration:none;">Reffo.ai</a> account to auto-fill descriptions, attributes, images, and price estimates when you list items.</div>
               </div>
             </div>
           </div>
@@ -1701,8 +1701,8 @@ export function renderUI(): string {
           </div>
         </div>
 
-        <div id="rentalFieldsCreate" style="display:none;margin-bottom:14px;border:2px solid #e6f0ff;border-radius:12px;padding:14px;background:#f8fbff;">
-          <div style="font-size:12px;font-weight:600;color:#1a6aba;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:10px;">Rental Details</div>
+        <div id="rentalFieldsCreate" style="display:none;margin-bottom:14px;border:2px solid #E8F0FA;border-radius:12px;padding:14px;background:#E8F0FA;">
+          <div style="font-size:12px;font-weight:600;color:#4A90D9;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:10px;">Rental Details</div>
           <label for="refRentalTerms">Rental Terms</label>
           <textarea id="refRentalTerms" placeholder="Terms and conditions for rental..." rows="2" style="resize:vertical;"></textarea>
           <div class="row">
@@ -1722,9 +1722,9 @@ export function renderUI(): string {
         <label for="refSku">SKU</label>
         <input id="refSku" name="sku" placeholder="Optional SKU or part number">
 
-        <details style="margin-bottom:14px;border:2px solid #E6E8EC;border-radius:12px;padding:14px;">
-          <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.02em;">Location Override</summary>
-          <p style="font-size:12px;color:#B1B5C3;margin:8px 0;">Leave blank to use your default location from Settings.</p>
+        <details style="margin-bottom:14px;border:2px solid #CBD5E0;border-radius:12px;padding:14px;">
+          <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.02em;">Location Override</summary>
+          <p style="font-size:12px;color:#718096;margin:8px 0;">Leave blank to use your default location from Settings.</p>
           <div class="row">
             <div><label for="refLocCity">City</label><input id="refLocCity" placeholder="City"></div>
             <div><label for="refLocState">State</label><input id="refLocState" placeholder="State"></div>
@@ -1761,7 +1761,7 @@ export function renderUI(): string {
         <div id="aiSuggestedImage"></div>
 
         <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;margin-bottom:10px;margin-top:20px;">
-          <span style="font-size:13px;font-weight:600;color:#23262F;">Also push to Reffo</span>
+          <span style="font-size:13px;font-weight:600;color:#1A1A2E;">Also push to Reffo</span>
           <label class="sync-toggle" style="margin:0;">
             <input type="checkbox" id="refAlsoPushReffo">
             <span class="toggle-track"></span>
@@ -1815,10 +1815,10 @@ export function renderUI(): string {
     <div class="modal">
       <h3 id="respondModalTitle">Respond to Offer</h3>
       <input type="hidden" id="respondNegId">
-      <div id="respondOfferInfo" style="background:#F4F5F6;border-radius:16px;padding:20px;margin-bottom:20px;">
-        <div style="font-size:12px;font-weight:600;color:#777E90;text-transform:uppercase;margin-bottom:4px;">Offered Price</div>
-        <div id="respondOfferPrice" style="font-size:24px;font-weight:700;color:#141416;"></div>
-        <div id="respondOfferMessage" style="font-size:14px;color:#777E90;margin-top:6px;"></div>
+      <div id="respondOfferInfo" style="background:#EDE8E3;border-radius:16px;padding:20px;margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;margin-bottom:4px;">Offered Price</div>
+        <div id="respondOfferPrice" style="font-size:24px;font-weight:700;color:#1A1A2E;"></div>
+        <div id="respondOfferMessage" style="font-size:14px;color:#4A5568;margin-top:6px;"></div>
       </div>
       <div id="respondCounterFields" class="hidden">
         <label for="respondCounterPrice">Your Counter Price</label>
@@ -1840,12 +1840,12 @@ export function renderUI(): string {
   <div id="tab-terms" class="hidden">
     <section>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;cursor:pointer;" onclick="switchTab('refs')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        <span style="font-size:13px;color:#777E90;">Back</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        <span style="font-size:13px;color:#4A5568;">Back</span>
       </div>
       <h2 style="border-bottom:none;margin-bottom:4px;">Terms of Service</h2>
-      <p style="font-size:13px;color:#777E90;margin-bottom:24px;">Last updated: March 6, 2026</p>
-      <div style="font-size:14px;color:#23262F;line-height:1.7;">
+      <p style="font-size:13px;color:#4A5568;margin-bottom:24px;">Last updated: March 6, 2026</p>
+      <div style="font-size:14px;color:#1A1A2E;line-height:1.7;">
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">1. Acceptance of Terms</h3>
         <p>By accessing or using Reffo.ai (the &ldquo;Service&rdquo;), the protocol, the beacon software, or any associated APIs, you agree to be bound by these Terms of Service (&ldquo;Terms&rdquo;). If you do not agree to these Terms, do not use the Service.</p>
 
@@ -1870,7 +1870,7 @@ export function renderUI(): string {
         <p style="margin-top:8px;">You acknowledge that you engage in peer-to-peer transactions at your own risk. Reffo.ai is not responsible for disputes between users.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">6. Prohibited Uses</h3>
-        <p>You agree to comply with our <a href="javascript:void(0)" onclick="switchTab('acceptable-use')" style="color:#EA526F;">Acceptable Use Policy</a>, which is incorporated into these Terms by reference. Violation of the Acceptable Use Policy may result in suspension or termination of your account.</p>
+        <p>You agree to comply with our <a href="javascript:void(0)" onclick="switchTab('acceptable-use')" style="color:#1A8A7D;">Acceptable Use Policy</a>, which is incorporated into these Terms by reference. Violation of the Acceptable Use Policy may result in suspension or termination of your account.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">7. API Usage</h3>
         <p>Access to the Reffo API is subject to rate limits and usage policies. API keys are personal and non-transferable. You may not use the API to scrape, spam, or otherwise abuse the Service. We reserve the right to revoke API access for violations.</p>
@@ -1897,7 +1897,7 @@ export function renderUI(): string {
         <p>We may update these Terms from time to time. When we do, we will revise the &ldquo;Last updated&rdquo; date at the top of this page. Continued use of the Service after changes constitutes acceptance of the revised Terms.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">15. Contact</h3>
-        <p>If you have questions about these Terms, please contact us at <a href="mailto:help@reffo.ai" style="color:#EA526F;">help@reffo.ai</a>.</p>
+        <p>If you have questions about these Terms, please contact us at <a href="mailto:help@reffo.ai" style="color:#1A8A7D;">help@reffo.ai</a>.</p>
       </div>
     </section>
   </div>
@@ -1906,12 +1906,12 @@ export function renderUI(): string {
   <div id="tab-privacy" class="hidden">
     <section>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;cursor:pointer;" onclick="switchTab('refs')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        <span style="font-size:13px;color:#777E90;">Back</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        <span style="font-size:13px;color:#4A5568;">Back</span>
       </div>
       <h2 style="border-bottom:none;margin-bottom:4px;">Privacy Policy</h2>
-      <p style="font-size:13px;color:#777E90;margin-bottom:24px;">Last updated: March 6, 2026</p>
-      <div style="font-size:14px;color:#23262F;line-height:1.7;">
+      <p style="font-size:13px;color:#4A5568;margin-bottom:24px;">Last updated: March 6, 2026</p>
+      <div style="font-size:14px;color:#1A1A2E;line-height:1.7;">
         <p>Reffo.ai (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use the Reffo.ai webapp, the beacon software, and associated APIs (collectively, the &ldquo;Service&rdquo;).</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">1. Information We Collect</h3>
@@ -1949,7 +1949,7 @@ export function renderUI(): string {
           <li>Object to or restrict certain processing of your data.</li>
           <li>Request data portability.</li>
         </ul>
-        <p style="margin-top:8px;">To exercise any of these rights, contact us at <a href="mailto:help@reffo.ai" style="color:#EA526F;">help@reffo.ai</a>.</p>
+        <p style="margin-top:8px;">To exercise any of these rights, contact us at <a href="mailto:help@reffo.ai" style="color:#1A8A7D;">help@reffo.ai</a>.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">6. Security</h3>
         <p>We implement industry-standard security measures to protect your data, including encryption in transit (TLS), secure password hashing, and access controls. However, no method of transmission over the internet is 100% secure, and we cannot guarantee absolute security.</p>
@@ -1967,7 +1967,7 @@ export function renderUI(): string {
         <p>We may update this Privacy Policy from time to time. When we do, we will revise the &ldquo;Last updated&rdquo; date at the top of this page. Continued use of the Service after changes constitutes acceptance of the revised policy.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">11. Contact</h3>
-        <p>If you have questions about this Privacy Policy, please contact us at <a href="mailto:help@reffo.ai" style="color:#EA526F;">help@reffo.ai</a>.</p>
+        <p>If you have questions about this Privacy Policy, please contact us at <a href="mailto:help@reffo.ai" style="color:#1A8A7D;">help@reffo.ai</a>.</p>
       </div>
     </section>
   </div>
@@ -1976,12 +1976,12 @@ export function renderUI(): string {
   <div id="tab-acceptable-use" class="hidden">
     <section>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;cursor:pointer;" onclick="switchTab('refs')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        <span style="font-size:13px;color:#777E90;">Back</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        <span style="font-size:13px;color:#4A5568;">Back</span>
       </div>
       <h2 style="border-bottom:none;margin-bottom:4px;">Acceptable Use Policy</h2>
-      <p style="font-size:13px;color:#777E90;margin-bottom:24px;">Last updated: March 6, 2026</p>
-      <div style="font-size:14px;color:#23262F;line-height:1.7;">
+      <p style="font-size:13px;color:#4A5568;margin-bottom:24px;">Last updated: March 6, 2026</p>
+      <div style="font-size:14px;color:#1A1A2E;line-height:1.7;">
         <p>This Acceptable Use Policy (&ldquo;AUP&rdquo;) governs your use of the Reffo.ai webapp, the Pelagora network, and associated services. By using the Service, you agree to comply with this policy. Violation may result in listing removal, account suspension, or reporting to law enforcement.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">1. Prohibited Items</h3>
@@ -2025,7 +2025,7 @@ export function renderUI(): string {
         <p style="margin-top:8px;">Note: Because the Pelagora network is decentralized, Reffo.ai can remove listings from its own search index and webapp but cannot control content on individual beacons. Beacon operators are independently responsible for the content they host.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">5. Reporting Violations</h3>
-        <p>If you encounter a listing or user that violates this policy, please report it to <a href="mailto:help@reffo.ai" style="color:#EA526F;">help@reffo.ai</a> with as much detail as possible, including the listing URL or description and the nature of the violation.</p>
+        <p>If you encounter a listing or user that violates this policy, please report it to <a href="mailto:help@reffo.ai" style="color:#1A8A7D;">help@reffo.ai</a> with as much detail as possible, including the listing URL or description and the nature of the violation.</p>
 
         <h3 style="font-size:16px;font-weight:600;margin:24px 0 8px;">6. Changes to This Policy</h3>
         <p>We may update this AUP from time to time. When we do, we will revise the &ldquo;Last updated&rdquo; date at the top of this page.</p>
@@ -2037,13 +2037,13 @@ export function renderUI(): string {
   <div id="tab-for-bots" class="hidden">
     <section>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;cursor:pointer;" onclick="switchTab('refs')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        <span style="font-size:13px;color:#777E90;">Back</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        <span style="font-size:13px;color:#4A5568;">Back</span>
       </div>
       <h2 style="border-bottom:none;margin-bottom:4px;">&#x1F916; For Bots Only</h2>
-      <p style="font-size:13px;color:#777E90;margin-bottom:24px;">Structured info for AI agents, crawlers, and bots. Humans: you probably want <a href="https://reffo.ai/docs" target="_blank" rel="noopener noreferrer" style="color:#EA526F;">Docs</a> or <a href="https://reffo.ai/agents" target="_blank" rel="noopener noreferrer" style="color:#EA526F;">AI Agents</a>.</p>
-      <div style="font-size:14px;color:#23262F;line-height:1.7;">
-        <p>For full bot-readable documentation, visit <a href="https://reffo.ai/for-bots" target="_blank" rel="noopener noreferrer" style="color:#EA526F;">reffo.ai/for-bots</a></p>
+      <p style="font-size:13px;color:#4A5568;margin-bottom:24px;">Structured info for AI agents, crawlers, and bots. Humans: you probably want <a href="https://reffo.ai/docs" target="_blank" rel="noopener noreferrer" style="color:#1A8A7D;">Docs</a> or <a href="https://reffo.ai/agents" target="_blank" rel="noopener noreferrer" style="color:#1A8A7D;">AI Agents</a>.</p>
+      <div style="font-size:14px;color:#1A1A2E;line-height:1.7;">
+        <p>For full bot-readable documentation, visit <a href="https://reffo.ai/for-bots" target="_blank" rel="noopener noreferrer" style="color:#1A8A7D;">reffo.ai/for-bots</a></p>
         <pre style="background:#1a1a2e;color:#e0e0e0;border-radius:12px;padding:20px;overflow-x:auto;font-size:13px;line-height:1.6;margin-top:16px;">Pelagora = open peer-to-peer commerce network (pelagora.net)
 Beacon = self-hosted marketplace node (Express + SQLite + DHT)
 MCP = @pelagora/mcp &mdash; connect AI agents to a beacon
@@ -2081,11 +2081,11 @@ Website = https://reffo.ai</pre>
   <!-- Sync to Reffo modal -->
   <div id="syncModal" class="modal-overlay hidden" onclick="if(event.target===this)closeSyncModal()">
     <div class="modal" style="text-align:center;padding:40px 36px 32px;">
-      <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#8101B4 0%,#EA526F 100%);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+      <div style="width:56px;height:56px;border-radius:50%;background:#D4602A;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
       </div>
       <h3 style="font-size:20px;font-weight:700;margin:0 0 8px;">Push to Reffo.ai?</h3>
-      <p style="font-size:14px;color:#777E90;margin:0 0 28px;line-height:1.5;">Your listing was saved locally. Would you also like to share it on Reffo.ai for more visibility?</p>
+      <p style="font-size:14px;color:#4A5568;margin:0 0 28px;line-height:1.5;">Your listing was saved locally. Would you also like to share it on Reffo.ai for more visibility?</p>
       <div class="modal-actions" style="justify-content:center;">
         <button type="button" class="btn-secondary" onclick="closeSyncModal()" style="min-width:100px;">Not now</button>
         <button type="button" class="btn-primary" id="syncModalConfirmBtn" style="min-width:140px;">Push to Reffo</button>
@@ -2151,8 +2151,8 @@ Website = https://reffo.ai</pre>
       <button class="modal-close" onclick="closeAiQuickStartModal()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
       </button>
-      <h3 style="font-size:18px;font-weight:700;color:#141416;margin:0 0 4px;">AI Quick Start</h3>
-      <p style="font-size:13px;color:#777E90;margin-bottom:16px;">Copy this prompt into any AI assistant to learn about Reffo and get help.</p>
+      <h3 style="font-size:18px;font-weight:700;color:#1A1A2E;margin:0 0 4px;">AI Quick Start</h3>
+      <p style="font-size:13px;color:#4A5568;margin-bottom:16px;">Copy this prompt into any AI assistant to learn about Reffo and get help.</p>
       <div class="ai-quickstart-prompt">
         <pre id="aiModalPromptText"></pre>
         <button class="ai-quickstart-copy-btn" onclick="copyAiPrompt()" title="Copy prompt">
@@ -2349,7 +2349,7 @@ Website = https://reffo.ai</pre>
         }).join('') + '</div>';
         homeLoaded = true;
       } catch(e) {
-        document.getElementById('homeRecentItems').innerHTML = '<div style="padding:20px;color:#777E90;font-size:13px;">Could not load listings.</div>';
+        document.getElementById('homeRecentItems').innerHTML = '<div style="padding:20px;color:#4A5568;font-size:13px;">Could not load listings.</div>';
       }
     }
 
@@ -2420,7 +2420,7 @@ Website = https://reffo.ai</pre>
             var firstPhoto = photos[0];
             var imgHtml = firstPhoto
               ? '<div class="row-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
-              : '<div class="row-img"><span style="color:#E6E8EC;font-size:14px;">&#x26A1;</span></div>';
+              : '<div class="row-img"><span style="color:#CBD5E0;font-size:14px;">&#x26A1;</span></div>';
             var statusLabel = statusLabels[ref.listingStatus] || 'Private';
             var statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
             var date = new Date(ref.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -2432,7 +2432,7 @@ Website = https://reffo.ai</pre>
               '<span class="row-date">' + date + '</span></div>';
           }).join('');
         } else {
-          itemsContainer.innerHTML = '<div style="padding:20px;color:#B1B5C3;font-size:13px;font-style:italic;">No listings yet</div>';
+          itemsContainer.innerHTML = '<div style="padding:20px;color:#718096;font-size:13px;font-style:italic;">No listings yet</div>';
         }
 
         // Recent offers
@@ -2442,17 +2442,17 @@ Website = https://reffo.ai</pre>
             var date = new Date(offer.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             var statusClass = { active: 'badge-for-sale', sold: 'badge-archived-sold', cancelled: 'badge-archived-deleted' }[offer.status] || 'badge-private';
             return '<div class="recent-list-row">' +
-              '<div class="row-img"><span style="color:#1a8a42;font-size:14px;">$</span></div>' +
+              '<div class="row-img"><span style="color:#2D8A6E;font-size:14px;">$</span></div>' +
               '<div class="row-info"><div class="row-name">' + escapeHtml(fmtCurrency(offer.price, offer.priceCurrency)) + '</div>' +
               '<div class="row-sub">Ref: ' + escapeHtml(offer.refId).substring(0, 8) + '...</div></div>' +
               '<span class="row-badge badge ' + statusClass + '" style="font-size:10px;padding:0 8px;line-height:22px;">' + escapeHtml(offer.status) + '</span>' +
               '<span class="row-date">' + date + '</span></div>';
           }).join('');
         } else {
-          offersContainer.innerHTML = '<div style="padding:20px;color:#B1B5C3;font-size:13px;font-style:italic;">No offers yet</div>';
+          offersContainer.innerHTML = '<div style="padding:20px;color:#718096;font-size:13px;font-style:italic;">No offers yet</div>';
         }
       } catch(e) {
-        document.getElementById('recentItemsList').innerHTML = '<div style="padding:20px;color:#B1B5C3;font-size:13px;">Failed to load dashboard</div>';
+        document.getElementById('recentItemsList').innerHTML = '<div style="padding:20px;color:#718096;font-size:13px;">Failed to load dashboard</div>';
       }
     }
 
@@ -2702,24 +2702,24 @@ Website = https://reffo.ai</pre>
 
         container.innerHTML =
           '<div style="display:flex;align-items:center;gap:10px;padding:4px 12px 8px;">' +
-            '<input type="checkbox" ' + (allSelected ? 'checked' : '') + ' onchange="toggleSelectAllArchive(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#EC526F;">' +
-            '<span style="font-size:11px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.05em;">' + (selectedIds.size > 0 ? selectedIds.size + ' selected' : 'Select all') + '</span>' +
+            '<input type="checkbox" ' + (allSelected ? 'checked' : '') + ' onchange="toggleSelectAllArchive(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#D4602A;">' +
+            '<span style="font-size:11px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.05em;">' + (selectedIds.size > 0 ? selectedIds.size + ' selected' : 'Select all') + '</span>' +
           '</div>' +
           '<div class="rows">' + refs.map(function(ref) {
             var statusLabel = ref.listingStatus === 'archived_sold' ? 'Sold' : 'Deleted';
-            var statusStyle = ref.listingStatus === 'archived_sold' ? 'background:#e8eaed;color:#1a8a42;' : 'background:#fce8e6;color:#E92222;';
+            var statusStyle = ref.listingStatus === 'archived_sold' ? 'background:#e8eaed;color:#2D8A6E;' : 'background:#FDE8E8;color:#C94444;';
             var archiveDate = new Date(ref.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             var isSelected = selectedIds.has(ref.id);
 
             return '<div class="ref-row" data-refid="' + ref.id + '" style="cursor:default;">' +
               '<div onclick="event.stopPropagation()" style="flex-shrink:0;margin-right:8px;display:flex;align-items:center;">' +
-                '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' onchange="toggleSelectArchive(\\'' + ref.id + '\\', this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#EC526F;">' +
+                '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' onchange="toggleSelectArchive(\\'' + ref.id + '\\', this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#D4602A;">' +
               '</div>' +
               '<span class="row-name">' + escapeHtml(ref.name) + '</span>' +
               '<div class="row-meta">' +
                 '<span class="badge" style="font-size:10px;padding:0 8px;line-height:22px;' + statusStyle + '">' + statusLabel + '</span>' +
                 (ref.category ? '<span class="badge badge-cat" style="font-size:10px;padding:0 8px;line-height:22px;">' + escapeHtml(ref.category) + '</span>' : '') +
-                '<span style="font-size:11px;color:#777E90;">' + archiveDate + '</span>' +
+                '<span style="font-size:11px;color:#4A5568;">' + archiveDate + '</span>' +
               '</div>' +
               '<div style="display:flex;gap:6px;flex-shrink:0;margin-left:auto;" onclick="event.stopPropagation()">' +
                 '<button class="btn-secondary btn-sm" style="font-size:11px;" onclick="restoreRef(\\'' + ref.id + '\\')">Restore</button>' +
@@ -2826,7 +2826,7 @@ Website = https://reffo.ai</pre>
 
       // Category-specific attribute fields
       if (schema.attributes.length > 0) {
-        html += '<div style="font-size:12px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:8px;margin-top:4px;">Category Details</div>';
+        html += '<div style="font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:8px;margin-top:4px;">Category Details</div>';
         // Render in rows of 2
         for (var i = 0; i < schema.attributes.length; i += 2) {
           var a1 = schema.attributes[i];
@@ -3108,8 +3108,8 @@ Website = https://reffo.ai</pre>
           var container = document.getElementById('aiSuggestedImage');
           if (container) {
             container.innerHTML = '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">' +
-              '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' +
-              '<span style="font-size:13px;color:#15803d;font-weight:500;">AI image will be added when you create the listing</span></div>';
+              '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2D8A6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' +
+              '<span style="font-size:13px;color:#2D8A6E;font-weight:500;">AI image will be added when you create the listing</span></div>';
           }
           showToast('AI image queued — will be saved when listing is created', 'accepted');
         }
@@ -3403,7 +3403,7 @@ Website = https://reffo.ai</pre>
 
               var imgHtml = firstPhoto
                 ? '<div class="col-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
-                : '<div class="col-img"><span style="color:#E6E8EC;font-size:14px;">&#x26A1;</span></div>';
+                : '<div class="col-img"><span style="color:#CBD5E0;font-size:14px;">&#x26A1;</span></div>';
 
               return '<div class="table-row" onclick="openDetail(\\'' + ref.id + '\\')">' +
                 '<div class="col-check" onclick="event.stopPropagation()"><input type="checkbox" ' + (isSelected ? 'checked' : '') + ' onchange="toggleSelectRef(\\'' + ref.id + '\\', this.checked)"></div>' +
@@ -3425,7 +3425,7 @@ Website = https://reffo.ai</pre>
         } else if (refLayout === 'row') {
           var selectedIds = window._selectedRefIds || new Set();
           var allRowsSelected = refs.length > 0 && refs.every(r => selectedIds.has(r.id));
-          container.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:4px 12px 8px;"><input type="checkbox" ' + (allRowsSelected ? 'checked' : '') + ' onchange="toggleSelectAll(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#EC526F;"><span style="font-size:11px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.05em;">' + (selectedIds.size > 0 ? selectedIds.size + ' selected' : 'Select all') + '</span></div>' +
+          container.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:4px 12px 8px;"><input type="checkbox" ' + (allRowsSelected ? 'checked' : '') + ' onchange="toggleSelectAll(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#D4602A;"><span style="font-size:11px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.05em;">' + (selectedIds.size > 0 ? selectedIds.size + ' selected' : 'Select all') + '</span></div>' +
           '<div class="rows">' + refs.map(ref => {
             const refOffers = offerMap[ref.id] || [];
             const activeOffer = refOffers.find(o => o.status === 'active');
@@ -3442,17 +3442,17 @@ Website = https://reffo.ai</pre>
               : '<div class="row-img"><span class="placeholder"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></span></div>';
 
             return '<div class="ref-row" data-refid="' + ref.id + '" onclick="openDetail(\\'' + ref.id + '\\')">' +
-              '<div onclick="event.stopPropagation()" style="flex-shrink:0;margin-right:8px;display:flex;align-items:center;"><input type="checkbox" ' + (isSelected ? 'checked' : '') + ' onchange="toggleSelectRef(\\'' + ref.id + '\\', this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#EC526F;"></div>' +
+              '<div onclick="event.stopPropagation()" style="flex-shrink:0;margin-right:8px;display:flex;align-items:center;"><input type="checkbox" ' + (isSelected ? 'checked' : '') + ' onchange="toggleSelectRef(\\'' + ref.id + '\\', this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#D4602A;"></div>' +
               imgHtml +
               '<span class="row-name">' + escapeHtml(ref.name) + '</span>' +
               '<div class="row-meta">' +
                 '<span class="badge ' + statusClass + '" style="font-size:10px;padding:0 8px;line-height:22px;">' + statusLabel + '</span>' +
                 (ref.category ? '<span class="badge badge-cat" style="font-size:10px;padding:0 8px;line-height:22px;">' + escapeHtml(ref.category) + '</span>' : '') +
-                (ref.condition ? '<span class="badge" style="font-size:10px;padding:0 8px;line-height:22px;background:#B1B5C3;color:#fff;">' + escapeHtml(ref.condition.replace(/_/g, ' ')) + '</span>' : '') +
+                (ref.condition ? '<span class="badge" style="font-size:10px;padding:0 8px;line-height:22px;background:#718096;color:#fff;">' + escapeHtml(ref.condition.replace(/_/g, ' ')) + '</span>' : '') +
                 (priceStr ? '<span class="row-price">' + escapeHtml(priceStr) + '</span>' : '') +
                 (attrSummary ? '<span class="row-qty">' + escapeHtml(attrSummary) + '</span>' : '') +
                 (ref.quantity > 1 ? '<span class="row-qty">Qty: ' + ref.quantity + '</span>' : '') +
-                (ref.networkPublished ? '<span class="badge" style="font-size:10px;padding:0 8px;line-height:22px;background:#7C3AED;color:#fff;">Published</span>' : '') +
+                (ref.networkPublished ? '<span class="badge" style="font-size:10px;padding:0 8px;line-height:22px;background:#1A8A7D;color:#fff;">Published</span>' : '') +
                 (ref.reffoSynced ? '<span class="badge badge-synced" style="font-size:10px;padding:0 8px;line-height:22px;">Synced</span>' : '') +
               '</div>' +
             '</div>';
@@ -3474,17 +3474,17 @@ Website = https://reffo.ai</pre>
 
             const imgHtml = firstPhoto
               ? '<div class="card-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
-              : '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#E6E8EC"/></svg></span></div>';
+              : '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#CBD5E0"/></svg></span></div>';
 
             return '<div class="card" onclick="openDetail(\\'' + ref.id + '\\')">' +
               imgHtml +
               '<div class="card-body">' +
                 '<h3>' + escapeHtml(ref.name) + '</h3>' +
                 '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + catBadges +
-                (ref.networkPublished ? '<span class="badge" style="background:#7C3AED;color:#fff;">Published</span>' : '') +
+                (ref.networkPublished ? '<span class="badge" style="background:#1A8A7D;color:#fff;">Published</span>' : '') +
                 (ref.reffoSynced ? '<span class="badge badge-synced">Synced</span>' : '') + '</div>' +
                 (priceStr ? '<div class="card-price">' + escapeHtml(priceStr) + '</div>' : '') +
-                (cardAttrSummary ? '<div class="card-desc" style="font-size:12px;color:#777E90;margin-top:4px;">' + escapeHtml(cardAttrSummary) + '</div>' : '') +
+                (cardAttrSummary ? '<div class="card-desc" style="font-size:12px;color:#4A5568;margin-top:4px;">' + escapeHtml(cardAttrSummary) + '</div>' : '') +
                 (ref.quantity > 1 ? '<div class="card-qty">Qty: ' + ref.quantity + '</div>' : '') +
                 (ref.description ? '<div class="card-desc">' + escapeHtml(ref.description) + '</div>' : '') +
               '</div></div>';
@@ -3557,7 +3557,7 @@ Website = https://reffo.ai</pre>
         // Build detail HTML — New header above gallery
         let html = '<div class="detail-header">';
         html += '<span class="detail-header-back" onclick="switchTab(\\'refs\\')">';
-        html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#23262F"/></svg>';
+        html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#1A1A2E"/></svg>';
         html += ' Back to refs</span>';
         html += '<div class="detail-title-row">';
         html += '<h1>' + escapeHtml(ref.name) + '</h1>';
@@ -3573,7 +3573,7 @@ Website = https://reffo.ai</pre>
         html += '<div class="avatar-sm">Y</div>';
         html += '<span class="poster-name">Your Beacon</span>';
         if (ref.networkPublished) {
-          html += '<span class="badge" style="background:#7C3AED;color:#fff;font-size:11px;">Published</span>';
+          html += '<span class="badge" style="background:#1A8A7D;color:#fff;font-size:11px;">Published</span>';
         }
         if (locParts.length > 0) {
           html += '<span class="loc-pin"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> ' + escapeHtml(locParts.join(', ')) + '</span>';
@@ -3604,7 +3604,7 @@ Website = https://reffo.ai</pre>
         html += '<div class="deal-heading">Information</div>';
         html += '<div class="info-grid">';
         html += '<div class="info-item">';
-        html += '<div class="info-icon blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#92A5EF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>';
+        html += '<div class="info-icon blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A8A7D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>';
         html += '<span class="info-type">' + (locParts.length > 0 ? escapeHtml(locParts.join(', ')) : 'Location not set') + '</span></div>';
         html += '</div>';
 
@@ -3619,16 +3619,16 @@ Website = https://reffo.ai</pre>
         html += '<div id="detailAutofillSection">';
         html += '<div id="detailAutofillActive" style="display:' + (window._aiEnabled ? 'block' : 'none') + ';">';
         html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">';
-        html += '<button type="button" onclick="triggerProductLookup(\\\'detail\\\')" style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#8101B4 0%,#EA526F 100%);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;">';
+        html += '<button type="button" onclick="triggerProductLookup(\\\'detail\\\')" style="display:flex;align-items:center;gap:6px;background:#D4602A;color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;">';
         html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>';
         html += 'Smart Autofill</button>';
-        html += '<span id="detailAutofillStatus" style="font-size:12px;color:#777E90;"></span></div></div>';
-        html += '<div id="detailAutofillPromo" style="display:' + (window._aiEnabled ? 'none' : 'block') + ';border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#f8f0fc 0%,#fdedf0 100%);padding:14px 16px;margin-bottom:14px;">';
+        html += '<span id="detailAutofillStatus" style="font-size:12px;color:#4A5568;"></span></div></div>';
+        html += '<div id="detailAutofillPromo" style="display:' + (window._aiEnabled ? 'none' : 'block') + ';border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#E6F5F3 0%,#fdedf0 100%);padding:14px 16px;margin-bottom:14px;">';
         html += '<div style="display:flex;align-items:center;gap:12px;">';
-        html += '<div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:linear-gradient(135deg,#8101B4 0%,#EA526F 100%);">';
-        html += '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FCFCFD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg></div>';
-        html += '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:#141416;margin-bottom:2px;">Smart Autofill with AI</div>';
-        html += '<div style="font-size:12px;color:#777E90;line-height:1.4;">Link a <a href="https://reffo.ai/api" target="_blank" style="color:#EC526F;font-weight:600;text-decoration:none;">Reffo.ai</a> account to auto-fill descriptions, attributes, images, and price estimates.</div>';
+        html += '<div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#D4602A;">';
+        html += '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg></div>';
+        html += '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:#1A1A2E;margin-bottom:2px;">Smart Autofill with AI</div>';
+        html += '<div style="font-size:12px;color:#4A5568;line-height:1.4;">Link a <a href="https://reffo.ai/api" target="_blank" style="color:#1A8A7D;font-weight:600;text-decoration:none;">Reffo.ai</a> account to auto-fill descriptions, attributes, images, and price estimates.</div>';
         html += '</div></div></div></div>';
         html += '<div id="detailAutofillCard"></div>';
         html += '<div id="detailCategoryFields"></div>';
@@ -3636,8 +3636,8 @@ Website = https://reffo.ai</pre>
         html += '<div><label>Currency</label><select id="dCurrency"><option value="USD"' + ((activeOffer && activeOffer.priceCurrency === 'USD') || !activeOffer ? ' selected' : '') + '>USD</option><option value="EUR"' + (activeOffer && activeOffer.priceCurrency === 'EUR' ? ' selected' : '') + '>EUR</option><option value="GBP"' + (activeOffer && activeOffer.priceCurrency === 'GBP' ? ' selected' : '') + '>GBP</option></select></div></div>';
         html += '<div class="row"><div><label>Quantity</label><input id="dQty" type="number" min="1" value="' + ref.quantity + '"></div>';
         html += '<div><label>SKU</label><input id="dSku" value="' + escapeHtml(ref.sku || '') + '"></div></div>';
-        html += '<details style="margin-bottom:14px;border:2px solid #E6E8EC;border-radius:12px;padding:14px;" open>';
-        html += '<summary style="cursor:pointer;font-size:12px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.02em;">Location</summary>';
+        html += '<details style="margin-bottom:14px;border:2px solid #CBD5E0;border-radius:12px;padding:14px;" open>';
+        html += '<summary style="cursor:pointer;font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.02em;">Location</summary>';
         html += '<div class="row"><div><label>City</label><input id="dLocCity" value="' + escapeHtml(ref.locationCity || '') + '"></div>';
         html += '<div><label>State</label><input id="dLocState" value="' + escapeHtml(ref.locationState || '') + '"></div>';
         html += '<div><label>Zip</label><input id="dLocZip" value="' + escapeHtml(ref.locationZip || '') + '"></div></div>';
@@ -3651,8 +3651,8 @@ Website = https://reffo.ai</pre>
         html += '<div><label>Radius (miles)</label><input id="dSellingRadius" type="number" min="1" value="' + (ref.sellingRadiusMiles || '') + '"></div></div>';
         html += '</details>';
         // Rental fields (shown when for_rent)
-        html += '<div id="rentalFieldsDetail" style="display:' + (ref.listingStatus === 'for_rent' ? 'block' : 'none') + ';margin-bottom:14px;border:2px solid #e6f0ff;border-radius:12px;padding:14px;background:#f8fbff;">';
-        html += '<div style="font-size:12px;font-weight:600;color:#1a6aba;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:10px;">Rental Details</div>';
+        html += '<div id="rentalFieldsDetail" style="display:' + (ref.listingStatus === 'for_rent' ? 'block' : 'none') + ';margin-bottom:14px;border:2px solid #E8F0FA;border-radius:12px;padding:14px;background:#E8F0FA;">';
+        html += '<div style="font-size:12px;font-weight:600;color:#4A90D9;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:10px;">Rental Details</div>';
         html += '<label>Rental Terms</label><textarea id="dRentalTerms" rows="2" style="resize:vertical;">' + escapeHtml(ref.rentalTerms || '') + '</textarea>';
         html += '<div class="row"><div><label>Deposit</label><input id="dRentalDeposit" type="number" min="0" step="0.01" value="' + (ref.rentalDeposit || '') + '"></div>';
         html += '<div><label>Duration</label><input id="dRentalDuration" type="number" min="1" value="' + (ref.rentalDuration || '') + '"></div>';
@@ -3663,8 +3663,8 @@ Website = https://reffo.ai</pre>
         html += '</select></div></div>';
         html += '</div>';
         // Purchase info fields
-        html += '<details style="margin-bottom:14px;border:2px solid #E6E8EC;border-radius:12px;padding:14px;" ' + (ref.purchaseDate || ref.purchasePrice ? 'open' : '') + '>';
-        html += '<summary style="cursor:pointer;font-size:12px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.02em;">Purchase Info</summary>';
+        html += '<details style="margin-bottom:14px;border:2px solid #CBD5E0;border-radius:12px;padding:14px;" ' + (ref.purchaseDate || ref.purchasePrice ? 'open' : '') + '>';
+        html += '<summary style="cursor:pointer;font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.02em;">Purchase Info</summary>';
         html += '<div class="row"><div><label>Purchase Date</label><input id="dPurchaseDate" type="date" value="' + escapeHtml(ref.purchaseDate || '') + '"></div>';
         html += '<div><label>Purchase Price</label><input id="dPurchasePrice" type="number" min="0" step="0.01" value="' + (ref.purchasePrice || '') + '"></div></div>';
         html += '</details>';
@@ -3704,12 +3704,12 @@ Website = https://reffo.ai</pre>
 
         // Row 1: Price + Edit/Share buttons
         html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:20px 20px 4px;">';
-        html += '<div style="font-size:24px;font-weight:700;color:#23262F;">' + (ref.listingStatus === 'private' ? 'My Item' : priceDisplay) + '</div>';
+        html += '<div style="font-size:24px;font-weight:700;color:#1A1A2E;">' + (ref.listingStatus === 'private' ? 'My Item' : priceDisplay) + '</div>';
         html += '<div style="display:flex;align-items:center;gap:8px;">';
-        html += '<button style="width:32px;height:32px;border-radius:50%;border:1px solid #E6E8EC;background:#FCFCFD;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#777E90;padding:0;" onclick="document.getElementById(\\'editFormSection\\').style.display=\\'block\\';document.getElementById(\\'editFormSection\\').scrollIntoView({behavior:\\'smooth\\'})">';
+        html += '<button style="width:32px;height:32px;border-radius:50%;border:1px solid #CBD5E0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4A5568;padding:0;" onclick="document.getElementById(\\'editFormSection\\').style.display=\\'block\\';document.getElementById(\\'editFormSection\\').scrollIntoView({behavior:\\'smooth\\'})">';
         html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
         html += '</button>';
-        html += '<button style="width:32px;height:32px;border-radius:50%;border:1px solid #E6E8EC;background:#FCFCFD;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#777E90;padding:0;" onclick="';
+        html += '<button style="width:32px;height:32px;border-radius:50%;border:1px solid #CBD5E0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4A5568;padding:0;" onclick="';
         const shareUrl2 = ref.shareUrl
           || (ref.reffoSynced && ref.reffoRefId ? ((typeof window !== 'undefined' && window._reffoUrl) || 'https://reffo.ai') + '/items/' + ref.reffoRefId : '');
         if (shareUrl2) {
@@ -3724,8 +3724,8 @@ Website = https://reffo.ai</pre>
 
         // Row 2: Avatar + "Your Beacon"
         html += '<div style="display:flex;align-items:center;gap:10px;padding:8px 20px 16px;">';
-        html += '<div style="width:32px;height:32px;border-radius:50%;background:#EC526F;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">Y</div>';
-        html += '<span style="font-size:14px;font-weight:600;color:#23262F;">Your Beacon</span>';
+        html += '<div style="width:32px;height:32px;border-radius:50%;background:#0A5E8A;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">Y</div>';
+        html += '<span style="font-size:14px;font-weight:600;color:#1A1A2E;">Your Beacon</span>';
         html += '</div>';
 
         // Private item: completeness checklist
@@ -3743,13 +3743,13 @@ Website = https://reffo.ai</pre>
           const doneCount = checks.filter(function(c) { return c.done; }).length;
           const pct = Math.round((doneCount / checks.length) * 100);
           html += '<div style="padding:0 20px 14px;">';
-          html += '<div style="background:#F4F5F6;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;">';
+          html += '<div style="background:#EDE8E3;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;">';
           html += '<div style="flex:1;min-width:0;">';
           html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">';
-          html += '<span style="font-size:13px;font-weight:700;color:' + (pct === 100 ? '#45B36B' : '#23262F') + ';">' + pct + '%</span>';
-          html += '<span style="font-size:13px;font-weight:600;color:#23262F;">Complete</span>';
+          html += '<span style="font-size:13px;font-weight:700;color:' + (pct === 100 ? '#2D8A6E' : '#1A1A2E') + ';">' + pct + '%</span>';
+          html += '<span style="font-size:13px;font-weight:600;color:#1A1A2E;">Complete</span>';
           html += '</div>';
-          html += '<div style="font-size:11px;color:#777E90;">Fill in details to help your listing sell faster.</div>';
+          html += '<div style="font-size:11px;color:#4A5568;">Fill in details to help your listing sell faster.</div>';
           html += '</div>';
           html += '<button class="button-stroke" onclick="document.getElementById(\\\'editFormSection\\\').style.display=\\\'block\\\';document.getElementById(\\\'editFormSection\\\').scrollIntoView({behavior:\\\'smooth\\\'})" style="font-size:12px;padding:0 14px;height:34px;white-space:nowrap;">Fill in details</button>';
           html += '</div></div>';
@@ -3779,22 +3779,22 @@ Website = https://reffo.ai</pre>
 
         html += '<div id="cardPriceFields" style="display:' + _showPrice + ';padding:0 20px 10px;">';
         html += '<div style="display:flex;gap:8px;">';
-        html += '<input type="number" id="cardPrice" placeholder="Price" value="' + _initPrice + '" style="flex:1;height:40px;padding:0 12px;border:2px solid #E6E8EC;border-radius:12px;font-size:14px;font-weight:500;background:#FCFCFD;font-family:inherit;" oninput="checkCardDirty()">';
-        html += '<select id="cardCurrency" style="width:80px;height:40px;padding:0 8px;border:2px solid #E6E8EC;border-radius:12px;font-size:13px;font-weight:600;background:#FCFCFD;font-family:inherit;cursor:pointer;" onchange="checkCardDirty()">';
+        html += '<input type="number" id="cardPrice" placeholder="Price" value="' + _initPrice + '" style="flex:1;height:40px;padding:0 12px;border:2px solid #CBD5E0;border-radius:12px;font-size:14px;font-weight:500;background:#FFFFFF;font-family:inherit;" oninput="checkCardDirty()">';
+        html += '<select id="cardCurrency" style="width:80px;height:40px;padding:0 8px;border:2px solid #CBD5E0;border-radius:12px;font-size:13px;font-weight:600;background:#FFFFFF;font-family:inherit;cursor:pointer;" onchange="checkCardDirty()">';
         html += '<option value="USD"' + (_initCurrency === 'USD' ? ' selected' : '') + '>USD</option><option value="EUR"' + (_initCurrency === 'EUR' ? ' selected' : '') + '>EUR</option><option value="GBP"' + (_initCurrency === 'GBP' ? ' selected' : '') + '>GBP</option>';
         html += '</select>';
         html += '</div></div>';
 
         // Min price field (willing_to_sell only)
         html += '<div id="cardMinPriceField" style="display:' + _showMinPrice + ';padding:0 20px 10px;">';
-        html += '<input type="number" id="cardMinPrice" placeholder="Minimum price (optional)" value="' + _initMinPrice + '" style="width:100%;height:40px;padding:0 12px;border:2px solid #E6E8EC;border-radius:12px;font-size:14px;font-weight:500;background:#FCFCFD;font-family:inherit;" oninput="checkCardDirty()">';
+        html += '<input type="number" id="cardMinPrice" placeholder="Minimum price (optional)" value="' + _initMinPrice + '" style="width:100%;height:40px;padding:0 12px;border:2px solid #CBD5E0;border-radius:12px;font-size:14px;font-weight:500;background:#FFFFFF;font-family:inherit;" oninput="checkCardDirty()">';
         html += '</div>';
 
         // Rental fields (for_rent only)
         html += '<div id="cardRentalFields" style="display:' + _showRental + ';padding:0 20px 10px;">';
         html += '<div style="display:flex;gap:8px;">';
-        html += '<input type="number" id="cardRentalDuration" placeholder="Duration" value="' + _initDuration + '" style="flex:1;height:40px;padding:0 12px;border:2px solid #E6E8EC;border-radius:12px;font-size:14px;font-weight:500;background:#FCFCFD;font-family:inherit;" oninput="checkCardDirty()">';
-        html += '<select id="cardRentalDurationUnit" style="width:100px;height:40px;padding:0 8px;border:2px solid #E6E8EC;border-radius:12px;font-size:13px;font-weight:600;background:#FCFCFD;font-family:inherit;cursor:pointer;" onchange="checkCardDirty()">';
+        html += '<input type="number" id="cardRentalDuration" placeholder="Duration" value="' + _initDuration + '" style="flex:1;height:40px;padding:0 12px;border:2px solid #CBD5E0;border-radius:12px;font-size:14px;font-weight:500;background:#FFFFFF;font-family:inherit;" oninput="checkCardDirty()">';
+        html += '<select id="cardRentalDurationUnit" style="width:100px;height:40px;padding:0 8px;border:2px solid #CBD5E0;border-radius:12px;font-size:13px;font-weight:600;background:#FFFFFF;font-family:inherit;cursor:pointer;" onchange="checkCardDirty()">';
         html += '<option value="hours"' + (_initDurationUnit === 'hours' ? ' selected' : '') + '>Hours</option><option value="days"' + (_initDurationUnit === 'days' ? ' selected' : '') + '>Days</option><option value="weeks"' + (_initDurationUnit === 'weeks' ? ' selected' : '') + '>Weeks</option><option value="months"' + (_initDurationUnit === 'months' ? ' selected' : '') + '>Months</option>';
         html += '</select>';
         html += '</div></div>';
@@ -3854,25 +3854,25 @@ Website = https://reffo.ai</pre>
 
         // Network publish status
         if (ref.networkPublished) {
-          html += '<div style="margin:14px 20px;padding:10px 16px;background:#F3F0FF;border:1px solid #D8CCF1;border-radius:12px;display:flex;align-items:center;justify-content:space-between;">';
+          html += '<div style="margin:14px 20px;padding:10px 16px;background:#E6F5F3;border:1px solid #B2DFD8;border-radius:12px;display:flex;align-items:center;justify-content:space-between;">';
           html += '<div style="display:flex;align-items:center;gap:8px;">';
-          html += '<span style="font-size:14px;">&#127760;</span>';
-          html += '<span style="font-size:13px;font-weight:600;color:#5B21B6;">Published to Reffo.ai</span>';
+          html += '<span style="font-size:14px;">&#2D8A6E;</span>';
+          html += '<span style="font-size:13px;font-weight:600;color:#1A8A7D;">Published to Reffo.ai</span>';
           html += '</div>';
           html += '<span style="position:relative;display:inline-flex;" onmouseenter="this.querySelector(\\'.npt\\').style.display=\\'block\\'" onmouseleave="this.querySelector(\\'.npt\\').style.display=\\'none\\'">';
-          html += '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:help;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
-          html += '<div class="npt" style="display:none;position:absolute;right:0;top:24px;width:220px;padding:10px 12px;background:#fff;border:1px solid #D8CCF1;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-size:11px;color:#5B21B6;line-height:1.5;z-index:10;">Public items are automatically mirrored on Reffo.ai for broader discovery by search engines and buyers.</div>';
+          html += '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A8A7D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:help;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+          html += '<div class="npt" style="display:none;position:absolute;right:0;top:24px;width:220px;padding:10px 12px;background:#fff;border:1px solid #B2DFD8;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-size:11px;color:#1A8A7D;line-height:1.5;z-index:10;">Public items are automatically mirrored on Reffo.ai for broader discovery by search engines and buyers.</div>';
           html += '</span>';
           html += '</div>';
         }
 
         // Account sync toggle — stylized card
-        html += '<div style="margin:14px 20px;border:1px solid #E6E8EC;border-radius:12px;overflow:hidden;">';
-        html += '<div style="height:3px;background:linear-gradient(90deg,#8101B4,#EA526F);"></div>';
+        html += '<div style="margin:14px 20px;border:1px solid #CBD5E0;border-radius:12px;overflow:hidden;">';
+        html += '<div style="height:3px;background:#1A8A7D;"></div>';
         html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;">';
         html += '<div>';
-        html += '<div style="font-size:14px;font-weight:600;color:#23262F;">&#128279; Sync to Reffo.ai Account</div>';
-        html += '<div style="font-size:12px;color:#777E90;margin-top:2px;">Manage this item from your Reffo.ai dashboard.</div>';
+        html += '<div style="font-size:14px;font-weight:600;color:#1A1A2E;">&#2D8A6E; Sync to Reffo.ai Account</div>';
+        html += '<div style="font-size:12px;color:#4A5568;margin-top:2px;">Manage this item from your Reffo.ai dashboard.</div>';
         html += '</div>';
         html += '<label class="sync-toggle"><input type="checkbox" ' + (ref.reffoSynced ? 'checked' : '') + ' onchange="toggleSync(\\'' + ref.id + '\\', this)"><span class="toggle-track"></span></label>';
         html += '</div></div>';
@@ -3885,7 +3885,7 @@ Website = https://reffo.ai</pre>
         }
 
         // Archive link
-        html += '<a style="display:block;text-align:center;font-size:13px;color:#777E90;cursor:pointer;padding:12px 0;" onclick="deleteRef(\\'' + ref.id + '\\')">Archive this listing</a>';
+        html += '<a style="display:block;text-align:center;font-size:13px;color:#4A5568;cursor:pointer;padding:12px 0;" onclick="deleteRef(\\'' + ref.id + '\\')">Archive this listing</a>';
 
         html += '</div>'; // end payment-card
         html += '</div>'; // end detail-right
@@ -4334,9 +4334,9 @@ Website = https://reffo.ai</pre>
           let actionBtn = '';
           const isOwnCard = peer.beaconId === window._myBeaconId;
           if (!isOwnCard && item.listingStatus === 'for_sale' && activeOffer) {
-            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#EC526F;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openBuyModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\', ' + activeOffer.price + ', \\'' + escapeJs(activeOffer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Buy at ' + escapeHtml(fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) + '</a>';
+            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#0A5E8A;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openBuyModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\', ' + activeOffer.price + ', \\'' + escapeJs(activeOffer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A5E8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Buy at ' + escapeHtml(fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) + '</a>';
           } else if (!isOwnCard && item.listingStatus === 'willing_to_sell') {
-            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#EC526F;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openOfferModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Make Offer</a>';
+            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#0A5E8A;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openOfferModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A5E8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Make Offer</a>';
           }
 
           const idx = lastSearchResults.length;
@@ -4344,14 +4344,14 @@ Website = https://reffo.ai</pre>
 
           const favKey = item.id + ':' + peer.beaconId;
           const isFav = window._favSet && window._favSet.has(favKey);
-          const heartFill = isFav ? '#EA526F' : 'none';
-          const heartStroke = isFav ? '#EA526F' : '#777E90';
+          const heartFill = isFav ? '#C94444' : 'none';
+          const heartStroke = isFav ? '#C94444' : '#4A5568';
           const heartClass = isFav ? 'fav-heart active' : 'fav-heart';
           const heartBtn = '<button class="' + heartClass + '" onclick="event.stopPropagation(); toggleFavorite(this, ' + idx + ')"><svg width="16" height="16" viewBox="0 0 24 24" fill="' + heartFill + '" stroke="' + heartStroke + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
 
           // Source badge
           const sourceDot = entrySource === 'reffo'
-            ? '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#7B61FF;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#7B61FF;display:inline-block;"></span>Reffo</span>'
+            ? '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#1A8A7D;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#1A8A7D;display:inline-block;"></span>Reffo</span>'
             : '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#45B26B;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#45B26B;display:inline-block;"></span>Beacon</span>';
 
           // For Reffo results, filePath is a full URL; for DHT, it's relative
@@ -4361,7 +4361,7 @@ Website = https://reffo.ai</pre>
           } else if (firstPhoto && peerHttpPort) {
             cardImgHtml = '<div class="card-img" style="position:relative;"><img src="http://' + location.hostname + ':' + peerHttpPort + '/' + escapeHtml(firstPhoto.filePath) + '" alt="">' + heartBtn + '</div>';
           } else {
-            cardImgHtml = '<div class="card-img" style="position:relative;"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#E6E8EC"/></svg></span>' + heartBtn + '</div>';
+            cardImgHtml = '<div class="card-img" style="position:relative;"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#CBD5E0"/></svg></span>' + heartBtn + '</div>';
           }
 
           cards += '<div class="card result-card" data-source="' + entrySource + '" onclick="openRemoteDetail(' + idx + ')">' +
@@ -4373,7 +4373,7 @@ Website = https://reffo.ai</pre>
               (item.description ? '<div class="card-desc">' + escapeHtml(item.description) + '</div>' : '') +
               (function() {
                 const lp = [item.locationCity, item.locationState, item.locationZip].filter(Boolean);
-                return lp.length > 0 ? '<div style="font-size:12px;color:#777E90;margin-top:4px;font-weight:500;">Near ' + escapeHtml(lp.join(', ')) + '</div>' : '';
+                return lp.length > 0 ? '<div style="font-size:12px;color:#4A5568;margin-top:4px;font-weight:500;">Near ' + escapeHtml(lp.join(', ')) + '</div>' : '';
               })() +
               '<div class="beacon-id">Beacon: ' + escapeHtml(peer.beaconId.slice(0, 16)) + '...</div>' +
               (actionBtn ? '<div style="margin-top:10px;">' + actionBtn + '</div>' : '') +
@@ -4406,7 +4406,7 @@ Website = https://reffo.ai</pre>
       if (reffoCount > 0) summaryParts.push(reffoCount + ' from Reffo');
       if (summaryParts.length === 0) summaryParts.push('0 results');
 
-      const summaryHtml = '<p id="searchSummary" style="font-size:14px;color:#777E90;margin-bottom:12px;font-weight:500;">' +
+      const summaryHtml = '<p id="searchSummary" style="font-size:14px;color:#4A5568;margin-bottom:12px;font-weight:500;">' +
         summaryParts.join(' \\u00b7 ') + '</p>';
 
       if (searchLayout === 'row') {
@@ -4615,8 +4615,8 @@ Website = https://reffo.ai</pre>
 
         container.innerHTML =
           '<div style="display:flex;align-items:center;gap:10px;padding:4px 12px 8px;">' +
-            '<input type="checkbox" ' + (allSelected ? 'checked' : '') + ' onchange="toggleSelectAllFav(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#EC526F;">' +
-            '<span style="font-size:11px;font-weight:600;color:#777E90;text-transform:uppercase;letter-spacing:0.05em;">' + (selectedIds.size > 0 ? selectedIds.size + ' selected' : 'Select all') + '</span>' +
+            '<input type="checkbox" ' + (allSelected ? 'checked' : '') + ' onchange="toggleSelectAllFav(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#D4602A;">' +
+            '<span style="font-size:11px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.05em;">' + (selectedIds.size > 0 ? selectedIds.size + ' selected' : 'Select all') + '</span>' +
           '</div>' +
           '<div class="rows">' + favs.map(function(fav) {
             const sLabel = statusLabelsLocal[fav.listingStatus] || '';
@@ -4627,13 +4627,13 @@ Website = https://reffo.ai</pre>
 
             return '<div class="ref-row" data-favkey="' + escapeHtml(favKey) + '" style="cursor:default;">' +
               '<div onclick="event.stopPropagation()" style="flex-shrink:0;margin-right:8px;display:flex;align-items:center;">' +
-                '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' onchange="toggleSelectFav(\\'' + escapeHtml(favKey) + '\\', this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#EC526F;">' +
+                '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' onchange="toggleSelectFav(\\'' + escapeHtml(favKey) + '\\', this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:#D4602A;">' +
               '</div>' +
               '<span class="row-name">' + escapeHtml(fav.refName) + '</span>' +
               '<div class="row-meta">' +
                 (sLabel ? '<span class="badge ' + sClass + '" style="font-size:10px;padding:0 8px;line-height:22px;">' + sLabel + '</span>' : '') +
                 (fav.category ? '<span class="badge badge-cat" style="font-size:10px;padding:0 8px;line-height:22px;">' + escapeHtml(fav.category) + '</span>' : '') +
-                (locParts.length > 0 ? '<span style="font-size:11px;color:#777E90;">Near ' + escapeHtml(locParts.join(', ')) + '</span>' : '') +
+                (locParts.length > 0 ? '<span style="font-size:11px;color:#4A5568;">Near ' + escapeHtml(locParts.join(', ')) + '</span>' : '') +
               '</div>' +
               '<div style="flex-shrink:0;margin-left:auto;" onclick="event.stopPropagation()">' +
                 '<button class="btn-danger btn-sm" style="font-size:11px;" onclick="removeFavorite(\\'' + escapeHtml(fav.refId) + '\\', \\'' + escapeHtml(fav.beaconId) + '\\')">Remove</button>' +
@@ -4690,12 +4690,12 @@ Website = https://reffo.ai</pre>
         const key = item.id + ':' + peer.beaconId;
         if (result.favorited) {
           btn.classList.add('active');
-          btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="#EA526F" stroke="#EA526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+          btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="#C94444" stroke="#C94444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
           if (window._favSet) window._favSet.add(key);
           showToast('Added to favorites', '');
         } else {
           btn.classList.remove('active');
-          btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#777E90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+          btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
           if (window._favSet) window._favSet.delete(key);
           showToast('Removed from favorites', '');
         }
@@ -4799,7 +4799,7 @@ Website = https://reffo.ai</pre>
       const sellerInitial = (peer.beaconId || 'S')[0].toUpperCase();
       html += '<div class="detail-header">';
       html += '<span class="detail-header-back" onclick="switchTab(\\'search\\')">';
-      html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#23262F"/></svg>';
+      html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#1A1A2E"/></svg>';
       html += ' Back to Search</span>';
       html += '<div class="detail-title-row">';
       html += '<h1>' + escapeHtml(item.name) + '</h1>';
@@ -4807,9 +4807,9 @@ Website = https://reffo.ai</pre>
       html += '<button onclick="navigator.clipboard.writeText(location.href).then(function(){ showToast(\\'Link copied!\\',\\'\\'); })" title="Share"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>';
       const detailFavKey = item.id + ':' + peer.beaconId;
       const detailIsFav = window._favSet && window._favSet.has(detailFavKey);
-      const detailHeartFill = detailIsFav ? '#EA526F' : 'none';
-      const detailHeartStroke = detailIsFav ? '#EA526F' : 'currentColor';
-      const detailHeartBg = detailIsFav ? 'background:#FFF0F3;' : '';
+      const detailHeartFill = detailIsFav ? '#C94444' : 'none';
+      const detailHeartStroke = detailIsFav ? '#C94444' : 'currentColor';
+      const detailHeartBg = detailIsFav ? 'background:#E6F5F3;' : '';
       html += '<button id="detailHeartBtn" title="Save" style="' + detailHeartBg + '" onclick="toggleDetailFavorite(' + idx + ', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="' + detailHeartFill + '" stroke="' + detailHeartStroke + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
       html += '</div></div>';
       html += '<div class="detail-posted-line">';
@@ -4843,7 +4843,7 @@ Website = https://reffo.ai</pre>
       html += '<div class="deal-heading">Information</div>';
       html += '<div class="info-grid">';
       html += '<div class="info-item">';
-      html += '<div class="info-icon blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#92A5EF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>';
+      html += '<div class="info-icon blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A8A7D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>';
       html += '<span class="info-type">' + (remoteLoc.length > 0 ? 'Near ' + escapeHtml(remoteLoc.join(', ')) : 'Location N/A') + '</span></div>';
       html += '<div class="info-item">';
       html += '<div class="info-icon orange"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FA8F54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
@@ -4879,17 +4879,17 @@ Website = https://reffo.ai</pre>
       // Collapsible "Send a Message" section (only for non-own items)
       if (!isOwnItem) {
         const msgId = 'detailMsgSection';
-        html += '<div style="margin:0 30px;border-top:1px solid #E6E8EC;padding-top:8px;">';
-        html += '<button class="contact-toggle" onclick="toggleDetailContact()" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;padding:6px 0;font-size:13px;font-weight:600;color:#777E90;width:100%;text-align:left;">';
+        html += '<div style="margin:0 30px;border-top:1px solid #CBD5E0;padding-top:8px;">';
+        html += '<button class="contact-toggle" onclick="toggleDetailContact()" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;padding:6px 0;font-size:13px;font-weight:600;color:#4A5568;width:100%;text-align:left;">';
         html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
         html += 'Send a Message';
         html += '<svg id="detailContactChevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:auto;transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>';
         html += '</button>';
         html += '<div id="' + msgId + '" style="display:none;padding-bottom:12px;">';
-        html += '<textarea id="detailMsgText" placeholder="Write a message to the seller..." rows="3" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid #E6E8EC;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box;margin-bottom:8px;"></textarea>';
+        html += '<textarea id="detailMsgText" placeholder="Write a message to the seller..." rows="3" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid #CBD5E0;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box;margin-bottom:8px;"></textarea>';
         html += '<div style="display:flex;align-items:center;gap:8px;">';
         html += '<button class="button-gradient" onclick="sendDetailMessage(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\')" style="height:34px;padding:0 16px;font-size:13px;">Send</button>';
-        html += '<span id="detailMsgStatus" style="font-size:12px;color:#777E90;"></span>';
+        html += '<span id="detailMsgStatus" style="font-size:12px;color:#4A5568;"></span>';
         html += '</div></div></div>';
       }
 
@@ -4915,7 +4915,7 @@ Website = https://reffo.ai</pre>
 
       // Total row
       if (offer) {
-        html += '<div class="invoice-row invoice-row-bg"><span class="invoice-label" style="font-weight:600;color:#141416;">Total</span><span class="invoice-value" style="font-size:16px;">' + escapeHtml(fmtCurrency(offer.price, offer.priceCurrency)) + '</span></div>';
+        html += '<div class="invoice-row invoice-row-bg"><span class="invoice-label" style="font-weight:600;color:#1A1A2E;">Total</span><span class="invoice-value" style="font-size:16px;">' + escapeHtml(fmtCurrency(offer.price, offer.priceCurrency)) + '</span></div>';
       }
 
       // Footer
@@ -4980,9 +4980,9 @@ Website = https://reffo.ai</pre>
       var textarea = document.getElementById('detailMsgText');
       var statusEl = document.getElementById('detailMsgStatus');
       var msg = textarea.value.trim();
-      if (!msg) { statusEl.textContent = 'Please enter a message'; statusEl.style.color = '#e74c3c'; return; }
+      if (!msg) { statusEl.textContent = 'Please enter a message'; statusEl.style.color = '#C94444'; return; }
       statusEl.textContent = 'Sending...';
-      statusEl.style.color = '#777E90';
+      statusEl.style.color = '#4A5568';
       try {
         var res = await fetch('/negotiations', {
           method: 'POST',
@@ -5002,10 +5002,10 @@ Website = https://reffo.ai</pre>
         }
         textarea.value = '';
         statusEl.textContent = 'Message sent!';
-        statusEl.style.color = '#2E7D32';
+        statusEl.style.color = '#2D8A6E';
       } catch (err) {
         statusEl.textContent = err.message;
-        statusEl.style.color = '#e74c3c';
+        statusEl.style.color = '#C94444';
       }
     };
 
@@ -5093,7 +5093,7 @@ Website = https://reffo.ai</pre>
       return '<div class="inbox-row' + unreadClass + '" onclick="' + item.onclick + '">' +
         '<div class="inbox-icon ' + iconClass + '">' + iconLetter + '</div>' +
         '<div class="inbox-body">' +
-          '<div class="inbox-sender">' + escapeHtml(item.sender) + ' &middot; <span style="color:#777E90;font-weight:400;">' + escapeHtml(item.refName) + '</span></div>' +
+          '<div class="inbox-sender">' + escapeHtml(item.sender) + ' &middot; <span style="color:#4A5568;font-weight:400;">' + escapeHtml(item.refName) + '</span></div>' +
           '<div class="inbox-preview">' + escapeHtml(item.preview) + '</div>' +
         '</div>' +
         '<div class="inbox-meta">' +
@@ -5266,9 +5266,9 @@ Website = https://reffo.ai</pre>
       var container = document.getElementById('inboxContainer');
       var refName = filtered.length > 0 ? escapeHtml(filtered[0].refName || refId.slice(0, 8)) : escapeHtml(refId.slice(0, 8));
       var html = '<span class="inbox-thread-back" onclick="renderInboxView()">';
-      html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#EC526F"/></svg>';
+      html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#0A5E8A"/></svg>';
       html += ' Back to Inbox</span>';
-      html += '<h3 style="font-size:18px;font-weight:700;color:#141416;margin-bottom:16px;">' + refName + '</h3>';
+      html += '<h3 style="font-size:18px;font-weight:700;color:#1A1A2E;margin-bottom:16px;">' + refName + '</h3>';
       html += renderNegotiationCards(filtered, isSeller);
       container.innerHTML = html;
     };
@@ -5291,34 +5291,34 @@ Website = https://reffo.ai</pre>
       var replyHtml = '';
       if (msg.reply) {
         var replyDate = msg.repliedAt ? new Date(msg.repliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
-        replyHtml = '<div style="margin-top:16px;padding:12px 16px;background:#F4F0FF;border-radius:8px;border-left:3px solid #7C3AED;">' +
-          '<div style="font-size:12px;color:#7C3AED;font-weight:600;margin-bottom:4px;">Your reply' + (replyDate ? ' &middot; ' + replyDate : '') + '</div>' +
-          '<div style="font-size:14px;color:#353945;line-height:1.6;white-space:pre-wrap;">' + escapeHtml(msg.reply) + '</div>' +
+        replyHtml = '<div style="margin-top:16px;padding:12px 16px;background:#E6F5F3;border-radius:8px;border-left:3px solid #1A8A7D;">' +
+          '<div style="font-size:12px;color:#1A8A7D;font-weight:600;margin-bottom:4px;">Your reply' + (replyDate ? ' &middot; ' + replyDate : '') + '</div>' +
+          '<div style="font-size:14px;color:#2D3748;line-height:1.6;white-space:pre-wrap;">' + escapeHtml(msg.reply) + '</div>' +
         '</div>';
       } else {
         replyHtml = '<div style="margin-top:16px;" id="replySection_' + msg.id + '">' +
-          '<button onclick="toggleReplyForm(\\'' + msg.id + '\\')" style="font-size:13px;padding:8px 18px;border-radius:20px;border:1px solid #7C3AED;background:none;cursor:pointer;color:#7C3AED;font-weight:500;font-family:Poppins,sans-serif;">Reply</button>' +
+          '<button onclick="toggleReplyForm(\\'' + msg.id + '\\')" style="font-size:13px;padding:8px 18px;border-radius:20px;border:1px solid #1A8A7D;background:none;cursor:pointer;color:#1A8A7D;font-weight:500;font-family:'DM Sans',sans-serif;">Reply</button>' +
           '<div id="replyForm_' + msg.id + '" style="display:none;margin-top:10px;">' +
-            '<textarea id="replyText_' + msg.id + '" placeholder="Write your reply..." rows="3" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid #E6E8EC;font-size:14px;resize:vertical;font-family:Poppins,sans-serif;margin-bottom:8px;" maxlength="2000"></textarea>' +
+            '<textarea id="replyText_' + msg.id + '" placeholder="Write your reply..." rows="3" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid #CBD5E0;font-size:14px;resize:vertical;font-family:'DM Sans',sans-serif;margin-bottom:8px;" maxlength="2000"></textarea>' +
             '<div style="display:flex;gap:8px;">' +
-              '<button onclick="sendReply(\\'' + msg.id + '\\')" style="font-size:13px;padding:8px 20px;border-radius:20px;border:none;background:#7C3AED;color:#fff;cursor:pointer;font-weight:500;font-family:Poppins,sans-serif;">Send Reply</button>' +
-              '<button onclick="toggleReplyForm(\\'' + msg.id + '\\')" style="font-size:13px;padding:8px 16px;border-radius:20px;border:1px solid #E6E8EC;background:none;cursor:pointer;color:#777E90;font-family:Poppins,sans-serif;">Cancel</button>' +
+              '<button onclick="sendReply(\\'' + msg.id + '\\')" style="font-size:13px;padding:8px 20px;border-radius:20px;border:none;background:#1A8A7D;color:#fff;cursor:pointer;font-weight:500;font-family:'DM Sans',sans-serif;">Send Reply</button>' +
+              '<button onclick="toggleReplyForm(\\'' + msg.id + '\\')" style="font-size:13px;padding:8px 16px;border-radius:20px;border:1px solid #CBD5E0;background:none;cursor:pointer;color:#4A5568;font-family:'DM Sans',sans-serif;">Cancel</button>' +
             '</div>' +
           '</div>' +
         '</div>';
       }
 
       var html = '<span class="inbox-thread-back" onclick="renderInboxView()">';
-      html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#EC526F"/></svg>';
+      html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#0A5E8A"/></svg>';
       html += ' Back to Inbox</span>';
       html += '<div class="inbox-thread">';
       html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">';
-      html += '<div style="width:36px;height:36px;border-radius:50%;background:#EC526F;color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;">' +
+      html += '<div style="width:36px;height:36px;border-radius:50%;background:#0A5E8A;color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;">' +
         (msg.senderName ? escapeHtml(msg.senderName.charAt(0).toUpperCase()) : '?') + '</div>';
-      html += '<div><div style="font-size:15px;font-weight:600;color:#23262F;">' + escapeHtml(msg.senderName || 'Anonymous') + '</div>';
-      html += '<div style="font-size:12px;color:#777E90;">' + date + ' &middot; Re: <span style="cursor:pointer;color:#7C3AED;" onclick="openDetail(\\'' + msg.refId + '\\')">' + escapeHtml(refName) + '</span></div>';
+      html += '<div><div style="font-size:15px;font-weight:600;color:#1A1A2E;">' + escapeHtml(msg.senderName || 'Anonymous') + '</div>';
+      html += '<div style="font-size:12px;color:#4A5568;">' + date + ' &middot; Re: <span style="cursor:pointer;color:#1A8A7D;" onclick="openDetail(\\'' + msg.refId + '\\')">' + escapeHtml(refName) + '</span></div>';
       html += '</div></div>';
-      html += '<div style="font-size:14px;color:#353945;line-height:1.7;white-space:pre-wrap;padding:12px 0;border-top:1px solid #F4F5F6;">' + escapeHtml(msg.message) + '</div>';
+      html += '<div style="font-size:14px;color:#2D3748;line-height:1.7;white-space:pre-wrap;padding:12px 0;border-top:1px solid #EDE8E3;">' + escapeHtml(msg.message) + '</div>';
       html += replyHtml;
       html += '</div>';
       container.innerHTML = html;
@@ -5330,7 +5330,7 @@ Website = https://reffo.ai</pre>
       if (!n) return;
       var container = document.getElementById('inboxContainer');
       var html = '<span class="inbox-thread-back" onclick="switchInboxTab(\\'resolved\\')">';
-      html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#EC526F"/></svg>';
+      html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#0A5E8A"/></svg>';
       html += ' Back to Resolved</span>';
       html += renderNegotiationCards([n], n.role === 'seller');
       html += '<div style="margin-top:8px;"><button class="btn-secondary btn-sm" onclick="archiveNeg(\\'' + n.id + '\\')">Archive</button></div>';
@@ -5343,7 +5343,7 @@ Website = https://reffo.ai</pre>
       if (!n) return;
       var container = document.getElementById('inboxContainer');
       var html = '<span class="inbox-thread-back" onclick="switchInboxTab(\\'archived\\')">';
-      html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#EC526F"/></svg>';
+      html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#0A5E8A"/></svg>';
       html += ' Back to Archived</span>';
       html += renderNegotiationCards([n], n.role === 'seller');
       html += '<div style="margin-top:8px;display:flex;gap:8px;">';
@@ -5551,7 +5551,7 @@ Website = https://reffo.ai</pre>
 
     // ===== Settings =====
     const userSvgPlaceholder = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
-    const previewSvgPlaceholder = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#B1B5C3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+    const previewSvgPlaceholder = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
 
     // Legacy loadMessages — now handled by loadInbox
     async function loadMessages() { return loadInbox(); }
@@ -5586,9 +5586,9 @@ Website = https://reffo.ai</pre>
           var section = document.getElementById('replySection_' + id);
           var replyDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
           if (section) {
-            section.innerHTML = '<div style="padding:10px 12px;background:#F4F0FF;border-radius:8px;border-left:3px solid #7C3AED;">' +
-              '<div style="font-size:11px;color:#7C3AED;font-weight:600;margin-bottom:4px;">Your reply · ' + replyDate + '</div>' +
-              '<div style="font-size:13px;color:#353945;line-height:1.5;white-space:pre-wrap;">' + escapeHtml(reply) + '</div>' +
+            section.innerHTML = '<div style="padding:10px 12px;background:#E6F5F3;border-radius:8px;border-left:3px solid #1A8A7D;">' +
+              '<div style="font-size:11px;color:#1A8A7D;font-weight:600;margin-bottom:4px;">Your reply · ' + replyDate + '</div>' +
+              '<div style="font-size:13px;color:#2D3748;line-height:1.5;white-space:pre-wrap;">' + escapeHtml(reply) + '</div>' +
             '</div>';
           }
         } else {
@@ -5644,15 +5644,15 @@ Website = https://reffo.ai</pre>
           const keyPrefix = document.getElementById('connectedKeyPrefix');
           keyPrefix.textContent = 'Key: ' + (data.apiKey || 'rfk_***');
           if (data.connected) {
-            dot.style.background = '#1a8a42';
+            dot.style.background = '#2D8A6E';
             text.textContent = 'Connected to Reffo.ai';
-            text.style.color = '#1a8a42';
+            text.style.color = '#2D8A6E';
             retryBtn.style.display = 'none';
             errorDetail.style.display = 'none';
           } else {
-            dot.style.background = '#F5A623';
+            dot.style.background = '#D4922A';
             text.textContent = 'Key saved — not connected';
-            text.style.color = '#F5A623';
+            text.style.color = '#D4922A';
             retryBtn.style.display = '';
             if (data.syncError) {
               errorDetail.textContent = data.syncError;
@@ -5984,7 +5984,7 @@ Website = https://reffo.ai</pre>
       var badgeClass = 'est-badge-' + (data.confidence || 'low');
       c.innerHTML = '<div class="price-estimate-card">' +
         '<div class="est-header">' +
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A8A7D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>' +
         '<span class="est-label">AI Price Suggestion</span>' +
         '<span class="est-badge ' + badgeClass + '">' + (data.confidence || 'low') + '</span>' +
         '</div>' +
@@ -6024,15 +6024,15 @@ Website = https://reffo.ai</pre>
         });
         var data = await res.json();
         if (res.ok) {
-          msgEl.innerHTML = '<div style="color:#1a8a42;font-size:13px;margin-bottom:8px;">AI provider saved.</div>';
+          msgEl.innerHTML = '<div style="color:#2D8A6E;font-size:13px;margin-bottom:8px;">AI provider saved.</div>';
           if (provider !== 'reffo') {
             document.getElementById('removeAiProviderBtn').style.display = '';
           }
         } else {
-          msgEl.innerHTML = '<div style="color:#EC526F;font-size:13px;margin-bottom:8px;">' + escapeHtml(data.error || 'Failed to save') + '</div>';
+          msgEl.innerHTML = '<div style="color:#C94444;font-size:13px;margin-bottom:8px;">' + escapeHtml(data.error || 'Failed to save') + '</div>';
         }
       } catch {
-        msgEl.innerHTML = '<div style="color:#EC526F;font-size:13px;margin-bottom:8px;">Failed to save AI provider.</div>';
+        msgEl.innerHTML = '<div style="color:#C94444;font-size:13px;margin-bottom:8px;">Failed to save AI provider.</div>';
       }
     };
 
@@ -6044,9 +6044,9 @@ Website = https://reffo.ai</pre>
         document.getElementById('aiApiKeyInput').value = '';
         toggleAiKeyField();
         document.getElementById('removeAiProviderBtn').style.display = 'none';
-        msgEl.innerHTML = '<div style="color:#1a8a42;font-size:13px;margin-bottom:8px;">Reverted to Reffo (default).</div>';
+        msgEl.innerHTML = '<div style="color:#2D8A6E;font-size:13px;margin-bottom:8px;">Reverted to Reffo (default).</div>';
       } catch {
-        msgEl.innerHTML = '<div style="color:#EC526F;font-size:13px;margin-bottom:8px;">Failed to remove AI provider.</div>';
+        msgEl.innerHTML = '<div style="color:#C94444;font-size:13px;margin-bottom:8px;">Failed to remove AI provider.</div>';
       }
     };
 
@@ -6183,7 +6183,7 @@ Website = https://reffo.ai</pre>
       // Show autofill summary card
       if (cardEl) {
         var cardHtml = '<div class="autofill-card"><div class="autofill-header">';
-        cardHtml += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>';
+        cardHtml += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A8A7D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>';
         cardHtml += '<span class="autofill-label">Smart Autofill</span></div>';
         // Image thumbnail + product link
         if (data.image_url || data.product_url) {
@@ -6388,17 +6388,17 @@ Website = https://reffo.ai</pre>
         }
         empty.classList.add('hidden');
         grid.innerHTML = collections.map(function(c) {
-          return '<div style="background:#FCFCFD;border:1px solid #E6E8EC;border-radius:12px;padding:20px;cursor:pointer;transition:all 0.15s;box-shadow:0 1px 3px rgba(15,15,15,0.06);" onclick="openCollectionDetail(\\'' + c.id + '\\')" onmouseover="this.style.boxShadow=\\'0 4px 12px rgba(15,15,15,0.12)\\';this.style.transform=\\'translateY(-1px)\\'" onmouseout="this.style.boxShadow=\\'0 1px 3px rgba(15,15,15,0.06)\\';this.style.transform=\\'none\\'">'
+          return '<div style="background:#FFFFFF;border:1px solid #CBD5E0;border-radius:12px;padding:20px;cursor:pointer;transition:all 0.15s;box-shadow:0 1px 3px rgba(15,15,15,0.06);" onclick="openCollectionDetail(\\'' + c.id + '\\')" onmouseover="this.style.boxShadow=\\'0 4px 12px rgba(15,15,15,0.12)\\';this.style.transform=\\'translateY(-1px)\\'" onmouseout="this.style.boxShadow=\\'0 1px 3px rgba(15,15,15,0.06)\\';this.style.transform=\\'none\\'">'
             + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
-            + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>'
-            + '<div style="font-size:14px;font-weight:600;color:#23262F;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(c.name) + '</div>'
+            + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A5E8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>'
+            + '<div style="font-size:14px;font-weight:600;color:#1A1A2E;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(c.name) + '</div>'
             + '</div>'
-            + (c.description ? '<div style="font-size:12px;color:#777E90;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(c.description) + '</div>' : '')
-            + '<div style="font-size:12px;color:#777E90;">' + c.refCount + ' item' + (c.refCount !== 1 ? 's' : '') + '</div>'
+            + (c.description ? '<div style="font-size:12px;color:#4A5568;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(c.description) + '</div>' : '')
+            + '<div style="font-size:12px;color:#4A5568;">' + c.refCount + ' item' + (c.refCount !== 1 ? 's' : '') + '</div>'
             + '</div>';
         }).join('');
       } catch(e) {
-        grid.innerHTML = '<p style="color:#777E90;font-size:13px;">Failed to load collections.</p>';
+        grid.innerHTML = '<p style="color:#4A5568;font-size:13px;">Failed to load collections.</p>';
       }
     }
     window.loadCollections = loadCollections;
@@ -6433,7 +6433,7 @@ Website = https://reffo.ai</pre>
             + '</div>';
         }).join('') + '</div>';
       } catch(e) {
-        document.getElementById('collectionRefs').innerHTML = '<p style="color:#777E90;font-size:13px;">Failed to load collection.</p>';
+        document.getElementById('collectionRefs').innerHTML = '<p style="color:#4A5568;font-size:13px;">Failed to load collection.</p>';
       }
     }
     window.openCollectionDetail = openCollectionDetail;
@@ -6487,8 +6487,8 @@ Website = https://reffo.ai</pre>
     function handleScanDrop(event) {
       event.preventDefault();
       var zone = document.getElementById('scanUploadZone');
-      zone.style.borderColor = '#E6E8EC';
-      zone.style.background = '#FCFCFD';
+      zone.style.borderColor = '#CBD5E0';
+      zone.style.background = '#FFFFFF';
       var files = event.dataTransfer.files;
       if (files.length > 0) uploadScanFile(files[0]);
     }
@@ -6658,9 +6658,9 @@ Website = https://reffo.ai</pre>
           var isRemoved = scanRemovedItems.has(item.id);
           var price = item.priceTypical ? ' ~$' + Number(item.priceTypical).toFixed(0) : '';
           var cond = item.condition ? ' · ' + item.condition : '';
-          return '<div style="font-size:12px;color:' + (isRemoved ? '#B1B5C3' : '#23262F') + ';' + (isRemoved ? 'text-decoration:line-through;' : 'font-weight:600;') + '">'
+          return '<div style="font-size:12px;color:' + (isRemoved ? '#718096' : '#1A1A2E') + ';' + (isRemoved ? 'text-decoration:line-through;' : 'font-weight:600;') + '">'
             + escapeHtml(item.name)
-            + '<span style="color:#777E90;font-weight:400;">' + price + cond + '</span></div>';
+            + '<span style="color:#4A5568;font-weight:400;">' + price + cond + '</span></div>';
         }).join('');
       }
     }
@@ -6668,10 +6668,10 @@ Website = https://reffo.ai</pre>
     function renderScanItemCards() {
       var grid = document.getElementById('scanItemsGrid');
       var statusColors = {
-        for_sale: { bg: '#e6f9ed', color: '#1a8a42' },
-        willing_to_sell: { bg: '#fff8e1', color: '#e6a200' },
-        for_rent: { bg: '#e6f0ff', color: '#1a6aba' },
-        private: { bg: '#E6E8EC', color: '#353945' },
+        for_sale: { bg: '#E6F4EF', color: '#2D8A6E' },
+        willing_to_sell: { bg: '#FFF3E0', color: '#D4922A' },
+        for_rent: { bg: '#E8F0FA', color: '#4A90D9' },
+        private: { bg: '#CBD5E0', color: '#2D3748' },
       };
       var statusLabels = { for_sale: 'For Sale', willing_to_sell: 'Willing to Sell', for_rent: 'For Rent', private: 'Private' };
 
@@ -6684,25 +6684,25 @@ Website = https://reffo.ai</pre>
 
         // Removed item — compact row
         if (isRemoved) {
-          return '<div id="scan-card-' + item.id + '" style="background:#FCFCFD;border:1px solid #E6E8EC;border-radius:12px;padding:12px 16px;opacity:0.45;cursor:pointer;" onclick="restoreScanItem(\\'' + item.id + '\\')">'
+          return '<div id="scan-card-' + item.id + '" style="background:#FFFFFF;border:1px solid #CBD5E0;border-radius:12px;padding:12px 16px;opacity:0.45;cursor:pointer;" onclick="restoreScanItem(\\'' + item.id + '\\')">'
             + '<div style="display:flex;align-items:center;gap:8px;">'
             + '<input type="checkbox" disabled style="width:16px;height:16px;opacity:0.5;">'
-            + '<div style="flex:1;font-size:14px;color:#777E90;text-decoration:line-through;">' + escapeHtml(item.name) + '</div>'
-            + '<span style="font-size:11px;color:#777E90;">Removed — click to restore</span>'
+            + '<div style="flex:1;font-size:14px;color:#4A5568;text-decoration:line-through;">' + escapeHtml(item.name) + '</div>'
+            + '<span style="font-size:11px;color:#4A5568;">Removed — click to restore</span>'
             + '</div></div>';
         }
 
         var conf = item.confidence != null ? Math.round(item.confidence * 100) + '%' : '';
-        var confColor = item.confidence >= 0.85 ? '#1a8a42' : item.confidence >= 0.7 ? '#e6a200' : '#777E90';
-        var confBg = item.confidence >= 0.85 ? '#e6f9ed' : item.confidence >= 0.7 ? '#fff8e1' : '#F4F5F6';
+        var confColor = item.confidence >= 0.85 ? '#2D8A6E' : item.confidence >= 0.7 ? '#D4922A' : '#4A5568';
+        var confBg = item.confidence >= 0.85 ? '#E6F4EF' : item.confidence >= 0.7 ? '#FFF3E0' : '#EDE8E3';
         var priceRange = (item.priceLow && item.priceHigh) ? '$' + Number(item.priceLow).toFixed(0) + '\\u2013$' + Number(item.priceHigh).toFixed(0) : '';
         var priceAvg = item.priceTypical ? '(avg $' + Number(item.priceTypical).toFixed(0) + ')' : '';
 
-        var html = '<div id="scan-card-' + item.id + '" style="background:#FCFCFD;border:1px solid #E6E8EC;border-radius:12px;padding:16px;' + (isSelected ? 'box-shadow:0 0 0 2px rgba(236,82,111,0.15);' : '') + '">';
+        var html = '<div id="scan-card-' + item.id + '" style="background:#FFFFFF;border:1px solid #CBD5E0;border-radius:12px;padding:16px;' + (isSelected ? 'box-shadow:0 0 0 2px rgba(10,94,138,0.15);' : '') + '">';
         html += '<div style="display:flex;gap:12px;">';
 
         // Left: checkbox
-        html += '<div style="padding-top:2px;"><input type="checkbox" class="scan-item-cb" data-item-id="' + item.id + '" ' + (isSelected ? 'checked' : '') + ' onchange="updateScanCounts()" style="width:16px;height:16px;accent-color:#EC526F;"></div>';
+        html += '<div style="padding-top:2px;"><input type="checkbox" class="scan-item-cb" data-item-id="' + item.id + '" ' + (isSelected ? 'checked' : '') + ' onchange="updateScanCounts()" style="width:16px;height:16px;accent-color:#D4602A;"></div>';
 
         // Center: content
         html += '<div style="flex:1;min-width:0;">';
@@ -6710,28 +6710,28 @@ Website = https://reffo.ai</pre>
         // Name row + confidence
         html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">';
         if (isEditing) {
-          html += '<input type="text" value="' + escapeHtml(item.name) + '" class="scan-item-name" data-idx="' + idx + '" style="flex:1;font-size:14px;font-weight:600;color:#23262F;font-family:\\'Poppins\\',sans-serif;border:1px solid #E6E8EC;border-radius:8px;padding:4px 8px;">';
+          html += '<input type="text" value="' + escapeHtml(item.name) + '" class="scan-item-name" data-idx="' + idx + '" style="flex:1;font-size:14px;font-weight:600;color:#1A1A2E;font-family:\\'DM Sans\\',sans-serif;border:1px solid #CBD5E0;border-radius:8px;padding:4px 8px;">';
         } else {
-          html += '<div style="flex:1;font-size:14px;font-weight:600;color:#23262F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(item.name) + '</div>';
+          html += '<div style="flex:1;font-size:14px;font-weight:600;color:#1A1A2E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(item.name) + '</div>';
         }
         if (conf) html += '<span style="font-size:11px;font-weight:700;color:' + confColor + ';background:' + confBg + ';padding:2px 8px;border-radius:20px;white-space:nowrap;">' + conf + '</span>';
         html += '</div>';
 
         // Category/subcategory
-        html += '<div style="font-size:12px;color:#777E90;margin-bottom:4px;">' + escapeHtml(item.category || 'Uncategorized') + '</div>';
+        html += '<div style="font-size:12px;color:#4A5568;margin-bottom:4px;">' + escapeHtml(item.category || 'Uncategorized') + '</div>';
 
         // Description (view mode only, 2-line clamp)
         if (!isEditing && item.description) {
-          html += '<div style="font-size:13px;color:#353945;margin-bottom:6px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + escapeHtml(item.description) + '</div>';
+          html += '<div style="font-size:13px;color:#2D3748;margin-bottom:6px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + escapeHtml(item.description) + '</div>';
         }
 
         // Price + condition + status row
         html += '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px;">';
         if (priceRange) {
-          html += '<span style="font-size:14px;font-weight:600;color:#23262F;">' + priceRange + '</span>';
-          if (priceAvg) html += '<span style="font-size:12px;color:#777E90;">' + priceAvg + '</span>';
+          html += '<span style="font-size:14px;font-weight:600;color:#1A1A2E;">' + priceRange + '</span>';
+          if (priceAvg) html += '<span style="font-size:12px;color:#4A5568;">' + priceAvg + '</span>';
         }
-        if (item.condition) html += '<span style="font-size:12px;color:#777E90;">' + escapeHtml(item.condition.charAt(0).toUpperCase() + item.condition.slice(1).replace(/_/g, ' ')) + '</span>';
+        if (item.condition) html += '<span style="font-size:12px;color:#4A5568;">' + escapeHtml(item.condition.charAt(0).toUpperCase() + item.condition.slice(1).replace(/_/g, ' ')) + '</span>';
 
         // Status dropdown
         html += '<select onchange="setScanItemStatus(\\'' + item.id + '\\',this.value)" style="font-size:11px;font-weight:700;padding:3px 24px 3px 10px;border-radius:20px;border:none;cursor:pointer;appearance:none;-webkit-appearance:none;background:' + sc.bg + ' url(\\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22' + encodeURIComponent(sc.color) + '%22 stroke-width=%222%22><polyline points=%226 9 12 15 18 9%22/></svg>\\') no-repeat right 6px center;color:' + sc.color + ';">';
@@ -6745,25 +6745,25 @@ Website = https://reffo.ai</pre>
         if (isEditing) {
           html += '<div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
           // Description
-          html += '<div style="grid-column:1/-1;"><label style="font-size:10px;font-weight:700;color:#777E90;text-transform:uppercase;display:block;margin-bottom:4px;">Description</label>';
-          html += '<textarea class="scan-edit-desc" data-item-id="' + item.id + '" rows="2" style="width:100%;border:1px solid #E6E8EC;border-radius:8px;padding:8px;font-size:13px;font-family:\\'Poppins\\',sans-serif;color:#23262F;resize:vertical;">' + escapeHtml(item.description || '') + '</textarea></div>';
+          html += '<div style="grid-column:1/-1;"><label style="font-size:10px;font-weight:700;color:#4A5568;text-transform:uppercase;display:block;margin-bottom:4px;">Description</label>';
+          html += '<textarea class="scan-edit-desc" data-item-id="' + item.id + '" rows="2" style="width:100%;border:1px solid #CBD5E0;border-radius:8px;padding:8px;font-size:13px;font-family:\\'DM Sans\\',sans-serif;color:#1A1A2E;resize:vertical;">' + escapeHtml(item.description || '') + '</textarea></div>';
           // Category
-          html += '<div><label style="font-size:10px;font-weight:700;color:#777E90;text-transform:uppercase;display:block;margin-bottom:4px;">Category</label>';
-          html += '<input type="text" class="scan-edit-cat" data-item-id="' + item.id + '" value="' + escapeHtml(item.category || '') + '" style="width:100%;border:1px solid #E6E8EC;border-radius:8px;padding:6px 8px;font-size:13px;font-family:\\'Poppins\\',sans-serif;color:#23262F;"></div>';
+          html += '<div><label style="font-size:10px;font-weight:700;color:#4A5568;text-transform:uppercase;display:block;margin-bottom:4px;">Category</label>';
+          html += '<input type="text" class="scan-edit-cat" data-item-id="' + item.id + '" value="' + escapeHtml(item.category || '') + '" style="width:100%;border:1px solid #CBD5E0;border-radius:8px;padding:6px 8px;font-size:13px;font-family:\\'DM Sans\\',sans-serif;color:#1A1A2E;"></div>';
           // Condition
-          html += '<div><label style="font-size:10px;font-weight:700;color:#777E90;text-transform:uppercase;display:block;margin-bottom:4px;">Condition</label>';
-          html += '<select class="scan-edit-cond" data-item-id="' + item.id + '" style="width:100%;border:1px solid #E6E8EC;border-radius:8px;padding:6px 8px;font-size:13px;font-family:\\'Poppins\\',sans-serif;color:#23262F;">';
+          html += '<div><label style="font-size:10px;font-weight:700;color:#4A5568;text-transform:uppercase;display:block;margin-bottom:4px;">Condition</label>';
+          html += '<select class="scan-edit-cond" data-item-id="' + item.id + '" style="width:100%;border:1px solid #CBD5E0;border-radius:8px;padding:6px 8px;font-size:13px;font-family:\\'DM Sans\\',sans-serif;color:#1A1A2E;">';
           ['','new','like_new','good','fair','poor'].forEach(function(c) {
             var label = c ? c.charAt(0).toUpperCase() + c.slice(1).replace(/_/g, ' ') : 'Select...';
             html += '<option value="' + c + '"' + ((item.condition || '') === c ? ' selected' : '') + '>' + label + '</option>';
           });
           html += '</select></div>';
           // Price
-          html += '<div><label style="font-size:10px;font-weight:700;color:#777E90;text-transform:uppercase;display:block;margin-bottom:4px;">Price ($)</label>';
-          html += '<input type="number" class="scan-edit-price" data-item-id="' + item.id + '" value="' + (item.priceTypical || '') + '" min="0" step="0.01" style="width:100%;border:1px solid #E6E8EC;border-radius:8px;padding:6px 8px;font-size:13px;font-family:\\'Poppins\\',sans-serif;color:#23262F;"></div>';
+          html += '<div><label style="font-size:10px;font-weight:700;color:#4A5568;text-transform:uppercase;display:block;margin-bottom:4px;">Price ($)</label>';
+          html += '<input type="number" class="scan-edit-price" data-item-id="' + item.id + '" value="' + (item.priceTypical || '') + '" min="0" step="0.01" style="width:100%;border:1px solid #CBD5E0;border-radius:8px;padding:6px 8px;font-size:13px;font-family:\\'DM Sans\\',sans-serif;color:#1A1A2E;"></div>';
           // Folder
-          html += '<div><label style="font-size:10px;font-weight:700;color:#777E90;text-transform:uppercase;display:block;margin-bottom:4px;">Folder</label>';
-          html += '<select class="scan-edit-folder" data-item-id="' + item.id + '" style="width:100%;border:1px solid #E6E8EC;border-radius:8px;padding:6px 8px;font-size:13px;font-family:\\'Poppins\\',sans-serif;color:#23262F;">';
+          html += '<div><label style="font-size:10px;font-weight:700;color:#4A5568;text-transform:uppercase;display:block;margin-bottom:4px;">Folder</label>';
+          html += '<select class="scan-edit-folder" data-item-id="' + item.id + '" style="width:100%;border:1px solid #CBD5E0;border-radius:8px;padding:6px 8px;font-size:13px;font-family:\\'DM Sans\\',sans-serif;color:#1A1A2E;">';
           html += '<option value="">No folder</option>';
           scanCollectionsList.forEach(function(c) {
             html += '<option value="' + c.id + '">' + escapeHtml(c.name) + '</option>';
@@ -6777,9 +6777,9 @@ Website = https://reffo.ai</pre>
         // Right: actions
         html += '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:60px;">';
         // Edit/Done button
-        html += '<button onclick="toggleScanItemEdit(\\'' + item.id + '\\')" style="font-size:12px;color:#777E90;background:none;border:none;cursor:pointer;font-family:\\'Poppins\\',sans-serif;">' + (isEditing ? 'Done' : 'Edit') + '</button>';
+        html += '<button onclick="toggleScanItemEdit(\\'' + item.id + '\\')" style="font-size:12px;color:#4A5568;background:none;border:none;cursor:pointer;font-family:\\'DM Sans\\',sans-serif;">' + (isEditing ? 'Done' : 'Edit') + '</button>';
         // Remove
-        html += '<button onclick="removeScanItem(\\'' + item.id + '\\')" style="font-size:10px;color:#777E90;background:none;border:none;cursor:pointer;font-family:\\'Poppins\\',sans-serif;transition:color 0.15s;" onmouseover="this.style.color=\\'#E92222\\'" onmouseout="this.style.color=\\'#777E90\\'">Remove</button>';
+        html += '<button onclick="removeScanItem(\\'' + item.id + '\\')" style="font-size:10px;color:#4A5568;background:none;border:none;cursor:pointer;font-family:\\'DM Sans\\',sans-serif;transition:color 0.15s;" onmouseover="this.style.color=\\'#C94444\\'" onmouseout="this.style.color=\\'#4A5568\\'">Remove</button>';
         html += '</div>';
 
         html += '</div>'; // end flex row
@@ -6989,22 +6989,22 @@ Website = https://reffo.ai</pre>
         var res = await fetch('/scans');
         var scans = await res.json();
         if (scans.length === 0) {
-          container.innerHTML = '<p style="color:#777E90;font-size:13px;">No scans yet</p>';
+          container.innerHTML = '<p style="color:#4A5568;font-size:13px;">No scans yet</p>';
           return;
         }
         container.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;">' + scans.map(function(s) {
-          var statusColor = s.status === 'completed' ? '#1a8a42' : s.status === 'failed' ? '#E92222' : '#e6a200';
+          var statusColor = s.status === 'completed' ? '#2D8A6E' : s.status === 'failed' ? '#C94444' : '#D4922A';
           var date = new Date(s.createdAt).toLocaleDateString();
-          return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#F4F5F6;border-radius:10px;cursor:pointer;" onclick="viewScan(\\'' + s.id + '\\')">'
+          return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#EDE8E3;border-radius:10px;cursor:pointer;" onclick="viewScan(\\'' + s.id + '\\')">'
             + '<div style="flex:1;min-width:0;">'
-            + '<div style="font-size:13px;font-weight:500;color:#23262F;">' + date + ' &middot; ' + (s.itemCount || 0) + ' items</div>'
+            + '<div style="font-size:13px;font-weight:500;color:#1A1A2E;">' + date + ' &middot; ' + (s.itemCount || 0) + ' items</div>'
             + '<div style="font-size:11px;color:' + statusColor + ';font-weight:500;text-transform:capitalize;">' + s.status + '</div>'
             + '</div>'
-            + '<button style="background:none;border:none;cursor:pointer;color:#777E90;font-size:12px;" onclick="event.stopPropagation();deleteScan(\\'' + s.id + '\\')">&times;</button>'
+            + '<button style="background:none;border:none;cursor:pointer;color:#4A5568;font-size:12px;" onclick="event.stopPropagation();deleteScan(\\'' + s.id + '\\')">&times;</button>'
             + '</div>';
         }).join('') + '</div>';
       } catch(e) {
-        container.innerHTML = '<p style="color:#777E90;font-size:13px;">Failed to load scan history.</p>';
+        container.innerHTML = '<p style="color:#4A5568;font-size:13px;">Failed to load scan history.</p>';
       }
     }
     window.loadScanHistory = loadScanHistory;
@@ -7040,7 +7040,7 @@ Website = https://reffo.ai</pre>
       var upc = document.getElementById('barcodeInput').value.trim();
       if (!upc) { showToast('Enter a UPC or barcode number', 'rejected'); return; }
       var container = document.getElementById('barcodeResult');
-      container.innerHTML = '<div style="color:#777E90;font-size:13px;">Looking up...</div>';
+      container.innerHTML = '<div style="color:#4A5568;font-size:13px;">Looking up...</div>';
       try {
         var res = await fetch('/scans/barcode', {
           method: 'POST',
@@ -7049,14 +7049,14 @@ Website = https://reffo.ai</pre>
         });
         var data = await res.json();
         if (!res.ok) {
-          container.innerHTML = '<div style="color:#E92222;font-size:13px;">' + escapeHtml(data.error || 'Lookup failed') + '</div>';
+          container.innerHTML = '<div style="color:#C94444;font-size:13px;">' + escapeHtml(data.error || 'Lookup failed') + '</div>';
           return;
         }
         var pe = data.price_estimate || {};
-        container.innerHTML = '<div style="background:#F4F5F6;border-radius:12px;padding:16px;margin-top:8px;">'
-          + '<div style="font-size:14px;font-weight:600;color:#23262F;margin-bottom:4px;">' + escapeHtml(data.description || upc) + '</div>'
-          + (pe.typical ? '<div style="font-size:14px;font-weight:700;color:#1a8a42;">~$' + Number(pe.typical).toFixed(0) + '</div>' : '')
-          + (pe.low && pe.high ? '<div style="font-size:11px;color:#777E90;">Range: $' + Number(pe.low).toFixed(0) + ' - $' + Number(pe.high).toFixed(0) + '</div>' : '')
+        container.innerHTML = '<div style="background:#EDE8E3;border-radius:12px;padding:16px;margin-top:8px;">'
+          + '<div style="font-size:14px;font-weight:600;color:#1A1A2E;margin-bottom:4px;">' + escapeHtml(data.description || upc) + '</div>'
+          + (pe.typical ? '<div style="font-size:14px;font-weight:700;color:#2D8A6E;">~$' + Number(pe.typical).toFixed(0) + '</div>' : '')
+          + (pe.low && pe.high ? '<div style="font-size:11px;color:#4A5568;">Range: $' + Number(pe.low).toFixed(0) + ' - $' + Number(pe.high).toFixed(0) + '</div>' : '')
           + '<div style="display:flex;gap:8px;margin-top:12px;">'
           + '<button class="btn-primary btn-sm" onclick="createRefFromBarcode()">Create Listing</button>'
           + '<button class="btn-secondary btn-sm" onclick="dismissBarcodeResult()">Dismiss</button>'
@@ -7065,7 +7065,7 @@ Website = https://reffo.ai</pre>
           + '</div>';
         window._barcodeData = data;
       } catch(e) {
-        container.innerHTML = '<div style="color:#E92222;font-size:13px;">Lookup failed</div>';
+        container.innerHTML = '<div style="color:#C94444;font-size:13px;">Lookup failed</div>';
       }
     }
     window.lookupBarcode = lookupBarcode;
