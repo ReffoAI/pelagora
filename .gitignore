@@ -10,3 +10,5 @@ release/
 data/
 Context_From_Doug/
 .claude/settings.local.json
+
+.DS_Store
