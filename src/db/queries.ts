@@ -39,6 +39,7 @@ function rowToRef(row: Record<string, unknown>): Ref {
     collectionId: row.collection_id as string | undefined,
     networkPublished: !!(row.network_published as number),
     shareUrl: row.share_url as string | undefined,
+    acceptedPaymentMethods: row.accepted_payment_methods ? JSON.parse(row.accepted_payment_methods as string) : undefined,
   };
 }
 
@@ -102,6 +103,7 @@ export class RefQueries {
     let locCountry = data.locationCountry ?? null;
     let scope = data.sellingScope ?? null;
     let radiusMiles = data.sellingRadiusMiles ?? null;
+    let paymentMethods = data.acceptedPaymentMethods ?? null;
 
     if (locLat == null && locLng == null) {
       const settings = new SettingsQueries(this.db).get();
@@ -115,6 +117,9 @@ export class RefQueries {
         locCountry = locCountry ?? settings.locationCountry ?? null;
         scope = scope ?? settings.defaultSellingScope;
         radiusMiles = radiusMiles ?? settings.defaultSellingRadiusMiles;
+        if (!paymentMethods && settings.acceptedPaymentMethods?.length) {
+          paymentMethods = settings.acceptedPaymentMethods;
+        }
       }
     }
 
@@ -124,15 +129,15 @@ export class RefQueries {
         selling_scope, selling_radius_miles, attributes, condition,
         rental_terms, rental_deposit, rental_duration, rental_duration_unit,
         purchase_date, purchase_price,
-        collection_id, beacon_id, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        collection_id, accepted_payment_methods, beacon_id, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(id, data.name, data.description || '', data.category || '', data.subcategory || '', data.image || null, data.sku || null,
       data.listingStatus || 'private', data.quantity || 1,
       locLat, locLng, locAddress, locCity, locState, locZip, locCountry,
       scope || 'global', radiusMiles, JSON.stringify(data.attributes) || null, data.condition || null,
       data.rentalTerms || null, data.rentalDeposit ?? null, data.rentalDuration ?? null, data.rentalDurationUnit || null,
       data.purchaseDate || null, data.purchasePrice ?? null,
-      data.collectionId || null, beaconId, now, now);
+      data.collectionId || null, paymentMethods ? JSON.stringify(paymentMethods) : null, beaconId, now, now);
     return this.get(id)!;
   }
 
@@ -193,6 +198,7 @@ export class RefQueries {
     if (data.purchaseDate !== undefined) { fields.push('purchase_date = ?'); values.push(data.purchaseDate); }
     if (data.purchasePrice !== undefined) { fields.push('purchase_price = ?'); values.push(data.purchasePrice); }
     if (data.collectionId !== undefined) { fields.push('collection_id = ?'); values.push(data.collectionId); }
+    if (data.acceptedPaymentMethods !== undefined) { fields.push('accepted_payment_methods = ?'); values.push(JSON.stringify(data.acceptedPaymentMethods)); }
 
     if (fields.length === 0) return existing;
 
@@ -645,6 +651,7 @@ function rowToSettings(row: Record<string, unknown>): BeaconSettings {
     defaultSellingRadiusMiles: (row.default_selling_radius_miles as number) || 250,
     profilePicturePath: row.profile_picture_path as string | undefined,
     networkPublishEnabled: row.network_publish_enabled == null ? true : !!(row.network_publish_enabled as number),
+    acceptedPaymentMethods: row.accepted_payment_methods ? JSON.parse(row.accepted_payment_methods as string) : [],
   };
 }
 
@@ -676,6 +683,7 @@ export class SettingsQueries {
       if (data.defaultSellingRadiusMiles !== undefined) { fields.push('default_selling_radius_miles = ?'); values.push(data.defaultSellingRadiusMiles); }
       if (data.profilePicturePath !== undefined) { fields.push('profile_picture_path = ?'); values.push(data.profilePicturePath); }
       if (data.networkPublishEnabled !== undefined) { fields.push('network_publish_enabled = ?'); values.push(data.networkPublishEnabled ? 1 : 0); }
+      if (data.acceptedPaymentMethods !== undefined) { fields.push('accepted_payment_methods = ?'); values.push(JSON.stringify(data.acceptedPaymentMethods)); }
       if (fields.length > 0) {
         fields.push("updated_at = datetime('now')");
         values.push('default');
@@ -683,13 +691,13 @@ export class SettingsQueries {
       }
     } else {
       this.db.prepare(`
-        INSERT INTO beacon_settings (id, location_lat, location_lng, location_address, location_city, location_state, location_zip, location_country, default_selling_scope, default_selling_radius_miles, profile_picture_path)
-        VALUES ('default', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO beacon_settings (id, location_lat, location_lng, location_address, location_city, location_state, location_zip, location_country, default_selling_scope, default_selling_radius_miles, profile_picture_path, accepted_payment_methods)
+        VALUES ('default', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         data.locationLat ?? null, data.locationLng ?? null, data.locationAddress ?? null,
         data.locationCity ?? null, data.locationState ?? null, data.locationZip ?? null,
         data.locationCountry ?? 'US', data.defaultSellingScope ?? 'global', data.defaultSellingRadiusMiles ?? 250,
-        data.profilePicturePath ?? null
+        data.profilePicturePath ?? null, JSON.stringify(data.acceptedPaymentMethods ?? [])
       );
     }
     return this.get()!;

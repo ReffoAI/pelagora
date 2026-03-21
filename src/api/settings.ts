@@ -146,7 +146,7 @@ router.get('/location', (_req: Request, res: Response) => {
 
 // POST /settings/location — Save default location settings
 router.post('/location', (req: Request, res: Response) => {
-  const { locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry, defaultSellingScope, defaultSellingRadiusMiles } = sanitizeObject(req.body);
+  const { locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry, defaultSellingScope, defaultSellingRadiusMiles, acceptedPaymentMethods } = sanitizeObject(req.body);
 
   const validScopes: SellingScope[] = ['global', 'national', 'range'];
   if (defaultSellingScope && !validScopes.includes(defaultSellingScope)) {
@@ -168,6 +168,7 @@ router.post('/location', (req: Request, res: Response) => {
     locationCountry: locationCountry ?? undefined,
     defaultSellingScope: defaultSellingScope ?? undefined,
     defaultSellingRadiusMiles: defaultSellingRadiusMiles != null ? Number(defaultSellingRadiusMiles) : undefined,
+    acceptedPaymentMethods: Array.isArray(acceptedPaymentMethods) ? acceptedPaymentMethods : undefined,
   });
 
   res.json({ ok: true, settings: updated });

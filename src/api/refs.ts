@@ -171,7 +171,7 @@ router.post('/', (req: Request, res: Response) => {
     locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry,
     sellingScope, sellingRadiusMiles, attributes, condition,
     rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit,
-    purchaseDate, purchasePrice } = body;
+    purchaseDate, purchasePrice, acceptedPaymentMethods } = body;
 
   if (!name || typeof name !== 'string') {
     return res.status(400).json({ error: 'name is required' });
@@ -205,6 +205,7 @@ router.post('/', (req: Request, res: Response) => {
     rentalDuration: rentalDuration != null ? Number(rentalDuration) : undefined, rentalDurationUnit,
     purchaseDate: purchaseDate || undefined,
     purchasePrice: purchasePrice != null ? Number(purchasePrice) : undefined,
+    acceptedPaymentMethods: Array.isArray(acceptedPaymentMethods) ? acceptedPaymentMethods : undefined,
   }, beaconId);
 
   // Auto-publish to Reffo network if listing is public
@@ -230,7 +231,7 @@ router.patch('/:id', (req: Request, res: Response) => {
     locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry,
     sellingScope, sellingRadiusMiles, attributes, condition,
     rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit,
-    purchaseDate, purchasePrice, collectionId } = body;
+    purchaseDate, purchasePrice, collectionId, acceptedPaymentMethods } = body;
 
   if (listingStatus !== undefined && !VALID_LISTING_STATUSES.includes(listingStatus)) {
     return res.status(400).json({ error: `Invalid listingStatus: ${listingStatus}. Must be one of: ${VALID_LISTING_STATUSES.join(', ')}` });
@@ -259,6 +260,7 @@ router.patch('/:id', (req: Request, res: Response) => {
     rentalDuration: rentalDuration != null ? Number(rentalDuration) : rentalDuration, rentalDurationUnit,
     purchaseDate, purchasePrice: purchasePrice != null ? Number(purchasePrice) : purchasePrice,
     collectionId,
+    acceptedPaymentMethods: Array.isArray(acceptedPaymentMethods) ? acceptedPaymentMethods : undefined,
   });
   if (!updated) return res.status(404).json({ error: 'Ref not found' });
 

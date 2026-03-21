@@ -179,11 +179,15 @@ router.patch('/:scanId/items/:itemId', (req: Request, res: Response) => {
 
 // POST /scans/confirm — Confirm selected scan items into refs
 router.post('/confirm', async (req: Request, res: Response) => {
-  const { scanId, itemIds, collectionId, listingStatuses } = req.body as {
+  const { scanId, itemIds, collectionId, listingStatuses, acceptedPaymentMethods, locationCity, locationState, locationZip } = req.body as {
     scanId: string;
     itemIds: string[];
     collectionId?: string;
     listingStatuses?: Record<string, string>;
+    acceptedPaymentMethods?: string[];
+    locationCity?: string;
+    locationState?: string;
+    locationZip?: string;
   };
   if (!scanId || !Array.isArray(itemIds) || itemIds.length === 0) {
     return res.status(400).json({ error: 'scanId and itemIds (non-empty array) are required' });
@@ -219,6 +223,10 @@ router.post('/confirm', async (req: Request, res: Response) => {
       listingStatus: status as 'private' | 'for_sale' | 'willing_to_sell' | 'for_rent',
       collectionId: collectionId || undefined,
       attributes: item.attributes || undefined,
+      acceptedPaymentMethods: acceptedPaymentMethods as any[] || undefined,
+      locationCity: locationCity || undefined,
+      locationState: locationState || undefined,
+      locationZip: locationZip || undefined,
     }, beaconId);
 
     // Price data stays on scan_items for display as a suggestion,

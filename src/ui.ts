@@ -590,21 +590,31 @@ export function renderUI(): string {
     }
 
     /* Dashboard stat cards */
-    .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: #FFFFFF; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(15,15,15,0.06); transition: transform 0.2s; }
+    .stat-cards { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: #FFFFFF; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 8px rgba(15,15,15,0.06); transition: transform 0.2s; display: flex; align-items: center; gap: 12px; flex: 1; min-width: 140px; cursor: pointer; }
     .stat-card:hover { transform: translateY(-2px); }
-    .stat-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
-    .stat-icon.pink { background: rgba(10,94,138,0.1); color: #0A5E8A; }
-    .stat-icon.green { background: rgba(26,138,66,0.1); color: #2D8A6E; }
-    .stat-icon.amber { background: rgba(230,162,0,0.1); color: #D4922A; }
-    .stat-icon.blue { background: rgba(26,106,186,0.1); color: #4A90D9; }
-    .stat-value { font-size: 28px; font-weight: 700; color: #1A1A2E; line-height: 1.2; }
-    .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #4A5568; margin-top: 4px; }
-    @media (max-width: 768px) { .stat-cards { grid-template-columns: repeat(2, 1fr); } #tab-dashboard > div:last-child { grid-template-columns: 1fr !important; } }
-    @media (max-width: 480px) { .stat-cards { grid-template-columns: 1fr; } }
+    .stat-card-emoji { font-size: 22px; flex-shrink: 0; }
+    .stat-card-info { display: flex; flex-direction: column; }
+    .stat-value { font-size: 20px; font-weight: 700; color: #1A1A2E; line-height: 1.2; }
+    .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #4A5568; margin-top: 2px; }
+    .stat-card-cta { background: linear-gradient(135deg, #D4602A, #8101B4); color: #FFFFFF; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; flex: 1; min-width: 140px; cursor: pointer; transition: transform 0.2s, opacity 0.2s; text-decoration: none; }
+    .stat-card-cta:hover { transform: translateY(-2px); opacity: 0.92; }
+    .stat-card-cta .stat-card-emoji { font-size: 22px; }
+    .stat-card-cta .stat-label { color: rgba(255,255,255,0.85); }
+    .stat-card-cta .stat-value { color: #FFFFFF; font-size: 14px; }
+    @media (max-width: 768px) { .stat-cards { flex-wrap: wrap; } .stat-card, .stat-card-cta { min-width: calc(50% - 8px); } #tab-dashboard > div:last-child { grid-template-columns: 1fr !important; } }
+    @media (max-width: 480px) { .stat-card, .stat-card-cta { min-width: 100%; } }
 
     /* Dashboard quick actions */
     .quick-actions { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+
+    /* Payment method pills */
+    .payment-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .payment-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 10px; border: 2px solid #CBD5E0; background: #FFFFFF; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .payment-pill:hover { border-color: #4A5568; }
+    .payment-pill .pill-icon { width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 10px; font-weight: 700; background: #B1B5C3; }
+    .payment-pill.active .pill-icon { background: var(--pill-color); }
+    .payment-pill.active { border-color: var(--pill-color); background: color-mix(in srgb, var(--pill-color) 8%, transparent); color: var(--pill-color); }
 
     /* AI Quick Start */
     .ai-quickstart-card { background: #FFFFFF; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(15,15,15,0.06); margin-bottom: 24px; border-top: 3px solid #1A8A7D; }
@@ -1100,34 +1110,45 @@ export function renderUI(): string {
 
     <!-- Dashboard Tab -->
     <div id="tab-dashboard">
-      <div class="stat-cards" id="dashboardStats">
-        <div class="stat-card" onclick="sidebarNav('refs')" style="cursor:pointer;">
-          <div class="stat-icon pink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
-          <div class="stat-value" id="statTotalListed">--</div>
-          <div class="stat-label">Total Listed</div>
-        </div>
-        <div class="stat-card" onclick="sidebarNav('inbox');switchInboxTab('buying');" style="cursor:pointer;">
-          <div class="stat-icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8l-8 8"/><path d="M8 8h8v8"/></svg></div>
-          <div class="stat-value" id="statActiveOffers">--</div>
-          <div class="stat-label">Active Offers</div>
-        </div>
-        <div class="stat-card" onclick="sidebarNav('inbox');" style="cursor:pointer;">
-          <div class="stat-icon amber"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
-          <div class="stat-value" id="statPendingNegs">--</div>
-          <div class="stat-label">Conversations</div>
-        </div>
-        <div class="stat-card" onclick="sidebarNav('favorites');" style="cursor:pointer;">
-          <div class="stat-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
-          <div class="stat-value" id="statFavorites">--</div>
-          <div class="stat-label">Favorites</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="margin:0;font-size:1.3rem;font-weight:700;color:#1A1A2E;">Dashboard</h2>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-secondary btn-sm" onclick="scanToListGuard()">Scan to List</button>
+          <button class="btn-primary btn-sm" onclick="sidebarNav('list')" style="background:linear-gradient(135deg,#D4602A,#8101B4);border:none;">+ Create New Listing</button>
         </div>
       </div>
 
-      <div class="quick-actions">
-        <button class="btn-primary" onclick="sidebarNav('list')">+ Create New Listing</button>
-        <button class="btn-secondary" onclick="sidebarNav('scan')">Scan to List</button>
-        <button class="btn-secondary" onclick="sidebarNav('search'); executeHeaderSearch();">Search Network</button>
+      <div class="stat-cards" id="dashboardStats">
+        <div class="stat-card" onclick="sidebarNav('refs')">
+          <span class="stat-card-emoji">🏷️</span>
+          <div class="stat-card-info">
+            <div class="stat-value" id="statTotalListed">--</div>
+            <div class="stat-label">Listed</div>
+          </div>
+        </div>
+        <div class="stat-card" onclick="sidebarNav('inbox');switchInboxTab('buying');">
+          <span class="stat-card-emoji">🔥</span>
+          <div class="stat-card-info">
+            <div class="stat-value" id="statActiveOffers">--</div>
+            <div class="stat-label">Active Offers</div>
+          </div>
+        </div>
+        <div class="stat-card" onclick="sidebarNav('favorites');">
+          <span class="stat-card-emoji">❤️</span>
+          <div class="stat-card-info">
+            <div class="stat-value" id="statFavorites">--</div>
+            <div class="stat-label">Favorites</div>
+          </div>
+        </div>
+        <div class="stat-card-cta" onclick="sidebarNav('skills');">
+          <span class="stat-card-emoji">🚀</span>
+          <div class="stat-card-info">
+            <div class="stat-value">Explore Skills</div>
+            <div class="stat-label">Extend your node</div>
+          </div>
+        </div>
       </div>
+
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
         <div class="ai-quickstart-card" style="grid-column:1/-1;padding:16px 20px;">
@@ -1154,7 +1175,7 @@ export function renderUI(): string {
             </button>
           </div>
         </div>
-        <div class="recent-list" id="dashboardRecentItems">
+        <div class="recent-list" id="dashboardRecentItems" style="grid-column:1/-1;">
           <div class="recent-list-header">
             <h3>Recent Listings</h3>
             <a onclick="sidebarNav('refs')">View all</a>
@@ -1167,6 +1188,13 @@ export function renderUI(): string {
             <a onclick="sidebarNav('inbox')">View all</a>
           </div>
           <div id="recentOffersList"><div style="padding:20px;color:#4A5568;font-size:13px;">Loading...</div></div>
+        </div>
+        <div class="recent-list" id="dashboardRecentMessages">
+          <div class="recent-list-header">
+            <h3>Recent Messages</h3>
+            <a onclick="sidebarNav('inbox')">View all</a>
+          </div>
+          <div id="recentMessagesList"><div style="padding:20px;color:#4A5568;font-size:13px;">Loading...</div></div>
         </div>
       </div>
     </div>
@@ -1365,8 +1393,35 @@ export function renderUI(): string {
           <!-- Items list -->
           <div id="scanItemsGrid" style="display:flex;flex-direction:column;gap:12px;"></div>
 
+          <!-- Bulk Listing Settings -->
+          <div id="scanBulkSettings" style="display:none;margin-top:16px;padding:14px;background:#FFFFFF;border:1px solid #CBD5E0;border-radius:12px;">
+            <div style="font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;margin-bottom:10px;">Bulk Listing Settings</div>
+            <p style="font-size:12px;color:#718096;margin:0 0 10px;">Applied to all items. You can override per-item later.</p>
+            <div style="margin-bottom:12px;">
+              <div style="font-size:12px;font-weight:500;color:#1A1A2E;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 100 4h4a2 2 0 010 4H8"/><path d="M12 18V6"/></svg>
+                Payment Methods
+              </div>
+              <div class="payment-pills" id="scanPaymentPills"></div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <div style="flex:1;min-width:100px;">
+                <label for="scanLocCity">City</label>
+                <input id="scanLocCity" placeholder="City">
+              </div>
+              <div style="flex:1;min-width:80px;">
+                <label for="scanLocState">State</label>
+                <input id="scanLocState" placeholder="State">
+              </div>
+              <div style="width:90px;">
+                <label for="scanLocZip">Zip</label>
+                <input id="scanLocZip" placeholder="Zip">
+              </div>
+            </div>
+          </div>
+
           <!-- Publish footer -->
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding:16px;background:#FFFFFF;border:1px solid #CBD5E0;border-radius:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding:16px;background:#FFFFFF;border:1px solid #CBD5E0;border-radius:12px;">
             <div style="font-size:13px;color:#4A5568;">
               <span id="scanPublishFooterCount">0</span> of <span id="scanTotalFooterCount">0</span> items to publish
               <span id="scanRemovedFooterCount" style="display:none;"> &middot; <span id="scanRemovedNum">0</span> removed</span>
@@ -1641,6 +1696,24 @@ export function renderUI(): string {
       </section>
 
       <section class="settings-card">
+        <h2>Accepted Payment Methods</h2>
+        <p style="font-size:13px;color:#4A5568;margin-bottom:16px;">Select the payment methods you accept. These become defaults for new listings.</p>
+        <div class="payment-pills" id="settingsPaymentPills">
+          <button type="button" class="payment-pill" data-method="cash" style="--pill-color:#2E7D32;" onclick="toggleSettingsPayment('cash')"><span class="pill-icon">$</span>Cash</button>
+          <button type="button" class="payment-pill" data-method="venmo" style="--pill-color:#3D95CE;" onclick="toggleSettingsPayment('venmo')"><span class="pill-icon">V</span>Venmo</button>
+          <button type="button" class="payment-pill" data-method="paypal" style="--pill-color:#003087;" onclick="toggleSettingsPayment('paypal')"><span class="pill-icon">P</span>PayPal</button>
+          <button type="button" class="payment-pill" data-method="zelle" style="--pill-color:#6D1ED4;" onclick="toggleSettingsPayment('zelle')"><span class="pill-icon">Z</span>Zelle</button>
+          <button type="button" class="payment-pill" data-method="cashapp" style="--pill-color:#00D632;" onclick="toggleSettingsPayment('cashapp')"><span class="pill-icon">C</span>Cash App</button>
+          <button type="button" class="payment-pill" data-method="apple_pay" style="--pill-color:#000000;" onclick="toggleSettingsPayment('apple_pay')"><span class="pill-icon"></span>Apple Pay</button>
+          <button type="button" class="payment-pill" data-method="check" style="--pill-color:#5C6BC0;" onclick="toggleSettingsPayment('check')"><span class="pill-icon">✓</span>Check</button>
+          <button type="button" class="payment-pill" data-method="bitcoin" style="--pill-color:#F7931A;" onclick="toggleSettingsPayment('bitcoin')"><span class="pill-icon">₿</span>Bitcoin</button>
+          <button type="button" class="payment-pill" data-method="lightning" style="--pill-color:#FFD600;" onclick="toggleSettingsPayment('lightning')"><span class="pill-icon">⚡</span>Lightning</button>
+          <button type="button" class="payment-pill" data-method="wire" style="--pill-color:#607D8B;" onclick="toggleSettingsPayment('wire')"><span class="pill-icon">W</span>Wire</button>
+        </div>
+        <button class="btn-primary" style="margin-top:16px;" onclick="savePaymentMethods()">Save Payment Methods</button>
+      </section>
+
+      <section class="settings-card">
         <h2>Beacon Info</h2>
         <div class="info-row"><span class="info-label">Beacon ID</span><span class="info-value" id="settingsBeaconId" style="word-break:break-all;font-size:12px;"></span></div>
         <div class="info-row"><span class="info-label">Version</span><span class="info-value" id="settingsVersion"></span></div>
@@ -1766,7 +1839,10 @@ export function renderUI(): string {
         <input id="refSku" name="sku" placeholder="Optional SKU or part number">
 
         <details style="margin-bottom:14px;border:2px solid #CBD5E0;border-radius:12px;padding:14px;">
-          <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.02em;">Location Override</summary>
+          <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.02em;display:flex;align-items:center;gap:6px;list-style:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+            Location Override
+          </summary>
           <p style="font-size:12px;color:#718096;margin:8px 0;">Leave blank to use your default location from Settings.</p>
           <div class="row">
             <div><label for="refLocCity">City</label><input id="refLocCity" placeholder="City"></div>
@@ -1794,7 +1870,16 @@ export function renderUI(): string {
           </div>
         </details>
 
-        <label>Photos (up to 30)</label>
+        <details style="margin-bottom:14px;border:2px solid #CBD5E0;border-radius:12px;padding:14px;" id="createPaymentMethodsSection">
+          <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.02em;display:flex;align-items:center;gap:6px;list-style:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 100 4h4a2 2 0 010 4H8"/><path d="M12 18V6"/></svg>
+            Accepted Payment Methods
+          </summary>
+          <p style="font-size:12px;color:#718096;margin:8px 0;">Pre-filled from your defaults. Override per listing.</p>
+          <div class="payment-pills" id="createPaymentPills"></div>
+        </details>
+
+        <label style="display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> Photos (up to 30)</label>
         <div class="upload-area" onclick="document.getElementById('refPhotos').click()">
           <div class="upload-icon">+</div>
           <p>Click to upload photos</p>
@@ -2193,6 +2278,24 @@ Website = https://reffo.ai</pre>
   </div>
   <div class="ai-quickstart-toast" id="aiToast"></div>
 
+  <!-- Scan AI Required Modal -->
+  <div class="ai-quickstart-modal" id="scanAiModal" onclick="if(event.target===this)document.getElementById('scanAiModal').classList.remove('open')">
+    <div class="ai-quickstart-modal-inner" style="max-width:440px;">
+      <button class="modal-close" onclick="document.getElementById('scanAiModal').classList.remove('open')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+      </button>
+      <div style="text-align:center;margin-bottom:16px;font-size:36px;">🤖</div>
+      <h3 style="font-size:18px;font-weight:700;color:#1A1A2E;margin:0 0 8px;text-align:center;">AI Required for Scan to List</h3>
+      <p style="font-size:13px;color:#4A5568;margin-bottom:20px;text-align:center;line-height:1.6;">
+        Scan to List uses AI vision to detect items in your photos. Connect to Reffo.ai or add your own AI API key in Settings.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn-primary" onclick="document.getElementById('scanAiModal').classList.remove('open');sidebarNav('settings');" style="width:100%;justify-content:center;">Go to Settings</button>
+        <button class="btn-secondary" onclick="document.getElementById('scanAiModal').classList.remove('open');" style="width:100%;justify-content:center;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const TAXONOMY = ${taxonomyJSON};
     const CATEGORY_SCHEMAS_UI = ${categorySchemaJSON};
@@ -2286,7 +2389,37 @@ Website = https://reffo.ai</pre>
         if (activeItem) activeItem.classList.add('active');
       }
       if (tab === 'dashboard') loadDashboard();
+      if (tab === 'list') loadListFormDefaults();
       window.scrollTo(0, 0);
+    }
+
+    var _listFormDefaultsLoaded = false;
+    async function loadListFormDefaults() {
+      if (_listFormDefaultsLoaded) return;
+      try {
+        var res = await fetch('/settings/location');
+        var loc = await res.json();
+        var methods = loc.acceptedPaymentMethods || [];
+        var container = document.getElementById('createPaymentPills');
+        if (!container) return;
+        var allMethods = [
+          { id:'cash', label:'Cash', symbol:'$', color:'#2E7D32' },
+          { id:'venmo', label:'Venmo', symbol:'V', color:'#3D95CE' },
+          { id:'paypal', label:'PayPal', symbol:'P', color:'#003087' },
+          { id:'zelle', label:'Zelle', symbol:'Z', color:'#6D1ED4' },
+          { id:'cashapp', label:'Cash App', symbol:'C', color:'#00D632' },
+          { id:'apple_pay', label:'Apple Pay', symbol:'\uF8FF', color:'#000000' },
+          { id:'check', label:'Check', symbol:'\\u2713', color:'#5C6BC0' },
+          { id:'bitcoin', label:'Bitcoin', symbol:'\\u20BF', color:'#F7931A' },
+          { id:'lightning', label:'Lightning', symbol:'\\u26A1', color:'#FFD600' },
+          { id:'wire', label:'Wire', symbol:'W', color:'#607D8B' }
+        ];
+        container.innerHTML = allMethods.map(function(m) {
+          var active = methods.indexOf(m.id) >= 0 ? ' active' : '';
+          return '<button type="button" class="payment-pill' + active + '" data-method="' + m.id + '" style="--pill-color:' + m.color + ';" onclick="this.classList.toggle(\\'active\\')"><span class="pill-icon">' + m.symbol + '</span>' + m.label + '</button>';
+        }).join('');
+        _listFormDefaultsLoaded = true;
+      } catch(e) {}
     }
 
     var currentInboxTab = 'all';
@@ -2423,16 +2556,14 @@ Website = https://reffo.ai</pre>
         const data = await res.json();
         document.getElementById('statTotalListed').textContent = data.totalListed;
         document.getElementById('statActiveOffers').textContent = data.activeOffers || 0;
-        // Load conversation count for the Conversations stat
+        document.getElementById('statFavorites').textContent = data.favoritesCount;
+
+        // Load conversations for Recent Messages
+        var convData = [];
         try {
           var convRes = await fetch('/conversations');
-          var convData = await convRes.json();
-          var openConvs = (convData || []).filter(function(c) { return c.status === 'open'; });
-          document.getElementById('statPendingNegs').textContent = openConvs.length;
-        } catch(e) {
-          document.getElementById('statPendingNegs').textContent = data.pendingNegotiations || 0;
-        }
-        document.getElementById('statFavorites').textContent = data.favoritesCount;
+          convData = (await convRes.json()) || [];
+        } catch(e) {}
 
         // Recent items
         const itemsContainer = document.getElementById('recentItemsList');
@@ -2481,6 +2612,23 @@ Website = https://reffo.ai</pre>
           }).join('');
         } else {
           offersContainer.innerHTML = '<div style="padding:20px;color:#718096;font-size:13px;font-style:italic;">No offers yet</div>';
+        }
+
+        // Recent messages
+        var msgContainer = document.getElementById('recentMessagesList');
+        var recentConvs = convData.filter(function(c) { return c.status === 'open'; }).slice(0, 5);
+        if (recentConvs.length > 0) {
+          msgContainer.innerHTML = recentConvs.map(function(conv) {
+            var date = conv.lastMessageAt ? new Date(conv.lastMessageAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+            var roleLabel = conv.role === 'buyer' ? 'Buying' : 'Selling';
+            return '<div class="recent-list-row" onclick="openConversation(\\'' + conv.id + '\\')">' +
+              '<div class="row-img"><span style="font-size:16px;">💬</span></div>' +
+              '<div class="row-info"><div class="row-name">' + escapeHtml(conv.refName || 'Unknown Item') + '</div>' +
+              '<div class="row-sub">' + roleLabel + '</div></div>' +
+              '<span class="row-date">' + date + '</span></div>';
+          }).join('');
+        } else {
+          msgContainer.innerHTML = '<div style="padding:20px;color:#718096;font-size:13px;font-style:italic;">No messages yet</div>';
         }
       } catch(e) {
         document.getElementById('recentItemsList').innerHTML = '<div style="padding:20px;color:#718096;font-size:13px;">Failed to load dashboard</div>';
@@ -3228,6 +3376,12 @@ Website = https://reffo.ai</pre>
         const rentalDuration = listingStatus === 'for_rent' ? (document.getElementById('refRentalDuration').value ? parseInt(document.getElementById('refRentalDuration').value) : null) : null;
         const rentalDurationUnit = listingStatus === 'for_rent' ? (document.getElementById('refRentalDurationUnit').value || null) : null;
 
+        // Gather selected payment methods from create form
+        var createPaymentMethods = [];
+        document.querySelectorAll('#createPaymentPills .payment-pill.active').forEach(function(p) {
+          createPaymentMethods.push(p.getAttribute('data-method'));
+        });
+
         const refRes = await fetch('/refs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -3235,7 +3389,8 @@ Website = https://reffo.ai</pre>
             locationCity: locCity, locationState: locState, locationZip: locZip,
             locationLat: locLat, locationLng: locLng,
             sellingScope, sellingRadiusMiles, condition, attributes,
-            rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit })
+            rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit,
+            acceptedPaymentMethods: createPaymentMethods.length > 0 ? createPaymentMethods : undefined })
         });
         if (!refRes.ok) { const err = await refRes.json(); throw new Error(err.error || 'Failed to create ref'); }
         const ref = await refRes.json();
@@ -5665,6 +5820,14 @@ Website = https://reffo.ai</pre>
           if (loc.locationLng) document.getElementById('locLng').value = loc.locationLng;
           document.getElementById('locScope').value = loc.defaultSellingScope || 'global';
           document.getElementById('locRadius').value = loc.defaultSellingRadiusMiles || 250;
+          // Pre-fill payment methods
+          window._settingsPaymentMethods = loc.acceptedPaymentMethods || [];
+          var pills = document.querySelectorAll('#settingsPaymentPills .payment-pill');
+          pills.forEach(function(p) {
+            var m = p.getAttribute('data-method');
+            if (window._settingsPaymentMethods.indexOf(m) >= 0) p.classList.add('active');
+            else p.classList.remove('active');
+          });
         } catch {}
       } catch {}
     }
@@ -5705,6 +5868,37 @@ Website = https://reffo.ai</pre>
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
         showMsg('locationMsg', 'Location saved!', true);
+      } catch (err) {
+        showMsg('locationMsg', err.message, false);
+      }
+    };
+
+    // Payment methods state
+    window._settingsPaymentMethods = [];
+
+    window.toggleSettingsPayment = function(method) {
+      var idx = window._settingsPaymentMethods.indexOf(method);
+      if (idx >= 0) window._settingsPaymentMethods.splice(idx, 1);
+      else window._settingsPaymentMethods.push(method);
+      // Update UI
+      var pills = document.querySelectorAll('#settingsPaymentPills .payment-pill');
+      pills.forEach(function(p) {
+        var m = p.getAttribute('data-method');
+        if (window._settingsPaymentMethods.indexOf(m) >= 0) p.classList.add('active');
+        else p.classList.remove('active');
+      });
+    };
+
+    window.savePaymentMethods = async function() {
+      try {
+        var res = await fetch('/settings/location', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ acceptedPaymentMethods: window._settingsPaymentMethods })
+        });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showMsg('locationMsg', 'Payment methods saved!', true);
       } catch (err) {
         showMsg('locationMsg', err.message, false);
       }
@@ -6412,6 +6606,22 @@ Website = https://reffo.ai</pre>
     var currentScanItems = [];
     var currentScanImageUrl = null;
 
+    window.scanToListGuard = async function() {
+      try {
+        var res = await fetch('/settings');
+        var data = await res.json();
+        var hasAi = data.hasApiKey || (data.aiProvider && data.aiProvider !== 'reffo' && data.aiApiKeySet);
+        if (hasAi) {
+          sidebarNav('scan');
+        } else {
+          document.getElementById('scanAiModal').classList.add('open');
+        }
+      } catch(e) {
+        // If settings check fails, just go to scan and let it fail there
+        sidebarNav('scan');
+      }
+    };
+
     function handleScanDrop(event) {
       event.preventDefault();
       var zone = document.getElementById('scanUploadZone');
@@ -6553,6 +6763,37 @@ Website = https://reffo.ai</pre>
           return '<option value="' + c.id + '">' + escapeHtml(c.name) + '</option>';
         }).join('');
       }).catch(function() {});
+
+      // Show bulk settings and populate from defaults
+      var bulkEl = document.getElementById('scanBulkSettings');
+      if (bulkEl) {
+        bulkEl.style.display = '';
+        fetch('/settings/location').then(function(r) { return r.json(); }).then(function(loc) {
+          var methods = loc.acceptedPaymentMethods || [];
+          var container = document.getElementById('scanPaymentPills');
+          var allMethods = [
+            { id:'cash', label:'Cash', symbol:'$', color:'#2E7D32' },
+            { id:'venmo', label:'Venmo', symbol:'V', color:'#3D95CE' },
+            { id:'paypal', label:'PayPal', symbol:'P', color:'#003087' },
+            { id:'zelle', label:'Zelle', symbol:'Z', color:'#6D1ED4' },
+            { id:'cashapp', label:'Cash App', symbol:'C', color:'#00D632' },
+            { id:'apple_pay', label:'Apple Pay', symbol:'\uF8FF', color:'#000000' },
+            { id:'check', label:'Check', symbol:'\\u2713', color:'#5C6BC0' },
+            { id:'bitcoin', label:'Bitcoin', symbol:'\\u20BF', color:'#F7931A' },
+            { id:'lightning', label:'Lightning', symbol:'\\u26A1', color:'#FFD600' },
+            { id:'wire', label:'Wire', symbol:'W', color:'#607D8B' }
+          ];
+          if (container) {
+            container.innerHTML = allMethods.map(function(m) {
+              var active = methods.indexOf(m.id) >= 0 ? ' active' : '';
+              return '<button type="button" class="payment-pill' + active + '" data-method="' + m.id + '" style="--pill-color:' + m.color + ';" onclick="this.classList.toggle(\\'active\\')"><span class="pill-icon">' + m.symbol + '</span>' + m.label + '</button>';
+            }).join('');
+          }
+          if (loc.locationCity) document.getElementById('scanLocCity').value = loc.locationCity;
+          if (loc.locationState) document.getElementById('scanLocState').value = loc.locationState;
+          if (loc.locationZip) document.getElementById('scanLocZip').value = loc.locationZip;
+        }).catch(function() {});
+      }
 
       renderScanItemCards();
     }
@@ -6866,7 +7107,13 @@ Website = https://reffo.ai</pre>
         var res = await fetch('/scans/confirm', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ scanId: currentScanId, itemIds: itemIds, collectionId: collectionId, listingStatuses: listingStatuses }),
+          body: JSON.stringify({
+            scanId: currentScanId, itemIds: itemIds, collectionId: collectionId, listingStatuses: listingStatuses,
+            acceptedPaymentMethods: (function() { var m = []; document.querySelectorAll('#scanPaymentPills .payment-pill.active').forEach(function(p) { m.push(p.getAttribute('data-method')); }); return m.length > 0 ? m : undefined; })(),
+            locationCity: document.getElementById('scanLocCity').value.trim() || undefined,
+            locationState: document.getElementById('scanLocState').value.trim() || undefined,
+            locationZip: document.getElementById('scanLocZip').value.trim() || undefined,
+          }),
         });
         var data = await res.json();
         if (!res.ok) {
