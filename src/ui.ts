@@ -351,7 +351,7 @@ export function renderUI(): string {
     .inbox-badge.replied { background: #EDE8E3; color: #4A5568; }
     .inbox-list { background: #fff; border: 1px solid #CBD5E0; border-radius: 12px; overflow: hidden; }
     .inbox-list .inbox-row:last-child { border-bottom: none; }
-    .inbox-thread { background: #fff; border: 1px solid #CBD5E0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; height: calc(100dvh - 200px); }
+    .inbox-thread { background: #fff; border: 1px solid #CBD5E0; border-radius: 12px; padding: 0; display: flex; flex-direction: column; max-height: calc(100dvh - 260px); overflow: hidden; }
     .inbox-thread-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #0A5E8A; cursor: pointer; margin-bottom: 16px; font-weight: 600; }
     .inbox-thread-back:hover { color: #B8521F; }
     .neg-item-name { font-weight: 700; font-size: 16px; color: #1A1A2E; }
@@ -5309,7 +5309,8 @@ Website = https://reffo.ai</pre>
       container.innerHTML = '<div class="inbox-list">' + convs.map(renderConversationRow).join('') + '</div>';
     }
 
-    function renderChatMessage(msg, myBeaconId) {
+    function renderChatMessage(msg, myBeaconId, ctx) {
+      ctx = ctx || {};
       var isSelf = msg.senderBeaconId === myBeaconId;
       var sideClass = isSelf ? 'self' : 'other';
       var time = msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
@@ -5321,10 +5322,20 @@ Website = https://reffo.ai</pre>
       if (msg.messageType === 'offer' || msg.messageType === 'counter') {
         var label = msg.messageType === 'offer' ? 'Offered' : 'Countered at';
         var amountStr = msg.amount ? fmtCurrency(msg.amount, msg.currency || 'USD') : '?';
-        var html = '<div class="chat-offer-card ' + sideClass + '">';
+        var html = '<div class="chat-offer-card ' + sideClass + '" style="display:flex;align-items:center;gap:10px;">';
+        html += '<div style="flex:1;">';
         html += '<div style="font-size:12px;font-weight:600;color:#D4922A;text-transform:uppercase;margin-bottom:4px;">' + label + '</div>';
         html += '<div style="font-size:20px;font-weight:700;color:#1A1A2E;">' + escapeHtml(amountStr) + '</div>';
         if (msg.content) html += '<div style="font-size:13px;color:#4A5568;margin-top:6px;">' + escapeHtml(msg.content) + '</div>';
+        html += '</div>';
+        // Inline accept/decline buttons for seller on incoming offers
+        if (!isSelf && ctx.isSeller && ctx.isPending && ctx.convId && ctx.convOpen) {
+          html += '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">';
+          html += '<button class="btn-primary btn-sm" style="font-size:11px;padding:4px 10px;white-space:nowrap;" onclick="sendConvMessage(\\'' + ctx.convId + '\\', \\'accept\\')">Accept</button>';
+          html += '<button class="btn-danger btn-sm" style="font-size:11px;padding:4px 10px;white-space:nowrap;" onclick="sendConvMessage(\\'' + ctx.convId + '\\', \\'reject\\')">Decline</button>';
+          html += '<button class="btn-secondary btn-sm" style="font-size:11px;padding:4px 10px;white-space:nowrap;" onclick="showCounterInput(\\'' + ctx.convId + '\\')">Counter</button>';
+          html += '</div>';
+        }
         html += '</div>';
         html += '<div class="chat-msg-time ' + sideClass + '">' + time + '</div>';
         return html;
@@ -5419,7 +5430,13 @@ Website = https://reffo.ai</pre>
           html += '<div class="chat-event">Conversation started</div>';
         } else {
           messages.forEach(function(msg) {
-            html += renderChatMessage(msg, myBeaconId);
+            var msgCtx = {
+              isSeller: isSeller,
+              convId: conv.id,
+              convOpen: conv.status === 'open',
+              isPending: pendingOffer && pendingOffer.id === msg.id,
+            };
+            html += renderChatMessage(msg, myBeaconId, msgCtx);
           });
         }
         html += '</div>';
@@ -5467,7 +5484,7 @@ Website = https://reffo.ai</pre>
         html += '</div>';
         container.style.display = 'flex';
         container.style.flexDirection = 'column';
-        container.style.height = 'calc(100dvh - 200px)';
+        container.style.height = '';
         container.innerHTML = html;
         document.body.style.overflow = 'hidden';
 
