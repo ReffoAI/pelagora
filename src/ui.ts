@@ -5345,7 +5345,7 @@ Website = https://reffo.ai</pre>
         var eventText = eventLabels[msg.messageType] || msg.content || msg.messageType;
         var eventHtml = '<div class="chat-event">' + escapeHtml(eventText) + ' &middot; ' + time;
         if (msg.messageType === 'accept') {
-          eventHtml += ' <span class="trade-guide-link" onclick="showTradeGuide(this)">What happens next?</span>';
+          eventHtml += ' <span class="trade-guide-link" onclick="showTradeGuide(this)" data-is-seller="' + (ctx.isSeller ? '1' : '0') + '">What happens next?</span>';
         }
         eventHtml += '</div>';
         if (msg.messageType === 'accept') {
@@ -5358,8 +5358,9 @@ Website = https://reffo.ai</pre>
               + '<ol>'
               + '<li>Use this chat to exchange contact details or arrange a meet-up</li>'
               + '<li>Agree on your preferred payment method</li>'
-              + '<li>Complete the exchange in person or ship the item</li>'
-              + '<li>Mark the item as &ldquo;Sold&rdquo; in your inventory</li>'
+              + (ctx.isSeller
+                ? '<li>Complete the exchange in person or ship the item</li><li>Mark the item as &ldquo;Sold&rdquo; in your inventory</li>'
+                : '<li>Arrange pickup or confirm shipping details</li><li>Confirm receipt once you have the item</li>')
               + '</ol></div>';
           }
         }
@@ -5645,14 +5646,16 @@ Website = https://reffo.ai</pre>
         return;
       }
       // Insert a new one after the event element
+      var sellerRole = el.getAttribute('data-is-seller') === '1';
       var guideHtml = '<div class="trade-guide-card">'
         + '<button class="guide-dismiss" onclick="this.parentElement.style.display=\\\'none\\\'" title="Dismiss">&times;</button>'
         + '<h4>Next Steps \\u2014 Completing Your Trade</h4>'
         + '<ol>'
         + '<li>Use this chat to exchange contact details or arrange a meet-up</li>'
         + '<li>Agree on your preferred payment method</li>'
-        + '<li>Complete the exchange in person or ship the item</li>'
-        + '<li>Mark the item as &ldquo;Sold&rdquo; in your inventory</li>'
+        + (sellerRole
+          ? '<li>Complete the exchange in person or ship the item</li><li>Mark the item as &ldquo;Sold&rdquo; in your inventory</li>'
+          : '<li>Arrange pickup or confirm shipping details</li><li>Confirm receipt once you have the item</li>')
         + '</ol></div>';
       var eventDiv = el.closest('.chat-event');
       if (eventDiv) {
