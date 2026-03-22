@@ -51,6 +51,10 @@ export function createApp(): express.Express {
   // Global error handler — catches multer errors, etc., and returns JSON instead of HTML
   app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     console.error('[API] Error:', err.message);
+    // Multer file filter errors and video-disabled errors should be 400
+    if (err.message && (err.message.includes('Video uploads are temporarily disabled') || err.message.includes('Unsupported file type'))) {
+      return res.status(400).json({ error: err.message });
+    }
     const status = (err as any).status || (err as any).statusCode || 500;
     res.status(status).json({ error: err.message });
   });

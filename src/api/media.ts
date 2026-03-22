@@ -34,7 +34,7 @@ const upload = multer({
   storage,
   fileFilter: (_req, file, cb) => {
     if (VIDEO_MIMES.includes(file.mimetype)) {
-      cb(new Error('Video uploads are temporarily disabled'));
+      cb(new Error('Video uploads are temporarily disabled. Photo uploads (JPEG, PNG, WebP) are supported.'));
     } else if (PHOTO_MIMES.includes(file.mimetype)) {
       cb(null, true);
     } else {
@@ -42,7 +42,7 @@ const upload = multer({
     }
   },
   limits: {
-    fileSize: MAX_VIDEO_SIZE,
+    fileSize: MAX_PHOTO_SIZE,
   },
 });
 

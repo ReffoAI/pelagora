@@ -30,6 +30,11 @@ function loadEnv(): void {
 loadEnv();
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
+const HOST = process.env.HOST || '127.0.0.1';
+
+function isNonLocalhost(host: string): boolean {
+  return host !== '127.0.0.1' && host !== 'localhost' && host !== '::1';
+}
 
 function getOrCreateBeaconId(): string {
   if (process.env.BEACON_ID) return process.env.BEACON_ID;
@@ -219,9 +224,27 @@ async function main(): Promise<void> {
 
   setDhtStatus({ connected: dht.isConnected, peers: dht.peerCount });
 
+  // Expose bound-host flag so the UI can show a warning banner
+  app.set('nonLocalhost', isNonLocalhost(HOST));
+
+  // Security status endpoint for UI
+  app.get('/api/security-status', (_req, res) => {
+    res.json({ nonLocalhost: isNonLocalhost(HOST) });
+  });
+
   // Start HTTP server
-  const server = app.listen(PORT, () => {
-    console.log(`[Pelagora] Running on http://localhost:${PORT}`);
+  const server = app.listen(PORT, HOST, () => {
+    console.log(`[Pelagora] Running on http://${HOST}:${PORT}`);
+
+    if (isNonLocalhost(HOST)) {
+      console.log('');
+      console.log('\x1b[41m\x1b[97m !! SECURITY WARNING !! \x1b[0m');
+      console.log('\x1b[91m   This beacon is listening on %s\x1b[0m', HOST);
+      console.log('\x1b[91m   Anyone who can reach this port can access your data.\x1b[0m');
+      console.log('\x1b[91m   Consider running behind a firewall or VPN.\x1b[0m');
+      console.log('');
+    }
+
     console.log(`[Pelagora] Node ID: ${BEACON_ID.slice(0, 16)}...`);
     console.log(`[Pelagora] Endpoints:`);
     console.log(`            GET  /              - Web UI`);
