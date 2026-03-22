@@ -175,6 +175,11 @@ router.patch('/:id/respond', async (req: Request, res: Response) => {
   if (negotiation.role !== 'seller') return res.status(403).json({ error: 'Only the seller can respond' });
   if (negotiation.status !== 'pending') return res.status(400).json({ error: 'Can only respond to pending negotiations' });
 
+  // When accepting, include next-steps guidance for the buyer
+  const nextStepsMessage = status === 'accepted'
+    ? (responseMessage || 'Offer accepted! Next steps: 1) Use the chat to exchange contact details or arrange a meet-up. 2) Agree on your preferred payment method. 3) Complete the exchange in person or ship the item.')
+    : (responseMessage || '');
+
   // Send response via DHT
   let delivered = false;
   if (dht) {
@@ -185,12 +190,12 @@ router.patch('/:id/respond', async (req: Request, res: Response) => {
         negotiationId: negotiation.id,
         status,
         counterPrice: status === 'countered' ? counterPrice : undefined,
-        responseMessage: responseMessage || '',
+        responseMessage: nextStepsMessage,
       },
     });
   }
 
-  const updated = negotiations.updateStatus(negId, status, counterPrice, responseMessage);
+  const updated = negotiations.updateStatus(negId, status, counterPrice, nextStepsMessage);
 
   // Push response back to webapp (fire-and-forget)
   const syncManager: SyncManager | undefined = req.app.get('syncManager');
@@ -199,7 +204,7 @@ router.patch('/:id/respond', async (req: Request, res: Response) => {
       negId,
       status,
       status === 'countered' ? counterPrice : undefined,
-      responseMessage,
+      nextStepsMessage,
     ).catch(() => {});
   }
 

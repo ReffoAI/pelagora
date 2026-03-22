@@ -170,11 +170,16 @@ router.post('/:id/messages', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'messageType is required' });
   }
 
+  // When seller accepts an offer, include next-steps guidance in the accept message
+  const nextStepsContent = messageType === 'accept'
+    ? (content || 'Offer accepted! Next steps: 1) Use this chat to exchange contact details or arrange a meet-up. 2) Agree on your preferred payment method. 3) Complete the exchange in person or ship the item. 4) Mark the item as "Sold" in your inventory.')
+    : (content || undefined);
+
   const message = conversations.addMessage({
     conversationId: convId,
     senderBeaconId: beaconId,
     messageType: messageType as ChatMessageType,
-    content: content || undefined,
+    content: nextStepsContent,
     amount: typeof amount === 'number' ? amount : undefined,
     currency: currency || undefined,
   });
