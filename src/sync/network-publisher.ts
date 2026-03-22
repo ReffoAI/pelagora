@@ -49,6 +49,7 @@ export class NetworkPublisher {
   private refs: RefQueries;
   private offers: OfferQueries;
   private settings: SettingsQueries;
+  private lastOfferTimestamp: string | null = null;
 
   constructor(beaconId: string, baseUrl?: string) {
     this.beaconId = beaconId;
@@ -250,16 +251,30 @@ export class NetworkPublisher {
 
   async heartbeat(): Promise<{ messages: NetworkMessage[]; offers: NetworkOffer[] }> {
     try {
+      const payload: Record<string, unknown> = { beaconId: this.beaconId };
+      if (this.lastOfferTimestamp) {
+        payload.offersSince = this.lastOfferTimestamp;
+      }
+
       const res = await fetch(`${this.baseUrl}/api/network/heartbeat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ beaconId: this.beaconId }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) return { messages: [], offers: [] };
 
       const data = await res.json() as { ok: boolean; messages?: NetworkMessage[]; offers?: NetworkOffer[] };
-      return { messages: data.messages || [], offers: data.offers || [] };
+      const offers = data.offers || [];
+
+      // Advance cursor to the latest offer timestamp to avoid re-delivery
+      for (const offer of offers) {
+        if (!this.lastOfferTimestamp || offer.createdAt > this.lastOfferTimestamp) {
+          this.lastOfferTimestamp = offer.createdAt;
+        }
+      }
+
+      return { messages: data.messages || [], offers };
     } catch {
       return { messages: [], offers: [] };
     }

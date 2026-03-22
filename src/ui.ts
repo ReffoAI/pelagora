@@ -351,7 +351,7 @@ export function renderUI(): string {
     .inbox-badge.replied { background: #EDE8E3; color: #4A5568; }
     .inbox-list { background: #fff; border: 1px solid #CBD5E0; border-radius: 12px; overflow: hidden; }
     .inbox-list .inbox-row:last-child { border-bottom: none; }
-    .inbox-thread { background: #fff; border: 1px solid #CBD5E0; border-radius: 12px; padding: 20px; }
+    .inbox-thread { background: #fff; border: 1px solid #CBD5E0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; height: calc(100dvh - 200px); }
     .inbox-thread-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #0A5E8A; cursor: pointer; margin-bottom: 16px; font-weight: 600; }
     .inbox-thread-back:hover { color: #B8521F; }
     .neg-item-name { font-weight: 700; font-size: 16px; color: #1A1A2E; }
@@ -402,7 +402,7 @@ export function renderUI(): string {
     .toast-sold { border-left: 4px solid #2D8A6E; }
 
     /* Chat conversation styles */
-    .chat-messages { max-height: 400px; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+    .chat-messages { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
     .chat-bubble { max-width: 75%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; word-wrap: break-word; }
     .chat-bubble.self { align-self: flex-end; background: #0A5E8A; color: #fff; border-bottom-right-radius: 4px; }
     .chat-bubble.other { align-self: flex-start; background: #F5F0EB; color: #1A1A2E; border-bottom-left-radius: 4px; }
@@ -431,6 +431,16 @@ export function renderUI(): string {
     .chat-msg-time { font-size: 10px; color: #4A5568; margin-top: 2px; }
     .chat-msg-time.self { text-align: right; }
     .chat-msg-time.other { text-align: left; }
+
+    /* Post-acceptance guidance card */
+    .trade-guide-card { align-self: center; background: linear-gradient(135deg, #E6F5F3, #E8F0FA); border: 1px solid #A4CDE3; border-radius: 12px; padding: 16px 20px; margin: 12px 0; max-width: 90%; font-size: 13px; color: #1A1A2E; position: relative; }
+    .trade-guide-card h4 { font-size: 14px; font-weight: 700; color: #0A5E8A; margin: 0 0 10px 0; }
+    .trade-guide-card ol { margin: 0; padding-left: 20px; line-height: 1.8; }
+    .trade-guide-card ol li { color: #2D3748; }
+    .trade-guide-card .guide-dismiss { position: absolute; top: 8px; right: 10px; background: none; border: none; font-size: 16px; color: #4A5568; cursor: pointer; padding: 2px 6px; line-height: 1; }
+    .trade-guide-card .guide-dismiss:hover { color: #1A1A2E; }
+    .trade-guide-link { font-size: 12px; color: #0A5E8A; cursor: pointer; text-decoration: underline; margin-left: 8px; }
+    .trade-guide-link:hover { color: #B8521F; }
 
     /* Archive badges */
     .badge-archived-sold { background: #e8eaed; color: #2D8A6E; }
@@ -794,6 +804,12 @@ export function renderUI(): string {
   </style>
 </head>
 <body>
+  <!-- Security warning banner (hidden by default, shown via JS if non-localhost) -->
+  <div id="securityWarningBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#991B1B;color:#FEE2E2;padding:10px 16px;font-size:13px;font-weight:500;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
+    <span style="font-weight:700;">Warning:</span> This beacon is accessible on a public network interface. Anyone who can reach this port can access your data. Consider running behind a firewall or VPN.
+    <button onclick="this.parentElement.style.display='none';document.body.style.paddingTop='0';" style="margin-left:16px;background:transparent;border:1px solid #FCA5A5;color:#FEE2E2;padding:2px 10px;border-radius:4px;cursor:pointer;font-size:12px;">Dismiss</button>
+  </div>
+
   <!-- App Header -->
   <div class="app-header">
     <div class="app-header-inner">
@@ -1576,7 +1592,7 @@ export function renderUI(): string {
           <div>
             <button class="btn-secondary btn-sm" onclick="document.getElementById('profilePicInput').click()">Upload Photo</button>
             <button class="btn-danger btn-sm" id="removeProfilePicBtn" style="display:none;margin-left:8px;" onclick="removeProfilePicture()">Remove</button>
-            <input type="file" id="profilePicInput" accept="image/*" style="display:none;" onchange="uploadProfilePicture(this)">
+            <input type="file" id="profilePicInput" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="uploadProfilePicture(this)">
             <p style="font-size:12px;color:#718096;margin-top:6px;margin-bottom:0;">Click the circle or button to upload. Max 10 MB.</p>
           </div>
         </div>
@@ -1627,26 +1643,9 @@ export function renderUI(): string {
       </section>
 
       <section class="settings-card">
-        <h2>AI Provider</h2>
-        <div id="aiProviderMsg"></div>
-        <p style="font-size:12px;color:#718096;margin-bottom:12px;">Choose how Smart Autofill gets product data. Default uses your Reffo API key.</p>
-        <label for="aiProviderSelect">Provider</label>
-        <select id="aiProviderSelect" onchange="toggleAiKeyField()">
-          <option value="reffo">Reffo (default)</option>
-          <option value="anthropic">Anthropic (Claude)</option>
-          <option value="openai">OpenAI (ChatGPT)</option>
-          <option value="google">Google (Gemini)</option>
-          <option value="xai">xAI (Grok)</option>
-        </select>
-        <div id="aiKeySection" style="display:none;margin-top:10px;">
-          <label for="aiApiKeyInput">API Key</label>
-          <input id="aiApiKeyInput" type="password" placeholder="Enter your API key">
-        </div>
-        <div id="aiReffoNote" style="font-size:12px;color:#718096;margin-top:8px;">Uses your Reffo API key — no extra configuration needed.</div>
-        <div style="display:flex;gap:8px;margin-top:12px;">
-          <button class="btn-primary btn-sm" onclick="saveAiProvider()">Save</button>
-          <button class="btn-danger btn-sm" id="removeAiProviderBtn" style="display:none;" onclick="removeAiProvider()">Remove</button>
-        </div>
+        <h2>AI Scanning</h2>
+        <p style="font-size:13px;color:#4A5568;margin-bottom:8px;">AI scanning is powered by <strong>Reffo.ai</strong>. Purchase scan credits at <a href="https://reffo.ai" target="_blank" rel="noopener" style="color:#2B6CB0;text-decoration:underline;">reffo.ai</a>.</p>
+        <p style="font-size:12px;color:#718096;">Uses your Reffo API key &mdash; no extra configuration needed.</p>
       </section>
 
       <section class="settings-card">
@@ -1883,8 +1882,9 @@ export function renderUI(): string {
         <div class="upload-area" onclick="document.getElementById('refPhotos').click()">
           <div class="upload-icon">+</div>
           <p>Click to upload photos</p>
-          <input type="file" id="refPhotos" accept="image/*" multiple>
+          <input type="file" id="refPhotos" accept="image/jpeg,image/png,image/webp" multiple>
         </div>
+        <p style="font-size:11px;color:#718096;margin:4px 0 0;">Video uploads coming soon</p>
         <div id="photoPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div>
         <div id="aiSuggestedImage"></div>
 
@@ -3170,10 +3170,15 @@ Website = https://reffo.ai</pre>
     function uploadPhotoForRef(refId) {
       const input = document.createElement('input');
       input.type = 'file';
-      input.accept = 'image/*';
+      input.accept = 'image/jpeg,image/png,image/webp';
       input.onchange = function() {
         const file = input.files[0];
         if (!file) return;
+        var allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (allowedTypes.indexOf(file.type) === -1) {
+          showToast('Unsupported file type. Please upload JPEG, PNG, or WebP images.', '');
+          return;
+        }
         const fd = new FormData();
         fd.append('photos', file);
         fetch('/refs/' + refId + '/media', { method: 'POST', body: fd })
@@ -3323,8 +3328,17 @@ Website = https://reffo.ai</pre>
 
     document.getElementById('refPhotos').addEventListener('change', function() {
       var files = this.files;
+      var allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      var rejected = [];
       for (var i = 0; i < files.length; i++) {
-        if (selectedPhotos.length < 30) selectedPhotos.push(files[i]);
+        if (allowedTypes.indexOf(files[i].type) === -1) {
+          rejected.push(files[i].name);
+        } else if (selectedPhotos.length < 30) {
+          selectedPhotos.push(files[i]);
+        }
+      }
+      if (rejected.length > 0) {
+        showToast('Unsupported file(s) skipped: only JPEG, PNG, WebP accepted', '');
       }
       this.value = '';
       renderPhotoPreview();
@@ -3395,7 +3409,7 @@ Website = https://reffo.ai</pre>
         if (!refRes.ok) { const err = await refRes.json(); throw new Error(err.error || 'Failed to create ref'); }
         const ref = await refRes.json();
 
-        // Upload photos and video separately so one failure doesn't kill the other
+        // Upload photos (video uploads temporarily disabled)
         const uploadErrors = [];
         if (selectedPhotos.length > 0) {
           const fd = new FormData();
@@ -3404,16 +3418,6 @@ Website = https://reffo.ai</pre>
           if (!photoRes.ok) {
             let errMsg = 'Photo upload failed';
             try { const err = await photoRes.json(); errMsg = err.error || errMsg; } catch {}
-            uploadErrors.push(errMsg);
-          }
-        }
-        if (selectedVideo) {
-          const fd = new FormData();
-          fd.append('files', selectedVideo);
-          const videoRes = await fetch('/refs/' + ref.id + '/media', { method: 'POST', body: fd });
-          if (!videoRes.ok) {
-            let errMsg = 'Video upload failed';
-            try { const err = await videoRes.json(); errMsg = err.error || errMsg; } catch {}
             uploadErrors.push(errMsg);
           }
         }
@@ -3853,8 +3857,9 @@ Website = https://reffo.ai</pre>
         html += '</div>';
         html += '<div class="upload-area" onclick="document.getElementById(\\'detailFileInput\\').click()" style="max-width:200px;">';
         html += '<div class="upload-icon">+</div><p>Upload</p>';
-        html += '<input type="file" id="detailFileInput" accept="image/*" multiple onchange="uploadDetailMedia(\\'' + ref.id + '\\')">';
+        html += '<input type="file" id="detailFileInput" accept="image/jpeg,image/png,image/webp" multiple onchange="uploadDetailMedia(\\'' + ref.id + '\\')">';
         html += '</div>';
+        html += '<p style="font-size:11px;color:#718096;margin:4px 0 0;">Video uploads coming soon</p>';
 
         // Conversations for this ref
         if (refConversations && refConversations.length > 0) {
@@ -4330,12 +4335,17 @@ Website = https://reffo.ai</pre>
       const input = document.getElementById('detailFileInput');
       if (!input.files.length) return;
       const errors = [];
-      // Split photos and video into separate requests
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
       const photos = [];
-      const videos = [];
       for (let i = 0; i < input.files.length; i++) {
-        if (input.files[i].type.startsWith('video/')) videos.push(input.files[i]);
-        else photos.push(input.files[i]);
+        var file = input.files[i];
+        if (file.type.startsWith('video/')) {
+          errors.push(file.name + ': Video uploads are temporarily disabled. Photo uploads (JPEG, PNG, WebP) are supported.');
+        } else if (allowedTypes.indexOf(file.type) === -1) {
+          errors.push(file.name + ': Unsupported file type. Please upload JPEG, PNG, or WebP images.');
+        } else {
+          photos.push(file);
+        }
       }
       if (photos.length > 0) {
         const fd = new FormData();
@@ -4344,15 +4354,6 @@ Website = https://reffo.ai</pre>
         if (!res.ok) {
           try { const err = await res.json(); errors.push(err.error || 'Photo upload failed'); }
           catch { errors.push('Photo upload failed (server error ' + res.status + ')'); }
-        }
-      }
-      if (videos.length > 0) {
-        const fd = new FormData();
-        videos.forEach(f => fd.append('files', f));
-        const res = await fetch('/refs/' + refId + '/media', { method: 'POST', body: fd });
-        if (!res.ok) {
-          try { const err = await res.json(); errors.push(err.error || 'Video upload failed'); }
-          catch { errors.push('Video upload failed (server error ' + res.status + ')'); }
         }
       }
       if (errors.length > 0) alert(errors.join('\\n'));
@@ -5331,7 +5332,27 @@ Website = https://reffo.ai</pre>
       if (msg.messageType === 'accept' || msg.messageType === 'reject' || msg.messageType === 'withdraw' || msg.messageType === 'sold' || msg.messageType === 'system') {
         var eventLabels = { accept: 'Offer accepted', reject: 'Offer declined', withdraw: 'Offer withdrawn', sold: 'Marked as sold', system: msg.content || 'System message' };
         var eventText = eventLabels[msg.messageType] || msg.content || msg.messageType;
-        return '<div class="chat-event">' + escapeHtml(eventText) + ' &middot; ' + time + '</div>';
+        var eventHtml = '<div class="chat-event">' + escapeHtml(eventText) + ' &middot; ' + time;
+        if (msg.messageType === 'accept') {
+          eventHtml += ' <span class="trade-guide-link" onclick="showTradeGuide(this)">What happens next?</span>';
+        }
+        eventHtml += '</div>';
+        if (msg.messageType === 'accept') {
+          var guideDismissKey = 'trade-guide-dismissed-' + (msg.conversationId || '');
+          var dismissed = localStorage.getItem(guideDismissKey);
+          if (!dismissed) {
+            eventHtml += '<div class="trade-guide-card" id="tradeGuide-' + (msg.id || '') + '">'
+              + '<button class="guide-dismiss" onclick="dismissTradeGuide(this, \\'' + escapeHtml(guideDismissKey) + '\\')" title="Dismiss">&times;</button>'
+              + '<h4>Next Steps \\u2014 Completing Your Trade</h4>'
+              + '<ol>'
+              + '<li>Use this chat to exchange contact details or arrange a meet-up</li>'
+              + '<li>Agree on your preferred payment method</li>'
+              + '<li>Complete the exchange in person or ship the item</li>'
+              + '<li>Mark the item as &ldquo;Sold&rdquo; in your inventory</li>'
+              + '</ol></div>';
+          }
+        }
+        return eventHtml;
       }
       return '<div class="chat-bubble ' + sideClass + '">' + escapeHtml(msg.content || '') + '</div>' +
         '<div class="chat-msg-time ' + sideClass + '">' + time + '</div>';
@@ -5375,7 +5396,7 @@ Website = https://reffo.ai</pre>
         html += '<svg width="6" height="10" viewBox="0 0 4 6" fill="none"><path d="M3.4711 0.2C3.5961 0.325075 3.66632 0.494669 3.66632 0.6715C3.66632 0.848331 3.5961 1.01792 3.4711 1.143L1.6091 3L3.4711 4.862C3.59116 4.98806 3.65718 5.15606 3.65505 5.33013C3.65293 5.5042 3.58284 5.67055 3.45974 5.79364C3.33665 5.91674 3.17031 5.98683 2.99623 5.98895C2.82216 5.99107 2.65416 5.92506 2.5281 5.805L0.200102 3.471C0.0751014 3.34592 0.00488281 3.17633 0.00488281 2.9995C0.00488281 2.82267 0.0751014 2.65308 0.200102 2.528L2.5291 0.2C2.65414 0.0753044 2.82352 0.00527954 3.0001 0.00527954C3.17669 0.00527954 3.34607 0.0753044 3.4711 0.2Z" fill="#0A5E8A"/></svg>';
         html += ' Back to Inbox</span>';
 
-        html += '<div class="inbox-thread" style="padding:0;overflow:hidden;">';
+        html += '<div class="inbox-thread" style="padding:0;overflow:hidden;flex:1;min-height:0;">';
 
         // Header
         html += '<div class="chat-thread-header">';
@@ -5444,13 +5465,19 @@ Website = https://reffo.ai</pre>
         }
 
         html += '</div>';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.height = 'calc(100dvh - 200px)';
         container.innerHTML = html;
+        document.body.style.overflow = 'hidden';
 
         var chatArea = document.getElementById('chatMessagesArea');
         if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
 
         startChatPolling(convId);
       } catch (err) {
+        container.style.display = ''; container.style.flexDirection = ''; container.style.height = '';
+        document.body.style.overflow = '';
         container.innerHTML = '<p class="empty">Failed to load conversation</p>';
       }
     };
@@ -5458,6 +5485,9 @@ Website = https://reffo.ai</pre>
     window.closeConversationThread = function() {
       currentOpenConversationId = null;
       stopChatPolling();
+      var container = document.getElementById('inboxContainer');
+      if (container) { container.style.display = ''; container.style.flexDirection = ''; container.style.height = ''; }
+      document.body.style.overflow = '';
       renderConversationsView();
     };
 
@@ -5569,6 +5599,45 @@ Website = https://reffo.ai</pre>
         openConversationThread(convId);
       } catch (err) {
         showToast(err.message, '');
+      }
+    };
+
+    window.dismissTradeGuide = function(btn, storageKey) {
+      var card = btn.closest('.trade-guide-card');
+      if (card) card.style.display = 'none';
+      try { localStorage.setItem(storageKey, '1'); } catch (e) {}
+    };
+
+    window.showTradeGuide = function(el) {
+      // Find or create a trade guide card near the clicked element
+      var parent = el.closest('.chat-messages') || el.parentElement;
+      // If a guide is already visible, just scroll to it
+      var existing = parent.querySelector('.trade-guide-card');
+      if (existing && existing.style.display !== 'none') {
+        existing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      // If dismissed, show a temporary one
+      if (existing) {
+        existing.style.display = '';
+        existing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      // Insert a new one after the event element
+      var guideHtml = '<div class="trade-guide-card">'
+        + '<button class="guide-dismiss" onclick="this.parentElement.style.display=\\\'none\\\'" title="Dismiss">&times;</button>'
+        + '<h4>Next Steps \\u2014 Completing Your Trade</h4>'
+        + '<ol>'
+        + '<li>Use this chat to exchange contact details or arrange a meet-up</li>'
+        + '<li>Agree on your preferred payment method</li>'
+        + '<li>Complete the exchange in person or ship the item</li>'
+        + '<li>Mark the item as &ldquo;Sold&rdquo; in your inventory</li>'
+        + '</ol></div>';
+      var eventDiv = el.closest('.chat-event');
+      if (eventDiv) {
+        eventDiv.insertAdjacentHTML('afterend', guideHtml);
+        var newCard = eventDiv.nextElementSibling;
+        if (newCard) newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     };
 
@@ -5745,23 +5814,10 @@ Website = https://reffo.ai</pre>
             }
           }
         }
-        // AI Provider settings
-        var aiProviderSelect = document.getElementById('aiProviderSelect');
-        var removeAiBtn = document.getElementById('removeAiProviderBtn');
-        if (aiProviderSelect && data.aiProvider) {
-          aiProviderSelect.value = data.aiProvider;
-          toggleAiKeyField();
-          if (data.aiProvider !== 'reffo') {
-            removeAiBtn.style.display = '';
-          } else {
-            removeAiBtn.style.display = 'none';
-          }
-        }
-
         // Store Reffo.ai base URL
         window._reffoUrl = data.reffoApiUrl || 'https://reffo.ai';
-        // Determine if AI autofill is available (has Reffo key OR has direct AI provider key)
-        var aiEnabled = data.hasApiKey || (data.aiProvider !== 'reffo' && data.aiApiKeySet);
+        // Determine if AI autofill is available (has Reffo API key)
+        var aiEnabled = data.hasApiKey;
         window._aiEnabled = aiEnabled;
         var createActive = document.getElementById('createAutofillActive');
         var createPromo = document.getElementById('createAutofillPromo');
@@ -6120,58 +6176,6 @@ Website = https://reffo.ai</pre>
       c.innerHTML = '<div class="price-estimate-card"><span class="est-muted">' + escapeHtml(message) + '</span></div>';
     };
 
-    // ===== AI Provider Settings =====
-    window.toggleAiKeyField = function() {
-      var provider = document.getElementById('aiProviderSelect').value;
-      var keySection = document.getElementById('aiKeySection');
-      var reffoNote = document.getElementById('aiReffoNote');
-      if (provider === 'reffo') {
-        keySection.style.display = 'none';
-        reffoNote.style.display = '';
-      } else {
-        keySection.style.display = '';
-        reffoNote.style.display = 'none';
-      }
-    };
-
-    window.saveAiProvider = async function() {
-      var provider = document.getElementById('aiProviderSelect').value;
-      var apiKey = document.getElementById('aiApiKeyInput').value.trim();
-      var msgEl = document.getElementById('aiProviderMsg');
-      try {
-        var res = await fetch('/settings/ai-provider', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ provider: provider, apiKey: apiKey || undefined })
-        });
-        var data = await res.json();
-        if (res.ok) {
-          msgEl.innerHTML = '<div style="color:#2D8A6E;font-size:13px;margin-bottom:8px;">AI provider saved.</div>';
-          if (provider !== 'reffo') {
-            document.getElementById('removeAiProviderBtn').style.display = '';
-          }
-        } else {
-          msgEl.innerHTML = '<div style="color:#C94444;font-size:13px;margin-bottom:8px;">' + escapeHtml(data.error || 'Failed to save') + '</div>';
-        }
-      } catch {
-        msgEl.innerHTML = '<div style="color:#C94444;font-size:13px;margin-bottom:8px;">Failed to save AI provider.</div>';
-      }
-    };
-
-    window.removeAiProvider = async function() {
-      var msgEl = document.getElementById('aiProviderMsg');
-      try {
-        await fetch('/settings/ai-provider', { method: 'DELETE' });
-        document.getElementById('aiProviderSelect').value = 'reffo';
-        document.getElementById('aiApiKeyInput').value = '';
-        toggleAiKeyField();
-        document.getElementById('removeAiProviderBtn').style.display = 'none';
-        msgEl.innerHTML = '<div style="color:#2D8A6E;font-size:13px;margin-bottom:8px;">Reverted to Reffo (default).</div>';
-      } catch {
-        msgEl.innerHTML = '<div style="color:#C94444;font-size:13px;margin-bottom:8px;">Failed to remove AI provider.</div>';
-      }
-    };
-
     // ===== Smart Autofill (Product Lookup) =====
     window.triggerProductLookup = async function(context) {
       var prefix = context === 'detail' ? 'd' : 'ref';
@@ -6388,6 +6392,18 @@ Website = https://reffo.ai</pre>
     initOutgoingSnapshot();
     // Pre-load settings so _aiEnabled is set before any detail view opens
     loadSettings();
+
+    // Check security status (non-localhost warning)
+    fetch('/api/security-status').then(function(r) { return r.json(); }).then(function(data) {
+      if (data.nonLocalhost) {
+        var banner = document.getElementById('securityWarningBanner');
+        if (banner) {
+          banner.style.display = 'block';
+          document.body.style.paddingTop = '42px';
+        }
+      }
+    }).catch(function() {});
+
     // Check for unread messages + pending negotiations to show notification dots
     Promise.all([
       fetch('/settings/network-messages').then(function(r) { return r.json(); }),
@@ -6610,7 +6626,7 @@ Website = https://reffo.ai</pre>
       try {
         var res = await fetch('/settings');
         var data = await res.json();
-        var hasAi = data.hasApiKey || (data.aiProvider && data.aiProvider !== 'reffo' && data.aiApiKeySet);
+        var hasAi = data.hasApiKey;
         if (hasAi) {
           sidebarNav('scan');
         } else {

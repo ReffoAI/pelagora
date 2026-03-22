@@ -252,6 +252,10 @@ export class SyncManager {
       const syncedRefs = this.refs.listSynced();
       const syncedRefMap = new Map(syncedRefs.map(ref => [ref.id, ref]));
 
+      // Track the earliest skipped offer so we don't advance the poll
+      // timestamp past offers we couldn't process yet
+      let earliestSkippedAt: string | null = null;
+
       for (const offer of result.offers) {
         // Check if we already have this negotiation
         const existing = this.negotiations.get(offer.id);
@@ -261,6 +265,9 @@ export class SyncManager {
         const localRef = syncedRefMap.get(offer.item_id);
         if (!localRef) {
           console.warn(`[Sync] Offer ${offer.id} references unknown ref ${offer.item_id}, skipping`);
+          if (!earliestSkippedAt || offer.created_at < earliestSkippedAt) {
+            earliestSkippedAt = offer.created_at;
+          }
           continue;
         }
 
@@ -284,8 +291,15 @@ export class SyncManager {
         }
       }
 
-      // Update last poll timestamp
-      this.lastOfferPoll = new Date().toISOString();
+      // Only advance poll timestamp if no offers were skipped; otherwise
+      // rewind to just before the earliest skipped offer so it's retried
+      if (earliestSkippedAt) {
+        const rewindMs = new Date(earliestSkippedAt).getTime() - 1000;
+        this.lastOfferPoll = new Date(rewindMs).toISOString();
+        console.warn(`[Sync] ${errors.length || 'Some'} offer(s) skipped — rewinding poll timestamp to retry`);
+      } else {
+        this.lastOfferPoll = new Date().toISOString();
+      }
     } catch (err) {
       errors.push((err as Error).message);
     }
@@ -404,19 +418,22 @@ export class SyncManager {
   startHeartbeat(intervalMs = 5 * 60 * 1000): void {
     if (this.heartbeatInterval) return;
 
-    // Initial heartbeat + offer poll + ref pull
+    // Initial heartbeat + ref pull then offer poll (refs must be pulled first
+    // so pollOffers can match item_ids to local refs)
     this.client.heartbeat(this.beaconId)
-      .then((result) => {
+      .then(async (result) => {
         this.handleHeartbeatResult(result);
-        return Promise.all([this.pollOffers(), this.pullRefs()]);
+        await this.pullRefs();
+        await this.pollOffers();
       })
       .catch(() => {});
 
     this.heartbeatInterval = setInterval(() => {
       this.client.heartbeat(this.beaconId)
-        .then((result) => {
+        .then(async (result) => {
           this.handleHeartbeatResult(result);
-          return Promise.all([this.pollOffers(), this.pullRefs()]);
+          await this.pullRefs();
+          await this.pollOffers();
         })
         .catch((err) => {
           console.warn('[Sync] Heartbeat failed:', err.message);
