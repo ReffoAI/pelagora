@@ -5,6 +5,7 @@
  */
 
 import { ConversationQueries } from '../db/conversation-queries';
+import { RefQueries } from '../db/queries';
 import type { ChatMessageType } from '@pelagora/pim-protocol';
 
 const DEFAULT_WEBAPP_URL = 'https://reffo.ai';
@@ -89,10 +90,14 @@ export class ConversationPoller {
           // Skip messages we sent ourselves
           if (msg.senderBeaconId === this.beaconId) continue;
 
-          // Determine our role: if we're the buyer, our counterpart is the seller
-          const isBuyer = msg.buyerBeaconId === this.beaconId;
-          const counterpartId = isBuyer ? msg.sellerBeaconId : msg.buyerBeaconId;
-          const role = isBuyer ? 'buyer' : 'seller';
+          // Determine our role: check if we own the item (seller) or not (buyer).
+          // We can't rely on buyerBeaconId matching because the webapp stores
+          // the remote beacon's ID in buyer_beacon_id regardless of actual role.
+          const refs = new RefQueries();
+          const ownedRef = refs.get(msg.refId);
+          const isSeller = !!ownedRef; // If we have this item in our inventory, we're the seller
+          const counterpartId = isSeller ? msg.buyerBeaconId : msg.sellerBeaconId;
+          const role = isSeller ? 'seller' : 'buyer';
 
           // Ensure the conversation exists locally
           const conversation = this.conversations.getOrCreate(
