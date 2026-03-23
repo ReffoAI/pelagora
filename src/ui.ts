@@ -1744,6 +1744,22 @@ export function renderUI(): string {
         <button class="btn-primary" style="margin-top:16px;" onclick="savePaymentMethods()">Save Payment Methods</button>
       </section>
 
+      <section class="settings-card" style="background:linear-gradient(135deg, #1a2332 0%, #23262F 100%);border:none;">
+        <div style="display:flex;align-items:center;gap:20px;">
+          <div style="width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(236,82,111,0.15);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EC526F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <h2 style="color:#FFFFFF;margin:0 0 4px;">Download Your Data</h2>
+            <p style="font-size:13px;color:rgba(255,255,255,0.6);margin:0;line-height:1.5;">Your data is yours. Back up all your refs, offers, conversations, favorites, and collections anytime.</p>
+          </div>
+          <button id="backupBtn" onclick="downloadBackup()" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-size:14px;font-weight:700;color:#fff;border:none;cursor:pointer;transition:all 0.2s;flex-shrink:0;background:linear-gradient(135deg, #EC526F 0%, #8101B4 100%);border-radius:12px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Back Up Now
+          </button>
+        </div>
+      </section>
+
       <section class="settings-card">
         <h2>Beacon Info</h2>
         <div class="info-row"><span class="info-label">Beacon ID</span><span class="info-value" id="settingsBeaconId" style="word-break:break-all;font-size:12px;"></span></div>
@@ -6143,6 +6159,34 @@ Website = https://reffo.ai</pre>
         showMsg('locationMsg', 'Payment methods saved!', true);
       } catch (err) {
         showMsg('locationMsg', err.message, false);
+      }
+    };
+
+    window.downloadBackup = async function() {
+      var btn = document.getElementById('backupBtn');
+      var origText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exporting...';
+      btn.style.opacity = '0.6';
+      try {
+        var res = await fetch('/settings/export');
+        if (!res.ok) throw new Error('Export failed');
+        var blob = await res.blob();
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        var date = new Date().toISOString().slice(0, 10);
+        a.download = 'pelagora-beacon-backup-' + date + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        alert('Failed to export data. Please try again.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+        btn.style.opacity = '1';
       }
     };
 

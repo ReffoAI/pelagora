@@ -594,4 +594,44 @@ router.post('/network-messages/:id/reply', async (req: Request, res: Response) =
   res.json({ ok: true });
 });
 
+// GET /settings/export — Export all beacon data as a JSON backup
+router.get('/export', (_req: Request, res: Response) => {
+  const db = getDb();
+  const beaconId = _req.app.get('beaconId') || '';
+
+  const refs = db.prepare('SELECT * FROM refs ORDER BY created_at DESC').all();
+  const refMedia = db.prepare('SELECT * FROM ref_media ORDER BY sort_order ASC').all();
+  const offers = db.prepare('SELECT * FROM offers ORDER BY created_at DESC').all();
+  const negotiations = db.prepare('SELECT * FROM negotiations ORDER BY created_at DESC').all();
+  const favorites = db.prepare('SELECT * FROM favorites ORDER BY created_at DESC').all();
+  const collections = db.prepare('SELECT * FROM collections ORDER BY created_at DESC').all();
+  const conversations = db.prepare('SELECT * FROM conversations ORDER BY created_at DESC').all();
+  const networkMessages = db.prepare('SELECT * FROM network_messages ORDER BY created_at DESC').all();
+
+  const settingsQ = new SettingsQueries();
+  const locationSettings = settingsQ.get();
+
+  const exportData = {
+    exported_at: new Date().toISOString(),
+    beacon_id: beaconId,
+    version: getVersion(),
+    settings: locationSettings || null,
+    refs,
+    ref_media: refMedia,
+    offers,
+    negotiations,
+    favorites,
+    collections,
+    conversations,
+    network_messages: networkMessages,
+  };
+
+  const json = JSON.stringify(exportData, null, 2);
+  const date = new Date().toISOString().slice(0, 10);
+
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Content-Disposition', `attachment; filename="pelagora-beacon-backup-${date}.json"`);
+  res.send(json);
+});
+
 export default router;
