@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@pelagora/pim-protocol": "^0.2.1",
-    "@reffo/skill-reverse-auction": "^1.0.0",
+    "@pelagora/skill-reverse-auction": "^1.0.0",
     "b4a": "^1.6.7",
     "better-sqlite3": "^11.7.0",
     "express": "^4.21.0",

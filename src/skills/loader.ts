@@ -2,7 +2,7 @@
  * Skill Loader — discovers and loads skill plugins on startup.
  *
  * Skills are discovered from:
- * 1. node_modules/@reffo/skill-* packages
+ * 1. node_modules/@pelagora/skill-* packages
  * 2. Local skills/ directory (for development)
  *
  * Each skill must export a default Skill object.
@@ -56,14 +56,14 @@ export class SkillLoader {
     const paths: string[] = [];
     const root = process.cwd();
 
-    // 1. Check node_modules/@reffo/skill-*
-    const reffoModules = path.join(root, 'node_modules', '@reffo');
-    if (fs.existsSync(reffoModules)) {
+    // 1. Check node_modules/@pelagora/skill-*
+    const pelagoraModules = path.join(root, 'node_modules', '@pelagora');
+    if (fs.existsSync(pelagoraModules)) {
       try {
-        const entries = fs.readdirSync(reffoModules, { withFileTypes: true });
+        const entries = fs.readdirSync(pelagoraModules, { withFileTypes: true });
         for (const entry of entries) {
           if (entry.isDirectory() && entry.name.startsWith('skill-')) {
-            paths.push(path.join(reffoModules, entry.name));
+            paths.push(path.join(pelagoraModules, entry.name));
           }
         }
       } catch {
