@@ -504,6 +504,7 @@ function initSchema(database: Database.Database): void {
       role TEXT NOT NULL CHECK (role IN ('buyer', 'seller')),
       status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'closed')),
       closed_by TEXT,
+      closed_reason TEXT,
       last_message_at TEXT NOT NULL DEFAULT (datetime('now')),
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -623,6 +624,14 @@ function initSchema(database: Database.Database): void {
     const refsColsPay = database.pragma('table_info(refs)') as { name: string }[];
     if (!refsColsPay.some(c => c.name === 'accepted_payment_methods')) {
       database.exec(`ALTER TABLE refs ADD COLUMN accepted_payment_methods TEXT`);
+    }
+  } catch {}
+
+  // Migration: add closed_reason to conversations
+  try {
+    const convCols = database.pragma('table_info(conversations)') as { name: string }[];
+    if (!convCols.some(c => c.name === 'closed_reason')) {
+      database.exec(`ALTER TABLE conversations ADD COLUMN closed_reason TEXT`);
     }
   } catch {}
 }

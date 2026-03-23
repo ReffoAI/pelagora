@@ -114,6 +114,7 @@ export function renderUI(): string {
       .mobile-search-pill { display: flex; }
       .mobile-search-expanded { display: grid; }
       .container { padding: 16px; }
+      #headerSearchWrapper { display: none !important; }
     }
     @media (min-width: 640px) and (max-width: 768px) { .search-filter-segment { padding: 0 10px; } }
 
@@ -485,8 +486,8 @@ export function renderUI(): string {
     .info-type { font-size: 14px; font-weight: 500; color: #1A1A2E; }
 
     /* Old Reffo gradient button */
-    .button-gradient { display: inline-flex; justify-content: center; align-items: center; height: 40px; padding: 0 20px; background: #D4602A; border-radius: 20px; font-size: 13px; font-weight: 500; color: #FFFFFF; border: none; cursor: pointer; transition: all 0.2s; flex: 1; gap: 6px; font-family: 'DM Sans', sans-serif; }
-    .button-gradient:hover { background: linear-gradient(90deg, #6e019a 0%, #d44560 100%); }
+    .button-gradient { display: inline-flex; justify-content: center; align-items: center; height: 40px; padding: 0 20px; background: linear-gradient(135deg, #0A5E8A 0%, #1A8A7D 100%); border-radius: 20px; font-size: 13px; font-weight: 500; color: #FFFFFF; border: none; cursor: pointer; transition: all 0.2s; flex: 1; gap: 6px; font-family: 'DM Sans', sans-serif; }
+    .button-gradient:hover { background: linear-gradient(135deg, #084A6E 0%, #147A6E 100%); }
     /* Old Reffo stroke button */
     .button-stroke { display: inline-flex; justify-content: center; align-items: center; height: 40px; padding: 0 20px; background: none; border-radius: 20px; font-size: 13px; font-weight: 500; color: #1A1A2E; box-shadow: 0 0 0 2px #CBD5E0 inset; border: none; cursor: pointer; transition: all 0.2s; gap: 6px; font-family: 'DM Sans', sans-serif; }
     .button-stroke:hover { background: #1A1A2E; box-shadow: 0 0 0 2px #1A1A2E inset; color: #FFFFFF; }
@@ -818,6 +819,37 @@ export function renderUI(): string {
         <span style="font-family:'Josefin Sans',sans-serif;font-size:1.1rem;font-weight:600;color:#FFFFFF;text-transform:uppercase;letter-spacing:0.18em;">Pelagora</span>
       </div>
 
+      <!-- Header search bar -->
+      <div id="headerSearchWrapper" style="flex:1;display:flex;justify-content:center;max-width:620px;margin:0 16px;position:relative;">
+        <!-- Collapsed pill -->
+        <div id="headerSearchPill" onclick="expandHeaderSearch()" style="display:flex;align-items:center;gap:8px;height:36px;padding:0 16px;border-radius:18px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);cursor:pointer;transition:all 0.2s;width:100%;max-width:360px;" onmouseover="this.style.background='rgba(255,255,255,0.15)';this.style.borderColor='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.1)';this.style.borderColor='rgba(255,255,255,0.2)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <span style="font-size:13px;color:rgba(255,255,255,0.5);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Search network...</span>
+        </div>
+        <!-- Expanded full search bar -->
+        <div id="headerSearchExpanded" style="display:none;width:100%;max-width:620px;">
+          <div style="display:flex;align-items:center;background:#FFFFFF;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,0.15);overflow:hidden;height:48px;padding-right:6px;">
+            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;height:100%;white-space:nowrap;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <input id="hdrSearchLoc" placeholder="Where?" style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;width:80px;" onkeydown="if(event.key==='Enter')runHeaderSearch()">
+            </div>
+            <span style="width:1px;height:24px;background:#E2E8F0;flex-shrink:0;"></span>
+            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;height:100%;white-space:nowrap;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              <select id="hdrSearchCat" style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;"><option value="">All</option></select>
+            </div>
+            <span style="width:1px;height:24px;background:#E2E8F0;flex-shrink:0;"></span>
+            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;height:100%;flex:1;min-width:0;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input id="hdrSearchQ" placeholder="Search..." style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;flex:1;min-width:0;" onkeydown="if(event.key==='Enter')runHeaderSearch()">
+            </div>
+            <button onclick="runHeaderSearch()" style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:#0A5E8A;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#084A6E'" onmouseout="this.style.background='#0A5E8A'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Header actions: link + bell + avatar -->
       <div class="app-header-actions">
         <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
@@ -827,7 +859,7 @@ export function renderUI(): string {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
           Link to Reffo.ai
         </button>
-        <button class="header-settings-btn" onclick="switchTab('inbox')" title="Inbox">
+        <button class="header-settings-btn" onclick="sidebarNav('inbox')" title="Inbox">
           <svg width="18" height="18" viewBox="0 0 18 19" fill="none"><path d="M17.97 15.02c0 .24-.09.46-.26.63-.16.17-.39.26-.62.26H.85c-.23-.01-.45-.1-.61-.27a.87.87 0 010-1.23c.16-.16.38-.26.61-.27h.02V7.98c.02-2.13.88-4.17 2.4-5.67C4.79.82 6.84-.02 8.97 0c2.13-.02 4.18.82 5.7 2.31 1.52 1.5 2.38 3.5 2.4 5.67v6.16h.02c.23 0 .46.09.62.26.17.17.26.39.26.62zM2.67 14.14h12.6V7.98c0-1.67-.66-3.27-1.85-4.45-1.18-1.18-2.78-1.85-4.45-1.85s-3.27.67-4.45 1.85C3.33 4.71 2.67 6.31 2.67 7.98v6.16zm4.28 3.62c-.25-.5.22-.97.77-.97h2.5c.55 0 1.02.47.77.97-.11.22-.26.42-.43.6-.43.41-1 .65-1.6.65-.59 0-1.16-.24-1.59-.65-.18-.17-.32-.38-.43-.6z" fill="currentColor"/></svg>
           <span class="notif-dot" id="headerNotifDot"></span>
         </button>
@@ -841,7 +873,7 @@ export function renderUI(): string {
               <div class="dd-header-sub" id="ddBeaconSub">Local Node</div>
             </div>
             <button class="dd-item" onclick="closeAvatarDropdown(); switchTab('refs');">My Refs</button>
-            <button class="dd-item" onclick="closeAvatarDropdown(); switchTab('inbox');">Inbox</button>
+            <button class="dd-item" onclick="closeAvatarDropdown(); sidebarNav('inbox');">Inbox</button>
             <button class="dd-item" onclick="closeAvatarDropdown(); switchTab('settings');">Settings</button>
             <div class="dd-divider"></div>
             <a class="dd-item" href="https://reffo.ai/about" target="_blank" rel="noopener noreferrer">About</a>
@@ -1940,6 +1972,37 @@ export function renderUI(): string {
     </div>
   </div>
 
+  <!-- End Chat Reason Modal -->
+  <div class="modal-overlay hidden" id="endChatModal">
+    <div class="modal" style="max-width:420px;">
+      <h3>End Chat</h3>
+      <p style="font-size:14px;color:#4A5568;margin:0 0 16px;">Why are you ending this chat?</p>
+      <input type="hidden" id="endChatConvId">
+      <div id="endChatReasons" style="display:flex;flex-direction:column;gap:4px;">
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#F4F5F6'" onmouseout="this.style.background=''">
+          <input type="checkbox" name="endChatReason" value="completed" style="width:18px;height:18px;accent-color:#0A5E8A;cursor:pointer;" onclick="selectEndChatReason(this)"> <span style="font-size:14px;font-weight:500;">Transaction completed</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#F4F5F6'" onmouseout="this.style.background=''">
+          <input type="checkbox" name="endChatReason" value="unresponsive" style="width:18px;height:18px;accent-color:#0A5E8A;cursor:pointer;" onclick="selectEndChatReason(this)"> <span style="font-size:14px;font-weight:500;">Unresponsive</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#F4F5F6'" onmouseout="this.style.background=''">
+          <input type="checkbox" name="endChatReason" value="spam" style="width:18px;height:18px;accent-color:#0A5E8A;cursor:pointer;" onclick="selectEndChatReason(this)"> <span style="font-size:14px;font-weight:500;">Spam or scam</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#F4F5F6'" onmouseout="this.style.background=''">
+          <input type="checkbox" name="endChatReason" value="no_longer_interested" style="width:18px;height:18px;accent-color:#0A5E8A;cursor:pointer;" onclick="selectEndChatReason(this)"> <span style="font-size:14px;font-weight:500;">No longer interested</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#F4F5F6'" onmouseout="this.style.background=''">
+          <input type="checkbox" name="endChatReason" value="other" style="width:18px;height:18px;accent-color:#0A5E8A;cursor:pointer;" onclick="selectEndChatReason(this)"> <span style="font-size:14px;font-weight:500;">Other</span>
+        </label>
+      </div>
+      <textarea id="endChatOtherField" placeholder="Tell us more..." maxlength="500" rows="3" style="display:none;width:100%;margin-top:8px;padding:10px 12px;border-radius:10px;border:1px solid #CBD5E0;font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;outline:none;"></textarea>
+      <div class="modal-actions" style="margin-top:20px;">
+        <button class="btn-secondary" onclick="closeEndChatModal()">Cancel</button>
+        <button class="btn-primary" onclick="submitEndChat()">End Chat</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Legal: Terms of Service -->
   <div id="tab-terms" class="hidden">
     <section>
@@ -2372,6 +2435,9 @@ Website = https://reffo.ai</pre>
       // Show/hide global search filter bar (only for network search tab)
       var sfbWrap = document.getElementById('globalSearchBarWrapper');
       if (sfbWrap) sfbWrap.style.display = (tab === 'search') ? '' : 'none';
+      // Hide header search pill when search page is active (it has its own bar)
+      var hsPill = document.getElementById('headerSearchWrapper');
+      if (hsPill) hsPill.style.display = (tab === 'search') ? 'none' : '';
       if (tab === 'home') { homeLoaded = false; loadHome(); }
       if (tab === 'inbox') loadConversations();
       if (tab === 'refs') loadMyRefs();
@@ -2451,7 +2517,7 @@ Website = https://reffo.ai</pre>
       if (target === 'refs') { switchTab('refs'); switchRefSubTab('active'); return; }
       if (target === 'archive') { switchTab('refs'); switchRefSubTab('archive'); return; }
       if (target === 'favorites') { switchTab('refs'); switchRefSubTab('favorites'); return; }
-      if (target === 'inbox') { switchTab('inbox'); return; }
+      if (target === 'inbox') { if (currentOpenConversationId) { currentOpenConversationId = null; stopChatPolling(); } switchTab('inbox'); return; }
       if (target === 'scan') { switchTab('scan'); return; }
       if (target === 'collections') { switchTab('collections'); return; }
       if (target === 'list') { switchTab('list'); return; }
@@ -4500,10 +4566,8 @@ Website = https://reffo.ai</pre>
 
           let actionBtn = '';
           const isOwnCard = peer.beaconId === window._myBeaconId;
-          if (!isOwnCard && item.listingStatus === 'for_sale' && activeOffer) {
-            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#0A5E8A;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openBuyModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\', ' + activeOffer.price + ', \\'' + escapeJs(activeOffer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A5E8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Buy at ' + escapeHtml(fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) + '</a>';
-          } else if (!isOwnCard && item.listingStatus === 'willing_to_sell') {
-            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#0A5E8A;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openOfferModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A5E8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Make Offer</a>';
+          if (!isOwnCard && (item.listingStatus === 'for_sale' || item.listingStatus === 'willing_to_sell')) {
+            actionBtn = '<a style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#0A5E8A;cursor:pointer;text-decoration:none;" onclick="event.stopPropagation(); openConversationModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A5E8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Message Seller</a>';
           }
 
           const idx = lastSearchResults.length;
@@ -4695,6 +4759,61 @@ Website = https://reffo.ai</pre>
       }
     }
     window.executeHeaderSearch = executeHeaderSearch;
+
+    // ===== Header Search Expand/Collapse =====
+    var _headerSearchExpanded = false;
+    window.expandHeaderSearch = function() {
+      _headerSearchExpanded = true;
+      document.getElementById('headerSearchPill').style.display = 'none';
+      document.getElementById('headerSearchExpanded').style.display = '';
+      // Populate category dropdown from taxonomy
+      var catSelect = document.getElementById('hdrSearchCat');
+      if (catSelect && catSelect.options.length <= 1) {
+        var mainCat = document.getElementById('headerSearchCat');
+        if (mainCat) {
+          for (var i = 0; i < mainCat.options.length; i++) {
+            if (mainCat.options[i].value) {
+              var opt = document.createElement('option');
+              opt.value = mainCat.options[i].value;
+              opt.textContent = mainCat.options[i].textContent;
+              catSelect.appendChild(opt);
+            }
+          }
+        }
+      }
+      setTimeout(function() { document.getElementById('hdrSearchQ').focus(); }, 50);
+    };
+
+    window.collapseHeaderSearch = function() {
+      _headerSearchExpanded = false;
+      document.getElementById('headerSearchPill').style.display = '';
+      document.getElementById('headerSearchExpanded').style.display = 'none';
+    };
+
+    window.runHeaderSearch = function() {
+      // Sync expanded header inputs to the main search inputs
+      document.getElementById('headerSearchQ').value = document.getElementById('hdrSearchQ').value;
+      document.getElementById('headerSearchLoc').value = document.getElementById('hdrSearchLoc').value;
+      document.getElementById('headerSearchCat').value = document.getElementById('hdrSearchCat').value;
+      collapseHeaderSearch();
+      executeHeaderSearch();
+    };
+
+    // Collapse header search on outside click
+    document.addEventListener('click', function(e) {
+      if (!_headerSearchExpanded) return;
+      var wrapper = document.getElementById('headerSearchWrapper');
+      if (wrapper && !wrapper.contains(e.target)) {
+        collapseHeaderSearch();
+      }
+    });
+
+    // Collapse header search on Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && _headerSearchExpanded) {
+        collapseHeaderSearch();
+      }
+    });
 
     // ===== Avatar Dropdown =====
     window.toggleAvatarDropdown = function() {
@@ -4954,10 +5073,7 @@ Website = https://reffo.ai</pre>
       let purchaseBtn = '';
       let negotiateBtn = '';
       const isOwnItem = peer.beaconId === window._myBeaconId;
-      if (!isOwnItem && item.listingStatus === 'for_sale' && offer) {
-        purchaseBtn = '<button class="button-gradient" onclick="openBuyModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\', ' + offer.price + ', \\'' + escapeJs(offer.priceCurrency) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Purchase</button>';
-        negotiateBtn = '<button class="button-stroke" onclick="openConversationModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Message Seller</button>';
-      } else if (!isOwnItem && item.listingStatus === 'willing_to_sell') {
+      if (!isOwnItem && (item.listingStatus === 'for_sale' || item.listingStatus === 'willing_to_sell')) {
         purchaseBtn = '<button class="button-gradient" onclick="openConversationModal(\\'' + escapeJs(item.id) + '\\', \\'' + escapeJs(item.name) + '\\', \\'' + escapeJs(peer.beaconId) + '\\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Message Seller</button>';
       }
 
@@ -5419,9 +5535,9 @@ Website = https://reffo.ai</pre>
         html += '<span class="chat-role-badge ' + roleBadgeClass + '">' + roleLabel + '</span>';
         html += '</div></div>';
         if (conv.status === 'open') {
-          html += '<button class="btn-secondary btn-sm" onclick="closeConversation(\\'' + conv.id + '\\')" style="flex-shrink:0;height:32px;padding:0 12px;font-size:12px;">Close</button>';
+          html += '<button class="btn-secondary btn-sm" onclick="openEndChatModal(\\'' + conv.id + '\\')" style="flex-shrink:0;height:32px;padding:0 12px;font-size:12px;">End Chat</button>';
         } else {
-          html += '<span class="inbox-badge withdrawn" style="flex-shrink:0;">Closed</span>';
+          html += '<button class="btn-secondary btn-sm" onclick="reopenConversation(\\'' + conv.id + '\\')" style="flex-shrink:0;height:32px;padding:0 12px;font-size:12px;color:#1a8a42;background:#e6f9ed;">Reopen Chat</button>';
         }
         html += '</div>';
 
@@ -5665,15 +5781,61 @@ Website = https://reffo.ai</pre>
       }
     };
 
-    window.closeConversation = async function(convId) {
-      if (!confirm('Close this conversation?')) return;
+    window.selectEndChatReason = function(el) {
+      // Uncheck all others (single-select checkbox behavior)
+      document.querySelectorAll('input[name="endChatReason"]').forEach(function(r) {
+        if (r !== el) r.checked = false;
+      });
+      document.getElementById('endChatOtherField').style.display = (el.checked && el.value === 'other') ? 'block' : 'none';
+    };
+
+    window.openEndChatModal = function(convId) {
+      document.getElementById('endChatConvId').value = convId;
+      document.querySelectorAll('input[name="endChatReason"]').forEach(function(r) { r.checked = false; });
+      document.getElementById('endChatOtherField').value = '';
+      document.getElementById('endChatOtherField').style.display = 'none';
+      document.getElementById('endChatModal').classList.remove('hidden');
+    };
+
+    window.closeEndChatModal = function() {
+      document.getElementById('endChatModal').classList.add('hidden');
+    };
+
+    window.submitEndChat = async function() {
+      var convId = document.getElementById('endChatConvId').value;
+      var checked = document.querySelector('input[name="endChatReason"]:checked');
+      var reason = checked ? checked.value : '';
+      if (reason === 'other') {
+        var otherText = document.getElementById('endChatOtherField').value.trim();
+        reason = otherText || 'other';
+      }
       try {
-        var res = await fetch('/conversations/' + convId + '/close', { method: 'PATCH' });
-        if (!res.ok) throw new Error('Failed to close conversation');
-        showToast('Conversation closed', '');
+        var res = await fetch('/conversations/' + convId + '/close', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ closed_reason: reason || undefined })
+        });
+        if (!res.ok) throw new Error('Failed to end chat');
+        showToast('Chat ended', '');
         currentOpenConversationId = null;
         stopChatPolling();
+        closeEndChatModal();
         loadConversations();
+      } catch (err) {
+        showToast(err.message, '');
+      }
+    };
+
+    window.closeConversation = async function(convId) {
+      openEndChatModal(convId);
+    };
+
+    window.reopenConversation = async function(convId) {
+      try {
+        var res = await fetch('/conversations/' + convId + '/reopen', { method: 'PATCH' });
+        if (!res.ok) throw new Error('Failed to reopen conversation');
+        showToast('Chat reopened', '');
+        openConversationThread(convId);
       } catch (err) {
         showToast(err.message, '');
       }

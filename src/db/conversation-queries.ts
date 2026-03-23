@@ -11,6 +11,7 @@ interface ConversationRow {
   role: 'buyer' | 'seller';
   status: ConversationStatus;
   closed_by: string | null;
+  closed_reason: string | null;
   last_message_at: string;
   created_at: string;
   updated_at: string;
@@ -35,6 +36,7 @@ export interface Conversation {
   role: 'buyer' | 'seller';
   status: ConversationStatus;
   closedBy: string | null;
+  closedReason: string | null;
   lastMessageAt: string;
   createdAt: string;
   updatedAt: string;
@@ -64,6 +66,7 @@ function rowToConversation(row: Record<string, unknown>): Conversation {
     role: row.role as 'buyer' | 'seller',
     status: row.status as ConversationStatus,
     closedBy: (row.closed_by as string) || null,
+    closedReason: (row.closed_reason as string) || null,
     lastMessageAt: row.last_message_at as string,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
@@ -208,11 +211,11 @@ export class ConversationQueries {
     };
   }
 
-  close(id: string, closedBy: string): Conversation | undefined {
+  close(id: string, closedBy: string, closedReason?: string): Conversation | undefined {
     const now = new Date().toISOString();
     this.db.prepare(
-      "UPDATE conversations SET status = 'closed', closed_by = ?, updated_at = ? WHERE id = ?"
-    ).run(closedBy, now, id);
+      "UPDATE conversations SET status = 'closed', closed_by = ?, closed_reason = ?, updated_at = ? WHERE id = ?"
+    ).run(closedBy, closedReason || null, now, id);
     return this.get(id);
   }
 

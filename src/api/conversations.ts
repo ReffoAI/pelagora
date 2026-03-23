@@ -288,7 +288,8 @@ router.patch('/:id/close', (req: Request, res: Response) => {
   if (!conv) return res.status(404).json({ error: 'Conversation not found' });
   if (conv.status === 'closed') return res.status(400).json({ error: 'Conversation is already closed' });
 
-  const updated = conversations.close(convId, beaconId);
+  const closedReason = req.body?.closed_reason ? String(req.body.closed_reason).slice(0, 500) : undefined;
+  const updated = conversations.close(convId, beaconId, closedReason);
   res.json(updated);
 });
 
