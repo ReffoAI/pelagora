@@ -553,10 +553,14 @@ export function renderUI(): string {
     }
     .payment-card-edit button:hover { text-decoration: underline; }
 
-    @media (max-width: 767px) {
+    @media (max-width: 1112px) {
+      .detail-columns { flex-direction: column; }
+      .detail-right { flex: none; width: 100%; }
       .deal-body { max-width: 100%; padding-right: 0; }
-      .info-item { width: 100%; }
       .payment-card { position: static; }
+    }
+    @media (max-width: 767px) {
+      .info-item { width: 100%; }
       .detail-title-row { flex-wrap: wrap; }
       .detail-title-row h1 { font-size: 24px; }
     }
@@ -6160,6 +6164,11 @@ Website = https://reffo.ai</pre>
       } catch (err) {
         showMsg('locationMsg', err.message, false);
       }
+    };
+
+    window.openConversation = function(convId) {
+      switchTab('inbox');
+      setTimeout(function() { window.openConversationThread(convId); }, 100);
     };
 
     window.downloadBackup = async function() {
