@@ -1,7 +1,7 @@
 import { TAXONOMY } from './taxonomy';
 import { CATEGORY_SCHEMAS } from '@pelagora/pim-protocol';
 
-export function renderUI(): string {
+export function renderUI(localToken?: string): string {
   const taxonomyJSON = JSON.stringify(TAXONOMY);
 
   // Serialize category schemas for client-side use (only the data needed for UI)
@@ -2380,6 +2380,32 @@ Website = https://reffo.ai</pre>
   </div>
 
   <script>
+    // --- Security: Local auth token (injected server-side) ---
+    ${localToken ? `
+    (function() {
+      var _origFetch = window.fetch;
+      var _token = ${JSON.stringify(localToken)};
+      window.fetch = function(url, opts) {
+        opts = opts || {};
+        // Only add auth for same-origin requests (relative URLs or localhost)
+        if (typeof url === 'string' && (url.startsWith('/') || url.match(/^https?:\\/\\/(localhost|127\\.0\\.0\\.1)/))) {
+          if (opts.headers instanceof Headers) {
+            if (!opts.headers.has('Authorization')) opts.headers.set('Authorization', 'Bearer ' + _token);
+          } else if (Array.isArray(opts.headers)) {
+            if (!opts.headers.some(function(h) { return h[0].toLowerCase() === 'authorization'; })) {
+              opts.headers.push(['Authorization', 'Bearer ' + _token]);
+            }
+          } else {
+            // For plain object or undefined headers, add Authorization without disturbing Content-Type auto-detection
+            var h = opts.headers || {};
+            if (!h['Authorization']) h['Authorization'] = 'Bearer ' + _token;
+            opts.headers = h;
+          }
+        }
+        return _origFetch.call(window, url, opts);
+      };
+    })();
+    ` : ''}
     const TAXONOMY = ${taxonomyJSON};
     const CATEGORY_SCHEMAS_UI = ${categorySchemaJSON};
     const DEFAULT_SCHEMA_UI = ${JSON.stringify(defaultSchemaForUI)};
@@ -3397,7 +3423,33 @@ Website = https://reffo.ai</pre>
             window._autofillImageUrl.detail = null;
             var detailContainer = document.getElementById('detailAiSuggestedImage');
             if (detailContainer) detailContainer.innerHTML = '';
-            openDetail(refId);
+            // Refresh media thumbnails without reloading the whole detail view
+            // so we don't lose unsaved form state
+            fetch('/refs/' + refId + '/media').then(function(r) { return r.json(); }).then(function(media) {
+              var thumbsEl = document.getElementById('mediaThumbs');
+              if (thumbsEl) {
+                var thumbsHtml = '';
+                media.forEach(function(m) {
+                  var isVid = m.mediaType === 'video';
+                  thumbsHtml += '<div class="media-thumb">';
+                  thumbsHtml += isVid
+                    ? '<video src="/' + escapeHtml(m.filePath) + '" muted></video>'
+                    : '<img src="/' + escapeHtml(m.filePath) + '" alt="">';
+                  thumbsHtml += '<button class="del-btn media-edit-only" onclick="deleteMedia(\\'' + refId + '\\', \\'' + m.id + '\\')" title="Delete">&times;</button>';
+                  thumbsHtml += '</div>';
+                });
+                thumbsEl.innerHTML = thumbsHtml;
+              }
+              // Also update the main gallery image if this is the first photo
+              var photos = media.filter(function(m) { return m.mediaType === 'photo'; });
+              if (photos.length > 0) {
+                var mainImg = document.getElementById('detailMainImg');
+                if (mainImg) {
+                  mainImg.innerHTML = '<img class="blur-bg" src="/' + escapeHtml(photos[0].filePath) + '" alt=""><img class="main-img" src="/' + escapeHtml(photos[0].filePath) + '" alt="">';
+                }
+                window._currentPhotos = photos.map(function(p) { return '/' + p.filePath; });
+              }
+            });
           } else {
             showToast('Failed to save image', 'rejected');
           }
@@ -3927,7 +3979,7 @@ Website = https://reffo.ai</pre>
         html += '</form>';
         html += '</div>';
 
-        // Media management
+        // Media management (upload controls only visible when editing)
         html += '<div class="deal-heading">Media</div>';
         html += '<div id="detailAiSuggestedImage"></div>';
         html += '<div class="media-thumbs" id="mediaThumbs">';
@@ -3937,15 +3989,15 @@ Website = https://reffo.ai</pre>
           html += isVid
             ? '<video src="/' + escapeHtml(m.filePath) + '" muted></video>'
             : '<img src="/' + escapeHtml(m.filePath) + '" alt="">';
-          html += '<button class="del-btn" onclick="deleteMedia(\\'' + ref.id + '\\', \\'' + m.id + '\\')" title="Delete">&times;</button>';
+          html += '<button class="del-btn media-edit-only" style="display:none;" onclick="deleteMedia(\\'' + ref.id + '\\', \\'' + m.id + '\\')" title="Delete">&times;</button>';
           html += '</div>';
         });
         html += '</div>';
-        html += '<div class="upload-area" onclick="document.getElementById(\\'detailFileInput\\').click()" style="max-width:200px;">';
+        html += '<div class="upload-area media-edit-only" style="display:none;max-width:200px;" onclick="document.getElementById(\\'detailFileInput\\').click()">';
         html += '<div class="upload-icon">+</div><p>Upload</p>';
         html += '<input type="file" id="detailFileInput" accept="image/jpeg,image/png,image/webp" multiple onchange="uploadDetailMedia(\\'' + ref.id + '\\')">';
         html += '</div>';
-        html += '<p style="font-size:11px;color:#718096;margin:4px 0 0;">Video uploads coming soon</p>';
+        html += '<p class="media-edit-only" style="display:none;font-size:11px;color:#718096;margin:4px 0 0;">Video uploads coming soon</p>';
 
         // Conversations for this ref
         if (refConversations && refConversations.length > 0) {
@@ -3965,9 +4017,9 @@ Website = https://reffo.ai</pre>
 
         // Row 1: Price + Edit/Share buttons
         html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:20px 20px 4px;">';
-        html += '<div style="font-size:24px;font-weight:700;color:#1A1A2E;">' + (ref.listingStatus === 'private' ? 'My Item' : priceDisplay) + '</div>';
+        html += '<div id="cardPriceHeader" style="font-size:24px;font-weight:700;color:#1A1A2E;">' + (ref.listingStatus === 'private' ? 'My Item' : priceDisplay) + '</div>';
         html += '<div style="display:flex;align-items:center;gap:8px;">';
-        html += '<button style="width:32px;height:32px;border-radius:50%;border:1px solid #CBD5E0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4A5568;padding:0;" onclick="document.getElementById(\\'editFormSection\\').style.display=\\'block\\';document.getElementById(\\'editFormSection\\').scrollIntoView({behavior:\\'smooth\\'})">';
+        html += '<button style="width:32px;height:32px;border-radius:50%;border:1px solid #CBD5E0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4A5568;padding:0;" onclick="document.getElementById(\\'editFormSection\\').style.display=\\'block\\';document.querySelectorAll(\\'.media-edit-only\\').forEach(function(el){el.style.display=\\'\\';});document.querySelectorAll(\\'.card-edit-only\\').forEach(function(el){var sw=el.getAttribute(\\'data-show-when\\');el.style.display=sw||\\'\\';}); document.getElementById(\\'editFormSection\\').scrollIntoView({behavior:\\'smooth\\'})">';
         html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
         html += '</button>';
         html += '<button style="width:32px;height:32px;border-radius:50%;border:1px solid #CBD5E0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4A5568;padding:0;" onclick="';
@@ -4012,13 +4064,13 @@ Website = https://reffo.ai</pre>
           html += '</div>';
           html += '<div style="font-size:11px;color:#4A5568;">Fill in details to help your listing sell faster.</div>';
           html += '</div>';
-          html += '<button class="button-stroke" onclick="document.getElementById(\\\'editFormSection\\\').style.display=\\\'block\\\';document.getElementById(\\\'editFormSection\\\').scrollIntoView({behavior:\\\'smooth\\\'})" style="font-size:12px;padding:0 14px;height:34px;white-space:nowrap;">Fill in details</button>';
+          html += '<button class="button-stroke" onclick="document.getElementById(\\\'editFormSection\\\').style.display=\\\'block\\\';document.querySelectorAll(\\\'.media-edit-only\\\').forEach(function(el){el.style.display=\\\'\\\';});document.querySelectorAll(\\\'.card-edit-only\\\').forEach(function(el){var sw=el.getAttribute(\\\'data-show-when\\\');el.style.display=sw||\\\'\\\';}); document.getElementById(\\\'editFormSection\\\').scrollIntoView({behavior:\\\'smooth\\\'})" style="font-size:12px;padding:0 14px;height:34px;white-space:nowrap;">Fill in details</button>';
           html += '</div></div>';
         }
 
-        // Status segmented control (replaces dropdown)
+        // Status segmented control (replaces dropdown) — hidden until edit mode
         html += '<input type="hidden" id="dStatus" value="' + (ref.listingStatus || 'private') + '">';
-        html += '<div style="padding:0 20px 10px;">';
+        html += '<div class="card-edit-only" style="display:none;padding:0 20px 10px;">';
         html += '<div class="status-segmented" id="detailStatusSegment">';
         ['private','for_sale','willing_to_sell','for_rent'].forEach(s => {
           const activeClass = ref.listingStatus === s ? segClassMap[s] : '';
@@ -4038,7 +4090,7 @@ Website = https://reffo.ai</pre>
         const _showMinPrice = _initStatus === 'willing_to_sell' ? 'block' : 'none';
         const _showRental = _initStatus === 'for_rent' ? 'block' : 'none';
 
-        html += '<div id="cardPriceFields" style="display:' + _showPrice + ';padding:0 20px 10px;">';
+        html += '<div id="cardPriceFields" class="card-edit-only" style="display:none;padding:0 20px 10px;" data-show-when="' + _showPrice + '">';
         html += '<div style="display:flex;gap:8px;">';
         html += '<input type="number" id="cardPrice" placeholder="Price" value="' + _initPrice + '" style="flex:1;height:40px;padding:0 12px;border:2px solid #CBD5E0;border-radius:12px;font-size:14px;font-weight:500;background:#FFFFFF;font-family:inherit;" oninput="checkCardDirty()">';
         html += '<select id="cardCurrency" style="width:80px;height:40px;padding:0 8px;border:2px solid #CBD5E0;border-radius:12px;font-size:13px;font-weight:600;background:#FFFFFF;font-family:inherit;cursor:pointer;" onchange="checkCardDirty()">';
@@ -4047,12 +4099,12 @@ Website = https://reffo.ai</pre>
         html += '</div></div>';
 
         // Min price field (willing_to_sell only)
-        html += '<div id="cardMinPriceField" style="display:' + _showMinPrice + ';padding:0 20px 10px;">';
+        html += '<div id="cardMinPriceField" class="card-edit-only" style="display:none;padding:0 20px 10px;" data-show-when="' + _showMinPrice + '">';
         html += '<input type="number" id="cardMinPrice" placeholder="Minimum price (optional)" value="' + _initMinPrice + '" style="width:100%;height:40px;padding:0 12px;border:2px solid #CBD5E0;border-radius:12px;font-size:14px;font-weight:500;background:#FFFFFF;font-family:inherit;" oninput="checkCardDirty()">';
         html += '</div>';
 
         // Rental fields (for_rent only)
-        html += '<div id="cardRentalFields" style="display:' + _showRental + ';padding:0 20px 10px;">';
+        html += '<div id="cardRentalFields" class="card-edit-only" style="display:none;padding:0 20px 10px;" data-show-when="' + _showRental + '">';
         html += '<div style="display:flex;gap:8px;">';
         html += '<input type="number" id="cardRentalDuration" placeholder="Duration" value="' + _initDuration + '" style="flex:1;height:40px;padding:0 12px;border:2px solid #CBD5E0;border-radius:12px;font-size:14px;font-weight:500;background:#FFFFFF;font-family:inherit;" oninput="checkCardDirty()">';
         html += '<select id="cardRentalDurationUnit" style="width:100px;height:40px;padding:0 8px;border:2px solid #CBD5E0;border-radius:12px;font-size:13px;font-weight:600;background:#FFFFFF;font-family:inherit;cursor:pointer;" onchange="checkCardDirty()">';
@@ -4230,6 +4282,21 @@ Website = https://reffo.ai</pre>
       var dirty = status !== ini.status || price !== ini.price || currency !== ini.currency || minPrice !== ini.minPrice || duration !== ini.duration || durationUnit !== ini.durationUnit;
       var btn = document.getElementById('cardSaveBtn');
       if (btn) btn.style.display = dirty ? 'block' : 'none';
+
+      // Live-update the price header
+      var header = document.getElementById('cardPriceHeader');
+      if (header) {
+        var priceNum = parseFloat(price) || 0;
+        if (status === 'private') {
+          header.textContent = 'My Item';
+        } else if (status === 'willing_to_sell') {
+          header.textContent = 'Make me sell';
+        } else if (priceNum > 0) {
+          header.textContent = fmtCurrency(priceNum, currency);
+        } else {
+          header.textContent = 'Free';
+        }
+      }
     };
 
     window.triggerDetailPriceEstimate = function() {
@@ -6500,6 +6567,18 @@ Website = https://reffo.ai</pre>
       if (data.image_url) {
         window._autofillImageUrl[context] = data.image_url;
         renderAiSuggestedImage(context);
+      }
+
+      // Fill empty subcategory (if the lookup returned one)
+      if (data.subcategory) {
+        var subcatEl = document.getElementById(prefix === 'd' ? 'dSubcat' : 'refSubcat');
+        if (subcatEl && !subcatEl.value) {
+          subcatEl.value = data.subcategory;
+          if (subcatEl.value === data.subcategory) {
+            subcatEl.dispatchEvent(new Event('change'));
+            filledFields.push('subcategory');
+          }
+        }
       }
 
       // Fill empty description

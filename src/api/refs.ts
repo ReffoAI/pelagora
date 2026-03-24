@@ -245,8 +245,15 @@ router.patch('/:id', (req: Request, res: Response) => {
     return res.status(400).json({ error: `Invalid category: ${category}` });
   }
 
-  if (subcategory !== undefined && category && !isValidSubcategory(category, subcategory)) {
-    return res.status(400).json({ error: `Invalid subcategory: ${subcategory} for category: ${category}` });
+  // For subcategory validation, use the category from the request body,
+  // or fall back to the existing item's category if not being changed
+  const effectiveCategory = category !== undefined ? category : (() => {
+    const existing = refs.get(String(req.params.id));
+    return existing?.category;
+  })();
+
+  if (subcategory !== undefined && subcategory !== '' && effectiveCategory && !isValidSubcategory(effectiveCategory, subcategory)) {
+    return res.status(400).json({ error: `Invalid subcategory: ${subcategory} for category: ${effectiveCategory}` });
   }
 
   const updated = refs.update(String(req.params.id), {

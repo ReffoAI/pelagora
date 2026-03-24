@@ -360,6 +360,7 @@ router.post('/product-lookup', async (req: Request, res: Response) => {
       sku: cached.sku,
       product_url: cached.product_url,
       image_url: cached.image_url,
+      subcategory: subcat || undefined,
       attributes: JSON.parse((cached.attributes as string) || '{}'),
       price_estimate: {
         low: cached.price_low,
@@ -442,7 +443,7 @@ router.post('/product-lookup', async (req: Request, res: Response) => {
       provider,
     );
 
-    res.json({ ...result, cached: false });
+    res.json({ ...result, subcategory: result.subcategory || subcat || undefined, cached: false });
   } catch (err) {
     console.error('Product lookup error:', err);
     res.status(502).json({ error: 'Product lookup failed. Check your AI provider configuration.' });
