@@ -13,13 +13,46 @@ import conversationsRouter from './conversations';
 import { renderUI } from '../ui';
 import { TAXONOMY } from '../taxonomy';
 
-export function createApp(): express.Express {
+export function createApp(localToken?: string): express.Express {
   const app = express();
 
   app.use(express.json());
 
-  // Allow cross-origin requests (so browsers can fetch media from peer beacons)
-  app.use((_req, res, next) => { res.header('Access-Control-Allow-Origin', '*'); next(); });
+  // --- Security: Host header validation (DNS rebinding protection) ---
+  app.use((req, res, next) => {
+    const host = (req.headers.host || '').replace(/:\d+$/, '');
+    if (host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '::1') {
+      return next();
+    }
+    // Allow non-localhost only if beacon is explicitly bound to a non-localhost address
+    if (app.get('nonLocalhost')) return next();
+    res.status(403).json({ error: 'Forbidden: invalid Host header' });
+  });
+
+  // --- Security: CORS — only allow same-origin and cross-beacon media requests ---
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    // Same-origin requests (no Origin header) always pass
+    if (!origin) return next();
+    // Allow requests from the beacon's own origin
+    if (origin.match(/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/)) {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      if (req.method === 'OPTIONS') return res.sendStatus(204);
+      return next();
+    }
+    // Allow Reffo.ai webapp
+    if (origin === 'https://reffo.ai' || origin === 'https://www.reffo.ai') {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type');
+      if (req.method === 'OPTIONS') return res.sendStatus(204);
+      return next();
+    }
+    // Cross-origin requests from unknown origins: block
+    res.status(403).json({ error: 'Forbidden: cross-origin request blocked' });
+  });
 
   // Serve uploaded media files
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
@@ -30,8 +63,33 @@ export function createApp(): express.Express {
   app.get('/header-logo.png', (_req, res) => { res.sendFile(path.join(__dirname, '../../header-logo.png')); });
 
   app.get('/', (_req, res) => {
-    res.type('html').send(renderUI());
+    res.type('html').send(renderUI(localToken));
   });
+
+  // --- Security: Local token auth for API endpoints ---
+  // Everything below this middleware requires the local auth token.
+  // The UI page (served above) and static assets (served above) are exempt.
+  if (localToken) {
+    app.use((req, res, next) => {
+      // Allow health check without auth (needed for monitoring)
+      if (req.path === '/health' && req.method === 'GET') return next();
+      // Allow taxonomy without auth (public reference data)
+      if (req.path === '/taxonomy' && req.method === 'GET') return next();
+      // Allow security-status without auth (UI needs it before token is loaded)
+      if (req.path === '/api/security-status' && req.method === 'GET') return next();
+
+      const authHeader = req.headers.authorization;
+      const queryToken = req.query._token;
+
+      if (
+        (authHeader && authHeader === `Bearer ${localToken}`) ||
+        queryToken === localToken
+      ) {
+        return next();
+      }
+      res.status(401).json({ error: 'Unauthorized: local auth token required' });
+    });
+  }
 
   app.get('/taxonomy', (_req, res) => {
     res.json(TAXONOMY);

@@ -1,7 +1,7 @@
 import { TAXONOMY } from './taxonomy';
 import { CATEGORY_SCHEMAS } from '@pelagora/pim-protocol';
 
-export function renderUI(): string {
+export function renderUI(localToken?: string): string {
   const taxonomyJSON = JSON.stringify(TAXONOMY);
 
   // Serialize category schemas for client-side use (only the data needed for UI)
@@ -2380,6 +2380,32 @@ Website = https://reffo.ai</pre>
   </div>
 
   <script>
+    // --- Security: Local auth token (injected server-side) ---
+    ${localToken ? `
+    (function() {
+      var _origFetch = window.fetch;
+      var _token = ${JSON.stringify(localToken)};
+      window.fetch = function(url, opts) {
+        opts = opts || {};
+        // Only add auth for same-origin requests (relative URLs or localhost)
+        if (typeof url === 'string' && (url.startsWith('/') || url.match(/^https?:\\/\\/(localhost|127\\.0\\.0\\.1)/))) {
+          if (opts.headers instanceof Headers) {
+            if (!opts.headers.has('Authorization')) opts.headers.set('Authorization', 'Bearer ' + _token);
+          } else if (Array.isArray(opts.headers)) {
+            if (!opts.headers.some(function(h) { return h[0].toLowerCase() === 'authorization'; })) {
+              opts.headers.push(['Authorization', 'Bearer ' + _token]);
+            }
+          } else {
+            // For plain object or undefined headers, add Authorization without disturbing Content-Type auto-detection
+            var h = opts.headers || {};
+            if (!h['Authorization']) h['Authorization'] = 'Bearer ' + _token;
+            opts.headers = h;
+          }
+        }
+        return _origFetch.call(window, url, opts);
+      };
+    })();
+    ` : ''}
     const TAXONOMY = ${taxonomyJSON};
     const CATEGORY_SCHEMAS_UI = ${categorySchemaJSON};
     const DEFAULT_SCHEMA_UI = ${JSON.stringify(defaultSchemaForUI)};

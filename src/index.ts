@@ -51,16 +51,55 @@ function getOrCreateBeaconId(): string {
 
 const BEACON_ID = getOrCreateBeaconId();
 
+// Generate or load a local auth token (prevents rogue local processes from accessing data)
+function getOrCreateLocalToken(): string {
+  const tokenFile = path.join(process.cwd(), 'data', 'local-token');
+  try {
+    return fs.readFileSync(tokenFile, 'utf-8').trim();
+  } catch {
+    const token = crypto.randomBytes(32).toString('hex');
+    fs.mkdirSync(path.dirname(tokenFile), { recursive: true });
+    fs.writeFileSync(tokenFile, token, { mode: 0o600 });
+    return token;
+  }
+}
+
+const LOCAL_TOKEN = getOrCreateLocalToken();
+
+// Secure sensitive files — restrict to owner-only read/write (chmod 600)
+function secureSensitiveFiles(): void {
+  const filesToSecure = [
+    path.join(process.cwd(), '.env'),
+    path.join(process.cwd(), 'pelagora.db'),
+    path.join(process.cwd(), 'pelagora.db-wal'),
+    path.join(process.cwd(), 'pelagora.db-shm'),
+    path.join(process.cwd(), 'data', 'beacon-id'),
+    path.join(process.cwd(), 'data', 'local-token'),
+  ];
+  for (const filePath of filesToSecure) {
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.chmodSync(filePath, 0o600);
+      }
+    } catch {
+      // Non-fatal: Windows doesn't support chmod, skip silently
+    }
+  }
+}
+
 async function main(): Promise<void> {
   // Ensure uploads directory exists
   fs.mkdirSync(path.join(process.cwd(), 'uploads'), { recursive: true });
+
+  // Secure sensitive files on startup
+  secureSensitiveFiles();
 
   // Initialize database
   getDb();
   console.log('[DB] SQLite initialized');
 
-  // Create Express app
-  const app = createApp();
+  // Create Express app with local auth token
+  const app = createApp(LOCAL_TOKEN);
   app.set('beaconId', BEACON_ID);
   app.set('startTime', Date.now());
   setBeaconId(BEACON_ID);
