@@ -3991,7 +3991,7 @@ Website = https://reffo.ai</pre>
 
         // Row 1: Price + Edit/Share buttons
         html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:20px 20px 4px;">';
-        html += '<div style="font-size:24px;font-weight:700;color:#1A1A2E;">' + (ref.listingStatus === 'private' ? 'My Item' : priceDisplay) + '</div>';
+        html += '<div id="cardPriceHeader" style="font-size:24px;font-weight:700;color:#1A1A2E;">' + (ref.listingStatus === 'private' ? 'My Item' : priceDisplay) + '</div>';
         html += '<div style="display:flex;align-items:center;gap:8px;">';
         html += '<button style="width:32px;height:32px;border-radius:50%;border:1px solid #CBD5E0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4A5568;padding:0;" onclick="document.getElementById(\\'editFormSection\\').style.display=\\'block\\';document.querySelectorAll(\\'.media-edit-only\\').forEach(function(el){el.style.display=\\'\\';});document.querySelectorAll(\\'.card-edit-only\\').forEach(function(el){var sw=el.getAttribute(\\'data-show-when\\');el.style.display=sw||\\'\\';}); document.getElementById(\\'editFormSection\\').scrollIntoView({behavior:\\'smooth\\'})">';
         html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
@@ -4256,6 +4256,21 @@ Website = https://reffo.ai</pre>
       var dirty = status !== ini.status || price !== ini.price || currency !== ini.currency || minPrice !== ini.minPrice || duration !== ini.duration || durationUnit !== ini.durationUnit;
       var btn = document.getElementById('cardSaveBtn');
       if (btn) btn.style.display = dirty ? 'block' : 'none';
+
+      // Live-update the price header
+      var header = document.getElementById('cardPriceHeader');
+      if (header) {
+        var priceNum = parseFloat(price) || 0;
+        if (status === 'private') {
+          header.textContent = 'My Item';
+        } else if (status === 'willing_to_sell') {
+          header.textContent = 'Make me sell';
+        } else if (priceNum > 0) {
+          header.textContent = fmtCurrency(priceNum, currency);
+        } else {
+          header.textContent = 'Free';
+        }
+      }
     };
 
     window.triggerDetailPriceEstimate = function() {
