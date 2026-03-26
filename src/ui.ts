@@ -39,8 +39,11 @@ export function renderUI(localToken?: string): string {
     h1 { font-family: 'Fira Sans', sans-serif; font-size: 1.25rem; font-weight: 700; color: #1A1A2E; margin: 0; }
 
     /* App Header — sticky bar */
-    .app-header { position: sticky; top: 0; z-index: 100; background: #1A1A2E; border-bottom: 3px solid #D4602A; padding: 0 24px; }
-    .app-header-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
+    .app-header { position: sticky; top: 0; z-index: 100; background: #1A1A2E; border-bottom: 3px solid #D4602A; padding: 0 24px; margin-left: 240px; width: calc(100% - 240px); transition: margin-left 0.3s, width 0.3s; }
+    body.sidebar-collapsed .app-header { margin-left: 60px; width: calc(100% - 60px); }
+    .app-header .app-header-logo { display: none; }
+    .app-header-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; transition: height 0.25s; }
+    .app-header.search-expanded .app-header-inner { height: 80px; }
     .app-header-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; flex-shrink: 0; }
     .app-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .header-settings-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; position: relative; color: rgba(255,255,255,0.6); }
@@ -212,10 +215,10 @@ export function renderUI(localToken?: string): string {
     /* Badges — status.sass: inline-block, 12px bold uppercase, 13px radius, 26px line-height */
     .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 4px 14px; border-radius: 20px; line-height: 1; text-transform: uppercase; letter-spacing: 0.06em; }
     .badge-cat { background: #EDE8E3; color: #4A5568; }
-    .badge-private { background: #CBD5E0; color: #2D3748; }
-    .badge-for-sale { background: #E6F4EF; color: #2D8A6E; }
-    .badge-willing { background: #FFF3E0; color: #D4922A; }
-    .badge-for-rent { background: #E8F0FA; color: #4A90D9; }
+    .badge-private { background: #1A1A2E; color: #FFFFFF; }
+    .badge-for-sale { background: #2D8A6E; color: #FFFFFF; }
+    .badge-willing { background: #D4922A; color: #FFFFFF; }
+    .badge-for-rent { background: #4A90D9; color: #FFFFFF; }
     .card-price { font-size: 16px; font-weight: 700; color: #2D8A6E; margin-top: 4px; }
     .card-qty { font-size: 12px; color: #4A5568; margin-top: 4px; font-weight: 500; }
     .card-desc { font-size: 14px; color: #4A5568; margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.71; }
@@ -223,10 +226,16 @@ export function renderUI(localToken?: string): string {
     /* Status segmented control */
     .status-segmented { display:flex; border-radius:12px; overflow:hidden; border:1px solid #CBD5E0; margin-bottom:14px; }
     .status-segmented button { flex:1; padding:8px 12px; border:none; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; background:transparent; color:#4A5568; text-align:center; white-space:nowrap; font-family:'DM Sans',sans-serif; }
-    .seg-active-private { background:#4A5568 !important; color:#fff !important; }
-    .seg-active-for_sale { background:#2D8A6E !important; color:#fff !important; }
-    .seg-active-willing_to_sell { background:#4A90D9 !important; color:#fff !important; }
-    .seg-active-for_rent { background:#D4922A !important; color:#fff !important; }
+    .seg-active-private { background:#1A1A2E !important; color:#fff !important; }
+    .seg-active-for_sale { background:#16A34A !important; color:#fff !important; }
+    .seg-active-willing_to_sell { background:#D97706 !important; color:#fff !important; }
+    .seg-active-for_rent { background:#2563EB !important; color:#fff !important; }
+
+    /* Fieldset chevrons */
+    details > summary .chevron-indicator { transition: transform 0.3s; }
+    details[open] > summary .chevron-indicator { transform: rotate(180deg); }
+    details > summary { list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
 
     /* Price estimate card */
     .price-estimate-card { background: linear-gradient(135deg, #E6F5F3 0%, #E6F5F3 100%); border: 1px solid #B2DFD8; border-left: 3px solid #1A8A7D; border-radius: 12px; padding: 14px 14px 14px 16px; margin-bottom: 14px; }
@@ -584,7 +593,17 @@ export function renderUI(localToken?: string): string {
 
     /* Dashboard layout */
     .dashboard-layout { display: flex; min-height: calc(100dvh - 64px); }
-    .sidebar { width: 240px; background: #FFFFFF; border-right: 1px solid #CBD5E0; position: fixed; top: 64px; left: 0; height: calc(100dvh - 64px); overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; flex-shrink: 0; transition: transform 0.3s; z-index: 90; padding: 16px 0; }
+    .sidebar { width: 240px; background: #FFFFFF; border-right: 1px solid #CBD5E0; position: fixed; top: 0; left: 0; height: 100dvh; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; flex-shrink: 0; transition: all 0.3s; z-index: 110; padding: 16px 0; }
+    .sidebar.collapsed { width: 60px; }
+    .sidebar.collapsed .sidebar-section-title { display: none; }
+    .sidebar.collapsed .sidebar-nav-item { padding: 10px 0; justify-content: center; font-size: 0; }
+    .sidebar.collapsed .sidebar-nav-item svg { margin: 0; }
+    .sidebar.collapsed .sidebar-divider { margin: 4px 8px; }
+    .sidebar.collapsed .sidebar-logo-text { display: none; }
+    .sidebar.collapsed .sidebar-logo-img { height: 24px; }
+    body.sidebar-collapsed .sidebar-logo-text { display: none; }
+    body.sidebar-collapsed .sidebar-logo-img { height: 24px; }
+    .sidebar.collapsed .sidebar-collapse-btn { position: static; margin: 4px auto; right: auto; transform: none; }
     .sidebar::-webkit-scrollbar { display: none; }
     .sidebar-section-title { padding: 16px 20px 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #4A5568; }
     .sidebar-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 14px; font-weight: 500; color: #1A1A2E; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; text-decoration: none; font-family: 'DM Sans', sans-serif; border-top: none; border-right: none; border-bottom: none; background: none; width: 100%; text-align: left; }
@@ -593,15 +612,20 @@ export function renderUI(localToken?: string): string {
     .sidebar-nav-item svg { flex-shrink: 0; width: 18px; height: 18px; }
     .sidebar-divider { height: 1px; background: #CBD5E0; margin: 8px 20px; }
     .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(20,20,22,0.3); z-index: 89; }
-    .dashboard-main { flex: 1; min-width: 0; margin-left: 240px; }
+    .dashboard-main { flex: 1; min-width: 0; margin-left: 240px; transition: margin-left 0.3s; }
+    body.sidebar-collapsed .dashboard-main { margin-left: 60px; }
     .sidebar-toggle { display: none; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); background: transparent; cursor: pointer; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); transition: all 0.2s; }
     .sidebar-toggle:hover { border-color: rgba(255,255,255,0.6); color: #FFFFFF; }
     @media (max-width: 768px) {
-      .sidebar { transform: translateX(-100%); z-index: 91; box-shadow: 4px 0 16px rgba(0,0,0,0.1); }
+      .sidebar { transform: translateX(-100%); z-index: 111; box-shadow: 4px 0 16px rgba(0,0,0,0.1); }
       .sidebar.open { transform: translateX(0); }
       .sidebar-overlay.open { display: block; }
       .sidebar-toggle { display: flex; }
-      .dashboard-main { margin-left: 0; }
+      .dashboard-main { margin-left: 0 !important; }
+      .app-header { margin-left: 0 !important; width: 100% !important; }
+      .app-header .app-header-logo { display: flex !important; }
+      .sidebar-collapse-btn { display: none !important; }
+      .sidebar-logo-overlay { display: none !important; }
     }
 
     /* Dashboard stat cards */
@@ -643,7 +667,11 @@ export function renderUI(localToken?: string): string {
     .ai-quickstart-llm-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border-radius: 8px; border: 1px solid #CBD5E0; background: #FFFFFF; font-size: 13px; font-weight: 500; color: #1A1A2E; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
     .ai-quickstart-llm-btn:hover { border-color: #0A5E8A; color: #0A5E8A; }
     .ai-quickstart-llm-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
-    .ai-quickstart-sidebar-card { margin: 16px 16px 8px; padding: 12px; border-radius: 12px; border: 1px solid rgba(10,94,138,0.2); background: linear-gradient(135deg, rgba(10,94,138,0.04), rgba(10,94,138,0.04)); cursor: pointer; transition: all 0.2s; }
+    .ai-quickstart-sidebar-card { margin: 16px 16px 8px; padding: 12px; border-radius: 12px; border: 1px solid rgba(10,94,138,0.2); background: linear-gradient(135deg, rgba(10,94,138,0.04), rgba(10,94,138,0.04)); cursor: pointer; transition: all 0.2s; overflow: hidden; }
+    .sidebar.collapsed .ai-quickstart-sidebar-card { margin: 4px 8px; padding: 8px; border-radius: 8px; border: none; background: transparent; }
+    .sidebar.collapsed .ai-quickstart-sidebar-card .qs-title { justify-content: center; margin: 0; font-size: 0; color: transparent; }
+    .sidebar.collapsed .ai-quickstart-sidebar-card .qs-title svg { width: 18px; height: 18px; }
+    .sidebar.collapsed .ai-quickstart-sidebar-card .qs-sub { display: none; }
     .ai-quickstart-sidebar-card:hover { border-color: rgba(10,94,138,0.4); box-shadow: 0 2px 8px rgba(10,94,138,0.08); }
     .ai-quickstart-sidebar-card .qs-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #1A1A2E; margin-bottom: 2px; }
     .ai-quickstart-sidebar-card .qs-sub { font-size: 11px; color: #4A5568; }
@@ -735,7 +763,8 @@ export function renderUI(localToken?: string): string {
     .neg-group-back:hover { color: #B8521F; }
 
     /* Footer */
-    .app-footer { border-top: 1px solid #CBD5E0; background: #FFFFFF; padding: 0; margin-left: 240px; }
+    .app-footer { border-top: 1px solid #CBD5E0; background: #FFFFFF; padding: 0; margin-left: 240px; transition: margin-left 0.3s; }
+    body.sidebar-collapsed .app-footer { margin-left: 60px; }
     .app-footer-inner { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
     .app-footer-grid { display: grid; grid-template-columns: 140px 1fr 1fr 1fr; gap: 40px; }
     .app-footer-brand { display: flex; flex-direction: column; gap: 16px; }
@@ -826,26 +855,26 @@ export function renderUI(localToken?: string): string {
       <!-- Header search bar -->
       <div id="headerSearchWrapper" style="flex:1;display:flex;justify-content:center;max-width:620px;margin:0 16px;position:relative;">
         <!-- Collapsed pill -->
-        <div id="headerSearchPill" onclick="expandHeaderSearch()" style="display:flex;align-items:center;gap:8px;height:36px;padding:0 16px;border-radius:18px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);cursor:pointer;transition:all 0.2s;width:100%;max-width:360px;" onmouseover="this.style.background='rgba(255,255,255,0.15)';this.style.borderColor='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.1)';this.style.borderColor='rgba(255,255,255,0.2)'">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <span style="font-size:13px;color:rgba(255,255,255,0.5);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Search network...</span>
+        <div id="headerSearchPill" onclick="expandHeaderSearch()" style="display:flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:19px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);cursor:pointer;transition:all 0.2s;width:100%;max-width:360px;" onmouseover="this.style.background='rgba(255,255,255,0.15)';this.style.borderColor='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.1)';this.style.borderColor='rgba(255,255,255,0.2)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <span style="font-size:13px;color:rgba(255,255,255,0.5);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:38px;">Search network...</span>
         </div>
         <!-- Expanded full search bar -->
         <div id="headerSearchExpanded" style="display:none;width:100%;max-width:620px;">
-          <div style="display:flex;align-items:center;background:#FFFFFF;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,0.15);overflow:hidden;height:48px;padding-right:6px;">
-            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;height:100%;white-space:nowrap;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <input id="hdrSearchLoc" placeholder="Where?" style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;width:80px;" onkeydown="if(event.key==='Enter')runHeaderSearch()">
+          <div style="display:flex;align-items:center;background:#FFFFFF;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,0.15);height:48px;padding:0 6px 0 0;">
+            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;white-space:nowrap;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;display:block;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <input id="hdrSearchLoc" placeholder="Where?" style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;width:80px;padding:0;margin:0;line-height:1;" onkeydown="if(event.key==='Enter')runHeaderSearch()">
             </div>
             <span style="width:1px;height:24px;background:#E2E8F0;flex-shrink:0;"></span>
-            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;height:100%;white-space:nowrap;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-              <select id="hdrSearchCat" style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;"><option value="">All</option></select>
+            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;white-space:nowrap;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;display:block;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              <select id="hdrSearchCat" style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;margin:0;line-height:1;"><option value="">All</option></select>
             </div>
             <span style="width:1px;height:24px;background:#E2E8F0;flex-shrink:0;"></span>
-            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;height:100%;flex:1;min-width:0;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input id="hdrSearchQ" placeholder="Search..." style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;flex:1;min-width:0;" onkeydown="if(event.key==='Enter')runHeaderSearch()">
+            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;flex:1;min-width:0;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;display:block;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input id="hdrSearchQ" placeholder="Search..." style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;flex:1;min-width:0;padding:0;margin:0;line-height:1;" onkeydown="if(event.key==='Enter')runHeaderSearch()">
             </div>
             <button onclick="runHeaderSearch()" style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:#0A5E8A;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#084A6E'" onmouseout="this.style.background='#0A5E8A'">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -899,25 +928,27 @@ export function renderUI(localToken?: string): string {
 
   <div class="app-content">
   <div class="dashboard-layout">
-  <aside class="sidebar" id="sidebar">
-    <!-- Search Network banner -->
-    <div style="padding:0 12px 8px;">
-      <div onclick="sidebarNav('search'); executeHeaderSearch();" style="cursor:pointer;background:linear-gradient(135deg,#0A5E8A 0%,#1A8A7D 100%);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;transition:transform 0.15s,box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(10,94,138,0.3)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
-        <div style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </div>
-        <div>
-          <div style="font-size:13px;font-weight:700;color:#fff;">Search Network</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.7);">Find items on the mesh</div>
-        </div>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:auto;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
+  <!-- Sidebar collapse toggle — outside aside so overflow doesn't clip -->
+  <div id="sidebarLogoOverlay" class="sidebar-logo-overlay" style="position:fixed;top:0;left:0;z-index:112;transition:width 0.3s;pointer-events:none;width:240px;">
+    <div style="position:relative;display:flex;align-items:center;padding:14px 16px 12px;gap:8px;pointer-events:auto;">
+      <a onclick="sidebarNav('home')" style="cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none;">
+        <img src="/pelagora-logo.png" alt="Pelagora" class="sidebar-logo-img" style="height:28px;width:auto;">
+        <span class="sidebar-logo-text" style="font-family:'Fira Sans',sans-serif;font-size:18px;font-weight:700;color:#1A1A2E;">Pelagora</span>
+      </a>
+      <button type="button" onclick="toggleSidebarCollapse()" class="sidebar-collapse-btn" title="Collapse sidebar" style="position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;border:1px solid #CBD5E0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4A5568;box-shadow:0 1px 4px rgba(0,0,0,0.08);transition:all 0.2s;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="collapseChevron" style="transition:transform 0.3s;"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
     </div>
-    <div class="sidebar-divider"></div>
+  </div>
+  <aside class="sidebar" id="sidebar" style="padding-top:52px;">
     <div class="sidebar-section-title">Actions</div>
     <button class="sidebar-nav-item" data-sidebar="list" onclick="sidebarNav('list')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span style="width:18px;height:18px;border-radius:4px;background:linear-gradient(135deg,#0A5E8A 0%,#1A8A7D 100%);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
       Create New Listing
+    </button>
+    <button class="sidebar-nav-item" data-sidebar="inventory" onclick="sidebarNav('inventory')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      Add to My Inventory
     </button>
     <div class="sidebar-divider"></div>
     <div class="sidebar-section-title">Manage</div>
@@ -1784,16 +1815,16 @@ export function renderUI(localToken?: string): string {
       </div>
       <h3 style="margin:0 0 20px;font-size:1.5rem;font-weight:700;">List a Ref</h3>
     </div>
-    <section style="max-width:1100px;margin:0 auto;padding:0 24px 24px;">
+    <section style="max-width:1100px;margin:0 auto;padding:0 24px 60px;">
       <div style="padding-top:30px;">
       <div id="listMsg"></div>
       <form id="listForm">
-        <input type="hidden" id="refListingStatus" name="listingStatus" value="private">
+        <input type="hidden" id="refListingStatus" name="listingStatus" value="for_sale">
 
         <!-- Segmented status control -->
         <div class="status-segmented" id="createStatusSegment">
-          <button type="button" class="seg-active-private" onclick="selectCreateStatus('private')">Private</button>
-          <button type="button" onclick="selectCreateStatus('for_sale')">For Sale</button>
+          <button type="button" onclick="selectCreateStatus('private')">Private</button>
+          <button type="button" class="seg-active-for_sale" onclick="selectCreateStatus('for_sale')">For Sale</button>
           <button type="button" onclick="selectCreateStatus('willing_to_sell')">Willing to Sell</button>
           <button type="button" onclick="selectCreateStatus('for_rent')">For Rent</button>
         </div>
@@ -1848,10 +1879,10 @@ export function renderUI(localToken?: string): string {
           </div>
         </div>
 
-        <div id="createPriceSection" style="display:none;">
+        <div id="createPriceSection" style="display:block;">
           <div class="row">
             <div>
-              <label for="refPrice">Price</label>
+              <label for="refPrice">Listing Price</label>
               <input id="refPrice" name="price" type="number" min="0" step="0.01" placeholder="0.00">
             </div>
             <div>
@@ -1867,6 +1898,7 @@ export function renderUI(localToken?: string): string {
             </div>
           </div>
         </div>
+        <div id="createPriceEstimate"></div>
 
         <div id="rentalFieldsCreate" style="display:none;margin-bottom:14px;border:2px solid #E8F0FA;border-radius:12px;padding:14px;background:#E8F0FA;">
           <div style="font-size:12px;font-weight:600;color:#4A90D9;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:10px;">Rental Details</div>
@@ -1889,10 +1921,11 @@ export function renderUI(localToken?: string): string {
         <label for="refSku">SKU</label>
         <input id="refSku" name="sku" placeholder="Optional SKU or part number">
 
-        <details style="margin-bottom:14px;border:2px solid #CBD5E0;border-radius:12px;padding:14px;">
-          <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.02em;display:flex;align-items:center;gap:6px;list-style:none;">
+        <details open style="margin-bottom:14px;border:2px solid #CBD5E0;border-radius:12px;padding:14px;">
+          <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.02em;display:flex;align-items:center;gap:6px;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-            Location Override
+            Location &amp; Selling Scope
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron-indicator" style="margin-left:auto;flex-shrink:0;"><path d="m6 9 6 6 6-6"/></svg>
           </summary>
           <p style="font-size:12px;color:#718096;margin:8px 0;">Leave blank to use your default location from Settings.</p>
           <div class="row">
@@ -1921,10 +1954,11 @@ export function renderUI(localToken?: string): string {
           </div>
         </details>
 
-        <details style="margin-bottom:14px;border:2px solid #CBD5E0;border-radius:12px;padding:14px;" id="createPaymentMethodsSection">
-          <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.02em;display:flex;align-items:center;gap:6px;list-style:none;">
+        <details open style="margin-bottom:14px;border:2px solid #CBD5E0;border-radius:12px;padding:14px;" id="createPaymentMethodsSection">
+          <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.02em;display:flex;align-items:center;gap:6px;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 100 4h4a2 2 0 010 4H8"/><path d="M12 18V6"/></svg>
             Accepted Payment Methods
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron-indicator" style="margin-left:auto;flex-shrink:0;"><path d="m6 9 6 6 6-6"/></svg>
           </summary>
           <p style="font-size:12px;color:#718096;margin:8px 0;">Pre-filled from your defaults. Override per listing.</p>
           <div class="payment-pills" id="createPaymentPills"></div>
@@ -1941,7 +1975,6 @@ export function renderUI(localToken?: string): string {
         <div id="aiSuggestedImage"></div>
 
         <div style="margin-top:20px;"></div>
-        <div id="createPriceEstimate"></div>
 
         <div style="display:flex;gap:10px;justify-content:flex-end;align-items:center;">
           <button type="button" class="btn-secondary" onclick="closeListRefModal()">Cancel</button>
@@ -2286,7 +2319,7 @@ Website = https://reffo.ai</pre>
       <div class="app-footer-grid">
         <!-- Col 1: Logo -->
         <div class="app-footer-brand">
-          <img src="/footer-brand.png" alt="Pelagora" style="height: 40px; width: auto;">
+          <img src="/pelagora-logo.png" alt="Pelagora" style="height: 40px; width: auto;">
           <button id="footerUpdateBtn" class="button-gradient" style="display:none;height:32px;padding:0 16px;font-size:12px;border-radius:16px;" onclick="switchTab('settings')">&#x2B06; Update</button>
         </div>
 
@@ -2555,6 +2588,18 @@ Website = https://reffo.ai</pre>
       if (tab === 'favorites') loadFavorites();
     }
 
+    // ===== Sidebar collapse =====
+    window.toggleSidebarCollapse = function() {
+      var sidebar = document.getElementById('sidebar');
+      var chevron = document.getElementById('collapseChevron');
+      var overlay = document.getElementById('sidebarLogoOverlay');
+      sidebar.classList.toggle('collapsed');
+      document.body.classList.toggle('sidebar-collapsed');
+      var isCollapsed = sidebar.classList.contains('collapsed');
+      chevron.style.transform = isCollapsed ? 'rotate(180deg)' : '';
+      overlay.style.width = isCollapsed ? '74px' : '240px';
+    };
+
     // ===== Sidebar navigation =====
     function sidebarNav(target) {
       closeSidebar();
@@ -2566,7 +2611,8 @@ Website = https://reffo.ai</pre>
       if (target === 'inbox') { if (currentOpenConversationId) { currentOpenConversationId = null; stopChatPolling(); } switchTab('inbox'); return; }
       if (target === 'scan') { switchTab('scan'); return; }
       if (target === 'collections') { switchTab('collections'); return; }
-      if (target === 'list') { switchTab('list'); return; }
+      if (target === 'list') { switchTab('list'); selectCreateStatus('for_sale'); return; }
+      if (target === 'inventory') { switchTab('list'); selectCreateStatus('private'); return; }
       if (target === 'search') { switchTab('search'); return; }
       if (target === 'settings') { switchTab('settings'); return; }
     }
@@ -3221,7 +3267,8 @@ Website = https://reffo.ai</pre>
     function fmtCurrency(amount, currency) {
       currency = currency || 'USD';
       try {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(amount);
+        var locale = currency === 'EUR' ? 'de-DE' : 'en-US';
+        return new Intl.NumberFormat(locale, { style: 'currency', currency: currency }).format(amount);
       } catch(e) {
         return currency + ' ' + Number(amount).toFixed(2);
       }
@@ -3590,7 +3637,7 @@ Website = https://reffo.ai</pre>
         document.getElementById('refSubcat').innerHTML = '<option value="">Select...</option>';
         document.getElementById('createCategoryFields').innerHTML = '';
         // Reset segmented control to Private
-        selectCreateStatus('private');
+        selectCreateStatus('for_sale');
         document.getElementById('createPriceEstimate').innerHTML = '';
         selectedPhotos = [];
         selectedVideo = null;
@@ -3878,8 +3925,10 @@ Website = https://reffo.ai</pre>
         html += '<button title="Save"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
         html += '</div></div>';
         html += '<div class="detail-posted-line">';
-        html += '<div class="avatar-sm">Y</div>';
-        html += '<span class="poster-name">Your Beacon</span>';
+        var dn = window._myDisplayName || 'You';
+        html += '<span style="color:#4A5568;font-weight:500;font-size:14px;">Listed by:</span>';
+        html += '<div class="avatar-sm">' + dn[0].toUpperCase() + '</div>';
+        html += '<span class="poster-name">' + dn + '</span>';
         if (ref.networkPublished) {
           html += '<span class="badge" style="background:#1A8A7D;color:#fff;font-size:11px;">Published</span>';
         }
@@ -3940,7 +3989,7 @@ Website = https://reffo.ai</pre>
         html += '</div></div></div></div>';
         html += '<div id="detailAutofillCard"></div>';
         html += '<div id="detailCategoryFields"></div>';
-        html += '<div class="row"><div><label>Price</label><input id="dPrice" type="number" min="0" step="0.01" value="' + (activeOffer ? activeOffer.price : '') + '"></div>';
+        html += '<div class="row"><div><label>Listing Price</label><input id="dPrice" type="number" min="0" step="0.01" value="' + (activeOffer ? activeOffer.price : '') + '"></div>';
         html += '<div><label>Currency</label><select id="dCurrency"><option value="USD"' + ((activeOffer && activeOffer.priceCurrency === 'USD') || !activeOffer ? ' selected' : '') + '>USD</option><option value="EUR"' + (activeOffer && activeOffer.priceCurrency === 'EUR' ? ' selected' : '') + '>EUR</option><option value="GBP"' + (activeOffer && activeOffer.priceCurrency === 'GBP' ? ' selected' : '') + '>GBP</option></select></div></div>';
         html += '<div class="row"><div><label>Quantity</label><input id="dQty" type="number" min="1" value="' + ref.quantity + '"></div>';
         html += '<div><label>SKU</label><input id="dSku" value="' + escapeHtml(ref.sku || '') + '"></div></div>';
@@ -3973,8 +4022,8 @@ Website = https://reffo.ai</pre>
         // Purchase info fields
         html += '<details style="margin-bottom:14px;border:2px solid #CBD5E0;border-radius:12px;padding:14px;" ' + (ref.purchaseDate || ref.purchasePrice ? 'open' : '') + '>';
         html += '<summary style="cursor:pointer;font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.02em;">Purchase Info</summary>';
-        html += '<div class="row"><div><label>Purchase Date</label><input id="dPurchaseDate" type="date" value="' + escapeHtml(ref.purchaseDate || '') + '"></div>';
-        html += '<div><label>Purchase Price</label><input id="dPurchasePrice" type="number" min="0" step="0.01" value="' + (ref.purchasePrice || '') + '"></div></div>';
+        html += '<div class="row"><div><label>Purchase Date</label><input id="dPurchaseDate" type="date" value="' + escapeHtml(ref.purchaseDate || '') + '" max="' + new Date().toISOString().split('T')[0] + '" min="1900-01-01"></div>';
+        html += '<div><label>Original Purchase Price</label><input id="dPurchasePrice" type="number" min="0" step="0.01" value="' + (ref.purchasePrice || '') + '"></div></div>';
         html += '</details>';
         html += '</form>';
         html += '</div>';
@@ -4015,31 +4064,15 @@ Website = https://reffo.ai</pre>
         html += '<div class="detail-right">';
         html += '<div class="payment-card">';
 
-        // Row 1: Price + Edit/Share buttons
+        // Row 1: Price + Edit button
         html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:20px 20px 4px;">';
         html += '<div id="cardPriceHeader" style="font-size:24px;font-weight:700;color:#1A1A2E;">' + (ref.listingStatus === 'private' ? 'My Item' : priceDisplay) + '</div>';
-        html += '<div style="display:flex;align-items:center;gap:8px;">';
-        html += '<button style="width:32px;height:32px;border-radius:50%;border:1px solid #CBD5E0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4A5568;padding:0;" onclick="document.getElementById(\\'editFormSection\\').style.display=\\'block\\';document.querySelectorAll(\\'.media-edit-only\\').forEach(function(el){el.style.display=\\'\\';});document.querySelectorAll(\\'.card-edit-only\\').forEach(function(el){var sw=el.getAttribute(\\'data-show-when\\');el.style.display=sw||\\'\\';}); document.getElementById(\\'editFormSection\\').scrollIntoView({behavior:\\'smooth\\'})">';
-        html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
-        html += '</button>';
-        html += '<button style="width:32px;height:32px;border-radius:50%;border:1px solid #CBD5E0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4A5568;padding:0;" onclick="';
-        const shareUrl2 = ref.shareUrl
-          || (ref.reffoSynced && ref.reffoRefId ? ((typeof window !== 'undefined' && window._reffoUrl) || 'https://reffo.ai') + '/items/' + ref.reffoRefId : '');
-        if (shareUrl2) {
-          html += 'navigator.clipboard.writeText(\\'' + shareUrl2 + '\\').then(function(){ showToast(\\'Link copied!\\',\\'\\'); })';
-        } else {
-          html += 'showToast(\\'List publicly to get a shareable link\\',\\'\\')';
-        }
-        html += '" title="Share">';
-        html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
-        html += '</button>';
-        html += '</div></div>';
-
-        // Row 2: Avatar + "Your Beacon"
-        html += '<div style="display:flex;align-items:center;gap:10px;padding:8px 20px 16px;">';
-        html += '<div style="width:32px;height:32px;border-radius:50%;background:#0A5E8A;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">Y</div>';
-        html += '<span style="font-size:14px;font-weight:600;color:#1A1A2E;">Your Beacon</span>';
+        html += '<button style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 14px;border-radius:8px;background:#1A1A2E;color:#fff;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0;" onclick="document.getElementById(\\'editFormSection\\').style.display=\\'block\\';document.querySelectorAll(\\'.media-edit-only\\').forEach(function(el){el.style.display=\\'\\';});document.querySelectorAll(\\'.card-edit-only\\').forEach(function(el){var sw=el.getAttribute(\\'data-show-when\\');el.style.display=sw||\\'\\';}); document.getElementById(\\'editFormSection\\').scrollIntoView({behavior:\\'smooth\\'})">';
+        html += '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+        html += 'Edit</button>';
         html += '</div>';
+
+        // (avatar/seller row removed — now in detail-posted-line)
 
         // Private item: completeness checklist
         if (ref.listingStatus === 'private') {
@@ -4092,7 +4125,7 @@ Website = https://reffo.ai</pre>
 
         html += '<div id="cardPriceFields" class="card-edit-only" style="display:none;padding:0 20px 10px;" data-show-when="' + _showPrice + '">';
         html += '<div style="display:flex;gap:8px;">';
-        html += '<input type="number" id="cardPrice" placeholder="Price" value="' + _initPrice + '" style="flex:1;height:40px;padding:0 12px;border:2px solid #CBD5E0;border-radius:12px;font-size:14px;font-weight:500;background:#FFFFFF;font-family:inherit;" oninput="checkCardDirty()">';
+        html += '<input type="number" id="cardPrice" placeholder="Listing Price" value="' + _initPrice + '" style="flex:1;height:40px;padding:0 12px;border:2px solid #CBD5E0;border-radius:12px;font-size:14px;font-weight:500;background:#FFFFFF;font-family:inherit;" oninput="checkCardDirty()">';
         html += '<select id="cardCurrency" style="width:80px;height:40px;padding:0 8px;border:2px solid #CBD5E0;border-radius:12px;font-size:13px;font-weight:600;background:#FFFFFF;font-family:inherit;cursor:pointer;" onchange="checkCardDirty()">';
         html += '<option value="USD"' + (_initCurrency === 'USD' ? ' selected' : '') + '>USD</option><option value="EUR"' + (_initCurrency === 'EUR' ? ' selected' : '') + '>EUR</option><option value="GBP"' + (_initCurrency === 'GBP' ? ' selected' : '') + '>GBP</option>';
         html += '</select>';
@@ -4127,7 +4160,8 @@ Website = https://reffo.ai</pre>
         // Invoice rows — category added as first row
         const catParts = [ref.category, ref.subcategory].filter(Boolean);
         if (catParts.length > 0) {
-          html += '<div class="invoice-row"><span class="invoice-label">Category</span><span class="invoice-value">' + escapeHtml(catParts.join(' / ')) + '</span></div>';
+          if (ref.category) html += '<div class="invoice-row"><span class="invoice-label">Category</span><span class="invoice-value">' + escapeHtml(ref.category) + '</span></div>';
+          if (ref.subcategory) html += '<div class="invoice-row"><span class="invoice-label">Subcategory</span><span class="invoice-value">' + escapeHtml(ref.subcategory) + '</span></div>';
         }
         if (conditionDisplay) {
           html += '<div class="invoice-row"><span class="invoice-label">Condition</span><span class="invoice-value">' + escapeHtml(conditionDisplay) + '</span></div>';
@@ -4157,7 +4191,7 @@ Website = https://reffo.ai</pre>
           html += '<div class="invoice-row"><span class="invoice-label">Purchased</span><span class="invoice-value">' + new Date(ref.purchaseDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '</span></div>';
         }
         if (ref.purchasePrice) {
-          html += '<div class="invoice-row"><span class="invoice-label">Purchase Price</span><span class="invoice-value">' + fmtCurrency(ref.purchasePrice, 'USD') + '</span></div>';
+          html += '<div class="invoice-row"><span class="invoice-label">Original Purchase Price</span><span class="invoice-value">' + fmtCurrency(ref.purchasePrice, 'USD') + '</span></div>';
         }
 
         // Hidden invoice rows (future use)
@@ -4853,6 +4887,7 @@ Website = https://reffo.ai</pre>
       _headerSearchExpanded = true;
       document.getElementById('headerSearchPill').style.display = 'none';
       document.getElementById('headerSearchExpanded').style.display = '';
+      document.querySelector('.app-header').classList.add('search-expanded');
       // Populate category dropdown from taxonomy
       var catSelect = document.getElementById('hdrSearchCat');
       if (catSelect && catSelect.options.length <= 1) {
@@ -4875,6 +4910,7 @@ Website = https://reffo.ai</pre>
       _headerSearchExpanded = false;
       document.getElementById('headerSearchPill').style.display = '';
       document.getElementById('headerSearchExpanded').style.display = 'none';
+      document.querySelector('.app-header').classList.remove('search-expanded');
     };
 
     window.runHeaderSearch = function() {
@@ -5266,7 +5302,8 @@ Website = https://reffo.ai</pre>
       // Invoice rows — category added
       const remoteCatParts = [item.category, item.subcategory].filter(Boolean);
       if (remoteCatParts.length > 0) {
-        html += '<div class="invoice-row"><span class="invoice-label">Category</span><span class="invoice-value">' + escapeHtml(remoteCatParts.join(' / ')) + '</span></div>';
+        if (item.category) html += '<div class="invoice-row"><span class="invoice-label">Category</span><span class="invoice-value">' + escapeHtml(item.category) + '</span></div>';
+        if (item.subcategory) html += '<div class="invoice-row"><span class="invoice-label">Subcategory</span><span class="invoice-value">' + escapeHtml(item.subcategory) + '</span></div>';
       }
       if (offer) {
         html += '<div class="invoice-row"><span class="invoice-label">Item Price</span><span class="invoice-value">' + escapeHtml(fmtCurrency(offer.price, offer.priceCurrency)) + '</span></div>';
@@ -6030,6 +6067,7 @@ Website = https://reffo.ai</pre>
         const res = await fetch('/settings');
         const data = await res.json();
         window._myBeaconId = data.beaconId || '';
+        window._myDisplayName = data.displayName || 'You';
         document.getElementById('settingsBeaconId').textContent = data.beaconId || '';
         document.getElementById('settingsVersion').textContent = data.version || '';
         const uptime = data.uptime || 0;
