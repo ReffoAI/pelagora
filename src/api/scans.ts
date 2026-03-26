@@ -8,6 +8,7 @@ import { ReffoClient } from '../sync/reffo-client';
 import { getDb } from '../db/schema';
 import { getAttributeKeys } from '../ref-schemas';
 import { callProductLookup, type AiProvider } from '../ai/product-lookup';
+import { resolveUpc, resolveUpcViaSearch, identifyUpcWithAI, resolveUpcViaReffo } from '../ai/upc-lookup';
 
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 const SCAN_DIR = path.join(UPLOADS_DIR, 'scans');
@@ -313,32 +314,32 @@ router.post('/confirm', async (req: Request, res: Response) => {
   res.json({ confirmed: created.length, refs: created });
 });
 
-// POST /scans/barcode — Barcode/UPC lookup (same logic as settings/product-lookup)
+// POST /scans/barcode — Multi-stage UPC/barcode lookup
+// Fallback chain: cache → UPCitemdb → Serper+AI → direct AI → Reffo.ai
 router.post('/barcode', async (req: Request, res: Response) => {
-  const { upc } = req.body;
+  const { upc, name: manualName } = req.body;
   if (!upc || typeof upc !== 'string' || !upc.trim()) {
     return res.status(400).json({ error: 'upc is required' });
   }
 
-  const name = upc.trim();
-  const nameNormalized = name.toLowerCase();
-
-  // Check local SQLite cache first
+  const trimmedUpc = upc.trim();
   const db = getDb();
+
+  // 1. Check cache by SKU (the UPC itself)
   const cached = db.prepare(
-    `SELECT * FROM product_catalog
-     WHERE name_normalized = ? AND category = '' AND subcategory = ''
-     AND expires_at > datetime('now')`
-  ).get(nameNormalized) as Record<string, unknown> | undefined;
+    `SELECT * FROM product_catalog WHERE sku = ? AND expires_at > datetime('now')`
+  ).get(trimmedUpc) as Record<string, unknown> | undefined;
 
   if (cached) {
     db.prepare(`UPDATE product_catalog SET lookup_count = lookup_count + 1 WHERE id = ?`).run(cached.id);
+    const attrs = JSON.parse((cached.attributes as string) || '{}');
     return res.json({
+      name: attrs.product_name || cached.name_normalized,
       description: cached.description,
       sku: cached.sku,
       product_url: cached.product_url,
       image_url: cached.image_url,
-      attributes: JSON.parse((cached.attributes as string) || '{}'),
+      attributes: attrs,
       price_estimate: {
         low: cached.price_low, high: cached.price_high,
         typical: cached.price_typical, confidence: cached.price_confidence || 'low',
@@ -347,46 +348,115 @@ router.post('/barcode', async (req: Request, res: Response) => {
     });
   }
 
-  const provider = (process.env.AI_PROVIDER || 'reffo').toLowerCase();
-  const attributeKeys = getAttributeKeys(undefined, undefined);
+  // 2. Resolve UPC → product name via multi-stage fallback
+  let productName: string | null = null;
+  let productCategory: string | undefined;
 
+  const provider = (process.env.AI_PROVIDER || 'reffo').toLowerCase();
+  const aiApiKey = process.env.AI_API_KEY;
+  const serperKey = process.env.SERPER_API_KEY;
+  const reffoApiKey = process.env.REFFO_API_KEY;
+  const reffoUrl = process.env.REFFO_API_URL || 'https://reffo.ai';
+
+  // Level 0: User provided the product name manually (retry of unidentified barcode)
+  if (manualName && typeof manualName === 'string' && manualName.trim()) {
+    productName = manualName.trim();
+    console.log(`[barcode] Manual name provided for "${trimmedUpc}" → "${productName}"`);
+  }
+
+  // Level 1: UPCitemdb free database (no API key needed)
+  if (!productName) {
+    const upcProduct = await resolveUpc(trimmedUpc);
+    if (upcProduct?.name) {
+      productName = upcProduct.name;
+      productCategory = upcProduct.category || undefined;
+      console.log(`[barcode] UPCitemdb resolved "${trimmedUpc}" → "${productName}"`);
+    }
+  }
+
+  // Level 2: Google search via Serper + AI extraction
+  if (!productName && serperKey && provider !== 'reffo' && aiApiKey) {
+    const searchResult = await resolveUpcViaSearch(trimmedUpc, provider as AiProvider, aiApiKey, serperKey);
+    if (searchResult?.name) {
+      productName = searchResult.name;
+      productCategory = searchResult.category || undefined;
+      console.log(`[barcode] Serper+AI resolved "${trimmedUpc}" → "${productName}"`);
+    }
+  }
+
+  // Level 3: Direct AI identification (least reliable)
+  if (!productName && provider !== 'reffo' && aiApiKey) {
+    productName = await identifyUpcWithAI(trimmedUpc, provider as AiProvider, aiApiKey);
+    if (productName) {
+      console.log(`[barcode] Direct AI resolved "${trimmedUpc}" → "${productName}"`);
+    }
+  }
+
+  // Level 4: Reffo.ai fallback (has its own multi-stage pipeline)
+  if (!productName && reffoApiKey) {
+    const reffoResult = await resolveUpcViaReffo(trimmedUpc, reffoApiKey, reffoUrl);
+    if (reffoResult?.name) {
+      productName = reffoResult.name;
+      productCategory = reffoResult.category || undefined;
+      console.log(`[barcode] Reffo.ai resolved "${trimmedUpc}" → "${productName}"`);
+    }
+  }
+
+  // All stages failed
+  if (!productName) {
+    console.log(`[barcode] Could not resolve UPC "${trimmedUpc}"`);
+    return res.json({
+      name: null,
+      description: null,
+      sku: trimmedUpc,
+      product_url: null,
+      image_url: null,
+      attributes: {},
+      price_estimate: { low: 0, high: 0, typical: 0, confidence: 'low' },
+      cached: false,
+      unidentified: true,
+    });
+  }
+
+  // 3. Enrich product data using the resolved name
   try {
+    const attributeKeys = getAttributeKeys(productCategory, undefined);
     let result: Record<string, unknown>;
 
     if (provider === 'reffo') {
-      const apiKey = process.env.REFFO_API_KEY;
-      if (!apiKey) {
+      if (!reffoApiKey) {
         return res.status(400).json({
           error: 'No AI provider configured. Connect to Reffo.ai or set up a direct AI provider in Settings.',
         });
       }
-      const reffoUrl = process.env.REFFO_API_URL || 'https://reffo.ai';
       const upstream = await fetch(`${reffoUrl}/api/product-lookup`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({ name, category: '', subcategory: '' }),
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${reffoApiKey}` },
+        body: JSON.stringify({ name: productName, category: productCategory || '', subcategory: '' }),
       });
       if (!upstream.ok) {
         const errData = await upstream.json().catch(() => ({}));
-        return res.status(upstream.status).json({ error: ((errData as Record<string, unknown>).error as string) || 'Product lookup failed' });
+        return res.status(upstream.status).json({ error: ((errData as Record<string, unknown>).error as string) || 'Product enrichment failed' });
       }
       result = await upstream.json() as Record<string, unknown>;
     } else {
-      const aiApiKey = process.env.AI_API_KEY;
       if (!aiApiKey) {
         return res.status(400).json({ error: `AI provider "${provider}" selected but no API key configured.` });
       }
       result = await callProductLookup(provider as AiProvider, aiApiKey, {
-        name, category: '', subcategory: '', attributeKeys,
+        name: productName, category: productCategory || '', subcategory: '', attributeKeys,
       }) as unknown as Record<string, unknown>;
     }
 
-    // Cache result
-    const id = require('uuid').v4();
+    // Override SKU with the actual UPC barcode
+    result.sku = trimmedUpc;
+
+    // 4. Cache with SKU for fast future lookups
+    const nameNormalized = productName.toLowerCase().trim();
     const pe = (result.price_estimate || {}) as Record<string, unknown>;
     db.prepare(
       `INSERT INTO product_catalog (id, name_normalized, category, subcategory, description, sku, product_url, image_url, attributes, price_low, price_high, price_typical, price_confidence, ai_model, expires_at)
-       VALUES (?, ?, '', '', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+30 days'))
+       VALUES (?, ?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+30 days'))
        ON CONFLICT(name_normalized, category, subcategory) DO UPDATE SET
          description = excluded.description, sku = excluded.sku, product_url = excluded.product_url,
          image_url = excluded.image_url, attributes = excluded.attributes,
@@ -394,14 +464,15 @@ router.post('/barcode', async (req: Request, res: Response) => {
          price_typical = excluded.price_typical, price_confidence = excluded.price_confidence,
          ai_model = excluded.ai_model, lookup_count = product_catalog.lookup_count + 1,
          updated_at = datetime('now'), expires_at = datetime('now', '+30 days')`
-    ).run(id, nameNormalized, result.description ?? null, result.sku ?? null,
+    ).run(uuid(), nameNormalized, productCategory || '',
+      result.description ?? null, trimmedUpc,
       result.product_url ?? null, result.image_url ?? null,
-      JSON.stringify(result.attributes || {}),
+      JSON.stringify({ ...(result.attributes as Record<string, unknown> || {}), product_name: productName }),
       pe.low ?? null, pe.high ?? null, pe.typical ?? null, pe.confidence ?? 'low', provider);
 
-    return res.json({ ...result, cached: false });
+    return res.json({ ...result, name: productName, cached: false, unidentified: false });
   } catch (err) {
-    console.error('Barcode lookup error:', err);
+    console.error('Barcode enrichment error:', err);
     return res.status(502).json({ error: 'Product lookup failed. Check your AI provider configuration.' });
   }
 });

@@ -4,6 +4,22 @@ All notable changes to **pelagora** will be documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/) and [Semantic Versioning](https://semver.org/).
 
+## [0.2.2] — 2026-03-26
+
+### Added
+- Multi-stage UPC barcode resolution pipeline: UPCitemdb → Serper+AI → Direct AI → Reffo.ai fallback
+- UPC normalization with multi-format digit variants (EAN-8, UPC-A, EAN-13)
+- SKU-based product catalog cache with index for fast UPC lookups
+- Rich barcode result card: product image, name, price with confidence badge, attributes, product URL
+- Unidentified barcode flow: manual product name entry with retry
+- Support for manual name override on barcode retry (`{ upc, name }` request body)
+
+### Changed
+- Barcode route now resolves UPC → product name before enrichment (previously treated UPC digits as a product name)
+- Cache lookup uses `sku` field instead of `name_normalized` for barcode results
+
+---
+
 ## [Unreleased]
 
 > **Note:** Versions 0.1.1–0.1.8 were published to npm but not documented here. Entries below cover all changes since 0.1.0.
