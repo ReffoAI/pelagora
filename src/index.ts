@@ -10,6 +10,7 @@ import { NetworkPublisher } from './sync/network-publisher';
 import { ConversationPoller } from './sync/conversation-poller';
 import { searchReffo } from './sync/reffo-client';
 import { getVersion } from './version';
+import { startUpdateChecker } from './update-checker';
 import { SkillLoader, createSkillRegistryRouter, createSkillExportRouter } from './skills';
 
 // Load .env into process.env (no dotenv dependency)
@@ -103,6 +104,9 @@ async function main(): Promise<void> {
   app.set('beaconId', BEACON_ID);
   app.set('startTime', Date.now());
   setBeaconId(BEACON_ID);
+
+  // Check npm registry for updates (always — no API key needed)
+  startUpdateChecker();
 
   // Initialize network publisher (always — no API key needed)
   const webappUrl = process.env.REFFO_WEBAPP_URL || process.env.REFFO_API_URL || 'https://reffo.ai';
