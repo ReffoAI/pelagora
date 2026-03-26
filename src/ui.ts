@@ -862,19 +862,19 @@ export function renderUI(localToken?: string): string {
         <!-- Expanded full search bar -->
         <div id="headerSearchExpanded" style="display:none;width:100%;max-width:620px;">
           <div style="display:flex;align-items:center;background:#FFFFFF;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,0.15);height:48px;padding:0 6px 0 0;">
-            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;white-space:nowrap;height:48px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <input id="hdrSearchLoc" placeholder="Where?" style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;width:80px;height:48px;" onkeydown="if(event.key==='Enter')runHeaderSearch()">
+            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;white-space:nowrap;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;display:block;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <input id="hdrSearchLoc" placeholder="Where?" style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;width:80px;padding:0;margin:0;line-height:1;" onkeydown="if(event.key==='Enter')runHeaderSearch()">
             </div>
-            <span style="width:1px;height:24px;background:#E2E8F0;flex-shrink:0;align-self:center;"></span>
-            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;white-space:nowrap;height:48px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-              <select id="hdrSearchCat" style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;height:48px;" onkeydown="if(event.key==='Enter')runHeaderSearch()"><option value="">All</option></select>
+            <span style="width:1px;height:24px;background:#E2E8F0;flex-shrink:0;"></span>
+            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;white-space:nowrap;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;display:block;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              <select id="hdrSearchCat" style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;margin:0;line-height:1;"><option value="">All</option></select>
             </div>
-            <span style="width:1px;height:24px;background:#E2E8F0;flex-shrink:0;align-self:center;"></span>
-            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;flex:1;min-width:0;height:48px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input id="hdrSearchQ" placeholder="Search..." style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;flex:1;min-width:0;height:48px;" onkeydown="if(event.key==='Enter')runHeaderSearch()">
+            <span style="width:1px;height:24px;background:#E2E8F0;flex-shrink:0;"></span>
+            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;flex:1;min-width:0;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;display:block;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input id="hdrSearchQ" placeholder="Search..." style="border:none;outline:none;background:transparent;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1A2E;flex:1;min-width:0;padding:0;margin:0;line-height:1;" onkeydown="if(event.key==='Enter')runHeaderSearch()">
             </div>
             <button onclick="runHeaderSearch()" style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:#0A5E8A;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#084A6E'" onmouseout="this.style.background='#0A5E8A'">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
