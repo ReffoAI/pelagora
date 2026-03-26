@@ -600,6 +600,8 @@ export function renderUI(localToken?: string): string {
     .sidebar.collapsed .sidebar-divider { margin: 4px 8px; }
     .sidebar.collapsed .sidebar-logo-text { display: none; }
     .sidebar.collapsed .sidebar-logo-img { height: 24px; }
+    body.sidebar-collapsed .sidebar-logo-text { display: none; }
+    body.sidebar-collapsed .sidebar-logo-img { height: 24px; }
     .sidebar.collapsed .sidebar-collapse-btn { position: static; margin: 4px auto; right: auto; transform: none; }
     .sidebar::-webkit-scrollbar { display: none; }
     .sidebar-section-title { padding: 16px 20px 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #4A5568; }
@@ -665,10 +667,10 @@ export function renderUI(localToken?: string): string {
     .ai-quickstart-llm-btn:hover { border-color: #0A5E8A; color: #0A5E8A; }
     .ai-quickstart-llm-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
     .ai-quickstart-sidebar-card { margin: 16px 16px 8px; padding: 12px; border-radius: 12px; border: 1px solid rgba(10,94,138,0.2); background: linear-gradient(135deg, rgba(10,94,138,0.04), rgba(10,94,138,0.04)); cursor: pointer; transition: all 0.2s; overflow: hidden; }
-    .sidebar.collapsed .ai-quickstart-sidebar-card { margin: 4px 8px; padding: 8px; border-radius: 8px; }
-    .sidebar.collapsed .ai-quickstart-sidebar-card .qs-title span { display: none; }
+    .sidebar.collapsed .ai-quickstart-sidebar-card { margin: 4px 8px; padding: 8px; border-radius: 8px; border: none; background: transparent; }
+    .sidebar.collapsed .ai-quickstart-sidebar-card .qs-title { justify-content: center; margin: 0; font-size: 0; color: transparent; }
+    .sidebar.collapsed .ai-quickstart-sidebar-card .qs-title svg { width: 18px; height: 18px; }
     .sidebar.collapsed .ai-quickstart-sidebar-card .qs-sub { display: none; }
-    .sidebar.collapsed .ai-quickstart-sidebar-card .qs-title { justify-content: center; margin: 0; }
     .ai-quickstart-sidebar-card:hover { border-color: rgba(10,94,138,0.4); box-shadow: 0 2px 8px rgba(10,94,138,0.08); }
     .ai-quickstart-sidebar-card .qs-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #1A1A2E; margin-bottom: 2px; }
     .ai-quickstart-sidebar-card .qs-sub { font-size: 11px; color: #4A5568; }
