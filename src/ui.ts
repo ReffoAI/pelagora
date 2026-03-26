@@ -928,7 +928,8 @@ export function renderUI(localToken?: string): string {
   <div id="sidebarLogoOverlay" class="sidebar-logo-overlay" style="position:fixed;top:0;left:0;z-index:112;transition:width 0.3s;pointer-events:none;width:240px;">
     <div style="position:relative;display:flex;align-items:center;padding:14px 16px 12px;gap:8px;pointer-events:auto;">
       <a onclick="sidebarNav('home')" style="cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none;">
-        <img src="/pelagora-logo-reverse.png" alt="Pelagora" class="sidebar-logo-img" style="height:32px;width:auto;">
+        <img src="/pelagora-logo.png" alt="Pelagora" class="sidebar-logo-img" style="height:28px;width:auto;">
+        <span class="sidebar-logo-text" style="font-family:'Fira Sans',sans-serif;font-size:18px;font-weight:700;color:#1A1A2E;">Pelagora</span>
       </a>
       <button type="button" onclick="toggleSidebarCollapse()" class="sidebar-collapse-btn" title="Collapse sidebar" style="position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;border:1px solid #CBD5E0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4A5568;box-shadow:0 1px 4px rgba(0,0,0,0.08);transition:all 0.2s;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="collapseChevron" style="transition:transform 0.3s;"><polyline points="15 18 9 12 15 6"/></svg>
