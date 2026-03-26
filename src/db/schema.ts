@@ -457,6 +457,8 @@ function initSchema(database: Database.Database): void {
     );
     CREATE UNIQUE INDEX IF NOT EXISTS idx_product_catalog_lookup
       ON product_catalog (name_normalized, category, subcategory);
+    CREATE INDEX IF NOT EXISTS idx_product_catalog_sku
+      ON product_catalog (sku);
 
     CREATE TABLE IF NOT EXISTS collections (
       id TEXT PRIMARY KEY,

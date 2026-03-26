@@ -7583,33 +7583,112 @@ Website = https://reffo.ai</pre>
     }
     window.deleteScan = deleteScan;
 
-    async function lookupBarcode() {
+    async function lookupBarcode(manualName) {
       var upc = document.getElementById('barcodeInput').value.trim();
       if (!upc) { showToast('Enter a UPC or barcode number', 'rejected'); return; }
       var container = document.getElementById('barcodeResult');
-      container.innerHTML = '<div style="color:#4A5568;font-size:13px;">Looking up...</div>';
+      container.innerHTML = '<div style="color:#4A5568;font-size:13px;display:flex;align-items:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>Resolving barcode...</div>';
       try {
+        var body = { upc: upc };
+        if (manualName) body.name = manualName;
         var res = await fetch('/scans/barcode', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ upc: upc }),
+          body: JSON.stringify(body),
         });
         var data = await res.json();
         if (!res.ok) {
           container.innerHTML = '<div style="color:#C94444;font-size:13px;">' + escapeHtml(data.error || 'Lookup failed') + '</div>';
           return;
         }
+
+        // Handle unidentified barcode
+        if (data.unidentified) {
+          container.innerHTML = '<div style="background:#FFF5F5;border:1px solid #FEB2B2;border-radius:12px;padding:16px;margin-top:8px;">'
+            + '<div style="font-size:14px;font-weight:600;color:#C94444;margin-bottom:8px;">Could not identify this barcode</div>'
+            + '<div style="font-size:13px;color:#4A5568;margin-bottom:12px;">Enter the product name to look it up manually:</div>'
+            + '<div style="display:flex;gap:8px;">'
+            + '<input id="barcodeManualName" type="text" placeholder="e.g. Coca-Cola Classic 12oz" style="flex:1;height:36px;padding:0 12px;border:1px solid #CBD5E0;border-radius:8px;font-size:13px;font-family:\\'DM Sans\\',sans-serif;color:#1A1A2E;" onkeydown="if(event.key===\\'Enter\\')retryBarcodeWithName()">'
+            + '<button class="btn-primary btn-sm" onclick="retryBarcodeWithName()">Retry</button>'
+            + '</div>'
+            + '<div style="margin-top:8px;"><button class="btn-secondary btn-sm" onclick="dismissBarcodeResult()">Dismiss</button></div>'
+            + '</div>';
+          window._barcodeData = null;
+          return;
+        }
+
+        // Build rich result card
         var pe = data.price_estimate || {};
-        container.innerHTML = '<div style="background:#EDE8E3;border-radius:12px;padding:16px;margin-top:8px;">'
-          + '<div style="font-size:14px;font-weight:600;color:#1A1A2E;margin-bottom:4px;">' + escapeHtml(data.description || upc) + '</div>'
-          + (pe.typical ? '<div style="font-size:14px;font-weight:700;color:#2D8A6E;">~$' + Number(pe.typical).toFixed(0) + '</div>' : '')
-          + (pe.low && pe.high ? '<div style="font-size:11px;color:#4A5568;">Range: $' + Number(pe.low).toFixed(0) + ' - $' + Number(pe.high).toFixed(0) + '</div>' : '')
-          + '<div style="display:flex;gap:8px;margin-top:12px;">'
+        var confidenceColor = pe.confidence === 'high' ? '#2D8A6E' : pe.confidence === 'medium' ? '#D4A843' : '#A0AEC0';
+        var confidenceLabel = pe.confidence === 'high' ? 'High confidence' : pe.confidence === 'medium' ? 'Medium confidence' : 'Low confidence';
+
+        var html = '<div style="background:#EDE8E3;border-radius:12px;padding:16px;margin-top:8px;">';
+
+        // Image + info row
+        html += '<div style="display:flex;gap:16px;align-items:flex-start;">';
+        if (data.image_url) {
+          html += '<img src="' + escapeHtml(data.image_url) + '" alt="" style="width:80px;height:80px;object-fit:contain;border-radius:8px;background:#fff;padding:4px;flex-shrink:0;" onerror="this.style.display=\\'none\\'">';
+        }
+        html += '<div style="flex:1;min-width:0;">';
+
+        // Product name
+        html += '<div style="font-size:15px;font-weight:600;color:#1A1A2E;margin-bottom:4px;">' + escapeHtml(data.name || 'Unknown Product') + '</div>';
+
+        // SKU
+        if (data.sku) {
+          html += '<div style="font-size:11px;color:#718096;margin-bottom:6px;">UPC: ' + escapeHtml(data.sku) + '</div>';
+        }
+
+        // Price
+        if (pe.typical) {
+          html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">';
+          html += '<span style="font-size:16px;font-weight:700;color:#2D8A6E;">~$' + Number(pe.typical).toFixed(0) + '</span>';
+          html += '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:' + confidenceColor + '22;color:' + confidenceColor + ';font-weight:600;">' + confidenceLabel + '</span>';
+          html += '</div>';
+        }
+        if (pe.low && pe.high) {
+          html += '<div style="font-size:11px;color:#4A5568;">Range: $' + Number(pe.low).toFixed(0) + ' \u2013 $' + Number(pe.high).toFixed(0) + '</div>';
+        }
+
+        html += '</div></div>'; // close info + row
+
+        // Description (truncated)
+        if (data.description) {
+          var desc = data.description.length > 200 ? data.description.substring(0, 200) + '...' : data.description;
+          html += '<div style="font-size:12px;color:#4A5568;margin-top:10px;line-height:1.4;">' + escapeHtml(desc) + '</div>';
+        }
+
+        // Attributes
+        if (data.attributes && Object.keys(data.attributes).length > 0) {
+          var attrHtml = '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">';
+          var attrKeys = Object.keys(data.attributes).filter(function(k) { return k !== 'product_name'; });
+          attrKeys.slice(0, 6).forEach(function(k) {
+            var label = k.replace(/_/g, ' ').replace(/\\b\\w/g, function(c) { return c.toUpperCase(); });
+            attrHtml += '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:#E2E8F0;color:#4A5568;">' + escapeHtml(label) + ': ' + escapeHtml(String(data.attributes[k])) + '</span>';
+          });
+          attrHtml += '</div>';
+          html += attrHtml;
+        }
+
+        // Product URL
+        if (data.product_url) {
+          html += '<div style="margin-top:8px;"><a href="' + escapeHtml(data.product_url) + '" target="_blank" rel="noopener" style="font-size:11px;color:#3182CE;text-decoration:none;">View product page \u2192</a></div>';
+        }
+
+        // Cached badge
+        if (data.cached) {
+          html += '<div style="font-size:10px;color:#A0AEC0;margin-top:6px;">Cached result</div>';
+        }
+
+        // Action buttons
+        html += '<div style="display:flex;gap:8px;margin-top:12px;">'
           + '<button class="btn-primary btn-sm" onclick="createRefFromBarcode()">Create Listing</button>'
           + '<button class="btn-secondary btn-sm" onclick="dismissBarcodeResult()">Dismiss</button>'
           + '<button class="btn-secondary btn-sm" onclick="retryBarcode()" style="display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>Retry</button>'
-          + '</div>'
           + '</div>';
+
+        html += '</div>';
+        container.innerHTML = html;
         window._barcodeData = data;
       } catch(e) {
         container.innerHTML = '<div style="color:#C94444;font-size:13px;">Lookup failed</div>';
@@ -7670,13 +7749,19 @@ Website = https://reffo.ai</pre>
     function createRefFromBarcode() {
       var data = window._barcodeData;
       if (!data) return;
-      var pe = data.price_estimate || {};
       var body = {
-        name: data.description || document.getElementById('barcodeInput').value.trim(),
+        name: data.name || data.description || document.getElementById('barcodeInput').value.trim(),
         description: data.description || '',
         sku: data.sku || document.getElementById('barcodeInput').value.trim(),
       };
-      if (data.attributes) body.attributes = data.attributes;
+      // Pass through attributes (exclude internal product_name key)
+      if (data.attributes) {
+        var attrs = {};
+        Object.keys(data.attributes).forEach(function(k) {
+          if (k !== 'product_name') attrs[k] = data.attributes[k];
+        });
+        if (Object.keys(attrs).length > 0) body.attributes = attrs;
+      }
       if (data.image_url) body.image = data.image_url;
       fetch('/refs', {
         method: 'POST',
@@ -7686,9 +7771,18 @@ Website = https://reffo.ai</pre>
         showToast('Listing created: ' + ref.name, 'accepted');
         document.getElementById('barcodeResult').innerHTML = '';
         document.getElementById('barcodeInput').value = '';
+        window._barcodeData = null;
       }).catch(function() { showToast('Failed to create listing', 'rejected'); });
     }
     window.createRefFromBarcode = createRefFromBarcode;
+
+    function retryBarcodeWithName() {
+      var nameInput = document.getElementById('barcodeManualName');
+      var manualName = nameInput ? nameInput.value.trim() : '';
+      if (!manualName) { showToast('Enter a product name to retry', 'rejected'); return; }
+      lookupBarcode(manualName);
+    }
+    window.retryBarcodeWithName = retryBarcodeWithName;
 
     function dismissBarcodeResult() {
       document.getElementById('barcodeResult').innerHTML = '';
