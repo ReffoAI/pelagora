@@ -221,6 +221,24 @@ router.post('/from-url', async (req: Request, res: Response) => {
 });
 
 // GET /refs/:refId/media
+// PUT /refs/:refId/media/reorder
+router.put('/reorder', (req: Request, res: Response) => {
+  const media = new MediaQueries();
+  const refs = new RefQueries();
+  const refId = String(req.params.refId);
+  const { order } = req.body; // array of media IDs in desired order
+
+  const ref = refs.get(refId);
+  if (!ref) return res.status(404).json({ error: 'Ref not found' });
+  if (!Array.isArray(order)) return res.status(400).json({ error: 'order must be an array of media IDs' });
+
+  for (let i = 0; i < order.length; i++) {
+    media.updateSortOrder(String(order[i]), i);
+  }
+
+  res.json({ ok: true });
+});
+
 router.get('/', (req: Request, res: Response) => {
   const media = new MediaQueries();
   const refId = String(req.params.refId);

@@ -432,6 +432,10 @@ export class MediaQueries {
     return media;
   }
 
+  updateSortOrder(id: string, sortOrder: number): void {
+    this.db.prepare('UPDATE ref_media SET sort_order = ? WHERE id = ?').run(sortOrder, id);
+  }
+
   deleteAllForRef(refId: string): string[] {
     const rows = this.db.prepare('SELECT file_path FROM ref_media WHERE ref_id = ?').all(refId);
     const paths = rows.map(r => (r as Record<string, unknown>).file_path as string);

@@ -201,16 +201,22 @@ export function renderUI(localToken?: string): string {
     @media (max-width: 1023px) { .cards { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 639px) { .cards { grid-template-columns: 1fr; } }
 
-    /* Ref card — Card.module.sass: 16px radius, deep shadow, image hover scale */
-    .card { background: #FFFFFF; border-radius: 16px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    /* Ref card — consistent-height with fixed slots */
+    .card { background: #FFFFFF; border-radius: 16px; box-shadow: 0 16px 32px -8px rgba(15,15,15,0.12); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; height: 100%; }
     .card:hover { transform: translateY(-3px); box-shadow: 0 16px 40px -8px rgba(15,15,15,0.18); }
-    .card-img { width: 100%; height: 180px; position: relative; overflow: hidden; background: #EDE8E3; display: flex; align-items: center; justify-content: center; }
-    .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s; }
-    .card:hover .card-img img { transform: scale(1.1); }
+    .card-img { width: 100%; aspect-ratio: 4/3; position: relative; overflow: hidden; background: #EDE8E3; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+    .card:hover .card-img img { transform: scale(1.05); }
     .card-img .placeholder { color: #718096; font-size: 2.5rem; }
-    .card-body { padding: 20px; }
-    .card-body h3 { font-size: 16px; font-weight: 600; color: #1A1A2E; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.2s; }
+    /* Status badge overlaid on image */
+    .card-img .card-status { position: absolute; top: 10px; left: 10px; z-index: 2; }
+    .card-body { padding: 16px; display: flex; flex-direction: column; min-height: 148px; flex: 1; }
+    .card-body .card-category { font-size: 11px; color: #4A5568; text-transform: uppercase; letter-spacing: 0.04em; height: 16px; line-height: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px; }
+    .card-body h3 { font-size: 14px; font-weight: 600; color: #1A1A2E; height: 20px; line-height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px; transition: color 0.2s; }
     .card:hover .card-body h3 { color: #0A5E8A; }
+    .card-body .card-attrs { font-size: 11px; color: #4A5568; height: 16px; line-height: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px; }
+    .card-body .card-location { font-size: 11px; color: #4A5568; height: 16px; line-height: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+    .card-body .card-spacer { flex: 1; }
     .card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
     /* Badges — status.sass: inline-block, 12px bold uppercase, 13px radius, 26px line-height */
     .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 4px 14px; border-radius: 20px; line-height: 1; text-transform: uppercase; letter-spacing: 0.06em; }
@@ -219,8 +225,9 @@ export function renderUI(localToken?: string): string {
     .badge-for-sale { background: #2D8A6E; color: #FFFFFF; }
     .badge-willing { background: #D4922A; color: #FFFFFF; }
     .badge-for-rent { background: #4A90D9; color: #FFFFFF; }
-    .card-price { font-size: 16px; font-weight: 700; color: #2D8A6E; margin-top: 4px; }
+    .card-price { font-size: 16px; font-weight: 700; color: #1A1A2E; }
     .card-qty { font-size: 12px; color: #4A5568; margin-top: 4px; font-weight: 500; }
+    .card-bottom-badges { display: flex; align-items: center; gap: 6px; height: 22px; overflow: hidden; margin-top: 4px; }
     .card-desc { font-size: 14px; color: #4A5568; margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.71; }
 
     /* Status segmented control */
@@ -3829,20 +3836,26 @@ Website = https://reffo.ai</pre>
             const cardAttrSummary = buildAttributeSummary(ref.category, ref.subcategory, ref.attributes, ref.condition);
 
             const imgHtml = firstPhoto
-              ? '<div class="card-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""></div>'
-              : '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#CBD5E0"/></svg></span></div>';
+              ? '<div class="card-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""><div class="card-status"><span class="badge ' + statusClass + '">' + statusLabel + '</span></div></div>'
+              : '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#CBD5E0"/></svg></span><div class="card-status"><span class="badge ' + statusClass + '">' + statusLabel + '</span></div></div>';
+
+            const locParts = [ref.locationCity, ref.locationState].filter(Boolean);
 
             return '<div class="card" onclick="openDetail(\\'' + ref.id + '\\')">' +
               imgHtml +
               '<div class="card-body">' +
+                '<div class="card-category">' + escapeHtml(ref.category || '') + '</div>' +
                 '<h3>' + escapeHtml(ref.name) + '</h3>' +
-                '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + catBadges +
-                (ref.networkPublished ? '<span class="badge" style="background:#1A8A7D;color:#fff;">Published</span>' : '') +
-                (ref.reffoSynced ? '<span class="badge badge-synced">Synced</span>' : '') + '</div>' +
-                (priceStr ? '<div class="card-price">' + escapeHtml(priceStr) + '</div>' : '') +
-                (cardAttrSummary ? '<div class="card-desc" style="font-size:12px;color:#4A5568;margin-top:4px;">' + escapeHtml(cardAttrSummary) + '</div>' : '') +
-                (ref.quantity > 1 ? '<div class="card-qty">Qty: ' + ref.quantity + '</div>' : '') +
-                (ref.description ? '<div class="card-desc">' + escapeHtml(ref.description) + '</div>' : '') +
+                '<div class="card-attrs">' + escapeHtml(cardAttrSummary || '') + '</div>' +
+                '<div class="card-location">' + (locParts.length > 0 ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>' + escapeHtml(locParts.join(', ')) : '') + '</div>' +
+                '<div class="card-spacer"></div>' +
+                '<div class="card-price">' + escapeHtml(priceStr || '') + '</div>' +
+                '<div class="card-bottom-badges">' +
+                  (ref.condition ? '<span class="badge" style="font-size:10px;padding:2px 10px;background:#EDE8E3;color:#4A5568;">' + escapeHtml(ref.condition.replace(/_/g, ' ')) + '</span>' : '') +
+                  (ref.networkPublished ? '<span class="badge" style="font-size:10px;padding:2px 10px;background:#1A8A7D;color:#fff;">Published</span>' : '') +
+                  (ref.reffoSynced ? '<span class="badge badge-synced" style="font-size:10px;padding:2px 10px;">Synced</span>' : '') +
+                  (ref.quantity > 1 ? '<span style="font-size:10px;color:#4A5568;font-weight:500;margin-left:auto;">Qty: ' + ref.quantity + '</span>' : '') +
+                '</div>' +
               '</div></div>';
           }).join('') + '</div>';
         }
@@ -3969,6 +3982,17 @@ Website = https://reffo.ai</pre>
         html += '<div id="editFormSection" style="display:none;">';
         html += '<div class="deal-heading">Edit Ref</div>';
         html += '<form id="detailForm" data-ref-id="' + ref.id + '">';
+
+        // Listing status (in main edit form)
+        html += '<label>Listing Status</label>';
+        html += '<input type="hidden" id="dStatus" value="' + (ref.listingStatus || 'private') + '">';
+        html += '<div class="status-segmented" id="detailStatusSegment" style="margin-bottom:14px;">';
+        ['private','for_sale','willing_to_sell','for_rent'].forEach(s => {
+          const activeClass = ref.listingStatus === s ? segClassMap[s] : '';
+          html += '<button type="button" class="' + activeClass + '" onclick="selectDetailStatus(\\'' + s + '\\')">' + statusLabels[s] + '</button>';
+        });
+        html += '</div>';
+
         html += '<label>Name</label><input id="dName" value="' + escapeHtml(ref.name) + '">';
         html += '<label>Description</label><textarea id="dDesc">' + escapeHtml(ref.description) + '</textarea>';
         html += '<div class="row"><div><label>Category</label><select id="dCat"><option value="">Select...</option></select></div>';
@@ -3989,8 +4013,9 @@ Website = https://reffo.ai</pre>
         html += '</div></div></div></div>';
         html += '<div id="detailAutofillCard"></div>';
         html += '<div id="detailCategoryFields"></div>';
-        html += '<div class="row"><div><label>Listing Price</label><input id="dPrice" type="number" min="0" step="0.01" value="' + (activeOffer ? activeOffer.price : '') + '"></div>';
-        html += '<div><label>Currency</label><select id="dCurrency"><option value="USD"' + ((activeOffer && activeOffer.priceCurrency === 'USD') || !activeOffer ? ' selected' : '') + '>USD</option><option value="EUR"' + (activeOffer && activeOffer.priceCurrency === 'EUR' ? ' selected' : '') + '>EUR</option><option value="GBP"' + (activeOffer && activeOffer.priceCurrency === 'GBP' ? ' selected' : '') + '>GBP</option></select></div></div>';
+
+        html += '<div class="row"><div><label>Listing Price</label><input id="dPrice" type="number" min="0" step="0.01" value="' + (activeOffer ? activeOffer.price : '') + '" oninput="updateCardPriceHeader()"></div>';
+        html += '<div><label>Currency</label><select id="dCurrency" onchange="updateCardPriceHeader()"><option value="USD"' + ((activeOffer && activeOffer.priceCurrency === 'USD') || !activeOffer ? ' selected' : '') + '>USD</option><option value="EUR"' + (activeOffer && activeOffer.priceCurrency === 'EUR' ? ' selected' : '') + '>EUR</option><option value="GBP"' + (activeOffer && activeOffer.priceCurrency === 'GBP' ? ' selected' : '') + '>GBP</option></select></div></div>';
         html += '<div class="row"><div><label>Quantity</label><input id="dQty" type="number" min="1" value="' + ref.quantity + '"></div>';
         html += '<div><label>SKU</label><input id="dSku" value="' + escapeHtml(ref.sku || '') + '"></div></div>';
         html += '<details style="margin-bottom:14px;border:2px solid #CBD5E0;border-radius:12px;padding:14px;" open>';
@@ -4032,13 +4057,14 @@ Website = https://reffo.ai</pre>
         html += '<div class="deal-heading">Media</div>';
         html += '<div id="detailAiSuggestedImage"></div>';
         html += '<div class="media-thumbs" id="mediaThumbs">';
-        media.forEach(m => {
+        media.forEach((m, idx) => {
           const isVid = m.mediaType === 'video';
-          html += '<div class="media-thumb">';
+          html += '<div class="media-thumb" draggable="true" data-media-id="' + m.id + '" data-media-idx="' + idx + '" ondragstart="onMediaDragStart(event,' + idx + ')" ondragover="onMediaDragOver(event,' + idx + ')" ondragleave="onMediaDragLeave(event)" ondrop="onMediaDrop(event,' + idx + ',\\'' + ref.id + '\\')" ondragend="onMediaDragEnd(event)" style="cursor:grab;">';
           html += isVid
-            ? '<video src="/' + escapeHtml(m.filePath) + '" muted></video>'
-            : '<img src="/' + escapeHtml(m.filePath) + '" alt="">';
-          html += '<button class="del-btn media-edit-only" style="display:none;" onclick="deleteMedia(\\'' + ref.id + '\\', \\'' + m.id + '\\')" title="Delete">&times;</button>';
+            ? '<video src="/' + escapeHtml(m.filePath) + '" muted style="pointer-events:none;"></video>'
+            : '<img src="/' + escapeHtml(m.filePath) + '" alt="" style="pointer-events:none;">';
+          if (idx === 0) html += '<span class="media-edit-only" style="display:none;position:absolute;top:4px;left:4px;font-size:9px;font-weight:700;text-transform:uppercase;background:rgba(0,0,0,0.6);color:#fff;padding:2px 6px;border-radius:4px;">Cover</span>';
+          html += '<button class="del-btn media-edit-only" style="display:none;" onclick="event.stopPropagation();deleteMedia(\\'' + ref.id + '\\', \\'' + m.id + '\\')" title="Delete">&times;</button>';
           html += '</div>';
         });
         html += '</div>';
@@ -4064,12 +4090,19 @@ Website = https://reffo.ai</pre>
         html += '<div class="detail-right">';
         html += '<div class="payment-card">';
 
-        // Row 1: Price + Edit button
+        // Row 1: Price + Edit/Save/Cancel buttons
         html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:20px 20px 4px;">';
         html += '<div id="cardPriceHeader" style="font-size:24px;font-weight:700;color:#1A1A2E;">' + (ref.listingStatus === 'private' ? 'My Item' : priceDisplay) + '</div>';
-        html += '<button style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 14px;border-radius:8px;background:#1A1A2E;color:#fff;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0;" onclick="document.getElementById(\\'editFormSection\\').style.display=\\'block\\';document.querySelectorAll(\\'.media-edit-only\\').forEach(function(el){el.style.display=\\'\\';});document.querySelectorAll(\\'.card-edit-only\\').forEach(function(el){var sw=el.getAttribute(\\'data-show-when\\');el.style.display=sw||\\'\\';}); document.getElementById(\\'editFormSection\\').scrollIntoView({behavior:\\'smooth\\'})">';
+        html += '<div id="cardEditBtn" style="flex-shrink:0;">';
+        html += '<button style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 14px;border-radius:8px;background:#1A1A2E;color:#fff;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;" onclick="enterEditMode()">';
         html += '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
-        html += 'Edit</button>';
+        html += 'Edit</button></div>';
+        html += '<div id="cardSaveCancelBtns" style="display:none;flex-shrink:0;">';
+        html += '<div style="display:flex;gap:6px;">';
+        html += '<button style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 14px;border-radius:8px;background:#F5F0EB;color:#1A1A2E;border:1px solid #CBD5E0;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;" onclick="exitEditMode()">Cancel</button>';
+        html += '<button style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 14px;border-radius:8px;background:#2D8A6E;color:#fff;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;" onclick="saveDetail(\\'' + ref.id + '\\', \\'' + (activeOffer ? activeOffer.id : '') + '\\')">';
+        html += '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        html += 'Save</button></div></div>';
         html += '</div>';
 
         // (avatar/seller row removed — now in detail-posted-line)
@@ -4097,58 +4130,9 @@ Website = https://reffo.ai</pre>
           html += '</div>';
           html += '<div style="font-size:11px;color:#4A5568;">Fill in details to help your listing sell faster.</div>';
           html += '</div>';
-          html += '<button class="button-stroke" onclick="document.getElementById(\\\'editFormSection\\\').style.display=\\\'block\\\';document.querySelectorAll(\\\'.media-edit-only\\\').forEach(function(el){el.style.display=\\\'\\\';});document.querySelectorAll(\\\'.card-edit-only\\\').forEach(function(el){var sw=el.getAttribute(\\\'data-show-when\\\');el.style.display=sw||\\\'\\\';}); document.getElementById(\\\'editFormSection\\\').scrollIntoView({behavior:\\\'smooth\\\'})" style="font-size:12px;padding:0 14px;height:34px;white-space:nowrap;">Fill in details</button>';
+          html += '<button class="button-stroke" onclick="enterEditMode()" style="font-size:12px;padding:0 14px;height:34px;white-space:nowrap;">Fill in details</button>';
           html += '</div></div>';
         }
-
-        // Status segmented control (replaces dropdown) — hidden until edit mode
-        html += '<input type="hidden" id="dStatus" value="' + (ref.listingStatus || 'private') + '">';
-        html += '<div class="card-edit-only" style="display:none;padding:0 20px 10px;">';
-        html += '<div class="status-segmented" id="detailStatusSegment">';
-        ['private','for_sale','willing_to_sell','for_rent'].forEach(s => {
-          const activeClass = ref.listingStatus === s ? segClassMap[s] : '';
-          html += '<button type="button" class="' + activeClass + '" onclick="selectDetailStatus(\\'' + s + '\\')">' + statusLabels[s] + '</button>';
-        });
-        html += '</div>';
-        html += '</div>';
-
-        // Price fields (for_sale and for_rent)
-        const _initStatus = ref.listingStatus || 'private';
-        const _initPrice = activeOffer ? String(activeOffer.price) : (ref.price ? String(ref.price) : '');
-        const _initCurrency = activeOffer ? (activeOffer.priceCurrency || 'USD') : (ref.currency || 'USD');
-        const _initMinPrice = ref.price ? String(ref.price) : '';
-        const _initDuration = ref.rentalDuration ? String(ref.rentalDuration) : '';
-        const _initDurationUnit = ref.rentalDurationUnit || 'days';
-        const _showPrice = (_initStatus === 'for_sale' || _initStatus === 'for_rent') ? 'block' : 'none';
-        const _showMinPrice = _initStatus === 'willing_to_sell' ? 'block' : 'none';
-        const _showRental = _initStatus === 'for_rent' ? 'block' : 'none';
-
-        html += '<div id="cardPriceFields" class="card-edit-only" style="display:none;padding:0 20px 10px;" data-show-when="' + _showPrice + '">';
-        html += '<div style="display:flex;gap:8px;">';
-        html += '<input type="number" id="cardPrice" placeholder="Listing Price" value="' + _initPrice + '" style="flex:1;height:40px;padding:0 12px;border:2px solid #CBD5E0;border-radius:12px;font-size:14px;font-weight:500;background:#FFFFFF;font-family:inherit;" oninput="checkCardDirty()">';
-        html += '<select id="cardCurrency" style="width:80px;height:40px;padding:0 8px;border:2px solid #CBD5E0;border-radius:12px;font-size:13px;font-weight:600;background:#FFFFFF;font-family:inherit;cursor:pointer;" onchange="checkCardDirty()">';
-        html += '<option value="USD"' + (_initCurrency === 'USD' ? ' selected' : '') + '>USD</option><option value="EUR"' + (_initCurrency === 'EUR' ? ' selected' : '') + '>EUR</option><option value="GBP"' + (_initCurrency === 'GBP' ? ' selected' : '') + '>GBP</option>';
-        html += '</select>';
-        html += '</div></div>';
-
-        // Min price field (willing_to_sell only)
-        html += '<div id="cardMinPriceField" class="card-edit-only" style="display:none;padding:0 20px 10px;" data-show-when="' + _showMinPrice + '">';
-        html += '<input type="number" id="cardMinPrice" placeholder="Minimum price (optional)" value="' + _initMinPrice + '" style="width:100%;height:40px;padding:0 12px;border:2px solid #CBD5E0;border-radius:12px;font-size:14px;font-weight:500;background:#FFFFFF;font-family:inherit;" oninput="checkCardDirty()">';
-        html += '</div>';
-
-        // Rental fields (for_rent only)
-        html += '<div id="cardRentalFields" class="card-edit-only" style="display:none;padding:0 20px 10px;" data-show-when="' + _showRental + '">';
-        html += '<div style="display:flex;gap:8px;">';
-        html += '<input type="number" id="cardRentalDuration" placeholder="Duration" value="' + _initDuration + '" style="flex:1;height:40px;padding:0 12px;border:2px solid #CBD5E0;border-radius:12px;font-size:14px;font-weight:500;background:#FFFFFF;font-family:inherit;" oninput="checkCardDirty()">';
-        html += '<select id="cardRentalDurationUnit" style="width:100px;height:40px;padding:0 8px;border:2px solid #CBD5E0;border-radius:12px;font-size:13px;font-weight:600;background:#FFFFFF;font-family:inherit;cursor:pointer;" onchange="checkCardDirty()">';
-        html += '<option value="hours"' + (_initDurationUnit === 'hours' ? ' selected' : '') + '>Hours</option><option value="days"' + (_initDurationUnit === 'days' ? ' selected' : '') + '>Days</option><option value="weeks"' + (_initDurationUnit === 'weeks' ? ' selected' : '') + '>Weeks</option><option value="months"' + (_initDurationUnit === 'months' ? ' selected' : '') + '>Months</option>';
-        html += '</select>';
-        html += '</div></div>';
-
-        // Save Changes button (hidden by default, shown when dirty)
-        html += '<div id="cardSaveBtn" style="display:none;padding:0 20px 10px;">';
-        html += '<button class="button-gradient" onclick="saveDetail(\\'' + ref.id + '\\', \\'' + (activeOffer ? activeOffer.id : '') + '\\')" style="width:100%;">Save Changes</button>';
-        html += '</div>';
 
         // Price estimate (hidden for private items)
         if (ref.listingStatus !== 'private') {
@@ -4237,16 +4221,6 @@ Website = https://reffo.ai</pre>
 
         container.innerHTML = html;
 
-        // Initialize dirty-state tracking for card fields
-        window._cardInitial = {
-          status: _initStatus,
-          price: _initPrice,
-          currency: _initCurrency,
-          minPrice: _initMinPrice,
-          duration: _initDuration,
-          durationUnit: _initDurationUnit
-        };
-
         // Populate category selects in detail form
         const dCat = document.getElementById('dCat');
         const dSubcat = document.getElementById('dSubcat');
@@ -4268,6 +4242,77 @@ Website = https://reffo.ai</pre>
       }
     }
     window.openDetail = openDetail;
+
+    window.enterEditMode = function() {
+      document.getElementById('editFormSection').style.display = 'block';
+      document.querySelectorAll('.media-edit-only').forEach(function(el) { el.style.display = ''; });
+      document.getElementById('cardEditBtn').style.display = 'none';
+      document.getElementById('cardSaveCancelBtns').style.display = '';
+      document.getElementById('editFormSection').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Drag-and-drop media reordering
+    window._mediaDragIdx = null;
+
+    window.onMediaDragStart = function(e, idx) {
+      window._mediaDragIdx = idx;
+      e.dataTransfer.effectAllowed = 'move';
+      e.currentTarget.style.opacity = '0.4';
+    };
+
+    window.onMediaDragOver = function(e, idx) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (window._mediaDragIdx !== null && window._mediaDragIdx !== idx) {
+        e.currentTarget.style.outline = '2px solid #D4602A';
+        e.currentTarget.style.outlineOffset = '2px';
+      }
+    };
+
+    window.onMediaDragLeave = function(e) {
+      e.currentTarget.style.outline = '';
+      e.currentTarget.style.outlineOffset = '';
+    };
+
+    window.onMediaDrop = async function(e, targetIdx, refId) {
+      e.preventDefault();
+      e.currentTarget.style.outline = '';
+      e.currentTarget.style.outlineOffset = '';
+      var fromIdx = window._mediaDragIdx;
+      window._mediaDragIdx = null;
+      if (fromIdx === null || fromIdx === targetIdx) return;
+
+      var thumbs = document.getElementById('mediaThumbs');
+      var items = Array.from(thumbs.querySelectorAll('.media-thumb'));
+      var ids = items.map(function(el) { return el.getAttribute('data-media-id'); });
+
+      // Reorder in array
+      var moved = ids.splice(fromIdx, 1)[0];
+      ids.splice(targetIdx, 0, moved);
+
+      // Send to API
+      await fetch('/refs/' + refId + '/media/reorder', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: ids })
+      });
+
+      // Refresh detail in edit mode
+      await openDetail(refId);
+      enterEditMode();
+    };
+
+    window.onMediaDragEnd = function(e) {
+      e.currentTarget.style.opacity = '1';
+      window._mediaDragIdx = null;
+    };
+
+    window.exitEditMode = function() {
+      document.getElementById('editFormSection').style.display = 'none';
+      document.querySelectorAll('.media-edit-only').forEach(function(el) { el.style.display = 'none'; });
+      document.getElementById('cardEditBtn').style.display = '';
+      document.getElementById('cardSaveCancelBtns').style.display = 'none';
+    };
 
     // Global: whether AI autofill is available (set by loadSettings)
     window._aiEnabled = false;
@@ -4291,45 +4336,33 @@ Website = https://reffo.ai</pre>
       // Toggle rental fields
       const rentalSection = document.getElementById('rentalFieldsDetail');
       if (rentalSection) rentalSection.style.display = status === 'for_rent' ? 'block' : 'none';
-      // Toggle card price/rental field containers
-      var cpf = document.getElementById('cardPriceFields');
-      var cmpf = document.getElementById('cardMinPriceField');
-      var crf = document.getElementById('cardRentalFields');
-      if (cpf) cpf.style.display = (status === 'for_sale' || status === 'for_rent') ? 'block' : 'none';
-      if (cmpf) cmpf.style.display = status === 'willing_to_sell' ? 'block' : 'none';
-      if (crf) crf.style.display = status === 'for_rent' ? 'block' : 'none';
-      // Check dirty state
-      if (typeof checkCardDirty === 'function') checkCardDirty();
+      // Update price header to reflect status change
+      updateCardPriceHeader();
       // Trigger AI price estimate for all statuses
       triggerDetailPriceEstimate();
     };
 
     window.checkCardDirty = function() {
-      var ini = window._cardInitial;
-      if (!ini) return;
-      var status = document.getElementById('dStatus').value;
-      var price = document.getElementById('cardPrice') ? document.getElementById('cardPrice').value : '';
-      var currency = document.getElementById('cardCurrency') ? document.getElementById('cardCurrency').value : 'USD';
-      var minPrice = document.getElementById('cardMinPrice') ? document.getElementById('cardMinPrice').value : '';
-      var duration = document.getElementById('cardRentalDuration') ? document.getElementById('cardRentalDuration').value : '';
-      var durationUnit = document.getElementById('cardRentalDurationUnit') ? document.getElementById('cardRentalDurationUnit').value : 'days';
-      var dirty = status !== ini.status || price !== ini.price || currency !== ini.currency || minPrice !== ini.minPrice || duration !== ini.duration || durationUnit !== ini.durationUnit;
-      var btn = document.getElementById('cardSaveBtn');
-      if (btn) btn.style.display = dirty ? 'block' : 'none';
+      // Legacy stub — card fields removed, price header updated via updateCardPriceHeader
+      updateCardPriceHeader();
+    };
 
-      // Live-update the price header
+    window.updateCardPriceHeader = function() {
       var header = document.getElementById('cardPriceHeader');
-      if (header) {
-        var priceNum = parseFloat(price) || 0;
-        if (status === 'private') {
-          header.textContent = 'My Item';
-        } else if (status === 'willing_to_sell') {
-          header.textContent = 'Make me sell';
-        } else if (priceNum > 0) {
-          header.textContent = fmtCurrency(priceNum, currency);
-        } else {
-          header.textContent = 'Free';
-        }
+      if (!header) return;
+      var status = document.getElementById('dStatus') ? document.getElementById('dStatus').value : 'private';
+      var priceEl = document.getElementById('dPrice');
+      var currencyEl = document.getElementById('dCurrency');
+      var price = priceEl ? parseFloat(priceEl.value) || 0 : 0;
+      var currency = currencyEl ? currencyEl.value : 'USD';
+      if (status === 'private') {
+        header.textContent = 'My Item';
+      } else if (status === 'willing_to_sell') {
+        header.textContent = 'Make me sell';
+      } else if (price > 0) {
+        header.textContent = fmtCurrency(price, currency);
+      } else {
+        header.textContent = 'Free';
       }
     };
 
@@ -4440,7 +4473,7 @@ Website = https://reffo.ai</pre>
         const listingStatus = document.getElementById('dStatus').value;
 
         // Confirm free listing if for_sale/for_rent with no price
-        var _savePriceEl = document.getElementById('cardPrice');
+        var _savePriceEl = document.getElementById('dPrice');
         var _savePrice = _savePriceEl ? parseFloat(_savePriceEl.value) : 0;
         if ((listingStatus === 'for_sale' || listingStatus === 'for_rent') && !_savePrice) {
           if (!confirm('No price set \\u2014 this item will be listed as Free. Continue?')) return;
@@ -4477,11 +4510,9 @@ Website = https://reffo.ai</pre>
         if (!res.ok) { const err = await res.json(); throw new Error(err.error); }
 
         // Create or update offer if price is set and not private
-        const cardPriceEl = document.getElementById('cardPrice');
-        const priceVal = cardPriceEl ? cardPriceEl.value : document.getElementById('dPrice').value;
+        const priceVal = document.getElementById('dPrice') ? document.getElementById('dPrice').value : '';
         const price = priceVal ? parseFloat(priceVal) : 0;
-        const cardCurrencyEl = document.getElementById('cardCurrency');
-        const currency = cardCurrencyEl ? cardCurrencyEl.value : document.getElementById('dCurrency').value;
+        const currency = document.getElementById('dCurrency') ? document.getElementById('dCurrency').value : 'USD';
         if (price > 0 && listingStatus !== 'private') {
           if (existingOfferId) {
             await fetch('/offers/' + existingOfferId, {
@@ -4515,7 +4546,8 @@ Website = https://reffo.ai</pre>
     window.deleteMedia = async function(refId, mediaId) {
       if (!confirm('Delete this media?')) return;
       await fetch('/refs/' + refId + '/media/' + mediaId, { method: 'DELETE' });
-      openDetail(refId);
+      await openDetail(refId);
+      enterEditMode();
     };
 
     window.uploadDetailMedia = async function(refId) {
@@ -4545,7 +4577,8 @@ Website = https://reffo.ai</pre>
       }
       if (errors.length > 0) alert(errors.join('\\n'));
       input.value = '';
-      openDetail(refId);
+      await openDetail(refId);
+      enterEditMode();
     };
 
     window.deleteRef = async function(refId) {
@@ -4706,29 +4739,34 @@ Website = https://reffo.ai</pre>
             ? '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#1A8A7D;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#1A8A7D;display:inline-block;"></span>Reffo</span>'
             : '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#45B26B;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#45B26B;display:inline-block;"></span>Beacon</span>';
 
+          // Build status badge overlay for image
+          const statusBadgeHtml = '<div class="card-status"><span class="badge ' + statusClass + '">' + statusLabel + '</span></div>';
+
           // For Reffo results, filePath is a full URL; for DHT, it's relative
           let cardImgHtml;
           if (firstPhoto && entrySource === 'reffo') {
-            cardImgHtml = '<div class="card-img" style="position:relative;"><img src="' + escapeHtml(firstPhoto.filePath) + '" alt="">' + heartBtn + '</div>';
+            cardImgHtml = '<div class="card-img"><img src="' + escapeHtml(firstPhoto.filePath) + '" alt="">' + statusBadgeHtml + heartBtn + '</div>';
           } else if (firstPhoto && peerHttpPort) {
-            cardImgHtml = '<div class="card-img" style="position:relative;"><img src="http://' + location.hostname + ':' + peerHttpPort + '/' + escapeHtml(firstPhoto.filePath) + '" alt="">' + heartBtn + '</div>';
+            cardImgHtml = '<div class="card-img"><img src="http://' + location.hostname + ':' + peerHttpPort + '/' + escapeHtml(firstPhoto.filePath) + '" alt="">' + statusBadgeHtml + heartBtn + '</div>';
           } else {
-            cardImgHtml = '<div class="card-img" style="position:relative;"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#CBD5E0"/></svg></span>' + heartBtn + '</div>';
+            cardImgHtml = '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 40 71" fill="none"><path d="M36.3314 2.40738C36.3314 2.40738 36.8264 1.42463 36.4263 0.662012C36.0263 -0.10061 35.0534 0.00517205 35.0534 0.00517205H11.1756C11.1756 0.00517205 10.5428 -0.0279334 10.1477 0.343949C9.75251 0.715831 9.59304 1.49138 9.59304 1.49138L0.238015 32.5907C0.238015 32.5907 -0.24866 33.7655 0.169465 34.6704C0.58759 35.5752 1.5753 35.4965 1.5753 35.4965H10.0645L0.5629 66.8837C0.5629 66.8837 -0.162543 68.519 1.00281 69.3381C2.16816 70.1572 3.37309 68.9223 3.37309 68.9223L37.7402 24.6034C37.7402 24.6034 38.3085 23.9493 37.9286 22.9371C37.5486 21.9249 36.7018 22.0235 36.7018 22.0235H26.875L36.3314 2.40738Z" fill="#CBD5E0"/></svg></span>' + statusBadgeHtml + heartBtn + '</div>';
           }
+
+          const searchLocParts = [item.locationCity, item.locationState].filter(Boolean);
 
           cards += '<div class="card result-card" data-source="' + entrySource + '" onclick="openRemoteDetail(' + idx + ')">' +
             cardImgHtml +
             '<div class="card-body">' +
+              '<div class="card-category">' + escapeHtml(item.category || '') + '</div>' +
               '<h3>' + escapeHtml(item.name) + '</h3>' +
-              '<div class="card-meta"><span class="badge ' + statusClass + '">' + statusLabel + '</span>' + badges + ' ' + sourceDot + '</div>' +
-              (priceStr ? '<div class="card-price">' + escapeHtml(priceStr) + '</div>' : '') +
-              (item.description ? '<div class="card-desc">' + escapeHtml(item.description) + '</div>' : '') +
-              (function() {
-                const lp = [item.locationCity, item.locationState, item.locationZip].filter(Boolean);
-                return lp.length > 0 ? '<div style="font-size:12px;color:#4A5568;margin-top:4px;font-weight:500;">Near ' + escapeHtml(lp.join(', ')) + '</div>' : '';
-              })() +
-              '<div class="beacon-id">Beacon: ' + escapeHtml(peer.beaconId.slice(0, 16)) + '...</div>' +
-              (actionBtn ? '<div style="margin-top:10px;">' + actionBtn + '</div>' : '') +
+              '<div class="card-attrs"></div>' +
+              '<div class="card-location">' + (searchLocParts.length > 0 ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>' + escapeHtml(searchLocParts.join(', ')) : '') + '</div>' +
+              '<div class="card-spacer"></div>' +
+              '<div class="card-price">' + escapeHtml(priceStr || '') + '</div>' +
+              '<div class="card-bottom-badges">' +
+                (item.condition ? '<span class="badge" style="font-size:10px;padding:2px 10px;background:#EDE8E3;color:#4A5568;">' + escapeHtml(item.condition.replace(/_/g, ' ')) + '</span>' : '') +
+                sourceDot +
+              '</div>' +
             '</div></div>';
 
           // Row view
