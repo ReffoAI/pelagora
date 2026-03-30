@@ -59,10 +59,10 @@ export function createApp(localToken?: string): express.Express {
 
   // Serve brand assets
   app.get('/favicon.ico', (_req, res) => { res.type('image/x-icon').sendFile(path.join(__dirname, '../../favicon.ico')); });
-  app.get('/footer-brand.png', (_req, res) => { res.sendFile(path.join(__dirname, '../../footer-brand.png')); });
-  app.get('/header-logo.png', (_req, res) => { res.sendFile(path.join(__dirname, '../../header-logo.png')); });
-  app.get('/pelagora-logo.png', (_req, res) => { res.sendFile(path.join(__dirname, '../../pelagora-logo.png')); });
-  app.get('/pelagora-logo-reverse.png', (_req, res) => { res.sendFile(path.join(__dirname, '../../pelagora-logo_reverse.png')); });
+  app.get('/favicon.png', (_req, res) => { res.type('image/png').sendFile(path.join(__dirname, '../../favicon.png')); });
+  app.get('/fav-reverse.png', (_req, res) => { res.type('image/png').sendFile(path.join(__dirname, '../../fav-reverse.png')); });
+  app.get('/icon.png', (_req, res) => { res.type('image/png').sendFile(path.join(__dirname, '../../icon.png')); });
+  app.get('/icon-reverse.png', (_req, res) => { res.type('image/png').sendFile(path.join(__dirname, '../../icon-reverse.png')); });
 
   app.get('/', (_req, res) => {
     res.type('html').send(renderUI(localToken));

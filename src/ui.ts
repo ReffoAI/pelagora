@@ -21,7 +21,8 @@ export function renderUI(localToken?: string): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pelagora</title>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" href="/favicon.png" media="(prefers-color-scheme: light)">
+  <link rel="icon" type="image/png" href="/fav-reverse.png" media="(prefers-color-scheme: dark)">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fira+Sans:wght@700&family=JetBrains+Mono:wght@400&family=Josefin+Sans:wght@600&display=swap" rel="stylesheet">
@@ -855,7 +856,7 @@ export function renderUI(localToken?: string): string {
   <div class="app-header">
     <div class="app-header-inner">
       <div class="app-header-logo" onclick="sidebarNav('home')">
-        <img src="/header-logo.png" alt="Pelagora" style="height:28px;width:auto;">
+        <img src="/icon.png" alt="Pelagora" style="height:28px;width:auto;">
         <span style="font-family:'Josefin Sans',sans-serif;font-size:1.1rem;font-weight:600;color:#FFFFFF;text-transform:uppercase;letter-spacing:0.18em;">Pelagora</span>
       </div>
 
@@ -939,7 +940,7 @@ export function renderUI(localToken?: string): string {
   <div id="sidebarLogoOverlay" class="sidebar-logo-overlay" style="position:fixed;top:0;left:0;z-index:112;transition:width 0.3s;pointer-events:none;width:240px;">
     <div style="position:relative;display:flex;align-items:center;padding:14px 16px 12px;gap:8px;pointer-events:auto;">
       <a onclick="sidebarNav('home')" style="cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none;">
-        <img src="/pelagora-logo.png" alt="Pelagora" class="sidebar-logo-img" style="height:28px;width:auto;">
+        <img src="/icon.png" alt="Pelagora" class="sidebar-logo-img" style="height:28px;width:auto;">
         <span class="sidebar-logo-text" style="font-family:'Fira Sans',sans-serif;font-size:18px;font-weight:700;color:#1A1A2E;">Pelagora</span>
       </a>
       <button type="button" onclick="toggleSidebarCollapse()" class="sidebar-collapse-btn" title="Collapse sidebar" style="position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;border:1px solid #CBD5E0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#4A5568;box-shadow:0 1px 4px rgba(0,0,0,0.08);transition:all 0.2s;">
@@ -2326,7 +2327,7 @@ Website = https://reffo.ai</pre>
       <div class="app-footer-grid">
         <!-- Col 1: Logo -->
         <div class="app-footer-brand">
-          <img src="/pelagora-logo.png" alt="Pelagora" style="height: 40px; width: auto;">
+          <img src="/icon.png" alt="Pelagora" style="height: 40px; width: auto;">
           <button id="footerUpdateBtn" class="button-gradient" style="display:none;height:32px;padding:0 16px;font-size:12px;border-radius:16px;" onclick="switchTab('settings')">&#x2B06; Update</button>
         </div>
 
