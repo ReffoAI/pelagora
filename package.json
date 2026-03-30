@@ -1,13 +1,17 @@
 {
   "name": "pelagora",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Self-hosted Pelagora node",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist",
     "favicon.ico",
-    "footer-brand.png",
+    "favicon.png",
+    "fav-reverse.png",
+    "icon.png",
+    "icon-reverse.png",
+    "l_favicon.ico",
     "LICENSE",
     "README.md",
     "CHANGELOG.md"
