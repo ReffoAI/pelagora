@@ -4,6 +4,34 @@ All notable changes to **pelagora** will be documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/) and [Semantic Versioning](https://semver.org/).
 
+## [0.2.5] — 2026-03-29
+
+### Changed
+- Brand asset refresh: new favicon and icon PNGs with dark/light mode variants
+- Updated README with responsive logo images for dark and light themes
+
+---
+
+## [0.2.4] — 2026-03-29
+
+### Added
+- npm registry polling for automatic update notifications
+- Unified card layout with consistent heights and image-overlay badges
+
+### Fixed
+- Edit mode UX: Save/Cancel toggle, image reorder, form state consolidation
+
+---
+
+## [0.2.3] — 2026-03-28
+
+### Fixed
+- Sidebar logo uses pelagora-logo.png with Pelagora text in collapsed state
+- Footer uses pelagora-logo.png; search bar items vertically centered
+- Header expands correctly for search bar; footer responds to sidebar collapse
+
+---
+
 ## [0.2.2] — 2026-03-26
 
 ### Added
