@@ -4,6 +4,13 @@ All notable changes to **pelagora** will be documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/) and [Semantic Versioning](https://semver.org/).
 
+## [0.2.6] — 2026-04-02
+
+### Added
+- Pre-release banner at top of page indicating active development status
+
+---
+
 ## [0.2.5] — 2026-03-29
 
 ### Changed
