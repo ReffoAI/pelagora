@@ -5,6 +5,7 @@ import fs from 'fs';
 import { v4 as uuid } from 'uuid';
 import { RefQueries, MediaQueries } from '../db';
 import type { MediaType } from '@pelagora/pim-protocol';
+import { sanitizeField } from '@pelagora/pim-protocol';
 
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 
@@ -153,9 +154,26 @@ router.post('/from-url', async (req: Request, res: Response) => {
   const media = new MediaQueries();
   const refId = String(req.params.refId);
 
-  const { url } = req.body;
-  if (!url || typeof url !== 'string') {
+  const { url: rawUrl } = req.body;
+  if (!rawUrl || typeof rawUrl !== 'string') {
     return res.status(400).json({ error: 'url is required' });
+  }
+
+  const url = sanitizeField(rawUrl, 'url');
+
+  // SSRF protection: only allow http/https schemes
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return res.status(400).json({ error: 'Only http and https URLs are allowed' });
+    }
+    // Block requests to localhost/internal IPs
+    const hostname = parsed.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]' || hostname === '::1' || hostname === '0.0.0.0') {
+      return res.status(400).json({ error: 'URLs pointing to local addresses are not allowed' });
+    }
+  } catch {
+    return res.status(400).json({ error: 'Invalid URL format' });
   }
 
   const ref = refs.get(refId);

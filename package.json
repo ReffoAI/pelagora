@@ -40,12 +40,13 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
-    "@pelagora/pim-protocol": "^0.3.0",
+    "@pelagora/pim-protocol": "^0.4.0",
     "@pelagora/skill-reverse-auction": "^1.0.0",
     "b4a": "^1.6.7",
     "better-sqlite3": "^11.7.0",
     "express": "^4.21.0",
     "express-rate-limit": "^8.3.1",
+    "helmet": "^8.1.0",
     "hyperswarm": "^4.8.4",
     "multer": "^2.0.2",
     "uuid": "^11.0.0"

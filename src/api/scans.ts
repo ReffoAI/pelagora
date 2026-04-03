@@ -9,6 +9,7 @@ import { getDb } from '../db/schema';
 import { getAttributeKeys } from '../ref-schemas';
 import { callProductLookup, type AiProvider } from '../ai/product-lookup';
 import { resolveUpc, resolveUpcViaSearch, identifyUpcWithAI, resolveUpcViaReffo } from '../ai/upc-lookup';
+import { sanitizeObject, sanitizeField } from '@pelagora/pim-protocol';
 
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 const SCAN_DIR = path.join(UPLOADS_DIR, 'scans');
@@ -167,7 +168,7 @@ router.patch('/:scanId/items/:itemId', (req: Request, res: Response) => {
   if (!item || item.scanId !== (req.params.scanId as string)) {
     return res.status(404).json({ error: 'Scan item not found' });
   }
-  const { name, category, condition, description, priceLow, priceHigh, priceTypical } = req.body;
+  const { name, category, condition, description, priceLow, priceHigh, priceTypical } = sanitizeObject(req.body);
   const updated = scanItemsQ.update(req.params.itemId as string, {
     name, category, condition, description,
     priceLow: priceLow != null ? Number(priceLow) : undefined,
@@ -180,7 +181,8 @@ router.patch('/:scanId/items/:itemId', (req: Request, res: Response) => {
 
 // POST /scans/confirm — Confirm selected scan items into refs
 router.post('/confirm', async (req: Request, res: Response) => {
-  const { scanId, itemIds, collectionId, listingStatuses, acceptedPaymentMethods, locationCity, locationState, locationZip } = req.body as {
+  const body = sanitizeObject(req.body);
+  const { scanId, itemIds, collectionId, listingStatuses, acceptedPaymentMethods, locationCity, locationState, locationZip } = body as {
     scanId: string;
     itemIds: string[];
     collectionId?: string;
@@ -317,12 +319,12 @@ router.post('/confirm', async (req: Request, res: Response) => {
 // POST /scans/barcode — Multi-stage UPC/barcode lookup
 // Fallback chain: cache → UPCitemdb → Serper+AI → direct AI → Reffo.ai
 router.post('/barcode', async (req: Request, res: Response) => {
-  const { upc, name: manualName } = req.body;
+  const { upc, name: manualName } = sanitizeObject(req.body);
   if (!upc || typeof upc !== 'string' || !upc.trim()) {
     return res.status(400).json({ error: 'upc is required' });
   }
 
-  const trimmedUpc = upc.trim();
+  const trimmedUpc = sanitizeField(upc.trim(), 'sku');
   const db = getDb();
 
   // 1. Check cache by SKU (the UPC itself)

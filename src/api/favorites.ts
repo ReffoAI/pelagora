@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { FavoriteQueries } from '../db';
+import { sanitizeObject } from '@pelagora/pim-protocol';
 
 const router = Router();
 
@@ -18,7 +19,7 @@ router.get('/ids', (_req: Request, res: Response) => {
 // POST /favorites/toggle — toggle favorite on/off
 router.post('/toggle', (req: Request, res: Response) => {
   const favorites = new FavoriteQueries();
-  const { refId, refName, beaconId, offerPrice, offerCurrency, listingStatus, category, subcategory, locationCity, locationState, locationZip, imageUrl } = req.body;
+  const { refId, refName, beaconId, offerPrice, offerCurrency, listingStatus, category, subcategory, locationCity, locationState, locationZip, imageUrl } = sanitizeObject(req.body);
 
   if (!refId || typeof refId !== 'string') {
     return res.status(400).json({ error: 'refId is required' });

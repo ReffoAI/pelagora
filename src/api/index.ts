@@ -1,5 +1,7 @@
 import express from 'express';
 import path from 'path';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import healthRouter from './health';
 import refsRouter from './refs';
 import offersRouter from './offers';
@@ -12,11 +14,36 @@ import scansRouter from './scans';
 import conversationsRouter from './conversations';
 import { renderUI } from '../ui';
 import { TAXONOMY } from '../taxonomy';
+import { SanitizationError } from '@pelagora/pim-protocol';
 
 export function createApp(localToken?: string): express.Express {
   const app = express();
 
-  app.use(express.json());
+  // --- Security: Helmet security headers ---
+  app.use(helmet({
+    contentSecurityPolicy: false, // CSP is complex for the embedded UI; handle separately if needed
+  }));
+
+  app.use(express.json({ limit: '1mb' }));
+
+  // --- Security: Rate limiting ---
+  // General limiter: 200 requests per 15 minutes per IP
+  const generalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later' },
+  });
+  // Strict limiter for write operations: 30 requests per 15 minutes per IP
+  const writeLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many write requests, please try again later' },
+  });
+  app.use(generalLimiter);
 
   // --- Security: Host header validation (DNS rebinding protection) ---
   app.use((req, res, next) => {
@@ -99,17 +126,21 @@ export function createApp(localToken?: string): express.Express {
 
   app.use('/health', healthRouter);
   app.use('/refs', refsRouter);
-  app.use('/refs/:refId/media', mediaRouter);
+  app.use('/refs/:refId/media', writeLimiter, mediaRouter);
   app.use('/offers', offersRouter);
   app.use('/negotiations', negotiationsRouter);
   app.use('/settings', settingsRouter);
   app.use('/favorites', favoritesRouter);
   app.use('/collections', collectionsRouter);
-  app.use('/scans', scansRouter);
+  app.use('/scans', writeLimiter, scansRouter);
   app.use('/conversations', conversationsRouter);
 
-  // Global error handler — catches multer errors, etc., and returns JSON instead of HTML
+  // Global error handler — catches SanitizationError, multer errors, etc.
   app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    // SanitizationError → 400 with field-level detail
+    if (err instanceof SanitizationError) {
+      return res.status(400).json({ error: err.message, field: err.field });
+    }
     console.error('[API] Error:', err.message);
     // Multer file filter errors and video-disabled errors should be 400
     if (err.message && (err.message.includes('Video uploads are temporarily disabled') || err.message.includes('Unsupported file type'))) {

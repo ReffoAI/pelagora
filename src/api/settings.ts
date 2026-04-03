@@ -5,7 +5,7 @@ import multer from 'multer';
 import { v4 as uuid } from 'uuid';
 import { SettingsQueries } from '../db';
 import type { SellingScope } from '@pelagora/pim-protocol';
-import { sanitizeObject } from '@pelagora/pim-protocol';
+import { sanitizeObject, validateCoordinates } from '@pelagora/pim-protocol';
 import { getVersion } from '../version';
 import { getDb } from '../db/schema';
 import { getAttributeKeys } from '../ref-schemas';
@@ -155,6 +155,14 @@ router.post('/location', (req: Request, res: Response) => {
 
   if (defaultSellingRadiusMiles !== undefined && (typeof defaultSellingRadiusMiles !== 'number' || defaultSellingRadiusMiles < 1)) {
     return res.status(400).json({ error: 'Selling radius must be a positive number' });
+  }
+
+  // Validate coordinates if provided
+  if (locationLat != null && locationLng != null) {
+    const coords = validateCoordinates(locationLat, locationLng);
+    if (!coords.valid) {
+      return res.status(400).json({ error: coords.error });
+    }
   }
 
   const settingsQ = new SettingsQueries();

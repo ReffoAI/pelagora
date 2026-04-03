@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { CollectionQueries } from '../db';
+import { sanitizeObject } from '@pelagora/pim-protocol';
 
 const router = Router();
 
@@ -17,7 +18,7 @@ router.get('/', (_req: Request, res: Response) => {
 // POST /collections
 router.post('/', (req: Request, res: Response) => {
   const collections = new CollectionQueries();
-  const { name, description } = req.body;
+  const { name, description } = sanitizeObject(req.body);
 
   if (!name || typeof name !== 'string') {
     return res.status(400).json({ error: 'name is required' });
@@ -45,7 +46,7 @@ router.get('/:id', (req: Request, res: Response) => {
 // PATCH /collections/:id
 router.patch('/:id', (req: Request, res: Response) => {
   const collections = new CollectionQueries();
-  const { name, description } = req.body;
+  const { name, description } = sanitizeObject(req.body);
 
   const updated = collections.update(String(req.params.id), { name, description });
   if (!updated) return res.status(404).json({ error: 'Collection not found' });
