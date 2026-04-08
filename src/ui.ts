@@ -549,6 +549,8 @@ export function renderUI(localToken?: string): string {
       justify-content: center; color: #4A5568; transition: all 0.2s;
     }
     .detail-title-actions button:hover { border-color: #1A1A2E; color: #1A1A2E; }
+    .detail-title-actions .action-pill { width: auto; height: 32px; border-radius: 16px; padding: 0 14px; font-size: 12px; font-weight: 600; white-space: nowrap; border: none; font-family: 'DM Sans', sans-serif; }
+    .detail-title-actions .action-pill:hover { opacity: 0.9; }
 
     .detail-posted-line {
       display: flex; align-items: center; gap: 10px;
@@ -3973,7 +3975,7 @@ Website = https://reffo.ai</pre>
           }
         }
 
-        const priceDisplay = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : 'No price';
+        const priceDisplay = ref.listingStatus === 'sold_out' ? 'Sold Out' : ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : 'No price';
         const locParts = [ref.locationCity, ref.locationState, ref.locationZip].filter(Boolean);
         const scopeLabels = { global: 'Global', national: 'National', range: 'Range' };
         let scopeText = '';
@@ -4001,9 +4003,9 @@ Website = https://reffo.ai</pre>
         html += '<button title="Save"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
         // Sold Out / Restock action button
         if (ref.listingStatus === 'sold_out') {
-          html += '<button onclick="restockRef(\\'' + ref.id + '\\')" style="background:#2D8A6E;color:#fff;border-color:#2D8A6E;font-size:12px;padding:0 14px;height:32px;border-radius:16px;" title="Restock">Restock</button>';
+          html += '<button class="action-pill" onclick="restockRef(\\'' + ref.id + '\\')" style="background:#2D8A6E;color:#fff;" title="Restock">Restock</button>';
         } else if (['for_sale', 'willing_to_sell', 'for_rent'].includes(ref.listingStatus)) {
-          html += '<button onclick="markSoldOut(\\'' + ref.id + '\\')" style="background:#C94444;color:#fff;border-color:#C94444;font-size:12px;padding:0 14px;height:32px;border-radius:16px;" title="Mark as Sold Out">Sold Out</button>';
+          html += '<button class="action-pill" onclick="markSoldOut(\\'' + ref.id + '\\')" style="background:#C94444;color:#fff;" title="Mark as Sold Out">Sold Out</button>';
         }
         html += '</div></div>';
         html += '<div class="detail-posted-line">';
@@ -4289,8 +4291,9 @@ Website = https://reffo.ai</pre>
 
         if (listedDate) {
           let footerText = 'Listed ' + listedDate;
-          if (ref.listingStatus === 'for_sale' || ref.listingStatus === 'willing_to_sell') footerText += ' · Open to negotiation';
-          if (ref.listingStatus === 'for_rent') footerText += ' · Available for rent';
+          if (ref.listingStatus === 'sold_out') footerText += ' · Currently sold out';
+          else if (ref.listingStatus === 'for_sale' || ref.listingStatus === 'willing_to_sell') footerText += ' · Open to negotiation';
+          else if (ref.listingStatus === 'for_rent') footerText += ' · Available for rent';
           html += '<div class="payment-card-footer">' + footerText + '</div>';
         }
 
@@ -4456,6 +4459,8 @@ Website = https://reffo.ai</pre>
       var currency = currencyEl ? currencyEl.value : 'USD';
       if (status === 'private') {
         header.textContent = 'My Item';
+      } else if (status === 'sold_out') {
+        header.textContent = 'Sold Out';
       } else if (status === 'willing_to_sell') {
         header.textContent = 'Make me sell';
       } else if (price > 0) {
