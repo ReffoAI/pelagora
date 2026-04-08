@@ -549,8 +549,8 @@ export function renderUI(localToken?: string): string {
       justify-content: center; color: #4A5568; transition: all 0.2s;
     }
     .detail-title-actions button:hover { border-color: #1A1A2E; color: #1A1A2E; }
-    .detail-title-actions .action-pill { width: auto; height: 32px; border-radius: 16px; padding: 0 14px; font-size: 12px; font-weight: 600; white-space: nowrap; border: none; font-family: 'DM Sans', sans-serif; }
-    .detail-title-actions .action-pill:hover { opacity: 0.9; }
+    .detail-title-actions .action-pill { width: auto !important; height: 32px !important; border-radius: 16px !important; padding: 0 14px !important; font-size: 12px !important; font-weight: 600 !important; white-space: nowrap !important; border: none !important; font-family: 'DM Sans', sans-serif; }
+    .detail-title-actions .action-pill:hover { opacity: 0.9; border-color: transparent !important; }
 
     .detail-posted-line {
       display: flex; align-items: center; gap: 10px;
@@ -2696,7 +2696,7 @@ Website = https://reffo.ai</pre>
           var imgHtml = firstPhoto
             ? '<img src="/' + escapeHtml(firstPhoto.filePath) + '" alt="">'
             : '<div style="height:140px;display:flex;align-items:center;justify-content:center;background:var(--bg);color:#D2D5DB;font-size:32px;">&#x1F4F7;</div>';
-          var price = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : ref.price > 0 ? fmtCurrency(ref.price, 'USD') : (ref.listingStatus !== 'private' ? 'Free' : '');
+          var price = ref.listingStatus === 'sold_out' ? 'Sold Out' : ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : ref.price > 0 ? fmtCurrency(ref.price, 'USD') : (ref.listingStatus !== 'private' ? 'Free' : '');
           var statusLabel = statusLabels[ref.listingStatus] || 'Private';
           var statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
           return '<div class="home-recent-card" onclick="openDetail(\\'' + ref.id + '\\')">' + imgHtml + '<div class="card-body"><div class="card-name">' + escapeHtml(ref.name) + '</div><div class="card-meta">' + escapeHtml(ref.category || '') + ' <span class="status-badge ' + statusClass + '">' + statusLabel + '</span></div>' + (price ? '<div class="card-price">' + price + '</div>' : '') + '</div></div>';
@@ -3855,7 +3855,7 @@ Website = https://reffo.ai</pre>
           '<div class="rows">' + refs.map(ref => {
             const refOffers = offerMap[ref.id] || [];
             const activeOffer = refOffers.find(o => o.status === 'active');
-            const priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : (ref.listingStatus !== 'private' ? 'Free' : '');
+            const priceStr = ref.listingStatus === 'sold_out' ? 'Sold Out' : ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : (ref.listingStatus !== 'private' ? 'Free' : '');
             const photos = (mediaMap[ref.id] || []).filter(m => m.mediaType === 'photo');
             const firstPhoto = photos[0];
             const statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
@@ -3888,7 +3888,7 @@ Website = https://reffo.ai</pre>
           container.innerHTML = '<div class="cards">' + refs.map(ref => {
             const refOffers = offerMap[ref.id] || [];
             const activeOffer = refOffers.find(o => o.status === 'active');
-            const priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : (ref.listingStatus !== 'private' ? 'Free' : '');
+            const priceStr = ref.listingStatus === 'sold_out' ? 'Sold Out' : ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : (ref.listingStatus !== 'private' ? 'Free' : '');
             const photos = (mediaMap[ref.id] || []).filter(m => m.mediaType === 'photo');
             const firstPhoto = photos[0];
             const catBadges = [ref.category, ref.subcategory].filter(Boolean).map(b =>
