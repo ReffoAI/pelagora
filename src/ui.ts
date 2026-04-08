@@ -844,15 +844,8 @@ export function renderUI(localToken?: string): string {
     .home-section-label { text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; color: #4A5568; margin-bottom: 4px; }
     .home-section h3 { font-size: 1.35rem; font-weight: 700; margin: 0 0 24px; }
     .home-quick-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 0 24px 8px; }
-    .home-recent-grid { display: flex; gap: 16px; overflow: hidden; }
-    .home-recent-grid .home-recent-card { min-width: 200px; max-width: 260px; flex: 1 1 0; }
-    .home-recent-card { background: #FFFFFF; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
-    .home-recent-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.10); }
-    .home-recent-card img { width: 100%; height: 140px; object-fit: cover; display: block; }
-    .home-recent-card .card-body { padding: 12px 14px; }
-    .home-recent-card .card-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .home-recent-card .card-meta { font-size: 12px; color: #4A5568; margin-top: 4px; }
-    .home-recent-card .card-price { font-weight: 600; font-size: 14px; color: #0A5E8A; margin-top: 6px; }
+    .home-recent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .home-recent-grid .card { min-width: 0; }
     .home-recent-empty { text-align: center; padding: 48px 24px; color: #4A5568; }
     .home-recent-empty p { margin: 0 0 16px; font-size: 14px; }
     @media (max-width: 767px) { .home-hero { padding: 48px 16px 40px; } }
@@ -2684,6 +2677,10 @@ Website = https://reffo.ai</pre>
           return;
         }
         const mediaMap = {};
+        const offersRes = await fetch('/offers');
+        const allOffers = await offersRes.json();
+        const homeOfferMap = {};
+        allOffers.forEach(function(o) { if (!homeOfferMap[o.refId]) homeOfferMap[o.refId] = []; homeOfferMap[o.refId].push(o); });
         await Promise.all(data.recentItems.map(async function(ref) {
           try {
             const mRes = await fetch('/refs/' + ref.id + '/media');
@@ -2693,13 +2690,25 @@ Website = https://reffo.ai</pre>
         container.innerHTML = '<div class="home-recent-grid">' + data.recentItems.map(function(ref) {
           var photos = (mediaMap[ref.id] || []).filter(function(m) { return m.mediaType === 'photo'; });
           var firstPhoto = photos[0];
-          var imgHtml = firstPhoto
-            ? '<img src="/' + escapeHtml(firstPhoto.filePath) + '" alt="">'
-            : '<div style="height:140px;display:flex;align-items:center;justify-content:center;background:var(--bg);color:#D2D5DB;font-size:32px;">&#x1F4F7;</div>';
-          var price = ref.listingStatus === 'sold_out' ? 'Sold Out' : ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : ref.price > 0 ? fmtCurrency(ref.price, 'USD') : (ref.listingStatus !== 'private' ? 'Free' : '');
+          var refOffers = homeOfferMap[ref.id] || [];
+          var activeOffer = refOffers.find(function(o) { return o.status === 'active'; });
+          var priceStr = ref.listingStatus === 'sold_out' ? 'Sold Out' : ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : (ref.listingStatus !== 'private' ? 'Free' : '');
           var statusLabel = statusLabels[ref.listingStatus] || 'Private';
           var statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
-          return '<div class="home-recent-card" onclick="openDetail(\\'' + ref.id + '\\')">' + imgHtml + '<div class="card-body"><div class="card-name">' + escapeHtml(ref.name) + '</div><div class="card-meta">' + escapeHtml(ref.category || '') + ' <span class="status-badge ' + statusClass + '">' + statusLabel + '</span></div>' + (price ? '<div class="card-price">' + price + '</div>' : '') + '</div></div>';
+          var imgHtml = firstPhoto
+            ? '<div class="card-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""><div class="card-status"><span class="badge ' + statusClass + '">' + statusLabel + '</span></div></div>'
+            : '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></span><div class="card-status"><span class="badge ' + statusClass + '">' + statusLabel + '</span></div></div>';
+          return '<div class="card" onclick="openDetail(\\'' + ref.id + '\\')">' +
+            imgHtml +
+            '<div class="card-body">' +
+              '<div class="card-category">' + escapeHtml(ref.category || '') + '</div>' +
+              '<h3>' + escapeHtml(ref.name) + '</h3>' +
+              '<div class="card-attrs"></div>' +
+              '<div class="card-location"></div>' +
+              '<div class="card-spacer"></div>' +
+              '<div class="card-price">' + escapeHtml(priceStr || '') + '</div>' +
+              '<div class="card-bottom-badges"></div>' +
+            '</div></div>';
         }).join('') + '</div>';
         homeLoaded = true;
       } catch(e) {
@@ -4003,9 +4012,9 @@ Website = https://reffo.ai</pre>
         html += '<button title="Save"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
         // Sold Out / Restock action button
         if (ref.listingStatus === 'sold_out') {
-          html += '<button class="action-pill" onclick="restockRef(\\'' + ref.id + '\\')" style="background:#2D8A6E;color:#fff;" title="Restock">Restock</button>';
+          html += '<button class="action-pill" onclick="restockRef(\\'' + ref.id + '\\')" style="background:#2D8A6E;color:#fff;" title="Restock"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Restock</button>';
         } else if (['for_sale', 'willing_to_sell', 'for_rent'].includes(ref.listingStatus)) {
-          html += '<button class="action-pill" onclick="markSoldOut(\\'' + ref.id + '\\')" style="background:#C94444;color:#fff;" title="Mark as Sold Out">Sold Out</button>';
+          html += '<button class="action-pill" onclick="markSoldOut(\\'' + ref.id + '\\')" style="background:transparent;color:#C94444;border:1.5px solid #C94444 !important;" title="Mark as Sold Out">Mark Sold Out</button>';
         }
         html += '</div></div>';
         html += '<div class="detail-posted-line">';
