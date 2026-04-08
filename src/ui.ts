@@ -226,6 +226,7 @@ export function renderUI(localToken?: string): string {
     .badge-for-sale { background: #2D8A6E; color: #FFFFFF; }
     .badge-willing { background: #D4922A; color: #FFFFFF; }
     .badge-for-rent { background: #4A90D9; color: #FFFFFF; }
+    .badge-sold-out { background: #C94444; color: #FFFFFF; }
     .card-price { font-size: 16px; font-weight: 700; color: #1A1A2E; }
     .card-qty { font-size: 12px; color: #4A5568; margin-top: 4px; font-weight: 500; }
     .card-bottom-badges { display: flex; align-items: center; gap: 6px; height: 22px; overflow: hidden; margin-top: 4px; }
@@ -238,6 +239,17 @@ export function renderUI(localToken?: string): string {
     .seg-active-for_sale { background:#16A34A !important; color:#fff !important; }
     .seg-active-willing_to_sell { background:#D97706 !important; color:#fff !important; }
     .seg-active-for_rent { background:#2563EB !important; color:#fff !important; }
+    .seg-active-sold_out { background:#C94444 !important; color:#fff !important; }
+
+    /* Stock type toggle */
+    .stock-toggle { display: flex; border-radius: 10px; overflow: hidden; border: 1px solid #CBD5E0; margin-bottom: 14px; }
+    .stock-toggle button { flex: 1; padding: 8px 12px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; background: transparent; color: #4A5568; text-align: center; white-space: nowrap; font-family: 'DM Sans', sans-serif; }
+    .stock-toggle button.active { background: #1A1A2E; color: #fff; }
+
+    /* Negotiable indicator */
+    .negotiable-tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 8px; margin-left: 6px; vertical-align: middle; }
+    .negotiable-tag.obo { background: #FFF3E0; color: #D4922A; }
+    .negotiable-tag.firm { background: #EDE8E3; color: #4A5568; }
 
     /* Fieldset chevrons */
     details > summary .chevron-indicator { transition: transform 0.3s; }
@@ -1885,7 +1897,14 @@ export function renderUI(localToken?: string): string {
 
         <div id="createCategoryFields"></div>
 
-        <div class="row">
+        <label style="font-size:11px;margin-bottom:6px;">Stock Type</label>
+        <div class="stock-toggle" id="createStockToggle">
+          <button type="button" class="active" onclick="selectCreateStock('tracked')">Track Quantity</button>
+          <button type="button" onclick="selectCreateStock('unlimited')">Unlimited Stock</button>
+        </div>
+        <input type="hidden" id="refStockType" value="tracked">
+
+        <div id="createQtyRow" class="row">
           <div>
             <label for="refQuantity">Quantity</label>
             <input id="refQuantity" name="quantity" type="number" min="1" step="1" value="1">
@@ -1909,6 +1928,12 @@ export function renderUI(localToken?: string): string {
                 <option value="JPY">JPY</option>
               </select>
             </div>
+          </div>
+          <div id="createNegotiableRow" style="margin-top:-6px;margin-bottom:14px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;color:#4A5568;text-transform:none;letter-spacing:0;">
+              <input type="checkbox" id="refPriceFirm" style="width:16px;height:16px;accent-color:#D4602A;cursor:pointer;">
+              Price is Firm <span style="font-size:11px;color:#718096;">(uncheck for OBO)</span>
+            </label>
           </div>
         </div>
         <div id="createPriceEstimate"></div>
@@ -2964,6 +2989,31 @@ Website = https://reffo.ai</pre>
       }
     };
 
+    window.markSoldOut = async function(refId) {
+      if (!confirm('Mark this item as Sold Out?')) return;
+      try {
+        var res = await fetch('/refs/' + refId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listingStatus: 'sold_out' }) });
+        if (!res.ok) throw new Error('Failed');
+        showToast('Marked as Sold Out', 'rejected');
+        homeLoaded = false;
+        await openDetail(refId);
+      } catch(e) {
+        showToast('Failed to mark as sold out', 'rejected');
+      }
+    };
+
+    window.restockRef = async function(refId) {
+      try {
+        var res = await fetch('/refs/' + refId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listingStatus: 'for_sale' }) });
+        if (!res.ok) throw new Error('Failed');
+        showToast('Item restocked', 'accepted');
+        homeLoaded = false;
+        await openDetail(refId);
+      } catch(e) {
+        showToast('Failed to restock', 'rejected');
+      }
+    };
+
     window.deleteRefWithConfirm = async function(refId) {
       if (!confirm('Delete this ref? It will be moved to the archive.')) return;
       try {
@@ -3361,8 +3411,8 @@ Website = https://reffo.ai</pre>
       input.click();
     }
 
-    const statusLabels = { private: 'Private', for_sale: 'For Sale', willing_to_sell: 'Willing to Sell', for_rent: 'For Rent', archived_sold: 'Sold (Archived)', archived_deleted: 'Deleted (Archived)' };
-    const statusBadgeClass = { private: 'badge-private', for_sale: 'badge-for-sale', willing_to_sell: 'badge-willing', for_rent: 'badge-for-rent', archived_sold: 'badge-archived-sold', archived_deleted: 'badge-archived-deleted' };
+    const statusLabels = { private: 'Private', for_sale: 'For Sale', willing_to_sell: 'Willing to Sell', for_rent: 'For Rent', sold_out: 'Sold Out', archived_sold: 'Sold (Archived)', archived_deleted: 'Deleted (Archived)' };
+    const statusBadgeClass = { private: 'badge-private', for_sale: 'badge-for-sale', willing_to_sell: 'badge-willing', for_rent: 'badge-for-rent', sold_out: 'badge-sold-out', archived_sold: 'badge-archived-sold', archived_deleted: 'badge-archived-deleted' };
     const negStatusLabels = { pending: 'Pending', accepted: 'Under Contract', rejected: 'Rejected', countered: 'Countered', withdrawn: 'Withdrawn', sold: 'Sold' };
 
     let lastSearchResults = [];
@@ -3556,7 +3606,9 @@ Website = https://reffo.ai</pre>
         const category = document.getElementById('refCat').value;
         const subcategory = document.getElementById('refSubcat').value;
         const listingStatus = document.getElementById('refListingStatus').value;
+        const stockType = document.getElementById('refStockType').value || 'tracked';
         const quantity = parseInt(document.getElementById('refQuantity').value) || 1;
+        const negotiable = !document.getElementById('refPriceFirm').checked;
         const priceVal = document.getElementById('refPrice').value;
         const price = priceVal ? parseFloat(priceVal) : 0;
         const currency = document.getElementById('refCurrency').value;
@@ -3597,7 +3649,7 @@ Website = https://reffo.ai</pre>
         const refRes = await fetch('/refs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, description, category, subcategory, listingStatus, quantity, sku,
+          body: JSON.stringify({ name, description, category, subcategory, listingStatus, quantity, stockType, negotiable, sku,
             locationCity: locCity, locationState: locState, locationZip: locZip,
             locationLat: locLat, locationLng: locLng,
             sellingScope, sellingRadiusMiles, condition, attributes,
@@ -3647,9 +3699,12 @@ Website = https://reffo.ai</pre>
         showMsg('listMsg', 'Ref added successfully!', true);
         e.target.reset();
         document.getElementById('refQuantity').value = '1';
+        document.getElementById('refStockType').value = 'tracked';
+        selectCreateStock('tracked');
+        document.getElementById('refPriceFirm').checked = false;
         document.getElementById('refSubcat').innerHTML = '<option value="">Select...</option>';
         document.getElementById('createCategoryFields').innerHTML = '';
-        // Reset segmented control to Private
+        // Reset segmented control to For Sale
         selectCreateStatus('for_sale');
         document.getElementById('createPriceEstimate').innerHTML = '';
         selectedPhotos = [];
@@ -3855,7 +3910,9 @@ Website = https://reffo.ai</pre>
                 '<div class="card-attrs">' + escapeHtml(cardAttrSummary || '') + '</div>' +
                 '<div class="card-location">' + (locParts.length > 0 ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>' + escapeHtml(locParts.join(', ')) : '') + '</div>' +
                 '<div class="card-spacer"></div>' +
-                '<div class="card-price">' + escapeHtml(priceStr || '') + '</div>' +
+                '<div class="card-price">' + escapeHtml(priceStr || '') +
+                  (ref.listingStatus === 'for_sale' ? (ref.negotiable === false ? '<span class="negotiable-tag firm">Firm</span>' : '<span class="negotiable-tag obo">OBO</span>') : '') +
+                '</div>' +
                 '<div class="card-bottom-badges">' +
                   (ref.condition ? '<span class="badge" style="font-size:10px;padding:2px 10px;background:#EDE8E3;color:#4A5568;">' + escapeHtml(ref.condition.replace(/_/g, ' ')) + '</span>' : '') +
                   (ref.networkPublished ? '<span class="badge" style="font-size:10px;padding:2px 10px;background:#1A8A7D;color:#fff;">Published</span>' : '') +
@@ -3942,6 +3999,12 @@ Website = https://reffo.ai</pre>
           ? 'navigator.clipboard.writeText(\\'' + shareUrl1 + '\\').then(function(){ showToast(\\'Link copied!\\',\\'\\'); })'
           : 'showToast(\\'List publicly to get a shareable link\\',\\'\\')') + '" title="Share"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>';
         html += '<button title="Save"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
+        // Sold Out / Restock action button
+        if (ref.listingStatus === 'sold_out') {
+          html += '<button onclick="restockRef(\\'' + ref.id + '\\')" style="background:#2D8A6E;color:#fff;border-color:#2D8A6E;font-size:12px;padding:0 14px;height:32px;border-radius:16px;" title="Restock">Restock</button>';
+        } else if (['for_sale', 'willing_to_sell', 'for_rent'].includes(ref.listingStatus)) {
+          html += '<button onclick="markSoldOut(\\'' + ref.id + '\\')" style="background:#C94444;color:#fff;border-color:#C94444;font-size:12px;padding:0 14px;height:32px;border-radius:16px;" title="Mark as Sold Out">Sold Out</button>';
+        }
         html += '</div></div>';
         html += '<div class="detail-posted-line">';
         var dn = window._myDisplayName || 'You';
@@ -4022,8 +4085,22 @@ Website = https://reffo.ai</pre>
 
         html += '<div class="row"><div><label>Listing Price</label><input id="dPrice" type="number" min="0" step="0.01" value="' + (activeOffer ? activeOffer.price : '') + '" oninput="updateCardPriceHeader()"></div>';
         html += '<div><label>Currency</label><select id="dCurrency" onchange="updateCardPriceHeader()"><option value="USD"' + ((activeOffer && activeOffer.priceCurrency === 'USD') || !activeOffer ? ' selected' : '') + '>USD</option><option value="EUR"' + (activeOffer && activeOffer.priceCurrency === 'EUR' ? ' selected' : '') + '>EUR</option><option value="GBP"' + (activeOffer && activeOffer.priceCurrency === 'GBP' ? ' selected' : '') + '>GBP</option></select></div></div>';
-        html += '<div class="row"><div><label>Quantity</label><input id="dQty" type="number" min="1" value="' + ref.quantity + '"></div>';
+        // Stock type toggle
+        var detailStockType = ref.stockType || 'tracked';
+        html += '<label style="font-size:11px;margin-bottom:6px;">Stock Type</label>';
+        html += '<div class="stock-toggle" id="detailStockToggle">';
+        html += '<button type="button" class="' + (detailStockType === 'tracked' ? 'active' : '') + '" onclick="selectDetailStock(\\'tracked\\')">Track Quantity</button>';
+        html += '<button type="button" class="' + (detailStockType === 'unlimited' ? 'active' : '') + '" onclick="selectDetailStock(\\'unlimited\\')">Unlimited Stock</button>';
+        html += '</div>';
+        html += '<input type="hidden" id="dStockType" value="' + detailStockType + '">';
+        html += '<div id="detailQtyRow" class="row" style="' + (detailStockType === 'unlimited' ? 'display:none;' : '') + '"><div><label>Quantity</label><input id="dQty" type="number" min="1" value="' + ref.quantity + '"></div>';
         html += '<div><label>SKU</label><input id="dSku" value="' + escapeHtml(ref.sku || '') + '"></div></div>';
+        // Negotiable checkbox (only for for_sale)
+        var detailNegotiable = ref.negotiable !== false;
+        html += '<div id="detailNegotiableRow" style="margin-bottom:14px;' + (ref.listingStatus === 'for_sale' ? '' : 'display:none;') + '">';
+        html += '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;color:#4A5568;text-transform:none;letter-spacing:0;">';
+        html += '<input type="checkbox" id="dPriceFirm" ' + (!detailNegotiable ? 'checked' : '') + ' style="width:16px;height:16px;accent-color:#D4602A;cursor:pointer;">';
+        html += 'Price is Firm <span style="font-size:11px;color:#718096;">(uncheck for OBO)</span></label></div>';
         html += '<details style="margin-bottom:14px;border:2px solid #CBD5E0;border-radius:12px;padding:14px;" open>';
         html += '<summary style="cursor:pointer;font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.02em;">Location</summary>';
         html += '<div class="row"><div><label>City</label><input id="dLocCity" value="' + escapeHtml(ref.locationCity || '') + '"></div>';
@@ -4342,10 +4419,26 @@ Website = https://reffo.ai</pre>
       // Toggle rental fields
       const rentalSection = document.getElementById('rentalFieldsDetail');
       if (rentalSection) rentalSection.style.display = status === 'for_rent' ? 'block' : 'none';
+      // Toggle negotiable row: only for for_sale
+      var negRow = document.getElementById('detailNegotiableRow');
+      if (negRow) negRow.style.display = status === 'for_sale' ? '' : 'none';
       // Update price header to reflect status change
       updateCardPriceHeader();
       // Trigger AI price estimate for all statuses
       triggerDetailPriceEstimate();
+    };
+
+    // Stock type toggle (detail form)
+    window.selectDetailStock = function(type) {
+      document.getElementById('dStockType').value = type;
+      var toggle = document.getElementById('detailStockToggle');
+      if (toggle) {
+        toggle.querySelectorAll('button').forEach(function(btn, i) {
+          btn.className = (i === 0 && type === 'tracked') || (i === 1 && type === 'unlimited') ? 'active' : '';
+        });
+      }
+      var qtyRow = document.getElementById('detailQtyRow');
+      if (qtyRow) qtyRow.style.display = type === 'unlimited' ? 'none' : '';
     };
 
     window.checkCardDirty = function() {
@@ -4497,6 +4590,8 @@ Website = https://reffo.ai</pre>
             category: document.getElementById('dCat').value,
             subcategory: document.getElementById('dSubcat').value,
             quantity: parseInt(document.getElementById('dQty').value) || 1,
+            stockType: document.getElementById('dStockType') ? document.getElementById('dStockType').value : 'tracked',
+            negotiable: document.getElementById('dPriceFirm') ? !document.getElementById('dPriceFirm').checked : true,
             sku: document.getElementById('dSku').value.trim() || undefined,
             listingStatus: listingStatus,
             locationCity: document.getElementById('dLocCity').value.trim() || null,
@@ -4768,7 +4863,9 @@ Website = https://reffo.ai</pre>
               '<div class="card-attrs"></div>' +
               '<div class="card-location">' + (searchLocParts.length > 0 ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>' + escapeHtml(searchLocParts.join(', ')) : '') + '</div>' +
               '<div class="card-spacer"></div>' +
-              '<div class="card-price">' + escapeHtml(priceStr || '') + '</div>' +
+              '<div class="card-price">' + escapeHtml(priceStr || '') +
+                (item.listingStatus === 'for_sale' ? (item.negotiable === false ? '<span class="negotiable-tag firm">Firm</span>' : '<span class="negotiable-tag obo">OBO</span>') : '') +
+              '</div>' +
               '<div class="card-bottom-badges">' +
                 (item.condition ? '<span class="badge" style="font-size:10px;padding:2px 10px;background:#EDE8E3;color:#4A5568;">' + escapeHtml(item.condition.replace(/_/g, ' ')) + '</span>' : '') +
                 sourceDot +
@@ -5061,8 +5158,8 @@ Website = https://reffo.ai</pre>
           updateFavBulkBar();
           return;
         }
-        const statusLabelsLocal = { for_sale: 'For Sale', willing_to_sell: 'Open to Offers', for_rent: 'For Rent' };
-        const statusBadgeClassLocal = { for_sale: 'badge-for-sale', willing_to_sell: 'badge-willing', for_rent: 'badge-for-rent' };
+        const statusLabelsLocal = { for_sale: 'For Sale', willing_to_sell: 'Open to Offers', for_rent: 'For Rent', sold_out: 'Sold Out' };
+        const statusBadgeClassLocal = { for_sale: 'badge-for-sale', willing_to_sell: 'badge-willing', for_rent: 'badge-for-rent', sold_out: 'badge-sold-out' };
         var selectedIds = window._selectedFavIds || new Set();
         var allSelected = favs.length > 0 && favs.every(function(f) { return selectedIds.has(f.refId + '::' + f.beaconId); });
 
@@ -6480,7 +6577,7 @@ Website = https://reffo.ai</pre>
     };
 
     // ===== Segmented Status Control (Create) =====
-    const segClassMap = { private: 'seg-active-private', for_sale: 'seg-active-for_sale', willing_to_sell: 'seg-active-willing_to_sell', for_rent: 'seg-active-for_rent' };
+    const segClassMap = { private: 'seg-active-private', for_sale: 'seg-active-for_sale', willing_to_sell: 'seg-active-willing_to_sell', for_rent: 'seg-active-for_rent', sold_out: 'seg-active-sold_out' };
     let createEstimateTimer = null;
 
     window.selectCreateStatus = function(status) {
@@ -6498,11 +6595,27 @@ Website = https://reffo.ai</pre>
       // Toggle rental fields: visible when for_rent
       var rentalSection = document.getElementById('rentalFieldsCreate');
       if (rentalSection) rentalSection.style.display = status === 'for_rent' ? 'block' : 'none';
+      // Toggle negotiable row: only for for_sale
+      var negRow = document.getElementById('createNegotiableRow');
+      if (negRow) negRow.style.display = status === 'for_sale' ? '' : 'none';
       // Toggle price estimate: visible when private
       var estimateSection = document.getElementById('createPriceEstimate');
       if (estimateSection) {
         triggerCreatePriceEstimate();
       }
+    };
+
+    // Stock type toggle (create form)
+    window.selectCreateStock = function(type) {
+      document.getElementById('refStockType').value = type;
+      var toggle = document.getElementById('createStockToggle');
+      if (toggle) {
+        toggle.querySelectorAll('button').forEach(function(btn, i) {
+          btn.className = (i === 0 && type === 'tracked') || (i === 1 && type === 'unlimited') ? 'active' : '';
+        });
+      }
+      var qtyRow = document.getElementById('createQtyRow');
+      if (qtyRow) qtyRow.style.display = type === 'unlimited' ? 'none' : '';
     };
 
     window.triggerCreatePriceEstimate = function() {

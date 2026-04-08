@@ -85,6 +85,8 @@ export class NetworkPublisher {
             subcategory: ref.subcategory,
             listingStatus: ref.listingStatus,
             quantity: ref.quantity,
+            stockType: ref.stockType || 'tracked',
+            negotiable: ref.negotiable !== false,
             price: activeOffer?.price ?? 0,
             priceCurrency: activeOffer?.priceCurrency || 'USD',
             locationLat: blurred?.lat,

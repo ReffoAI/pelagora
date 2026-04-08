@@ -1,11 +1,13 @@
 // Schema.org-based types with Reffo extensions
 // See: https://schema.org/Product, https://schema.org/Offer
 
-export type ListingStatus = 'private' | 'for_sale' | 'willing_to_sell' | 'for_rent' | 'archived_sold' | 'archived_deleted';
+export type ListingStatus = 'private' | 'for_sale' | 'willing_to_sell' | 'for_rent' | 'sold_out' | 'archived_sold' | 'archived_deleted';
 
 export type RentalDurationUnit = 'hours' | 'days' | 'weeks' | 'months';
 
 export type SellingScope = 'global' | 'national' | 'range';
+
+export type StockType = 'tracked' | 'unlimited';
 
 export interface Ref {
   id: string;
@@ -25,6 +27,10 @@ export interface Ref {
   listingStatus: ListingStatus;
   /** Reffo: quantity available */
   quantity: number;
+  /** Reffo: stock tracking model */
+  stockType?: StockType;
+  /** Reffo: whether price is open to negotiation */
+  negotiable?: boolean;
   /** Reffo: whether this ref is synced to reffo.ai */
   reffoSynced: boolean;
   /** Reffo: the ref ID on reffo.ai (if synced) */

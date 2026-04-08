@@ -6,8 +6,8 @@ import { isValidCategory, isValidSubcategory, TAXONOMY } from '../taxonomy';
 import type { ListingStatus } from '@pelagora/pim-protocol';
 import { sanitizeObject } from '@pelagora/pim-protocol';
 
-const VALID_LISTING_STATUSES: ListingStatus[] = ['private', 'for_sale', 'willing_to_sell', 'for_rent'];
-const PUBLIC_STATUSES: ListingStatus[] = ['for_sale', 'willing_to_sell', 'for_rent'];
+const VALID_LISTING_STATUSES: ListingStatus[] = ['private', 'for_sale', 'willing_to_sell', 'for_rent', 'sold_out'];
+const PUBLIC_STATUSES: ListingStatus[] = ['for_sale', 'willing_to_sell', 'for_rent', 'sold_out'];
 
 const router = Router();
 
@@ -84,7 +84,7 @@ router.post('/bulk-update-status', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'ids must be a non-empty array' });
   }
 
-  const validStatuses: ListingStatus[] = ['private', 'for_sale', 'willing_to_sell', 'for_rent'];
+  const validStatuses: ListingStatus[] = ['private', 'for_sale', 'willing_to_sell', 'for_rent', 'sold_out'];
   if (!validStatuses.includes(listingStatus)) {
     return res.status(400).json({ error: `Invalid listingStatus. Must be one of: ${validStatuses.join(', ')}` });
   }
@@ -168,6 +168,7 @@ router.post('/', (req: Request, res: Response) => {
   const refs = new RefQueries();
   const body = sanitizeObject(req.body);
   const { name, description, category, subcategory, image, sku, listingStatus, quantity,
+    stockType, negotiable,
     locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry,
     sellingScope, sellingRadiusMiles, attributes, condition,
     rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit,
@@ -185,6 +186,10 @@ router.post('/', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'quantity must be a positive integer' });
   }
 
+  if (stockType !== undefined && !['tracked', 'unlimited'].includes(stockType)) {
+    return res.status(400).json({ error: 'stockType must be "tracked" or "unlimited"' });
+  }
+
   if (category && !isValidCategory(category)) {
     return res.status(400).json({ error: `Invalid category: ${category}` });
   }
@@ -195,7 +200,7 @@ router.post('/', (req: Request, res: Response) => {
 
   const beaconId = req.app.get('beaconId') as string;
   const ref = refs.create({
-    name, description, category, subcategory, image, sku, listingStatus, quantity,
+    name, description, category, subcategory, image, sku, listingStatus, quantity, stockType, negotiable,
     locationLat: locationLat != null ? Number(locationLat) : undefined,
     locationLng: locationLng != null ? Number(locationLng) : undefined,
     locationAddress, locationCity, locationState, locationZip, locationCountry,
@@ -228,6 +233,7 @@ router.patch('/:id', (req: Request, res: Response) => {
   const refs = new RefQueries();
   const body = sanitizeObject(req.body);
   const { name, description, category, subcategory, image, sku, listingStatus, quantity,
+    stockType, negotiable,
     locationLat, locationLng, locationAddress, locationCity, locationState, locationZip, locationCountry,
     sellingScope, sellingRadiusMiles, attributes, condition,
     rentalTerms, rentalDeposit, rentalDuration, rentalDurationUnit,
@@ -239,6 +245,10 @@ router.patch('/:id', (req: Request, res: Response) => {
 
   if (quantity !== undefined && (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 1)) {
     return res.status(400).json({ error: 'quantity must be a positive integer' });
+  }
+
+  if (stockType !== undefined && !['tracked', 'unlimited'].includes(stockType)) {
+    return res.status(400).json({ error: 'stockType must be "tracked" or "unlimited"' });
   }
 
   if (category !== undefined && category !== '' && !isValidCategory(category)) {
@@ -257,7 +267,7 @@ router.patch('/:id', (req: Request, res: Response) => {
   }
 
   const updated = refs.update(String(req.params.id), {
-    name, description, category, subcategory, image, sku, listingStatus, quantity,
+    name, description, category, subcategory, image, sku, listingStatus, quantity, stockType, negotiable,
     locationLat: locationLat != null ? Number(locationLat) : locationLat,
     locationLng: locationLng != null ? Number(locationLng) : locationLng,
     locationAddress, locationCity, locationState, locationZip, locationCountry,

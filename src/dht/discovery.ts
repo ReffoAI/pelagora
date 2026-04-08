@@ -88,6 +88,7 @@ export class DhtDiscovery {
           locationCity: i.locationCity, locationState: i.locationState,
           locationZip: i.locationZip, locationCountry: i.locationCountry,
           sellingScope: i.sellingScope, sellingRadiusMiles: i.sellingRadiusMiles,
+          stockType: i.stockType || 'tracked', negotiable: i.negotiable !== false,
         };
       }),
       offers: offers.list().filter(o => discoverableRefIds.has(o.refId)).map(o => ({
