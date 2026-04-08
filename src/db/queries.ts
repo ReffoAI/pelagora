@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { v4 as uuid } from 'uuid';
 import { getDb } from './schema';
-import type { Ref, RefCreate, RefUpdate, ListingStatus, Offer, OfferCreate, OfferUpdate, RefMedia, MediaType, Negotiation, NegotiationCreate, NegotiationStatus, NegotiationRole, BeaconSettings, SellingScope, RentalDurationUnit } from '@pelagora/pim-protocol';
+import type { Ref, RefCreate, RefUpdate, ListingStatus, StockType, Offer, OfferCreate, OfferUpdate, RefMedia, MediaType, Negotiation, NegotiationCreate, NegotiationStatus, NegotiationRole, BeaconSettings, SellingScope, RentalDurationUnit } from '@pelagora/pim-protocol';
 
 function rowToRef(row: Record<string, unknown>): Ref {
   return {
@@ -14,6 +14,8 @@ function rowToRef(row: Record<string, unknown>): Ref {
     sku: row.sku as string | undefined,
     listingStatus: row.listing_status as ListingStatus,
     quantity: (row.quantity as number) || 1,
+    stockType: (row.stock_type as StockType) || 'tracked',
+    negotiable: row.negotiable === undefined ? true : !!(row.negotiable as number),
     reffoSynced: !!(row.reffo_synced as number),
     reffoRefId: row.reffo_ref_id as string | undefined,
     locationLat: row.location_lat as number | undefined,
@@ -124,15 +126,15 @@ export class RefQueries {
     }
 
     this.db.prepare(`
-      INSERT INTO refs (id, name, description, category, subcategory, image, sku, listing_status, quantity,
+      INSERT INTO refs (id, name, description, category, subcategory, image, sku, listing_status, quantity, stock_type, negotiable,
         location_lat, location_lng, location_address, location_city, location_state, location_zip, location_country,
         selling_scope, selling_radius_miles, attributes, condition,
         rental_terms, rental_deposit, rental_duration, rental_duration_unit,
         purchase_date, purchase_price,
         collection_id, accepted_payment_methods, beacon_id, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(id, data.name, data.description || '', data.category || '', data.subcategory || '', data.image || null, data.sku || null,
-      data.listingStatus || 'private', data.quantity || 1,
+      data.listingStatus || 'private', data.quantity || 1, data.stockType || 'tracked', data.negotiable !== false ? 1 : 0,
       locLat, locLng, locAddress, locCity, locState, locZip, locCountry,
       scope || 'global', radiusMiles, JSON.stringify(data.attributes) || null, data.condition || null,
       data.rentalTerms || null, data.rentalDeposit ?? null, data.rentalDuration ?? null, data.rentalDurationUnit || null,
@@ -146,15 +148,15 @@ export class RefQueries {
     const now = new Date().toISOString();
 
     this.db.prepare(`
-      INSERT OR IGNORE INTO refs (id, name, description, category, subcategory, image, sku, listing_status, quantity,
+      INSERT OR IGNORE INTO refs (id, name, description, category, subcategory, image, sku, listing_status, quantity, stock_type, negotiable,
         location_lat, location_lng, location_address, location_city, location_state, location_zip, location_country,
         selling_scope, selling_radius_miles, attributes, condition,
         rental_terms, rental_deposit, rental_duration, rental_duration_unit,
         purchase_date, purchase_price,
         collection_id, beacon_id, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(id, data.name, data.description || '', data.category || '', data.subcategory || '', data.image || null, data.sku || null,
-      data.listingStatus || 'private', data.quantity || 1,
+      data.listingStatus || 'private', data.quantity || 1, data.stockType || 'tracked', data.negotiable !== false ? 1 : 0,
       data.locationLat ?? null, data.locationLng ?? null, data.locationAddress ?? null,
       data.locationCity ?? null, data.locationState ?? null, data.locationZip ?? null, data.locationCountry ?? null,
       data.sellingScope || 'global', data.sellingRadiusMiles ?? null,
@@ -180,6 +182,8 @@ export class RefQueries {
     if (data.sku !== undefined) { fields.push('sku = ?'); values.push(data.sku); }
     if (data.listingStatus !== undefined) { fields.push('listing_status = ?'); values.push(data.listingStatus); }
     if (data.quantity !== undefined) { fields.push('quantity = ?'); values.push(data.quantity); }
+    if (data.stockType !== undefined) { fields.push('stock_type = ?'); values.push(data.stockType); }
+    if (data.negotiable !== undefined) { fields.push('negotiable = ?'); values.push(data.negotiable ? 1 : 0); }
     if (data.locationLat !== undefined) { fields.push('location_lat = ?'); values.push(data.locationLat); }
     if (data.locationLng !== undefined) { fields.push('location_lng = ?'); values.push(data.locationLng); }
     if (data.locationAddress !== undefined) { fields.push('location_address = ?'); values.push(data.locationAddress); }
@@ -222,7 +226,7 @@ export class RefQueries {
   }
 
   listDiscoverable(category?: string, subcategory?: string): Ref[] {
-    let sql = "SELECT * FROM refs WHERE listing_status IN ('for_sale', 'willing_to_sell', 'for_rent')";
+    let sql = "SELECT * FROM refs WHERE listing_status IN ('for_sale', 'willing_to_sell', 'for_rent', 'sold_out')";
     const params: string[] = [];
 
     if (category) {
@@ -241,7 +245,7 @@ export class RefQueries {
 
   searchDiscoverable(term: string): Ref[] {
     const rows = this.db.prepare(
-      "SELECT * FROM refs WHERE listing_status IN ('for_sale', 'willing_to_sell', 'for_rent') AND (name LIKE ? OR description LIKE ?) ORDER BY created_at DESC"
+      "SELECT * FROM refs WHERE listing_status IN ('for_sale', 'willing_to_sell', 'for_rent', 'sold_out') AND (name LIKE ? OR description LIKE ?) ORDER BY created_at DESC"
     ).all(`%${term}%`, `%${term}%`);
     return rows.map(r => rowToRef(r as Record<string, unknown>));
   }
@@ -292,6 +296,11 @@ export class RefQueries {
   }
 
   decrementQuantity(id: string): number {
+    // Skip decrement for unlimited stock items — quantity is irrelevant
+    const existing = this.get(id);
+    if (existing && existing.stockType === 'unlimited') {
+      return existing.quantity;
+    }
     this.db.prepare(
       "UPDATE refs SET quantity = MAX(0, quantity - 1), updated_at = datetime('now') WHERE id = ?"
     ).run(id);

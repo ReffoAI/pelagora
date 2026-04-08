@@ -2,6 +2,7 @@
  * SyncManager: orchestrates syncing beacon refs to Reffo.ai
  */
 
+import type { ListingStatus } from '@pelagora/pim-protocol';
 import { ReffoClient, type WebappRef } from './reffo-client';
 import { RefQueries, OfferQueries, MediaQueries, NegotiationQueries } from '../db/queries';
 import { ConversationQueries } from '../db/conversation-queries';
@@ -155,8 +156,10 @@ export class SyncManager {
               description: webRef.description || '',
               category: webRef.category || '',
               subcategory: webRef.subcategory || '',
-              listingStatus: webRef.listing_status as 'private' | 'for_sale' | 'willing_to_sell' | 'for_rent',
+              listingStatus: webRef.listing_status as ListingStatus,
               quantity: webRef.quantity || 1,
+              stockType: (webRef as any).stock_type || 'tracked',
+              negotiable: (webRef as any).negotiable !== false,
               condition: webRef.condition || undefined,
               attributes: webRef.attributes || undefined,
               locationCity: loc?.city || undefined,
@@ -184,8 +187,10 @@ export class SyncManager {
               category: webRef.category || '',
               subcategory: webRef.subcategory || '',
               sku: webRef.sku || undefined,
-              listingStatus: webRef.listing_status as 'private' | 'for_sale' | 'willing_to_sell' | 'for_rent',
+              listingStatus: webRef.listing_status as ListingStatus,
               quantity: webRef.quantity || 1,
+              stockType: (webRef as any).stock_type || 'tracked',
+              negotiable: (webRef as any).negotiable !== false,
               condition: webRef.condition || undefined,
               attributes: webRef.attributes || undefined,
               locationCity: loc?.city || undefined,

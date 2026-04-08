@@ -70,6 +70,8 @@ export interface WebappRef {
   subcategory: string | null;
   listing_status: string;
   quantity: number | null;
+  stock_type: string | null;
+  negotiable: boolean | null;
   price: number | null;
   currency: string;
   condition: string | null;
@@ -168,6 +170,8 @@ export class ReffoClient {
           subcategory: ref.subcategory,
           listingStatus: ref.listingStatus,
           quantity: ref.quantity,
+          stockType: ref.stockType || 'tracked',
+          negotiable: ref.negotiable !== false,
           price: activeOffer?.price,
           priceCurrency: activeOffer?.priceCurrency || 'USD',
           locationLat: blurred?.lat,

@@ -139,8 +139,10 @@ function initSchema(database: Database.Database): void {
       subcategory TEXT NOT NULL DEFAULT '',
       image TEXT,
       sku TEXT,
-      listing_status TEXT NOT NULL DEFAULT 'private' CHECK(listing_status IN ('private', 'for_sale', 'willing_to_sell', 'for_rent', 'archived_sold', 'archived_deleted')),
+      listing_status TEXT NOT NULL DEFAULT 'private' CHECK(listing_status IN ('private', 'for_sale', 'willing_to_sell', 'for_rent', 'sold_out', 'archived_sold', 'archived_deleted')),
       quantity INTEGER NOT NULL DEFAULT 1,
+      stock_type TEXT NOT NULL DEFAULT 'tracked' CHECK(stock_type IN ('tracked', 'unlimited')),
+      negotiable INTEGER NOT NULL DEFAULT 1,
       location_lat REAL,
       location_lng REAL,
       location_address TEXT,
@@ -634,6 +636,76 @@ function initSchema(database: Database.Database): void {
     const convCols = database.pragma('table_info(conversations)') as { name: string }[];
     if (!convCols.some(c => c.name === 'closed_reason')) {
       database.exec(`ALTER TABLE conversations ADD COLUMN closed_reason TEXT`);
+    }
+  } catch {}
+
+  // Migration: expand CHECK constraint to include 'sold_out' status, add stock_type and negotiable
+  const refsSoldOutCheck = database.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='refs'").get() as { sql: string } | undefined;
+  if (refsSoldOutCheck && !refsSoldOutCheck.sql.includes('sold_out')) {
+    database.exec(`
+      PRAGMA foreign_keys = OFF;
+      BEGIN TRANSACTION;
+      CREATE TABLE refs_soldout_mig AS SELECT * FROM refs;
+      DROP TABLE refs;
+      CREATE TABLE refs (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL DEFAULT '',
+        category TEXT NOT NULL DEFAULT '',
+        subcategory TEXT NOT NULL DEFAULT '',
+        image TEXT,
+        sku TEXT,
+        listing_status TEXT NOT NULL DEFAULT 'private' CHECK(listing_status IN ('private', 'for_sale', 'willing_to_sell', 'for_rent', 'sold_out', 'archived_sold', 'archived_deleted')),
+        quantity INTEGER NOT NULL DEFAULT 1,
+        stock_type TEXT NOT NULL DEFAULT 'tracked' CHECK(stock_type IN ('tracked', 'unlimited')),
+        negotiable INTEGER NOT NULL DEFAULT 1,
+        reffo_synced INTEGER NOT NULL DEFAULT 0,
+        reffo_ref_id TEXT,
+        location_lat REAL,
+        location_lng REAL,
+        location_address TEXT,
+        location_city TEXT,
+        location_state TEXT,
+        location_zip TEXT,
+        location_country TEXT,
+        selling_scope TEXT DEFAULT 'global',
+        selling_radius_miles INTEGER,
+        attributes TEXT,
+        condition TEXT,
+        rental_terms TEXT,
+        rental_deposit REAL,
+        rental_duration INTEGER,
+        rental_duration_unit TEXT,
+        purchase_date TEXT,
+        purchase_price REAL,
+        collection_id TEXT REFERENCES collections(id) ON DELETE SET NULL,
+        network_published INTEGER NOT NULL DEFAULT 0,
+        share_url TEXT,
+        accepted_payment_methods TEXT,
+        beacon_id TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      INSERT INTO refs (id, name, description, category, subcategory, image, sku, listing_status, quantity, reffo_synced, reffo_ref_id, location_lat, location_lng, location_address, location_city, location_state, location_zip, location_country, selling_scope, selling_radius_miles, attributes, condition, rental_terms, rental_deposit, rental_duration, rental_duration_unit, purchase_date, purchase_price, collection_id, network_published, share_url, accepted_payment_methods, beacon_id, created_at, updated_at)
+        SELECT id, name, description, category, subcategory, image, sku, listing_status, quantity, reffo_synced, reffo_ref_id, location_lat, location_lng, location_address, location_city, location_state, location_zip, location_country, selling_scope, selling_radius_miles, attributes, condition, rental_terms, rental_deposit, rental_duration, rental_duration_unit, purchase_date, purchase_price, collection_id, network_published, share_url, accepted_payment_methods, beacon_id, created_at, updated_at FROM refs_soldout_mig;
+      DROP TABLE refs_soldout_mig;
+      CREATE INDEX IF NOT EXISTS idx_refs_category ON refs(category);
+      CREATE INDEX IF NOT EXISTS idx_refs_cat_subcat ON refs(category, subcategory);
+      CREATE INDEX IF NOT EXISTS idx_refs_beacon ON refs(beacon_id);
+      CREATE INDEX IF NOT EXISTS idx_refs_listing_status ON refs(listing_status);
+      COMMIT;
+      PRAGMA foreign_keys = ON;
+    `);
+  }
+
+  // Migration: add stock_type and negotiable columns (for databases that already have sold_out)
+  try {
+    const refsColsStock = database.pragma('table_info(refs)') as { name: string }[];
+    if (!refsColsStock.some(c => c.name === 'stock_type')) {
+      database.exec(`ALTER TABLE refs ADD COLUMN stock_type TEXT NOT NULL DEFAULT 'tracked'`);
+    }
+    if (!refsColsStock.some(c => c.name === 'negotiable')) {
+      database.exec(`ALTER TABLE refs ADD COLUMN negotiable INTEGER NOT NULL DEFAULT 1`);
     }
   } catch {}
 }

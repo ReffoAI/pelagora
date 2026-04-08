@@ -226,6 +226,7 @@ export function renderUI(localToken?: string): string {
     .badge-for-sale { background: #2D8A6E; color: #FFFFFF; }
     .badge-willing { background: #D4922A; color: #FFFFFF; }
     .badge-for-rent { background: #4A90D9; color: #FFFFFF; }
+    .badge-sold-out { background: #C94444; color: #FFFFFF; }
     .card-price { font-size: 16px; font-weight: 700; color: #1A1A2E; }
     .card-qty { font-size: 12px; color: #4A5568; margin-top: 4px; font-weight: 500; }
     .card-bottom-badges { display: flex; align-items: center; gap: 6px; height: 22px; overflow: hidden; margin-top: 4px; }
@@ -238,6 +239,17 @@ export function renderUI(localToken?: string): string {
     .seg-active-for_sale { background:#16A34A !important; color:#fff !important; }
     .seg-active-willing_to_sell { background:#D97706 !important; color:#fff !important; }
     .seg-active-for_rent { background:#2563EB !important; color:#fff !important; }
+    .seg-active-sold_out { background:#C94444 !important; color:#fff !important; }
+
+    /* Stock type toggle */
+    .stock-toggle { display: flex; border-radius: 10px; overflow: hidden; border: 1px solid #CBD5E0; margin-bottom: 14px; }
+    .stock-toggle button { flex: 1; padding: 8px 12px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; background: transparent; color: #4A5568; text-align: center; white-space: nowrap; font-family: 'DM Sans', sans-serif; }
+    .stock-toggle button.active { background: #1A1A2E; color: #fff; }
+
+    /* Negotiable indicator */
+    .negotiable-tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 8px; margin-left: 6px; vertical-align: middle; }
+    .negotiable-tag.obo { background: #FFF3E0; color: #D4922A; }
+    .negotiable-tag.firm { background: #EDE8E3; color: #4A5568; }
 
     /* Fieldset chevrons */
     details > summary .chevron-indicator { transition: transform 0.3s; }
@@ -537,6 +549,8 @@ export function renderUI(localToken?: string): string {
       justify-content: center; color: #4A5568; transition: all 0.2s;
     }
     .detail-title-actions button:hover { border-color: #1A1A2E; color: #1A1A2E; }
+    .detail-title-actions .action-pill { width: auto !important; height: 32px !important; border-radius: 16px !important; padding: 0 14px !important; font-size: 12px !important; font-weight: 600 !important; white-space: nowrap !important; border: none !important; font-family: 'DM Sans', sans-serif; gap: 6px !important; }
+    .detail-title-actions .action-pill:hover { opacity: 0.9; border-color: transparent !important; }
 
     .detail-posted-line {
       display: flex; align-items: center; gap: 10px;
@@ -830,15 +844,8 @@ export function renderUI(localToken?: string): string {
     .home-section-label { text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; color: #4A5568; margin-bottom: 4px; }
     .home-section h3 { font-size: 1.35rem; font-weight: 700; margin: 0 0 24px; }
     .home-quick-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 0 24px 8px; }
-    .home-recent-grid { display: flex; gap: 16px; overflow: hidden; }
-    .home-recent-grid .home-recent-card { min-width: 200px; max-width: 260px; flex: 1 1 0; }
-    .home-recent-card { background: #FFFFFF; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
-    .home-recent-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.10); }
-    .home-recent-card img { width: 100%; height: 140px; object-fit: cover; display: block; }
-    .home-recent-card .card-body { padding: 12px 14px; }
-    .home-recent-card .card-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .home-recent-card .card-meta { font-size: 12px; color: #4A5568; margin-top: 4px; }
-    .home-recent-card .card-price { font-weight: 600; font-size: 14px; color: #0A5E8A; margin-top: 6px; }
+    .home-recent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .home-recent-grid .card { min-width: 0; }
     .home-recent-empty { text-align: center; padding: 48px 24px; color: #4A5568; }
     .home-recent-empty p { margin: 0 0 16px; font-size: 14px; }
     @media (max-width: 767px) { .home-hero { padding: 48px 16px 40px; } }
@@ -1885,7 +1892,14 @@ export function renderUI(localToken?: string): string {
 
         <div id="createCategoryFields"></div>
 
-        <div class="row">
+        <label style="font-size:11px;margin-bottom:6px;">Stock Type</label>
+        <div class="stock-toggle" id="createStockToggle">
+          <button type="button" class="active" onclick="selectCreateStock('tracked')">Track Quantity</button>
+          <button type="button" onclick="selectCreateStock('unlimited')">Unlimited Stock</button>
+        </div>
+        <input type="hidden" id="refStockType" value="tracked">
+
+        <div id="createQtyRow" class="row">
           <div>
             <label for="refQuantity">Quantity</label>
             <input id="refQuantity" name="quantity" type="number" min="1" step="1" value="1">
@@ -1909,6 +1923,12 @@ export function renderUI(localToken?: string): string {
                 <option value="JPY">JPY</option>
               </select>
             </div>
+          </div>
+          <div id="createNegotiableRow" style="margin-top:-6px;margin-bottom:14px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;color:#4A5568;text-transform:none;letter-spacing:0;">
+              <input type="checkbox" id="refPriceFirm" style="width:16px;height:16px;accent-color:#D4602A;cursor:pointer;">
+              Price is Firm <span style="font-size:11px;color:#718096;">(uncheck for OBO)</span>
+            </label>
           </div>
         </div>
         <div id="createPriceEstimate"></div>
@@ -2657,6 +2677,10 @@ Website = https://reffo.ai</pre>
           return;
         }
         const mediaMap = {};
+        const offersRes = await fetch('/offers');
+        const allOffers = await offersRes.json();
+        const homeOfferMap = {};
+        allOffers.forEach(function(o) { if (!homeOfferMap[o.refId]) homeOfferMap[o.refId] = []; homeOfferMap[o.refId].push(o); });
         await Promise.all(data.recentItems.map(async function(ref) {
           try {
             const mRes = await fetch('/refs/' + ref.id + '/media');
@@ -2666,13 +2690,25 @@ Website = https://reffo.ai</pre>
         container.innerHTML = '<div class="home-recent-grid">' + data.recentItems.map(function(ref) {
           var photos = (mediaMap[ref.id] || []).filter(function(m) { return m.mediaType === 'photo'; });
           var firstPhoto = photos[0];
-          var imgHtml = firstPhoto
-            ? '<img src="/' + escapeHtml(firstPhoto.filePath) + '" alt="">'
-            : '<div style="height:140px;display:flex;align-items:center;justify-content:center;background:var(--bg);color:#D2D5DB;font-size:32px;">&#x1F4F7;</div>';
-          var price = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : ref.price > 0 ? fmtCurrency(ref.price, 'USD') : (ref.listingStatus !== 'private' ? 'Free' : '');
+          var refOffers = homeOfferMap[ref.id] || [];
+          var activeOffer = refOffers.find(function(o) { return o.status === 'active'; });
+          var priceStr = ref.listingStatus === 'sold_out' ? 'Sold Out' : ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : (ref.listingStatus !== 'private' ? 'Free' : '');
           var statusLabel = statusLabels[ref.listingStatus] || 'Private';
           var statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
-          return '<div class="home-recent-card" onclick="openDetail(\\'' + ref.id + '\\')">' + imgHtml + '<div class="card-body"><div class="card-name">' + escapeHtml(ref.name) + '</div><div class="card-meta">' + escapeHtml(ref.category || '') + ' <span class="status-badge ' + statusClass + '">' + statusLabel + '</span></div>' + (price ? '<div class="card-price">' + price + '</div>' : '') + '</div></div>';
+          var imgHtml = firstPhoto
+            ? '<div class="card-img"><img src="/' + escapeHtml(firstPhoto.filePath) + '" alt=""><div class="card-status"><span class="badge ' + statusClass + '">' + statusLabel + '</span></div></div>'
+            : '<div class="card-img"><span class="placeholder"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></span><div class="card-status"><span class="badge ' + statusClass + '">' + statusLabel + '</span></div></div>';
+          return '<div class="card" onclick="openDetail(\\'' + ref.id + '\\')">' +
+            imgHtml +
+            '<div class="card-body">' +
+              '<div class="card-category">' + escapeHtml(ref.category || '') + '</div>' +
+              '<h3>' + escapeHtml(ref.name) + '</h3>' +
+              '<div class="card-attrs"></div>' +
+              '<div class="card-location"></div>' +
+              '<div class="card-spacer"></div>' +
+              '<div class="card-price">' + escapeHtml(priceStr || '') + '</div>' +
+              '<div class="card-bottom-badges"></div>' +
+            '</div></div>';
         }).join('') + '</div>';
         homeLoaded = true;
       } catch(e) {
@@ -2961,6 +2997,46 @@ Website = https://reffo.ai</pre>
       } catch(e) {
         console.error('[Archive] Failed:', e);
         showToast('Failed to archive ref', 'rejected');
+      }
+    };
+
+    window.markAsSold = function(refId) {
+      showConfirmModal('Mark as Sold', 'This item will be archived and removed from your active listings.', 'Mark as Sold', '#C94444', async function() {
+        try {
+          var res = await fetch('/refs/' + refId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listingStatus: 'archived_sold' }) });
+          if (!res.ok) throw new Error('Failed');
+          showToast('Marked as Sold', 'sold');
+          homeLoaded = false;
+          await loadMyRefs();
+        } catch(e) {
+          showToast('Failed to mark as sold', 'rejected');
+        }
+      });
+    };
+
+    window.markSoldOut = function(refId) {
+      showConfirmModal('Mark as Sold Out', 'This item will stay visible to buyers but won\\u2019t accept new offers or messages.', 'Mark Sold Out', '#C94444', async function() {
+        try {
+          var res = await fetch('/refs/' + refId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listingStatus: 'sold_out' }) });
+          if (!res.ok) throw new Error('Failed');
+          showToast('Marked as Sold Out', 'rejected');
+          homeLoaded = false;
+          await openDetail(refId);
+        } catch(e) {
+          showToast('Failed to mark as sold out', 'rejected');
+        }
+      });
+    };
+
+    window.restockRef = async function(refId) {
+      try {
+        var res = await fetch('/refs/' + refId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listingStatus: 'for_sale' }) });
+        if (!res.ok) throw new Error('Failed');
+        showToast('Item restocked', 'accepted');
+        homeLoaded = false;
+        await openDetail(refId);
+      } catch(e) {
+        showToast('Failed to restock', 'rejected');
       }
     };
 
@@ -3306,6 +3382,101 @@ Website = https://reffo.ai</pre>
       }, 5000);
     }
 
+    function showConfirmModal(title, message, confirmLabel, confirmColor, onConfirm) {
+      var overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = '<div class="modal" style="padding:32px 28px;width:420px;text-align:center;">' +
+        '<h3 style="font-size:20px;margin-bottom:8px;">' + title + '</h3>' +
+        '<p style="font-size:14px;color:#4A5568;margin-bottom:24px;line-height:1.6;">' + message + '</p>' +
+        '<div style="display:flex;gap:10px;justify-content:center;">' +
+          '<button class="btn-secondary btn-sm" id="confirmModalCancel">Cancel</button>' +
+          '<button class="btn-sm" id="confirmModalOk" style="background:' + (confirmColor || '#C94444') + ';color:#fff;border:none;height:40px;padding:0 20px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">' + (confirmLabel || 'Confirm') + '</button>' +
+        '</div></div>';
+      document.body.appendChild(overlay);
+      overlay.querySelector('#confirmModalCancel').onclick = function() { overlay.remove(); };
+      overlay.querySelector('#confirmModalOk').onclick = function() { overlay.remove(); onConfirm(); };
+      overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+    }
+
+    function showRestockModal(refId) {
+      var overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = '<div class="modal" style="padding:32px 28px;width:420px;text-align:center;">' +
+        '<h3 style="font-size:20px;margin-bottom:8px;">Restock Item</h3>' +
+        '<p style="font-size:14px;color:#4A5568;margin-bottom:16px;line-height:1.6;">How many units are you adding back?</p>' +
+        '<input type="number" id="restockQtyInput" min="1" value="1" style="width:120px;text-align:center;margin:0 auto 24px;display:block;">' +
+        '<div style="display:flex;gap:10px;justify-content:center;">' +
+          '<button class="btn-secondary btn-sm" id="restockCancel">Cancel</button>' +
+          '<button class="btn-sm" id="restockOk" style="background:#2D8A6E;color:#fff;border:none;height:40px;padding:0 20px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Restock</button>' +
+        '</div></div>';
+      document.body.appendChild(overlay);
+      overlay.querySelector('#restockCancel').onclick = function() { overlay.remove(); };
+      overlay.querySelector('#restockOk').onclick = async function() {
+        var qty = parseInt(overlay.querySelector('#restockQtyInput').value) || 1;
+        overlay.remove();
+        try {
+          var res = await fetch('/refs/' + refId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listingStatus: 'for_sale', quantity: qty }) });
+          if (!res.ok) throw new Error('Failed');
+          showToast('Restocked with ' + qty + ' units', 'accepted');
+          homeLoaded = false;
+          await openDetail(refId);
+        } catch(e) {
+          showToast('Failed to restock', 'rejected');
+        }
+      };
+      overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+    }
+
+    function showRecordSaleModal(refId, currentQty) {
+      var overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      var saleQty = 1;
+      function render() {
+        var newQty = currentQty - saleQty;
+        var note = newQty <= 0 ? '<span style="color:#C94444;">This will archive the item (0 remaining).</span>' : newQty + ' remaining after sale.';
+        overlay.innerHTML = '<div class="modal" style="padding:32px 28px;width:420px;text-align:center;">' +
+          '<h3 style="font-size:20px;margin-bottom:8px;">Record a Sale</h3>' +
+          '<p style="font-size:14px;color:#4A5568;margin-bottom:16px;line-height:1.6;">How many units were sold?</p>' +
+          '<div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:8px;">' +
+            '<button id="saleDecBtn" style="width:40px;height:40px;border-radius:50%;border:1.5px solid #CBD5E0;background:#fff;font-size:20px;font-weight:700;cursor:pointer;color:#1A1A2E;display:flex;align-items:center;justify-content:center;">&minus;</button>' +
+            '<span style="font-size:32px;font-weight:700;color:#1A1A2E;min-width:48px;">' + saleQty + '</span>' +
+            '<button id="saleIncBtn" style="width:40px;height:40px;border-radius:50%;border:1.5px solid #CBD5E0;background:#fff;font-size:20px;font-weight:700;cursor:pointer;color:#1A1A2E;display:flex;align-items:center;justify-content:center;">+</button>' +
+          '</div>' +
+          '<p style="font-size:13px;color:#4A5568;margin-bottom:24px;">' + note + '</p>' +
+          '<div style="display:flex;gap:10px;justify-content:center;">' +
+            '<button class="btn-secondary btn-sm" id="saleCancel">Cancel</button>' +
+            '<button class="btn-sm" id="saleOk" style="background:#C94444;color:#fff;border:none;height:40px;padding:0 20px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Record Sale</button>' +
+          '</div></div>';
+        overlay.querySelector('#saleDecBtn').onclick = function() { if (saleQty > 1) { saleQty--; render(); } };
+        overlay.querySelector('#saleIncBtn').onclick = function() { if (saleQty < currentQty) { saleQty++; render(); } };
+        overlay.querySelector('#saleCancel').onclick = function() { overlay.remove(); };
+        overlay.querySelector('#saleOk').onclick = async function() {
+          overlay.remove();
+          var newQty = Math.max(0, currentQty - saleQty);
+          try {
+            if (newQty <= 0) {
+              var res = await fetch('/refs/' + refId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listingStatus: 'archived_sold', quantity: 0 }) });
+              if (!res.ok) throw new Error('Failed');
+              showToast('All units sold — item archived', 'sold');
+              homeLoaded = false;
+              await loadMyRefs();
+            } else {
+              var res = await fetch('/refs/' + refId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ quantity: newQty }) });
+              if (!res.ok) throw new Error('Failed');
+              showToast('Sold ' + saleQty + ' — ' + newQty + ' remaining', 'accepted');
+              homeLoaded = false;
+              await openDetail(refId);
+            }
+          } catch(e) {
+            showToast('Failed to record sale', 'rejected');
+          }
+        };
+      }
+      document.body.appendChild(overlay);
+      overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+      render();
+    }
+
     function showSyncModal(refId) {
       var modal = document.getElementById('syncModal');
       modal.classList.remove('hidden');
@@ -3361,8 +3532,8 @@ Website = https://reffo.ai</pre>
       input.click();
     }
 
-    const statusLabels = { private: 'Private', for_sale: 'For Sale', willing_to_sell: 'Willing to Sell', for_rent: 'For Rent', archived_sold: 'Sold (Archived)', archived_deleted: 'Deleted (Archived)' };
-    const statusBadgeClass = { private: 'badge-private', for_sale: 'badge-for-sale', willing_to_sell: 'badge-willing', for_rent: 'badge-for-rent', archived_sold: 'badge-archived-sold', archived_deleted: 'badge-archived-deleted' };
+    const statusLabels = { private: 'Private', for_sale: 'For Sale', willing_to_sell: 'Willing to Sell', for_rent: 'For Rent', sold_out: 'Sold Out', archived_sold: 'Sold (Archived)', archived_deleted: 'Deleted (Archived)' };
+    const statusBadgeClass = { private: 'badge-private', for_sale: 'badge-for-sale', willing_to_sell: 'badge-willing', for_rent: 'badge-for-rent', sold_out: 'badge-sold-out', archived_sold: 'badge-archived-sold', archived_deleted: 'badge-archived-deleted' };
     const negStatusLabels = { pending: 'Pending', accepted: 'Under Contract', rejected: 'Rejected', countered: 'Countered', withdrawn: 'Withdrawn', sold: 'Sold' };
 
     let lastSearchResults = [];
@@ -3556,7 +3727,9 @@ Website = https://reffo.ai</pre>
         const category = document.getElementById('refCat').value;
         const subcategory = document.getElementById('refSubcat').value;
         const listingStatus = document.getElementById('refListingStatus').value;
+        const stockType = document.getElementById('refStockType').value || 'tracked';
         const quantity = parseInt(document.getElementById('refQuantity').value) || 1;
+        const negotiable = !document.getElementById('refPriceFirm').checked;
         const priceVal = document.getElementById('refPrice').value;
         const price = priceVal ? parseFloat(priceVal) : 0;
         const currency = document.getElementById('refCurrency').value;
@@ -3597,7 +3770,7 @@ Website = https://reffo.ai</pre>
         const refRes = await fetch('/refs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, description, category, subcategory, listingStatus, quantity, sku,
+          body: JSON.stringify({ name, description, category, subcategory, listingStatus, quantity, stockType, negotiable, sku,
             locationCity: locCity, locationState: locState, locationZip: locZip,
             locationLat: locLat, locationLng: locLng,
             sellingScope, sellingRadiusMiles, condition, attributes,
@@ -3647,9 +3820,12 @@ Website = https://reffo.ai</pre>
         showMsg('listMsg', 'Ref added successfully!', true);
         e.target.reset();
         document.getElementById('refQuantity').value = '1';
+        document.getElementById('refStockType').value = 'tracked';
+        selectCreateStock('tracked');
+        document.getElementById('refPriceFirm').checked = false;
         document.getElementById('refSubcat').innerHTML = '<option value="">Select...</option>';
         document.getElementById('createCategoryFields').innerHTML = '';
-        // Reset segmented control to Private
+        // Reset segmented control to For Sale
         selectCreateStatus('for_sale');
         document.getElementById('createPriceEstimate').innerHTML = '';
         selectedPhotos = [];
@@ -3798,7 +3974,7 @@ Website = https://reffo.ai</pre>
           '<div class="rows">' + refs.map(ref => {
             const refOffers = offerMap[ref.id] || [];
             const activeOffer = refOffers.find(o => o.status === 'active');
-            const priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : (ref.listingStatus !== 'private' ? 'Free' : '');
+            const priceStr = ref.listingStatus === 'sold_out' ? 'Sold Out' : ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : (ref.listingStatus !== 'private' ? 'Free' : '');
             const photos = (mediaMap[ref.id] || []).filter(m => m.mediaType === 'photo');
             const firstPhoto = photos[0];
             const statusClass = statusBadgeClass[ref.listingStatus] || 'badge-private';
@@ -3831,7 +4007,7 @@ Website = https://reffo.ai</pre>
           container.innerHTML = '<div class="cards">' + refs.map(ref => {
             const refOffers = offerMap[ref.id] || [];
             const activeOffer = refOffers.find(o => o.status === 'active');
-            const priceStr = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : (ref.listingStatus !== 'private' ? 'Free' : '');
+            const priceStr = ref.listingStatus === 'sold_out' ? 'Sold Out' : ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : (ref.listingStatus !== 'private' ? 'Free' : '');
             const photos = (mediaMap[ref.id] || []).filter(m => m.mediaType === 'photo');
             const firstPhoto = photos[0];
             const catBadges = [ref.category, ref.subcategory].filter(Boolean).map(b =>
@@ -3855,7 +4031,9 @@ Website = https://reffo.ai</pre>
                 '<div class="card-attrs">' + escapeHtml(cardAttrSummary || '') + '</div>' +
                 '<div class="card-location">' + (locParts.length > 0 ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>' + escapeHtml(locParts.join(', ')) : '') + '</div>' +
                 '<div class="card-spacer"></div>' +
-                '<div class="card-price">' + escapeHtml(priceStr || '') + '</div>' +
+                '<div class="card-price">' + escapeHtml(priceStr || '') +
+                  (ref.listingStatus === 'for_sale' ? (ref.negotiable === false ? '<span class="negotiable-tag firm">Firm</span>' : '<span class="negotiable-tag obo">OBO</span>') : '') +
+                '</div>' +
                 '<div class="card-bottom-badges">' +
                   (ref.condition ? '<span class="badge" style="font-size:10px;padding:2px 10px;background:#EDE8E3;color:#4A5568;">' + escapeHtml(ref.condition.replace(/_/g, ' ')) + '</span>' : '') +
                   (ref.networkPublished ? '<span class="badge" style="font-size:10px;padding:2px 10px;background:#1A8A7D;color:#fff;">Published</span>' : '') +
@@ -3916,7 +4094,7 @@ Website = https://reffo.ai</pre>
           }
         }
 
-        const priceDisplay = ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : 'No price';
+        const priceDisplay = ref.listingStatus === 'sold_out' ? 'Sold Out' : ref.listingStatus === 'willing_to_sell' ? 'Make me sell' : activeOffer ? (activeOffer.price === 0 ? 'Free' : fmtCurrency(activeOffer.price, activeOffer.priceCurrency)) : 'No price';
         const locParts = [ref.locationCity, ref.locationState, ref.locationZip].filter(Boolean);
         const scopeLabels = { global: 'Global', national: 'National', range: 'Range' };
         let scopeText = '';
@@ -3942,6 +4120,26 @@ Website = https://reffo.ai</pre>
           ? 'navigator.clipboard.writeText(\\'' + shareUrl1 + '\\').then(function(){ showToast(\\'Link copied!\\',\\'\\'); })'
           : 'showToast(\\'List publicly to get a shareable link\\',\\'\\')') + '" title="Share"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>';
         html += '<button title="Save"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
+        // Sold / Sold Out / Restock action buttons
+        if (ref.listingStatus === 'sold_out') {
+          var isTrackedSoldOut = ref.stockType !== 'unlimited';
+          if (isTrackedSoldOut) {
+            html += '<button class="action-pill" onclick="showRestockModal(\\'' + ref.id + '\\')" style="background:#2D8A6E;color:#fff;" title="Restock"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Restock</button>';
+          } else {
+            html += '<button class="action-pill" onclick="restockRef(\\'' + ref.id + '\\')" style="background:#2D8A6E;color:#fff;" title="Restock"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Restock</button>';
+          }
+        } else if (['for_sale', 'willing_to_sell', 'for_rent'].includes(ref.listingStatus)) {
+          var isUnlimited = ref.stockType === 'unlimited';
+          var isMultiQty = ref.quantity > 1;
+          if (isUnlimited) {
+            html += '<button class="action-pill" onclick="markSoldOut(\\'' + ref.id + '\\')" style="background:transparent;color:#C94444;border:1.5px solid #C94444 !important;" title="Mark as Sold Out">Mark Sold Out</button>';
+          } else if (isMultiQty) {
+            html += '<button class="action-pill" onclick="showRecordSaleModal(\\'' + ref.id + '\\', ' + ref.quantity + ')" style="background:transparent;color:#4A5568;border:1.5px solid #CBD5E0 !important;" title="Record a Sale">Record Sale</button>';
+            html += '<button class="action-pill" onclick="markSoldOut(\\'' + ref.id + '\\')" style="background:transparent;color:#C94444;border:1.5px solid #C94444 !important;" title="Mark as Sold Out">Mark Sold Out</button>';
+          } else {
+            html += '<button class="action-pill" onclick="markAsSold(\\'' + ref.id + '\\')" style="background:transparent;color:#C94444;border:1.5px solid #C94444 !important;" title="Mark as Sold">Mark as Sold</button>';
+          }
+        }
         html += '</div></div>';
         html += '<div class="detail-posted-line">';
         var dn = window._myDisplayName || 'You';
@@ -4022,8 +4220,22 @@ Website = https://reffo.ai</pre>
 
         html += '<div class="row"><div><label>Listing Price</label><input id="dPrice" type="number" min="0" step="0.01" value="' + (activeOffer ? activeOffer.price : '') + '" oninput="updateCardPriceHeader()"></div>';
         html += '<div><label>Currency</label><select id="dCurrency" onchange="updateCardPriceHeader()"><option value="USD"' + ((activeOffer && activeOffer.priceCurrency === 'USD') || !activeOffer ? ' selected' : '') + '>USD</option><option value="EUR"' + (activeOffer && activeOffer.priceCurrency === 'EUR' ? ' selected' : '') + '>EUR</option><option value="GBP"' + (activeOffer && activeOffer.priceCurrency === 'GBP' ? ' selected' : '') + '>GBP</option></select></div></div>';
-        html += '<div class="row"><div><label>Quantity</label><input id="dQty" type="number" min="1" value="' + ref.quantity + '"></div>';
+        // Stock type toggle
+        var detailStockType = ref.stockType || 'tracked';
+        html += '<label style="font-size:11px;margin-bottom:6px;">Stock Type</label>';
+        html += '<div class="stock-toggle" id="detailStockToggle">';
+        html += '<button type="button" class="' + (detailStockType === 'tracked' ? 'active' : '') + '" onclick="selectDetailStock(\\'tracked\\')">Track Quantity</button>';
+        html += '<button type="button" class="' + (detailStockType === 'unlimited' ? 'active' : '') + '" onclick="selectDetailStock(\\'unlimited\\')">Unlimited Stock</button>';
+        html += '</div>';
+        html += '<input type="hidden" id="dStockType" value="' + detailStockType + '">';
+        html += '<div id="detailQtyRow" class="row" style="' + (detailStockType === 'unlimited' ? 'display:none;' : '') + '"><div><label>Quantity</label><input id="dQty" type="number" min="1" value="' + ref.quantity + '"></div>';
         html += '<div><label>SKU</label><input id="dSku" value="' + escapeHtml(ref.sku || '') + '"></div></div>';
+        // Negotiable checkbox (only for for_sale)
+        var detailNegotiable = ref.negotiable !== false;
+        html += '<div id="detailNegotiableRow" style="margin-bottom:14px;' + (ref.listingStatus === 'for_sale' ? '' : 'display:none;') + '">';
+        html += '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;color:#4A5568;text-transform:none;letter-spacing:0;">';
+        html += '<input type="checkbox" id="dPriceFirm" ' + (!detailNegotiable ? 'checked' : '') + ' style="width:16px;height:16px;accent-color:#D4602A;cursor:pointer;">';
+        html += 'Price is Firm <span style="font-size:11px;color:#718096;">(uncheck for OBO)</span></label></div>';
         html += '<details style="margin-bottom:14px;border:2px solid #CBD5E0;border-radius:12px;padding:14px;" open>';
         html += '<summary style="cursor:pointer;font-size:12px;font-weight:600;color:#4A5568;text-transform:uppercase;letter-spacing:0.02em;">Location</summary>';
         html += '<div class="row"><div><label>City</label><input id="dLocCity" value="' + escapeHtml(ref.locationCity || '') + '"></div>';
@@ -4212,8 +4424,9 @@ Website = https://reffo.ai</pre>
 
         if (listedDate) {
           let footerText = 'Listed ' + listedDate;
-          if (ref.listingStatus === 'for_sale' || ref.listingStatus === 'willing_to_sell') footerText += ' · Open to negotiation';
-          if (ref.listingStatus === 'for_rent') footerText += ' · Available for rent';
+          if (ref.listingStatus === 'sold_out') footerText += ' · Currently sold out';
+          else if (ref.listingStatus === 'for_sale' || ref.listingStatus === 'willing_to_sell') footerText += ' · Open to negotiation';
+          else if (ref.listingStatus === 'for_rent') footerText += ' · Available for rent';
           html += '<div class="payment-card-footer">' + footerText + '</div>';
         }
 
@@ -4342,10 +4555,26 @@ Website = https://reffo.ai</pre>
       // Toggle rental fields
       const rentalSection = document.getElementById('rentalFieldsDetail');
       if (rentalSection) rentalSection.style.display = status === 'for_rent' ? 'block' : 'none';
+      // Toggle negotiable row: only for for_sale
+      var negRow = document.getElementById('detailNegotiableRow');
+      if (negRow) negRow.style.display = status === 'for_sale' ? '' : 'none';
       // Update price header to reflect status change
       updateCardPriceHeader();
       // Trigger AI price estimate for all statuses
       triggerDetailPriceEstimate();
+    };
+
+    // Stock type toggle (detail form)
+    window.selectDetailStock = function(type) {
+      document.getElementById('dStockType').value = type;
+      var toggle = document.getElementById('detailStockToggle');
+      if (toggle) {
+        toggle.querySelectorAll('button').forEach(function(btn, i) {
+          btn.className = (i === 0 && type === 'tracked') || (i === 1 && type === 'unlimited') ? 'active' : '';
+        });
+      }
+      var qtyRow = document.getElementById('detailQtyRow');
+      if (qtyRow) qtyRow.style.display = type === 'unlimited' ? 'none' : '';
     };
 
     window.checkCardDirty = function() {
@@ -4363,6 +4592,8 @@ Website = https://reffo.ai</pre>
       var currency = currencyEl ? currencyEl.value : 'USD';
       if (status === 'private') {
         header.textContent = 'My Item';
+      } else if (status === 'sold_out') {
+        header.textContent = 'Sold Out';
       } else if (status === 'willing_to_sell') {
         header.textContent = 'Make me sell';
       } else if (price > 0) {
@@ -4497,6 +4728,8 @@ Website = https://reffo.ai</pre>
             category: document.getElementById('dCat').value,
             subcategory: document.getElementById('dSubcat').value,
             quantity: parseInt(document.getElementById('dQty').value) || 1,
+            stockType: document.getElementById('dStockType') ? document.getElementById('dStockType').value : 'tracked',
+            negotiable: document.getElementById('dPriceFirm') ? !document.getElementById('dPriceFirm').checked : true,
             sku: document.getElementById('dSku').value.trim() || undefined,
             listingStatus: listingStatus,
             locationCity: document.getElementById('dLocCity').value.trim() || null,
@@ -4768,7 +5001,9 @@ Website = https://reffo.ai</pre>
               '<div class="card-attrs"></div>' +
               '<div class="card-location">' + (searchLocParts.length > 0 ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>' + escapeHtml(searchLocParts.join(', ')) : '') + '</div>' +
               '<div class="card-spacer"></div>' +
-              '<div class="card-price">' + escapeHtml(priceStr || '') + '</div>' +
+              '<div class="card-price">' + escapeHtml(priceStr || '') +
+                (item.listingStatus === 'for_sale' ? (item.negotiable === false ? '<span class="negotiable-tag firm">Firm</span>' : '<span class="negotiable-tag obo">OBO</span>') : '') +
+              '</div>' +
               '<div class="card-bottom-badges">' +
                 (item.condition ? '<span class="badge" style="font-size:10px;padding:2px 10px;background:#EDE8E3;color:#4A5568;">' + escapeHtml(item.condition.replace(/_/g, ' ')) + '</span>' : '') +
                 sourceDot +
@@ -5061,8 +5296,8 @@ Website = https://reffo.ai</pre>
           updateFavBulkBar();
           return;
         }
-        const statusLabelsLocal = { for_sale: 'For Sale', willing_to_sell: 'Open to Offers', for_rent: 'For Rent' };
-        const statusBadgeClassLocal = { for_sale: 'badge-for-sale', willing_to_sell: 'badge-willing', for_rent: 'badge-for-rent' };
+        const statusLabelsLocal = { for_sale: 'For Sale', willing_to_sell: 'Open to Offers', for_rent: 'For Rent', sold_out: 'Sold Out' };
+        const statusBadgeClassLocal = { for_sale: 'badge-for-sale', willing_to_sell: 'badge-willing', for_rent: 'badge-for-rent', sold_out: 'badge-sold-out' };
         var selectedIds = window._selectedFavIds || new Set();
         var allSelected = favs.length > 0 && favs.every(function(f) { return selectedIds.has(f.refId + '::' + f.beaconId); });
 
@@ -6480,7 +6715,7 @@ Website = https://reffo.ai</pre>
     };
 
     // ===== Segmented Status Control (Create) =====
-    const segClassMap = { private: 'seg-active-private', for_sale: 'seg-active-for_sale', willing_to_sell: 'seg-active-willing_to_sell', for_rent: 'seg-active-for_rent' };
+    const segClassMap = { private: 'seg-active-private', for_sale: 'seg-active-for_sale', willing_to_sell: 'seg-active-willing_to_sell', for_rent: 'seg-active-for_rent', sold_out: 'seg-active-sold_out' };
     let createEstimateTimer = null;
 
     window.selectCreateStatus = function(status) {
@@ -6498,11 +6733,27 @@ Website = https://reffo.ai</pre>
       // Toggle rental fields: visible when for_rent
       var rentalSection = document.getElementById('rentalFieldsCreate');
       if (rentalSection) rentalSection.style.display = status === 'for_rent' ? 'block' : 'none';
+      // Toggle negotiable row: only for for_sale
+      var negRow = document.getElementById('createNegotiableRow');
+      if (negRow) negRow.style.display = status === 'for_sale' ? '' : 'none';
       // Toggle price estimate: visible when private
       var estimateSection = document.getElementById('createPriceEstimate');
       if (estimateSection) {
         triggerCreatePriceEstimate();
       }
+    };
+
+    // Stock type toggle (create form)
+    window.selectCreateStock = function(type) {
+      document.getElementById('refStockType').value = type;
+      var toggle = document.getElementById('createStockToggle');
+      if (toggle) {
+        toggle.querySelectorAll('button').forEach(function(btn, i) {
+          btn.className = (i === 0 && type === 'tracked') || (i === 1 && type === 'unlimited') ? 'active' : '';
+        });
+      }
+      var qtyRow = document.getElementById('createQtyRow');
+      if (qtyRow) qtyRow.style.display = type === 'unlimited' ? 'none' : '';
     };
 
     window.triggerCreatePriceEstimate = function() {
