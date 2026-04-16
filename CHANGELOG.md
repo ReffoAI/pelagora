@@ -4,6 +4,33 @@ All notable changes to **pelagora** will be documented in this file.
 
 This project follows [Keep a Changelog](https://keepachangelog.com/) and [Semantic Versioning](https://semver.org/).
 
+## [0.3.2] — 2026-04-08
+
+### Added
+- `sold_out` status, `StockType` enum, and `negotiable` (OBO/Firm) flag to listings
+- Restock quantity modal with increment/decrement controls
+- Record-sale flow with quantity tracking
+- Conditional sold button: "Mark as Sold" (qty=1) vs "Mark Sold Out" (multi/unlimited)
+- Styled confirmation modals replacing browser `confirm()` for sold/sold-out actions
+
+### Fixed
+- Rate limit bumped to 10k req/15min for local UI polling
+- Homepage cards use unified card layout; sold-out action button label corrected
+- `action-pill` specificity and sold_out price display across all card views
+- Sold-out button pill styling, price display, and footer text
+
+### Changed
+- Bumped `@pelagora/pim-protocol` dependency to `^0.5.0`
+
+---
+
+## [0.3.1] — 2026-04-07
+
+### Fixed
+- Rename `/for-bots` route to `/ai-skill`, point docs link to `pelagora.org/ai-skill`
+
+---
+
 ## [0.3.0] — 2026-04-03
 
 ### Added
